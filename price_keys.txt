@@ -1,0 +1,28 @@
+Amazon: Current
+Amazon: 30 days avg.
+Amazon: 90 days avg.
+Amazon: 180 days avg.
+Amazon: Lowest
+Amazon: Highest
+New: Current
+New: 30 days avg.
+New: 90 days avg.
+New: Lowest
+New: Highest
+New, 3rd Party FBA: Current
+New, 3rd Party FBA: 30 days avg.
+New, 3rd Party FBA: 90 days avg.
+New, 3rd Party FBA: Lowest
+New, 3rd Party FBA: Highest
+FBA Fees:
+New, 3rd Party FBM: Current
+New, 3rd Party FBM: 30 days avg.
+New, 3rd Party FBM: 90 days avg.
+New, 3rd Party FBM: Lowest
+New, 3rd Party FBM: Highest
+List Price: Current
+List Price: 30 days avg.
+List Price: 90 days avg.
+List Price: 180 days avg.
+List Price: Lowest
+List Price: Highest
