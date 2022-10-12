@@ -35,7 +35,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
 \backend\assets\IconsAsset::register($this);
 \backend\assets\ProductIndexAsset::register($this);
-$source_id = (int)\backend\models\Source::get_source()['source_id'];
 ?>
 
 <div class="[ PRODUCTS ]">
@@ -260,6 +259,7 @@ $source_id = (int)\backend\models\Source::get_source()['source_id'];
 
       $images_left[0];
       $images_left["Title"];
+      $source_id = $item->source_id;
       ?>
     <!-- ITEM -->
     <tr
@@ -322,7 +322,7 @@ $source_id = (int)\backend\models\Source::get_source()['source_id'];
 
                 <div
                   class="[ button-x-2 ] product-list__item-mismatch-all"
-                  data-url="/product/missall?id=<?=$item->id?>&source_id=<?=$source_id?>"
+                  data-url= <?=Url::to(['product/missall', 'id' => $item->id, 'source_id' => $source_id])?>
                 ></div>
 
 

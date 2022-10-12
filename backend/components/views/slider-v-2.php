@@ -12,7 +12,6 @@
  * @var $right_item_show
  * @var $is_filter_items
  * @var $get_
- * @var $source
  * @var $items
  */
 
@@ -20,12 +19,16 @@
 use common\models\Comparison;
 use yii\helpers\Html;
 use backend\models\User;
+use yii\helpers\Url;
 
 $node = Yii::$app->request->get('node');
 $canCompare = \Yii::$app->user->can('compare-products', ['product' => $product]);
 $cnt = 1;
 
 $variables_left = $this->context->getVariablesLeft($product);
+
+$source     = $product->source;
+$source_id  = $product->source_id;
 ?>
 
 <? if (User::is_detail_view_for_items() || $is_admin = User::isAdmin()):?>
@@ -65,7 +68,7 @@ $variables_left = $this->context->getVariablesLeft($product);
             }
 
             // Инициализаця переменных:
-            $variables_right = $this->context->getVariablesRight($source, $item);
+            $variables_right = $this->context->getVariablesRight($product->source, $item, false);
 
             $urlKey_right = $item->urlKey;
             $node_id = $index + 1;
@@ -94,7 +97,7 @@ $variables_left = $this->context->getVariablesLeft($product);
                             "<div class=\"slider-item__img\" data-img='" . $variables_right['img_right'] . "' style=\"background-image: url('" . $variables_right['img_right'] . "')\"></div>",
                             ['view', 'id' => $product_id,
                                 'node' => $node_id,
-                                'source_id' => $source['source_id'],
+                                'source_id' => $source_id,
                                 'comparisons' => $get_['filter-items__comparisons'],
                                 'filter-items__profile' => $get_['filter-items__profile']
                             ],
@@ -131,14 +134,24 @@ $variables_left = $this->context->getVariablesLeft($product);
                             </td>
 
                             <td style="text-align: right;">
-                                <? $link = '/product/compare?id='.$product_id.'&source_id='.$source['source_id'].'&node='.($index+1).'&status='.Comparison::STATUS_PRE_MATCH.$current?>
+                                <?php $link = Url::to(['product/compare',
+                                    'id'=>$product_id,
+                                    'source_id'=>$source_id,
+                                    'node'=>($index+1),
+                                    'status'=>Comparison::STATUS_PRE_MATCH],true).$current;
+                                ?>
                                 <div
                                     class="slider__yellow_button -v-2 <?= $comparisons[$index]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
                                     data-link = "<?= Html::encode($link) ?>"
                                 >
                                 </div>
 
-                                <? $link = '/product/compare?id='.$product_id.'&source_id='.$source['source_id'].'&node='.($index+1).'&status='.Comparison::STATUS_MISMATCH.$current?>
+                                <?php $link = Url::to(['product/compare',
+                                    'id'=>$product_id,
+                                    'source_id'=>$source_id,
+                                    'node'=>($index+1),
+                                    'status'=>Comparison::STATUS_MISMATCH],true).$current;
+                                ?>
                                 <div
                                     class="slider__red_button -v-2 <?= $comparisons[$index]->status === 'MISMATCH' ? '-hover' : '' ?>"
                                     data-link = "<?= Html::encode($link) ?>"
@@ -150,7 +163,12 @@ $variables_left = $this->context->getVariablesLeft($product);
                 </div> <!-- td-4 -->
 
                 <div class="td -btn" style="display: none">
-                    <? $link = '/product/compare?id='.$product_id.'&source_id='.$source['source_id'].'&node='.($index+1).'&status='.Comparison::STATUS_MISMATCH.$current?>
+                    <?php $link = Url::to(['product/compare',
+                        'id'=>$product_id,
+                        'source_id'=>$source_id,
+                        'node'=>($index+1),
+                        'status'=>Comparison::STATUS_MISMATCH],true).$current;
+                    ?>
                     <div
                         class="slider__red_button -v-2"
                         data-link = "<?= Html::encode($link) ?>"
@@ -159,7 +177,12 @@ $variables_left = $this->context->getVariablesLeft($product);
                 </div>
 
                 <div class="td -btn" style="display: none">
-                    <? $link = '/product/compare?id='.$product_id.'&source_id='.$source['source_id'].'&node='.($index+1).'&status='.Comparison::STATUS_MATCH.$current?>
+                    <?php $link = Url::to(['product/compare',
+                        'id'=>$product_id,
+                        'source_id'=>$source_id,
+                        'node'=>($index+1),
+                        'status'=>Comparison::STATUS_MATCH],true).$current;
+                    ?>
                     <div
                         class="slider__green_button -v-2"
                         data-link = "<?= Html::encode($link) ?>"
