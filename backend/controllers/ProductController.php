@@ -61,7 +61,8 @@ class ProductController extends Controller{
     $rules_2 = [
       'allow' => true,
       'actions' => ['compare', 'view', 'result', 'missall', 'user_visible_fields','reset_compare','del_item','test1','get_products_by_params'],
-      'roles' => ['compare-products'],
+      //'roles' => ['compare-products'],
+        'roles' => ['@'],
       'roleParams' => function(){
         return ['product' => $this->source_class::findOne(['id' => Yii::$app->request->get('id')])];
       },
@@ -1711,9 +1712,7 @@ class ProductController extends Controller{
       ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
       ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
       ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ');
-    
-    //where_
-    $q->where(['or like', 'status', ['MATCH','%,MATCH,%','MATCH,%','%,MATCH'], false]);
+    $q->where(['or like', 'comparisons.status', ['MATCH','%,MATCH,%','MATCH,%','%,MATCH'], false]);
 
 
     $q->andWhere(['and',['p_all_compare.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]]);
@@ -1731,13 +1730,13 @@ class ProductController extends Controller{
     //echo PHP_EOL;
     //exit;
 
-    $q->where(['like', 'status', 'MISMATCH']);
+    $q->where(['like', 'comparisons.status', 'MISMATCH']);
     $mismatch = $q->count();
 
-    $q->where(['like', 'status', 'PRE_MATCH']);
+    $q->where(['like', 'comparisons.status', 'PRE_MATCH']);
     $pre_match = $q->count();
 
-    $q->where(['like', 'status', 'OTHER']);
+    $q->where(['like', 'comparisons.status', 'OTHER']);
     $other = $q->count();
 
     //$q = Product::find()

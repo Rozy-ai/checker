@@ -128,6 +128,25 @@ $this->params['breadcrumbs'][] = $this->title;
               type="text" class="form-control" placeholder="Title"  id="filter-items__comparing-images" name="filter-items__comparing-images">
           </div>
 
+            <div class="form-group _col-sm-2">
+                <select name="filter-items__product_status" id="filter-items__product_status" class="form-control">
+                    <option>Status</option>
+                    <option value="<?= \common\models\HiddenItems::STATUS_NO_CHECK ?>">
+                        <?= \common\models\HiddenItems::getTitleStatuses(\common\models\HiddenItems::STATUS_NO_CHECK)?>
+                    </option>
+                    <option value="<?= \common\models\HiddenItems::STATUS_NOT_FOUND ?>">
+                        <?= \common\models\HiddenItems::getTitleStatuses(\common\models\HiddenItems::STATUS_NOT_FOUND)?>
+                    </option>
+                    <option value="<?= \common\models\HiddenItems::STATUS_CHECK ?>">
+                        <?= \common\models\HiddenItems::getTitleStatuses(\common\models\HiddenItems::STATUS_CHECK)?>
+                    </option>
+                    <option value="<?= \common\models\HiddenItems::STATUS_ACCEPT ?>">
+                        <?= \common\models\HiddenItems::getTitleStatuses(\common\models\HiddenItems::STATUS_ACCEPT)?>
+                    </option><option value="<?= \common\models\HiddenItems::STATUS_NO_ACCEPT ?>">
+                        <?= \common\models\HiddenItems::getTitleStatuses(\common\models\HiddenItems::STATUS_NO_ACCEPT)?>
+                    </option>
+                </select>
+            </div>
 
           <? if (User::isAdmin()): ?>
           <div class="form-group _col-sm-3">
