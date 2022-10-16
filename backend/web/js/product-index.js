@@ -19,11 +19,28 @@ $(document).ready(function(){
         $this.css('opacity','0.5');
       },
       dataType: "json",
-      success: function(response){
-        if (response.res === 'ok'){
-          $this.remove();
-        }
-      }
+        success: function(response){
+          if (response.res === 'ok'){
+              $this.remove();
+          }
+        },
+      	error: function (jqXHR, exception) {
+            if (jqXHR.status === 0) {
+                    alert('Not connect. Verify Network.');
+            } else if (jqXHR.status == 404) {
+                    alert('Requested page not found (404).');
+            } else if (jqXHR.status == 500) {
+                    alert('Internal Server Error (500).');
+            } else if (exception === 'parsererror') {
+                    alert('Requested JSON parse failed.');
+            } else if (exception === 'timeout') {
+                    alert('Time out error.');
+            } else if (exception === 'abort') {
+                    alert('Ajax request aborted.');
+            } else {
+                    alert('Uncaught Error. ' + jqXHR.responseText);
+            }
+	}
     });
   }
   
@@ -136,10 +153,27 @@ $(document).ready(function(){
     	beforeSend: function() {},
     	dataType: "json",
     	success: function(response){
-    	  if (response.res === 'ok'){
-          $root.remove();
+            if (response.res === 'ok'){
+                $root.remove();
+            }
+    	},
+        error: function (jqXHR, exception) {
+            if (jqXHR.status === 0) {
+                    alert('Not connect. Verify Network.');
+            } else if (jqXHR.status == 404) {
+                    alert('Requested page not found (404).');
+            } else if (jqXHR.status == 500) {
+                    alert('Internal Server Error (500).');
+            } else if (exception === 'parsererror') {
+                    alert('Requested JSON parse failed.');
+            } else if (exception === 'timeout') {
+                    alert('Time out error.');
+            } else if (exception === 'abort') {
+                    alert('Ajax request aborted.');
+            } else {
+                    alert('Uncaught Error. ' + jqXHR.responseText);
+            }
         }
-    	}
     });
     
   });
@@ -301,7 +335,24 @@ $(document).ready(function(){
         $item.find('.slider__yellow_button').removeClass('-hover');
         $item.find('.slider__red_button').addClass('-hover');
         
-      }
+      },
+        error: function (jqXHR, exception) {
+            if (jqXHR.status === 0) {
+                    alert('Not connect. Verify Network.');
+            } else if (jqXHR.status == 404) {
+                    alert('Requested page not found (404).');
+            } else if (jqXHR.status == 500) {
+                    alert('Internal Server Error (500).');
+            } else if (exception === 'parsererror') {
+                    alert('Requested JSON parse failed.');
+            } else if (exception === 'timeout') {
+                    alert('Time out error.');
+            } else if (exception === 'abort') {
+                    alert('Ajax request aborted.');
+            } else {
+                    alert('Uncaught Error. ' + jqXHR.responseText);
+            }
+	}
     });
     
   })

@@ -17,16 +17,14 @@ use yii\base\Widget;
 
 class TopSlider extends Widget
 {
-    private $_options = [
-
-    ];
-
+    private $_options = [];
+    public $options = [];
+    
     public $page;
     public $product;
-    public $options = [];
     public $hide_red = false;
     public $no_compare;
-    public $compare_item;
+    public $compare_item;       // Не используется нигде
     public $right_item_show;
     public $get_;
     public $is_filter_items;
@@ -35,9 +33,8 @@ class TopSlider extends Widget
     private function hide_red($items){
       $return = [];
       $pid =$this->product->id;
-      $source_id = \backend\models\Source::get_source()['source_id'];
 
-      $res = Comparison::find()->where(['product_id' => $this->product->id, 'status' => 'MISMATCH','source_id'=> $source_id])->all();
+      $res = Comparison::find()->where(['product_id' => $this->product->id, 'status' => 'MISMATCH','source_id'=> $this->product->source_id])->all();
 
       $out = [];
       if ($res){
@@ -103,21 +100,28 @@ class TopSlider extends Widget
                         <span class="cnt-1__stock-title __blue-title">ROI:</span>
                         <span class="grade cnt-1__stock-n">'.$item->ROI_Ali.'</span>
                     </span>';
-        }    
-    
+        }
+        
+    /**
+     * 
+     * @param type $source - источник
+     * @param type $item - продукт, из которого берутся данные
+     * @param type $is_short Скраткий или полный список отображать
+     * @return type
+     */
     function getVariablesRight($source, $item, $is_short = false){
         $footer_right = '';
         
         if ($is_short){
-            if ($source['source_name'] === 'EBAY'){
+            if ($source->name === 'EBAY'){
                 $footer_right .= $this->getSales($item);
                 $footer_right .= $this->getStock($item);                
-            } elseif ($source['source_name'] === 'CHINA') {
+            } elseif ($source->name === 'CHINA') {
                 $footer_right .= getROIAli($item);
             }
             $footer_right .= '<span><span class=" __blue-title">Price:</span>'.$item->price.' </span>';
         } else {         
-            if ($source['source_name'] === 'EBAY'){
+            if ($source->name === 'EBAY'){
                 $footer_right .= $this->getSales($item);
                 $footer_right .= $this->getStock($item);  
                 $footer_right .=
@@ -125,7 +129,7 @@ class TopSlider extends Widget
                     '<span><span class=" __blue-title">Rating:</span>'.$item->rating.' </span>'.
                     '<span><span class=" __blue-title">ROI:</span>'.$item->ROI.' </span>'.
                     '<span><span class=" __blue-title">Margin:</span>'.$item->Margin.' </span>';
-            } elseif ($source['source_name'] === 'CHINA') {
+            } elseif ($source->name === 'CHINA') {
                 $footer_right = '<span><span class=" __blue-title">MQO:</span>' . $item->MOQ_Ali . ' </span>' .
                                 '<span><span class=" __blue-title">Total:</span>' . $item->Total_Ali . ' </span>' .
                                 '<span><span class=" __blue-title">Price:</span>' . $item->price . ' </span>' .
@@ -184,8 +188,7 @@ class TopSlider extends Widget
         'hide_red' => $this->hide_red,
         'compare_item' => $this->compare_item,
         'is_filter_items' => $this->is_filter_items,
-        'get_' => $this->get_,
-        'source' => \backend\models\Source::get_source(),
+        'get_' => $this->get_
       ]);
 
     }

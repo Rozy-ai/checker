@@ -12,7 +12,6 @@
  * @var $right_item_show
  * @var $is_filter_items
  * @var $get_
- * @var $source
  * @var $items
  */
 
@@ -20,14 +19,16 @@
 use common\models\Comparison;
 use yii\helpers\Html;
 use backend\models\User;
+use yii\helpers\Url;
 
 $node = Yii::$app->request->get('node');
 $canCompare = \Yii::$app->user->can('compare-products', ['product' => $product]);
 $cnt = 1;
 
-$current = '';
-
 $variables_left = $this->context->getVariablesLeft($product);
+
+$source_id = $product->source_id;
+$source    = $product->source;
 ?>
 
 <!-- Если администратор, то показываем в виде ссылки -->
@@ -64,7 +65,7 @@ $variables_left = $this->context->getVariablesLeft($product);
                 if (!in_array($comparisons[$index]->status,['PRE_MATCH','OTHER','MISMATCH','MATCH'])) 
                     continue;
             }
-            
+
         //Иниацияализация переменных
         $variables_right = $this->context->getVariablesRight($source, $item, true);
         $current = ($page === $index) ? '&load_next=1' : '&load_next=0'
@@ -91,14 +92,14 @@ $variables_left = $this->context->getVariablesLeft($product);
             <?=
             Html::a(
                     "<div class=\"slider-item__img\" data-img='" . $variables_right['img_right'] . "' style=\"background-image: url('" . $variables_right['img_right'] . "')\"></div>",
-                    ['view', 'id' => $product_id, 'node' => $index + 1, 'source_id' => $source['source_id'], 'comparisons' => $get_['filter-items__comparisons'], 'filter-items__profile' => $get_['filter-items__profile']],
+                    ['view', 'id' => $product_id, 'node' => $index + 1, 'source_id' => $source_id, 'comparisons' => $get_['filter-items__comparisons'], 'filter-items__profile' => $get_['filter-items__profile']],
                     ['class' => 'linkImg slider-item__link-img']
             )
             ?>
 
 
             <!-- FORK -->
-            <? if ($source['source_name'] === 'EBAY'): ?>
+            <? if ($source->name === 'EBAY'): ?>
             <div class="slider-item__cnt-1">
                 <span class="cnt-1__stock-title __blue-title">Stock:</span>
                 <span class="grade cnt-1__stock-n"><?= $item->gradeKey; ?></span>
@@ -113,7 +114,7 @@ $variables_left = $this->context->getVariablesLeft($product);
                 <? endif; ?>
             </span>
             <? endif; ?>
-            <? elseif ($source['source_name'] === 'CHINA'): ?>
+            <? elseif ($source->name === 'CHINA'): ?>
             <div class="slider-item__cnt-1">
                 <span class="cnt-1__stock-title __blue-title">ROI:</span>
                 <span class="grade cnt-1__stock-n"><?= $item->ROI_Ali; ?></span>
@@ -141,16 +142,26 @@ $variables_left = $this->context->getVariablesLeft($product);
                 ?>
             <? endif; ?>
 
-            <? $link = '/product/compare?id='.$product_id.'&source_id='.$source['source_id'].'&node='.($index+1).'&status='.Comparison::STATUS_PRE_MATCH.$current?>
+            <?php $link = Url::to(['product/compare',
+                'id'=>$product_id,
+                'source_id'=>$source_id,
+                'node'=>($index+1),
+                'status'=>Comparison::STATUS_PRE_MATCH],true).$current;
+            ?>
             <div
                 class="slider__yellow_button _slider__green_button -v-2 -v-3 -min <?= $comparisons[$index]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
                 data-link = "<?= Html::encode($link) ?>"
 
                 >
             </div>
-            <? $link = '/product/compare?id='.$product_id.'&source_id='.$source['source_id'].'&node='.($index+1).'&status='.Comparison::STATUS_MISMATCH.$current ?>
+            <?php $link = Url::to(['product/compare',
+                'id'=>$product_id,
+                'source_id'=>$source_id,
+                'node'=>($index+1),
+                'status'=>Comparison::STATUS_MISMATCH],true).$current;
+            ?>
             <div
-                class="slider__red_button -min <?= $comparisons[$index]->status === 'MISMATCH' ? '-hover' : '' ?>""
+                class="slider__red_button -min <?= $comparisons[$index]->status === 'MISMATCH' ? '-hover' : '' ?>"
                 data-link = "<?= Html::encode($link) ?>"            
                 >
 
@@ -171,7 +182,7 @@ $variables_left = $this->context->getVariablesLeft($product);
 
         </div>
 
-        <a href="/product/view?id=<?= $product->id ?>&source_id=<?= $source['source_id'] ?>&node=<?= $index + 1 ?>&comparisons=<?= $get_['filter-items__comparisons'] ?>&filter-items__profile=<?= $get_['filter-items__profile'] ?>"
+        <a href="/product/view?id=<?= $product->id ?>&source_id=<?= $source_id ?>&node=<?= $index + 1 ?>&comparisons=<?= $get_['filter-items__comparisons'] ?>&filter-items__profile=<?= $get_['filter-items__profile'] ?>"
            class="[ PAGE-N ]  slider__page-n <?= $page === $index ? '-current' : '' ?>"><?= $index + 1 ?><?//=$cnt?></a>
 
     </div>

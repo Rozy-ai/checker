@@ -31,6 +31,7 @@ use yii\web\Session;
 use yii\web\UrlManager;
 use yii\web\UrlNormalizer;
 use yii\web\UrlRule;
+use backend\services\FilterIndexService;
 
 
 /**
@@ -108,6 +109,7 @@ class ProductController extends Controller{
         //ImportController::className()
       ]
     );
+
   }
 
   public function set_source($source_id = false){
@@ -148,154 +150,50 @@ class ProductController extends Controller{
     return $this->source_class = 'common\models\\'.ucfirst($source->table_1);
   }
 
-
   public function actionIndex(){
     ini_set("memory_limit", "3024M");
-
-    $where = [];
-    $where_1 = [];
-    $where_2 = [];
-    $where_3 = [];
-    $where_4 = []; // users
-    $where_5 = []; // comparing_images
-    $where_6 = []; // comparisons MATCH MISMATCH OTHER    + NOCOMAPRE
-
-    $f_items__source = $this->request->get('filter-items__source',1);
-
-    //$this->set_source(); в controller::beforeAction()
-
-    $filter_items__profile = $this->request->get('filter-items__profile');
-
-    $f_items__right_item_show = $this->request->get('filter-items__right-item-show');
-    $f_items__show_n_on_page = $this->request->get('filter-items__show_n_on_page',10);
-    $f_items__id = $this->request->get('filter-items__id');
-    $f_items__comparing_images = $this->request->get('filter-items__comparing-images');
-    $f_items__target_image = $this->request->get('filter-items__target-image');
-    $f_items__user = $this->request->get('filter-items__user');
-
-    /* объеденил [no compare и select] */
-    $f_items__comparisons = $this->request->get('filter-items__comparisons'); // ! new
-    $f_items__no_compare = $this->request->get('filter-items__no-compare');
-    $f_items__product_status = $this->request->get('filter-items__product_status');
-    if ($f_items__no_compare === 'on') $f_items__no_compare = true;
-    if (!$f_items__no_compare) $where_1 = ['and',['hidden_items.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]];
+    
+    $filterService = new FilterIndexService();
+    $filterService->filter_items__profile = $this->request->get('filter-items__profile');
+    $filterService->f_items__right_item_show = $this->request->get('filter-items__right-item-show');
+    $filterService->f_items__show_n_on_page = $this->request->get('filter-items__show_n_on_page',10);
+    $filterService->f_items__id = $this->request->get('filter-items__id');
+    $filterService->f_items__comparing_images = $this->request->get('filter-items__comparing-images');
+    $filterService->f_items__target_image = $this->request->get('filter-items__target-image');
+    $filterService->f_items__user = $this->request->get('filter-items__user');
+    $filterService->f_items__comparisons = $this->request->get('filter-items__comparisons'); // ! new
+    $filterService->f_items__no_compare = $this->request->get('filter-items__no-compare');
+    
+    $filterService->source_id           = $this->source_id; //устанавливается в controller::beforeAction()
+    $filterService->source_class        = $this->source_class;
+    $filterService->source_table_name   = $this->source_table_name;
 
     $page_n = (int)$this->request->get('page',0);
-    /**/
     $no_compare = false;
 
-    if (User::isAdmin() && !$f_items__comparisons) {
+    if (User::isAdmin() && !$filterService->f_items__comparisons) {
       $no_compare = false;
       $f_items__comparisons = 'YES_NO_OTHER';
-
       $get_array = Yii::$app->request->get();
       $_url = ['product/index'];
-
       if ($page_n === 0) $_url['page'] = 1;
       $_url['filter-items__comparisons'] = "YES_NO_OTHER";
-
       return $this->redirect(array_merge($get_array,$_url));
     }
-    if (!User::isAdmin() && !$f_items__comparisons) {
+    
+    if (!User::isAdmin() && !$filterService->f_items__comparisons) {
       $no_compare = true;
       $f_items__comparisons = 'NOCOMPARE';
-
       $get_array = Yii::$app->request->get();
       $_url = ['product/index'];
-
       if ($page_n === 0) $get_array['page'] = 1;
       $get_array['filter-items__comparisons'] = "NOCOMPARE";
-
       if ($page_n === 0) $_url['page'] = 1;
       $_url['filter-items__comparisons'] = "NOCOMPARE";
-
       return $this->redirect(array_merge($get_array,$_url));
     }
-
-
-
-    $on_page_str = null;
-
-    // тяжелый запрос
-    $where_3_list = $this->where_3_list_for_filter();
-    $where_4_list = $this->where_4_list_for_filter();
-
-    if ($f_items__id){
-      $where_2 = ['or',[$this->source_table_name.'.id' => $f_items__id], [$this->source_table_name.'.asin' => $f_items__id] ];
-    }
-    if ($f_items__target_image){
-      $where_3 = ['like', 'info', '"Categories: Root": "'.$f_items__target_image.'"'];
-    }
-    if ($f_items__user){
-      $where_4 = ['like', 'users', $f_items__user];
-    }
-    if ($f_items__comparing_images){ //
-      $where_5 = ['like', 'info', str_replace('/','\/',$f_items__comparing_images)];
-    }
-
-    $where_6_list = $this->where_6_list_for_filter();
-
-    $where_10 = [];
-    if ($filter_items__profile && $filter_items__profile !== '{{all}}' && $filter_items__profile !== 'Все'){
-      $where_10 = ['like', $this->source_table_name.'.`profile`', $filter_items__profile];
-    }
-
-
-    if ($f_items__comparisons){
-      if ($f_items__comparisons === 'MATCH') $where_6 = ['or like', 'comparisons_aggregated.statuses', ['MATCH','%,MATCH,%','MATCH,%','%,MATCH'], false];
-      if ($f_items__comparisons === 'MISMATCH') $where_6 = ['or like', 'comparisons_aggregated.statuses', 'MISMATCH'];
-      if ($f_items__comparisons === 'PRE_MATCH') $where_6 = ['or like', 'comparisons_aggregated.statuses', 'PRE_MATCH'];
-      if ($f_items__comparisons === 'OTHER') $where_6 = ['or like', 'comparisons_aggregated.statuses', 'OTHER'];
-
-      // это когда
-      if ($f_items__comparisons === 'YES_NO_OTHER') {
-        $where_6 = ['and', "`comparisons`.`status` IS NOT NULL AND comparisons.`status` <> 'MISMATCH'"];
-      }
-
-      if ($f_items__comparisons === 'NOCOMPARE') {
-        $no_compare = true;
-        $where_6 = ['and',['p_all_compare.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]];
-      }
-
-      if($f_items__comparisons === 'ALL_WITH_NOT_FOUND'){
-        // todo ebay не отработал
-        $where_1 = [];
-      }
-    }
-
-    $where_7 = [];
-    if (0 && $this->source_table_name === 'parser_trademarkia_com') {
-      $where_7 = ['like', 'info', 'add_info'];
-    }
-
-    $where_8 = [];
-    if (!User::isAdmin()){
-      $userId = \Yii::$app->getUser()->id;
-      $where_8 = ["IN",'comparisons.user_id',[$userId, null]];
-
-    }
-    $where_9 = ['messages.settings__visible_all' => '1'];
-
-
-    $where__1 = ['and', $where_1, $where_2, $where_3, $where_4, $where_5, $where_6,$where_7,$where_8,$where_10];
-    $where__2 = ['and', $where_1, $where_2, $where_3, $where_4, $where_5, $where_6,$where_7,$where_9,$where_10];
-
-
-    if (!$where_1 && !$where_2 && !$where_3 && !$where_4 && !$where_5 && !$where_6 && !$where_7 && !$where_8 && !$where_10){
-      $where__1 = ['and', '1+1'];
-    }
-    if (!$where_1 && !$where_2 && !$where_3 && !$where_4 && !$where_5 && !$where_6 && !$where_7 && !$where_9 && !$where_10) {
-      $where__2 = ['and', '1+1'];
-    }
-
-    if(isset($f_items__product_status)) {
-        $where = ['hidden_items.status' => $f_items__product_status];
-    }
-    else {
-        $where = ['or', $where__1, $where__2];
-    }
-
-
+    
+    // Если $page_n(берет значение из Get запроса 'page') то переходим на страницу 1
     $get_array = Yii::$app->request->get();
     $_url[] = 'product/index';
     $get_array['page'] = 1;
@@ -303,12 +201,15 @@ class ProductController extends Controller{
     $res_url = Url::toRoute($url_construct);
     if ($page_n === 0) return $this->redirect($res_url);
 
-    /*
-    $f_items__user = $this->request->get('filter-items__user_source',false);
-    $uid = \Yii::$app->getUser()->id;
-    User::find()->where(['id' => $uid])->limit(1)->one()->user__source_access;
-    */
+    $on_page_str = null;
 
+    $where_3_list = $filterService->getWhere_3_list();
+    $where_4_list = $filterService->getWhere_4_list();
+    $where_6_list = $filterService->getWhere_6_list();
+    
+    $where = $filterService->getAllWheres();
+    
+    // source_class = "Parser_trademarkia_com extends Product"
     $q = $this->source_class::find()
           //->select('*')
           ->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
@@ -318,72 +219,51 @@ class ProductController extends Controller{
           ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
           ->leftJoin('messages','messages.id = comparisons.messages_id')
           ->where($where);
-
-    if (0 && $this->source_table_name === 'parser_trademarkia_com') {
-      $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
-      $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
-    }else{
-      $q->innerJoin($this->source_table_name_2,$this->source_table_name_2.'.`asin` = '.$this->source_table_name.'.asin');
-    }
-
+    
+    $q->innerJoin($this->source_table_name_2,$this->source_table_name_2.'.`asin` = '.$this->source_table_name.'.asin');
+    
     $sort = $this->request->get('filter-items__sort');
-
     if ($sort){
       if( $sort === 'created_ASC' ) $q->orderBy($this->source_table_name.'.date_add ASC');
       elseif ( $sort === 'created_DESC' ) $q->orderBy($this->source_table_name.'.date_add DESC');
       elseif ( $sort === 'updated_ASC' ) $q->orderBy('p_updated.date ASC');
       elseif ( $sort === 'updated_DESC' ) $q->orderBy('p_updated.date DESC');
       else $q->orderBy($this->source_table_name.'.id');
-
     }else{
       $q->orderBy($this->source_table_name.'.id');
     }
-
     $q->addGroupBy('`'.$this->source_table_name.'`.`id`');
 
-    $this->start_import();
-
-    $q_for_cnt = clone $q;
-
+    $this->start_import(); // ???
+    
+    //Запрос, чтобы уздать количество записей
     $cnt_all = $q->count();
 
-    // $f_items__show_n_on_page
-    if ($f_items__show_n_on_page !== 'ALL'){
-      $f_items__show_n_on_page = (int)$f_items__show_n_on_page;
+    // Рассчитываем нужные для вывода продукты
+    if ($filterService->f_items__show_n_on_page !== 'ALL'){
+      $f_items__show_n_on_page = (int)$filterService->f_items__show_n_on_page;
       $offset = ($page_n-1) * $f_items__show_n_on_page;
       $q->limit($f_items__show_n_on_page);
     }else{
       $offset = 0;
     }
+    $q->offset($offset);
 
-               $q->offset($offset);
-
-//    echo '<pre>'.PHP_EOL;
-//    print_r($q);
-//    print_r($q->createCommand()->getRawSql());
-//    echo PHP_EOL;
-//    exit;
-//    echo '<pre>'.PHP_EOL;
-
-    $list =    $q->all();
-
-    //echo '<pre>'.PHP_EOL;
-//    print_r($q->createCommand()->getRawSql());
-    //echo PHP_EOL;
-//    exit;
-
-
+    //Получаем нужные продукты (список слева)
+    $list =    $q->all(); //AfrerFind добавляем информацию в каждый продукт
+    
+    
     $pages_cnt = 1;
     // если 8.3 → 9
     if ($f_items__show_n_on_page !== 'ALL') {
-      $pages_cnt = $cnt_all / $f_items__show_n_on_page;
-      $on_page_str = ($offset+1) . ' ─ ' . $f_items__show_n_on_page;
-      $parse = explode('.',$pages_cnt.'');
-      if (isset($parse[1]) && (int)$parse[1] > 0){
-        $pages_cnt = $parse[0] + 1;
-      }
+        $pages_cnt = $cnt_all / $f_items__show_n_on_page;
+        $on_page_str = ($offset+1) . ' ─ ' . $f_items__show_n_on_page;
+        $parse = explode('.',$pages_cnt.'');
+        if (isset($parse[1]) && (int)$parse[1] > 0){
+          $pages_cnt = $parse[0] + 1;
+        }
     }else{
-      $on_page_str = ($offset+1) . ' ─ ' . $cnt_all;
+        $on_page_str = ($offset+1) . ' ─ ' . $cnt_all;
     }
 
     $pager = $this->simple_pager($pages_cnt,$page_n,5);
@@ -403,10 +283,19 @@ class ProductController extends Controller{
     //$profiles_list = $this->profiles_list_cnt();
     $this->getView()->params['filter_statuses'] = $this->cnt_filter_statuses($this->request->get('filter-items__profile'));
 
+    if ($filterService->f_items__comparisons === 'NOCOMPARE') {
+        $no_compare = true;
+    }
+    
     $last_update = $this->get_last_local_import();
     
+    // В каждый эленент добавляется дополнительна информация
     $cnt_all_right = 0;
     foreach ($list as $k => $product){
+        $product->source_id = $this->source_id;
+        $product->baseInfo = $product->info; // Нужно для фкцированного поля baseInfo. Поле $product->info может быть другим в зависимости от парсера 
+        $product->initAddInfo();
+        
         $items = $product->getAddInfo();
         $cnt_all_right += count($items);
     }
@@ -426,28 +315,16 @@ class ProductController extends Controller{
       'where_4_list' => $where_4_list,
       'where_6_list' => $where_6_list,
       'profiles_list' => $profiles_list,
-      'is_admin' => User::isAdmin($this->user->getIdentity()->id),
+      'is_admin' => User::isAdmin(),
       'no_compare' => $no_compare,
       'pager' => $pager,
       'sort' => $sort,
-      'right_item_show' => $f_items__right_item_show ? 1 : 0,
+      'right_item_show' => $filterService->f_items__right_item_show ? 1 : 0,
       'last_update' => $last_update,
     ]);
   }
 
   public function profiles_list_cnt(){
-
-    /*
-    $s = Source::get_source($source_id);
-    if (!$s) {
-      echo '<pre>'.PHP_EOL;
-      print_r('Products::profiles_list() ... не найден source');
-      echo PHP_EOL;
-      exit;
-
-    }
-    */
-
     $source_class = $this->source_class;
     //$q = $source_class::find()->distinct(true)->select(['profile'])->asArray();
     /* @var $source_class ActiveRecord */
@@ -579,10 +456,6 @@ class ProductController extends Controller{
     $q0 = $source_class::find()->distinct(true)->select(['profile'])->asArray();
 
     $res_1 = $q0->column();
-//    echo '<pre>'.PHP_EOL;
-//    print_r($res_1);
-//    echo PHP_EOL;
-//    exit;
 
     $find_uniq = function($data){
       $out = [];
@@ -892,6 +765,11 @@ class ProductController extends Controller{
       //echo PHP_EOL;
       exit;
     }
+    
+    // В модель добавдяем дополнительную информацию
+    $model->source_id = $this->source_id;
+    $model->baseInfo = $model->info; // Нужно для фкцированного поля baseInfo. Поле $product->info может быть другим в зависимости от парсера 
+    $model->initAddInfo();
 
     //$model = $this->findModel($id,$item_1__ignore_red,$direction);
     //$prev = $this->getNextModel($id, true,$item_1__ignore_red);
@@ -1098,6 +976,7 @@ class ProductController extends Controller{
       //echo PHP_EOL;
       exit;
     }
+    $model->initAddInfo();
 
     $comparisonModel = Comparison::findOne(['product_id' => $id, 'node' => $node,'source_id' => $this->source_id]);
 
@@ -1106,7 +985,7 @@ class ProductController extends Controller{
       $comparisonModel = new Comparison(['product_id' => $model->id,'source_id' => $this->source_id, 'user_id' => Yii::$app->user->id, 'node' => $node]);
     }
     if ($comparisonModel === null) {
-      throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+      throw new NotFoundHttpException(Yii::t('yii', 'Не найдена модель сравнения'));
     }
 
     //$m_id = Yii::$app->request->get('msgid') ?: -1 ;
@@ -1245,7 +1124,7 @@ class ProductController extends Controller{
 
       if ($nodes){
         foreach ($nodes as $node => $addInfo){
-          $comparisonModel = Comparison::findOne(['product_id' => $id, 'node' => $node,'source_id' => $this->source_id]);
+          $comparisonModel = Comparison::findOne(['product_id' => $id, 'n+ode' => $node,'source_id' => $this->source_id]);
 
           if (!$comparisonModel && isset($nodes[$node])) {
             $comparisonModel = new Comparison([
@@ -1754,7 +1633,7 @@ class ProductController extends Controller{
     return $pager;
   }
 
-
+/*
   private function where_3_list_for_filter(){
     $out = [];
     $cnt = [];
@@ -1762,23 +1641,26 @@ class ProductController extends Controller{
 
     //$q = Product::find()
 
-    $q = $this->source_class::find()
+    $q = $this->source_class::find() //Parser_trademarkia_com
       ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
       ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
       ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ');
 
     //$q->andWhere(['p_all_compare.p_id' => null]);
-    if (0 && $this->source_table_name === 'parser_trademarkia_com'){
-      $q->andWhere(['like','info','add_info']);
-      $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
-      $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
+    if (0 && $this->source_table_name === 'parser_trademarkia_com'){    // where_7
+      $q->andWhere(['like','info','add_info']);                         // 
+      $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");            //
+      $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");           //
     }
+    // where 1
     $q->andWhere(['and',['hidden_items.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]]);
+    
+    
     $q->addGroupBy('`'.$this->source_table_name.'`.`id`');
-    $all = $q->all();
+    $all = $q->all(); // array of Parser_trademarkia_com ( array (1291) )
 
-    foreach ($all as $a_item){
-      $c_root = $a_item->baseInfo['Categories: Root'];
+    foreach ($all as $a_item){   //Parser_trademarkia_com (101 полей)
+      $c_root = $a_item->baseInfo['Categories: Root'];  // (sring) Musical Instruments
       if (isset($cnt[$c_root])) $cnt[$c_root]++; else $cnt[$c_root] = 1;
 
       $out[] = $c_root;
@@ -1792,6 +1674,7 @@ class ProductController extends Controller{
     $all = User::find()
       ->where('status > 0')
       ->all();
+    
     foreach ($all as $user){
 
       //$q = Product::find()
@@ -1803,9 +1686,10 @@ class ProductController extends Controller{
         ->where(['comparisons.user_id' => $user->id]);
 
       //$q->andWhere(['p_all_compare.p_id' => null]);
-      $q->andWhere(['like','info','add_info']);
+      $q->andWhere(['like','info','add_info']);                 // where 7
       $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
       $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
+                                                                // where 1
       $q->andWhere(['and',['hidden_items.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]]);
       $q->addGroupBy('`'.$this->source_table_name.'`.`id`');
       $c = $q->count();
@@ -1820,8 +1704,6 @@ class ProductController extends Controller{
     return $cnt;
 
   }
-
-
 
   private function where_6_list_for_filter(){
     //$q = Product::find()
@@ -1885,7 +1767,8 @@ class ProductController extends Controller{
 
     return $out;
   }
-
+*/
+  
   public function is_source_access($user_id = false,$source_id = false){
     if (!$user_id){
       $user_id = \Yii::$app->getUser()->id;
