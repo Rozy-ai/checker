@@ -236,6 +236,7 @@ class ProductController extends Controller{
 
     $this->start_import(); // ???
     
+    $x = $this->source_class::find(['id'=>0])->one(); // Эксперимент. Если вначале тустить легкий запрос, то следущий будет быстрее
     //Запрос, чтобы уздать количество записей
     $cnt_all = $q->count();
 
@@ -293,10 +294,10 @@ class ProductController extends Controller{
     $cnt_all_right = 0;
     foreach ($list as $k => $product){
         $product->source_id = $this->source_id;
-        $product->baseInfo = $product->info; // Нужно для фкцированного поля baseInfo. Поле $product->info может быть другим в зависимости от парсера 
-        $product->initAddInfo();
+        //$product->baseInfo = $product->info; // Нужно для фкцированного поля baseInfo. Поле $product->info может быть другим в зависимости от парсера 
+        //$product->initAddInfo();
         
-        $items = $product->getAddInfo();
+        $items = $product->addInfo;
         $cnt_all_right += count($items);
     }
 

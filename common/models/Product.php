@@ -183,10 +183,16 @@ class Product extends \yii\db\ActiveRecord{
 
     public function getBaseInfo()
     {
+        if (!$this->_baseInfo && $this->info) {
+            $this->_baseInfo = $this->info;
+        }
         return $this->_baseInfo;
     }
 
   public function getAddInfo(){
+        if (!$this->_addInfo) {
+            $this->initAddInfo();
+        }
         return $this->_addInfo;
     }
 
@@ -209,6 +215,9 @@ class Product extends \yii\db\ActiveRecord{
      */
   public function get_right_items($del_with_status = []){
 //$filter = [Result, NOCOMPARE, PRE_MATCH, MATCH, OTHER, MISMATCH, YES_NO_OTHER, ALL, ALL_WITH_NOT_FOUND,];
+        if (!$this->_addInfo){
+            $this->initAddInfo();
+        }
         $right_products = $this->_addInfo;
 
         $res = Comparison::find()

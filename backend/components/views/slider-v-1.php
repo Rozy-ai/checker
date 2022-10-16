@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Отображение списка кратко
+ * 
  * @var $product
  * @var $page
  * @var $comparisons

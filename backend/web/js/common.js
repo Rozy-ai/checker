@@ -642,7 +642,7 @@ $(function(){
     $message.html(title)
   })
   
-  // на правом товаре
+  // на правом товаре Написана константином как новая версия brief_on_hover. Но тогда остальные смещения нужно подобрать заново 
   lib.brief_on_hover1(".slider-item__border .-img, .slider-item__border .slider_images, .slider-item__border.slider_images", {'offset_left': 665, 'arrow_position': 'left'}, function($message, $this){      
     let description_right = '<div>'+$this.attr('data-description_right')+'</div>';
     let img_right = '<img style="max-width: 100%;" src="'+$this.attr('data-img_right')+'" />';

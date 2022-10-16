@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
           $profile_path = $get_['filter-items__profile'] ?? 'Все';
           if ($profile_path === '{{all}}') $profile_path = 'Все';
           ?>
-          <div class="cnt-items col-sm-6">Показаны записи <?=$on_page?> из <?=$cnt_all;?>. (Справа: <?=$cnt_all_right?>) Источник <?=$selected_source_name?> / <?= $profile_path?></div>
+          <div class="cnt-items col-sm-6">Показаны записи <?=$on_page?> из <?=$cnt_all;?>. (<?=$cnt_all_right?>) Источник <?=$selected_source_name?> / <?= $profile_path?></div>
 
           <? $pages_n_list = [10,20,50,100,200]?>
           <div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">
