@@ -60,7 +60,8 @@ class ProductController extends Controller{
     $rules_2 = [
       'allow' => true,
       'actions' => ['compare', 'view', 'result', 'missall', 'user_visible_fields','reset_compare','del_item','test1','get_products_by_params'],
-      'roles' => ['compare-products'],
+      //'roles' => ['compare-products'],
+        'roles' => ['@'],
       'roleParams' => function(){
         return ['product' => $this->source_class::findOne(['id' => Yii::$app->request->get('id')])];
       },
@@ -175,6 +176,7 @@ class ProductController extends Controller{
     /* объеденил [no compare и select] */
     $f_items__comparisons = $this->request->get('filter-items__comparisons'); // ! new
     $f_items__no_compare = $this->request->get('filter-items__no-compare');
+    $f_items__product_status = $this->request->get('filter-items__product_status');
     if ($f_items__no_compare === 'on') $f_items__no_compare = true;
     if (!$f_items__no_compare) $where_1 = ['and',['hidden_items.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]];
 
@@ -286,7 +288,12 @@ class ProductController extends Controller{
       $where__2 = ['and', '1+1'];
     }
 
-    $where = ['or', $where__1, $where__2];
+    if(isset($f_items__product_status)) {
+        $where = ['hidden_items.status' => $f_items__product_status];
+    }
+    else {
+        $where = ['or', $where__1, $where__2];
+    }
 
 
     $get_array = Yii::$app->request->get();
@@ -1823,7 +1830,7 @@ class ProductController extends Controller{
       ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
       ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
       ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ');
-    $q->where(['or like', 'status', ['MATCH','%,MATCH,%','MATCH,%','%,MATCH'], false]);
+    $q->where(['or like', 'comparisons.status', ['MATCH','%,MATCH,%','MATCH,%','%,MATCH'], false]);
 
 
     $q->andWhere(['and',['p_all_compare.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]]);
@@ -1841,13 +1848,13 @@ class ProductController extends Controller{
     //echo PHP_EOL;
     //exit;
 
-    $q->where(['like', 'status', 'MISMATCH']);
+    $q->where(['like', 'comparisons.status', 'MISMATCH']);
     $mismatch = $q->count();
 
-    $q->where(['like', 'status', 'PRE_MATCH']);
+    $q->where(['like', 'comparisons.status', 'PRE_MATCH']);
     $pre_match = $q->count();
 
-    $q->where(['like', 'status', 'OTHER']);
+    $q->where(['like', 'comparisons.status', 'OTHER']);
     $other = $q->count();
 
     //$q = Product::find()

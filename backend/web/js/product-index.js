@@ -122,7 +122,8 @@ $(document).ready(function(){
     
     
   });
-  
+
+  /* присваивание левому товару статуса STATUS_NOT_FOUND */
   $body.on('click','.product-list__item-mismatch-all',function(e){
     e.stopPropagation();
     let $this = $(this);

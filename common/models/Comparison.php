@@ -281,6 +281,8 @@ class Comparison extends ActiveRecordAlias{
         $h = new HiddenItems();
         $h->p_id = $p_id;
         $h->source_id = $source_id;
+        $h->status = HiddenItems::STATUS_NOT_FOUND;
+        $h->user_id = Yii::$app->user->id;
         $h->insert();
       }
       else HiddenItems::findOne(['p_id' => $p_id,'source_id' => $source_id])->save();
