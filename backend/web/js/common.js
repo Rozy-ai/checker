@@ -208,11 +208,6 @@ lib.brief_on_hover1 = function(selector, prop, cb){
       $brief.hide();
       $brief.css('width',false);
     });
-    
-    $('body').on('mouseout mousedown', selector, function(evt) {
-        $brief.hide();
-        $brief.css('width',false);
-    });
 }
 
 lib.brief_on_hover = function(selector,prop,cb){

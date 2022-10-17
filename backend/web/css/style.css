@@ -2388,6 +2388,7 @@ table.tableInfo th {
 
 .brief_table td {
     vertical-align: top;
+    text-align:center;
 }
 
 .brief_table td.first {

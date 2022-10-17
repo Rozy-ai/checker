@@ -154,7 +154,7 @@ class FilterIndexService {
           ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
           ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
           ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-          ->where(['or like', 'status', ['MATCH','%,MATCH,%','MATCH,%','%,MATCH'], false]);
+          ->where(['or like', 'comparisons.status', ['MATCH','%,MATCH,%','MATCH,%','%,MATCH'], false]);
 
         $q->andWhere( $this->filtersIndex->where_6('NOCOMPARE', $this->source_id) );
         //$q->andWhere( $this->filtersIndex->where_7($this->source_table_name));
@@ -162,13 +162,13 @@ class FilterIndexService {
 
         $match = $q->count();
 
-        $q->where(['like', 'status', 'MISMATCH']);
+        $q->where(['like', 'comparisons.status', 'MISMATCH']);
         $mismatch = $q->count();
 
-        $q->where(['like', 'status', 'PRE_MATCH']);
+        $q->where(['like', 'comparisons.status', 'PRE_MATCH']);
         $pre_match = $q->count();
 
-        $q->where(['like', 'status', 'OTHER']);
+        $q->where(['like', 'comparisons.status', 'OTHER']);
         $other = $q->count();
 
 
