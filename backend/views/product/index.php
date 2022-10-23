@@ -288,7 +288,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
     >
       <td class="products-list__td1">
-        <div class="product-list-item__data" style="white-space: nowrap"><span>Asin:</span><br><?=(strlen($item->asin)>6)?substr($item->asin, 0, 6).'..':$item->asin?></div>
+        <?php
+            if (User::isAdmin()){
+               $asin = $item->asin;
+            } else {
+               $asin = (strlen($item->asin)>6)?substr($item->asin, 0, 6).'..':$item->asin;
+            }
+        ?>         
+        <div class="product-list-item__data" style="white-space: nowrap"><span>Asin:</span><br><?=$asin?></div>
         <div class="product-list-item__data"><span>BSR:</span><br><?= number_format( $item->baseInfo["Sales Rank: Current"] , 0, '', ' ');?></div>
         <div class="product-list-item__data"><span>Sales30:</span><br><?=$item->baseInfo["Sales Rank: Drops last 30 days"]?></div>
         <div

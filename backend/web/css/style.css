@@ -1889,7 +1889,7 @@ table.tableInfo th {
 .slider-item__cnt-1 {
   display: block;
   text-align: left;
-  margin-top: 4px;
+  margin-top: 10px;
   padding-left: 6px;
 }
 .cnt-1__stock-n {}
@@ -2101,8 +2101,9 @@ table.tableInfo th {
   vertical-align: middle;
 
 }
-.products-list__td1{
+td.products-list__td1{
   width: 50px;
+  padding: 0.4rem;
 }
 .products-list__td2{
   width: 20%;

@@ -34,21 +34,42 @@ class Product extends \yii\db\ActiveRecord{
     protected $_source;
     protected $_source_id;
 
+    public function getSource_id() {
+        return $this->_source_id;
+    }
+    
     public function setSource_id($value) {
         $this->_source_id = $value;
     }
 
+    public function getBaseInfo()
+    {
+        if (!$this->_baseInfo && $this->info) {
+            $this->_baseInfo = $this->info;
+        }
+        return $this->_baseInfo;
+    }
+    
     public function setBaseInfo($base_info) {
         $this->_baseInfo = $base_info;
+    }
+
+    public function getAddInfo(){
+        if (!$this->_addInfo) {
+            $this->initAddInfo();
+        }
+        return $this->_addInfo;
     }
 
     public function getSource() {
         return $this->_source ?? $this->_source = Source::findOne(['table_1' => str_replace('common\models\\', '', strtolower(get_called_class()))]);
     }
-
-    public function getSource_id() {
-        return $this->_source_id;
+    
+    public function setSource($source) {
+        $this->_source = $source;
     }
+
+
 
     /**
      * {@inheritdoc}
@@ -62,7 +83,7 @@ class Product extends \yii\db\ActiveRecord{
      * Служит для того чтобы загрузить для продукта дополнительную инфу
      * $this->_addinfo = new Product_right(.....)
      */
-    public function initAddInfo() {
+    private function initAddInfo() {
         $asin = $this->asin;
 
         $source = $this->source;
@@ -90,7 +111,7 @@ class Product extends \yii\db\ActiveRecord{
                 $res = $this->get_all_elements_in_array_to_first_level($data, '.');
             }
 
-            $pr = new Product_right(array_merge($out, $res, ['parent_item' => $this->_baseInfo]));
+            $pr = new Product_right(array_merge($out, $res, ['parent_item' => $this->baseInfo]));
             $this->_addInfo[] = $pr;
         }
     }
@@ -181,22 +202,6 @@ class Product extends \yii\db\ActiveRecord{
         return $this->hasOne(P_user_visible::class, ['p_id' => 'id']);
     }
 
-    public function getBaseInfo()
-    {
-        if (!$this->_baseInfo && $this->info) {
-            $this->_baseInfo = $this->info;
-        }
-        return $this->_baseInfo;
-    }
-
-  public function getAddInfo(){
-        if (!$this->_addInfo) {
-            $this->initAddInfo();
-        }
-        return $this->_addInfo;
-    }
-
-
     /**
      * <code>
      * ->get_right_items(['PRE_MATCH', 'MATCH', 'OTHER', 'MISMATCH', 'NOCOMPARE']); // 0
@@ -215,17 +220,14 @@ class Product extends \yii\db\ActiveRecord{
      */
   public function get_right_items($del_with_status = []){
 //$filter = [Result, NOCOMPARE, PRE_MATCH, MATCH, OTHER, MISMATCH, YES_NO_OTHER, ALL, ALL_WITH_NOT_FOUND,];
-        if (!$this->_addInfo){
-            $this->initAddInfo();
-        }
-        $right_products = $this->_addInfo;
+        $right_products = $this->addInfo;
 
         $res = Comparison::find()
                 ->where(['product_id' => $this->id])
                 ->all();
 
         $node_to_status = [];
-        foreach ($this->_addInfo as $k => $item) {
+        foreach ($this->addInfo as $k => $item) {
             $status = false;
 
             foreach ($res as $r) {
@@ -235,7 +237,7 @@ class Product extends \yii\db\ActiveRecord{
             }
             $status = $status ?: 'NOCOMPARE';
 
-            $this->_addInfo[$k]->set_status($status);
+            $this->addInfo[$k]->set_status($status);
 
             $node_to_status[$k] = $status;
             /*
