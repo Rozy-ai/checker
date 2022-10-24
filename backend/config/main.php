@@ -11,7 +11,7 @@ return [
     'language' => 'ru-RU',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'common\SetupChecker'],
     'modules' => [],
     'components' => [
         'request' => [

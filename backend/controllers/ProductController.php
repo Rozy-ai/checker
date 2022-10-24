@@ -31,13 +31,18 @@ use yii\web\Session;
 use yii\web\UrlManager;
 use yii\web\UrlNormalizer;
 use yii\web\UrlRule;
-use backend\services\FilterIndexService;
+use backend\services\FilterService;
+use backend\services\IndexService;
 
 
 /**
  * ProductController implements the CRUD actions for Product model.
  */
 class ProductController extends Controller{
+    
+  /** @var IndexService */
+  public $indexService;
+    
   public $prev = null;
   public $next = null;
 
@@ -111,49 +116,25 @@ class ProductController extends Controller{
     );
 
   }
-
-  public function set_source($source_id = false){
-
-    if (!$source_id){
-      $source_id = $this->request->get('filter-items__source', false);
-      if (!$source_id) $source_id = $this->request->get('source_id', false);
-      if (!$source_id) $source_id = $this->request->post('source_id', false);
+  
+    /**
+     * @inheritdoc
+     * @param IndexService $indexService
+     */
+    public function __construct($id, $module,
+            IndexService $indexService,
+            array $config = []) {
+        parent::__construct($id, $module, $config);
+        $this->indexService = $indexService;
     }
-    if ($source_id === false){
-/*
-      if ($s_source = (new Session())->get('source')){
-        $source_id = $s_source['id'];
-      }else{
-        $source_id = 1;
-      }
-*/
-      $source_id = 1;
-    }
-
-    $source = Source::findOne(['id' => (int)$source_id]);
-
-    //(new Session())->set('source',$source);
-    if (!$source) {
-      $url[] = $_SERVER['REDIRECT_URL'];
-      $get_ = $this->request->get();
-      $get_['filter-items__source'] = 1;
-      $get_['source_id'] = 1;
-
-      header('Location: '. Url::to(array_merge($url,$get_)));
-      exit;
-    }
-
-    $this->view->params['source_id'] = $source_id;
-    $this->source_id = $source_id;
-    $this->source_table_name = $source->table_1;
-    $this->source_table_name_2 = $source->table_2;
-    return $this->source_class = 'common\models\\'.ucfirst($source->table_1);
-  }
 
   public function actionIndex(){
     ini_set("memory_limit", "3024M");
     
-    $filterService = new FilterIndexService();
+    ;
+    $this->indexService->loadParamsToFilters( \Yii::$app->request->getQueryParams() );
+    
+    $filterService = new FilterService();
     $filterService->filter_items__profile = $this->request->get('filter-items__profile');
     $filterService->f_items__right_item_show = $this->request->get('filter-items__right-item-show');
     $filterService->f_items__show_n_on_page = $this->request->get('filter-items__show_n_on_page',10);
@@ -571,12 +552,31 @@ class ProductController extends Controller{
   }
 
   public function beforeAction($action){
+      
+    $source_id = $this->request->get('filter-items__source', false);
+    if (!$source_id) {
+        $source_id = $this->request->get('source_id', false);
+    }
+    if (!$source_id) {
+        $source_id = $this->request->post('source_id', false);
+    }
 
-    $this->set_source();
-    if ($this->is_source_access() === false){
+    $source_id = $this->indexService->set_source($source_id);
+    if (!$source_id) {
+        $url[] = $_SERVER['REDIRECT_URL'];
+        $get_ = $this->request->get();
+        $get_['filter-items__source'] = 1;
+        $get_['source_id'] = 1;
 
+        header('Location: ' . Url::to(array_merge($url, $get_)));
+        exit;
+    }
+    
+    $this->view->params['source_id'] = $source_id;
+    
+    
+    if ($this->indexService->is_source_access() === false){
       $user_id = \Yii::$app->getUser()->id;
-
       $u = User::find()->where(['id' => $user_id])->limit(1)->one();
       $res = $u->user__source_access;
       if ($res){
@@ -584,15 +584,8 @@ class ProductController extends Controller{
         $get_ = $this->request->get();
         $get_['filter-items__source'] = $res[0]->source_id;
         $get_['source_id'] = $res[0]->source_id;
-
         return $this->redirect(array_merge($url,$get_));
       }
-
-//      echo '<pre>'.PHP_EOL;
-//      header('Content-type: text/html; charset=utf-8');
-//      print_r('у вас нет доступа к этому источнику');
-//      echo PHP_EOL;
-//      exit;
     }
 
 
@@ -1631,24 +1624,7 @@ class ProductController extends Controller{
     return $pager;
   }
 
-  public function is_source_access($user_id = false,$source_id = false){
-    if (!$user_id){
-      $user_id = \Yii::$app->getUser()->id;
-    }
-    if (!$source_id){
-      $source_id = Source::get_source()['source_id'];
-    }
 
-    $u = User::find()->where(['id' => $user_id])->limit(1)->one();
-    $res = $u->user__source_access;
-
-    // если нет записей... то можно все источники
-    if (!$res) return true;
-    foreach ($res as $r){
-      if ((int)$r->source_id === (int)$source_id) return true;
-    }
-    return false;
-  }
 
 
   public function actionDel_item(){
