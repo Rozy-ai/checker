@@ -29,6 +29,7 @@ $(function(){
 })
 
 $(document).ready(function(){
+
   let cb = {
     'image_place': function(evt){
       let place = $(this).data('image-place');
@@ -40,6 +41,19 @@ $(document).ready(function(){
   };
   cb.set();
   $('#product-view-pjax').on('pjax:end', cb.set);
+  $(".product-list__product-list-item").each(function(index,value){
+   let mismatch=$(this).find('.mismatch').text();
+   let processed=$(this).find('.product-list-item__processed').text();
+   let total=processed.split('/');
+
+   console.log(mismatch)
+    console.log(total[1])
+    if (mismatch==total[1])
+    {
+      $('.product-list-item__data>span').text('Not found').css('color','red');
+    }
+  });
+
 })
 
 window.addEventListener('load', function(){

@@ -21,9 +21,9 @@ function fatal_handler() {
 
 
 
-defined('YII_DEBUG') or define('YII_DEBUG', false);
+defined('YII_DEBUG') or define('YII_DEBUG', true);
 defined('YII_ENV') or define('YII_ENV', 'prod');
-
+echo __DIR__.'/../../../../';
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../vendor/yiisoft/yii2/Yii.php';
 require __DIR__ . '/../../common/config/bootstrap.php';
