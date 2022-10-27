@@ -26,6 +26,7 @@ AppAsset::register($this);
 <?php $this->beginBody() ?>
 
 <header>
+    <h1>Сука</h1>
     <?php
     NavBar::begin([
         'brandLabel' => Yii::$app->name,
