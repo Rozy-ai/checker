@@ -33,21 +33,17 @@ class FiltersIndex {
     }
     
     /**
-     * @param string $table
-     * @param string $id
-     * 
+     * @param string $source_table_name
+     * @param string $f_items__id
      * @return array
      */
-    public function where_2(string $table, string $id = null): array
-    {
-        // return [];
-
-        return $id 
-            ? ['LIKE', $table.'.asin', $id]
-            : [];
+    public function where_2($source_table_name, $f_items__id){
+        return ($f_items__id)? 
+            ['or',[$source_table_name.'.id' => $f_items__id],
+                  [$source_table_name.'.asin' => $f_items__id]
+            ]:[];
     }
     
-
     /**
      * @param string $f_items__target_image берется из контроллера get параметра
      * @return array
@@ -138,10 +134,8 @@ class FiltersIndex {
      * @param type $source_table_name
      * @return array
      */
-    public function where_10($filter_items__profile, $source_table_name)
-    {
-        return ($filter_items__profile && $filter_items__profile !== '{{all}}' && $filter_items__profile !== 'Все')
-            ? ['like', $source_table_name.'.`profile`', $filter_items__profile] 
-            : [];
+    public function where_10($filter_items__profile, $source_table_name){
+        return ($filter_items__profile && $filter_items__profile !== '{{all}}' && $filter_items__profile !== 'Все')?
+            ['like', $source_table_name.'.`profile`', $filter_items__profile] : [];
     }
 }

@@ -114,7 +114,7 @@ class ProductController extends Controller{
 
   public function set_source($source_id = false){
 
-    if (!$source_id) {
+    if (!$source_id){
       $source_id = $this->request->get('filter-items__source', false);
       if (!$source_id) $source_id = $this->request->get('source_id', false);
       if (!$source_id) $source_id = $this->request->post('source_id', false);
@@ -150,12 +150,9 @@ class ProductController extends Controller{
     return $this->source_class = 'common\models\\'.ucfirst($source->table_1);
   }
 
-  public function actionIndex()
-  {
+  public function actionIndex(){
     ini_set("memory_limit", "3024M");
     
-    // filter-items__id
-
     $filterService = new FilterIndexService();
     $filterService->filter_items__profile = $this->request->get('filter-items__profile');
     $filterService->f_items__right_item_show = $this->request->get('filter-items__right-item-show');
@@ -171,7 +168,7 @@ class ProductController extends Controller{
     $filterService->source_class        = $this->source_class;
     $filterService->source_table_name   = $this->source_table_name;
 
-    $page_n = (int) $this->request->get('page', 0);
+    $page_n = (int)$this->request->get('page',0);
     $no_compare = false;
 
     if (User::isAdmin() && !$filterService->f_items__comparisons) {
@@ -226,7 +223,7 @@ class ProductController extends Controller{
     $q->innerJoin($this->source_table_name_2,$this->source_table_name_2.'.`asin` = '.$this->source_table_name.'.asin');
     
     $sort = $this->request->get('filter-items__sort');
-    if ($sort) {
+    if ($sort){
       if( $sort === 'created_ASC' ) $q->orderBy($this->source_table_name.'.date_add ASC');
       elseif ( $sort === 'created_DESC' ) $q->orderBy($this->source_table_name.'.date_add DESC');
       elseif ( $sort === 'updated_ASC' ) $q->orderBy('p_updated.date ASC');
@@ -328,17 +325,18 @@ class ProductController extends Controller{
     ]);
   }
 
-
-  public function profiles_list_cnt()
-  {
+  public function profiles_list_cnt(){
     $source_class = $this->source_class;
     //$q = $source_class::find()->distinct(true)->select(['profile'])->asArray();
     /* @var $source_class ActiveRecord */
     $q2 = $source_class::find()
+
       ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
       ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
       ->innerJoin($this->source_table_name_2,$this->source_table_name_2.'.`asin` = '.$this->source_table_name.'.asin')
+
       ->where(['and',['hidden_items.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]])
+
       ->asArray();
 
     $q2->select($this->source_table_name.'.id, ' . $this->source_table_name.'.profile' )

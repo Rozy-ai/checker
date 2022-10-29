@@ -31,13 +31,11 @@ use yii\widgets\Pjax;
 
 $source = \backend\models\Source::get_source();
 
-// 4/4 Acoustic Violin Set Full Size with Case, Bow and Free Rosin for Adults, Learners Age 11+, Black
+$this->title = "#{$model->id}";
 
 \backend\assets\ProductAsset::register($this);
 
 $base = $model->baseInfo;
-
-$this->title = $this->params['breadcrumbs'][1]['label'] . ' | ' . $base['Title'];
 
 $add_info = $model->addInfo;
 //$add_info = $compare_items;
@@ -106,9 +104,11 @@ $get_ = $this->params['get_'];
           <div class="filter __comparison">
             <select name="" class="filter __comparison-select form-control">
               <? foreach ($this->params['filter_statuses'] as $k_status => $status_data):?>
-                <option value="<?=$k_status?>"
-                  <?= isset($get_['comparisons']) ? $get_['comparisons'] == $k_status ? 'selected' : '' : '' ?>
-                ><?= $status_data['name']?> (<?=$status_data['cnt'] ?>)</option>
+                <option
+                  value="<?=$k_status?>"
+                  <?= isset($get_['comparisons'])?     $get_['comparisons'] == $k_status ? 'selected' : ''    : '' ?>
+
+                ><?=$status_data['name']?> (<?=$status_data['cnt']?>)</option>
               <? endforeach;?>
             </select>
           </div>
@@ -143,17 +143,17 @@ $get_ = $this->params['get_'];
     <div class="position-1 -hidden">
       <div class="slider__layout">
 
-        <?php
+        <?
+        $images_left = preg_split("/[; ]/", $base["Image"]);
 
-            $images_left = preg_split("/[; ]/", $base["Image"]);
-            $images_left[0];
-            $images_left["Title"];
-
+        $images_left[0];
+        $images_left["Title"];
         ?>
 
         <div
           data-pid="<?=$p_item->id?>"
           class="slider__layout-td slider__left-item"
+          style=""
         >
 
           <div class="slider__left-item_info">
