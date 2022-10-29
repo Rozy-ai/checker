@@ -472,7 +472,12 @@ class IndexService {
         }
         $where = $this->filters->getAllWheres();
         $q = $this->source->class_1::find()
-            ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
+                ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source->table_1 . '.id')
+                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('p_updated', 'p_updated.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('messages', 'messages.id = comparisons.messages_id')
             ->where($where);
         return $q->count();
     }
@@ -486,16 +491,16 @@ class IndexService {
         }
 
         $where = $this->filters->getAllWheres();
-        $q = $this->source_class::find()
+        $q = $this->source->class_1::find()
                 //->select('*') todo: Нужно перечислить только нужные поля для оптимизации
-                ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source_table_name . '.id')
-                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
-                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source_table_name . '.id ')
-                ->leftJoin('p_updated', 'p_updated.p_id = ' . $this->source_table_name . '.id ')
-                ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
+                ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source->table_1 . '.id')
+                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('p_updated', 'p_updated.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source->table_1 . '.id ')
                 ->leftJoin('messages', 'messages.id = comparisons.messages_id')
                 ->where($where);
-        $q->innerJoin($this->source_table_name_2, $this->source_table_name_2 . '.`asin` = ' . $this->source_table_name . '.asin');
+        $q->innerJoin($this->source->table_2, $this->source->table_2 . '.`asin` = ' . $this->source->table_1 . '.asin');
 
         switch ($this->filter_items__sort) {
             case 'created_ASC': $q->orderBy($this->source_table_name . '.date_add ASC');
