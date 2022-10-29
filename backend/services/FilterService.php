@@ -11,7 +11,7 @@ use backend\models\User;
 /**
  * Description of Filter
  *
- * @author koste
+ * @author kosten
  */
 class FilterService {
     public $filter_items__profile;
@@ -116,7 +116,7 @@ class FilterService {
     
     
     /**
-     * Фильтр статуса товара из models/Comparisons, где список указан константой
+     * Фильтр статуса товара из common/models/Comparisons, где список указан константой
      * 
      * @param type $f_items__comparisons
      * @param type $source_id - id источника товара (sourse->id)
@@ -124,7 +124,8 @@ class FilterService {
      * @throws \yii\base\InvalidArgumentException
      */
     public function where_6($f_items__comparisons = null, $source_id = null){
-        if ($f_items__comparisons){
+        if ($f_items__comparisons)
+        {
             $this->f_items__comparisons = $f_items__comparisons;
         }
         
@@ -220,139 +221,5 @@ class FilterService {
         }
 
         return ['or', $where__1, $where__2];
-    }
-    
-    /**
-     * Получить список всех категорий ( 'Categories: Root' ) и их количество
-     * @return attay
-     *    [
-     *       string => int,
-     *       string => int,
-     *       ...
-     *       string => int
-     *    ]
-     */
-    public function getWhere_3_list(){
-        $cnt = [];
-
-        $q = $this->source_class::find()
-          ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ');
-
-        // if (0 && $this->source_table_name === 'parser_trademarkia_com'){
-        //    $q->andWhere(['like','info','add_info']);
-        //    $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
-        //    $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
-        // }
-        
-        $q->andWhere( $this->where_1() );
-        $q->addGroupBy('`'.$this->source_table_name.'`.`id`');
-        $all = $q->all();
-
-        foreach ($all as $a_item){
-          $c_root = $a_item->info['Categories: Root']; //baseInfo - еще не инициальзированы 
-          if (isset($cnt[$c_root])) $cnt[$c_root]++; else $cnt[$c_root] = 1;
-
-        }
-        return $cnt;
-    }
-    
-    /**
-     * Список пользователей с количеством сравнений для каждого
-     * @return attay
-     *    [
-     *       username => [
-     *          'id'        => int,
-     *          'username'  => string, //Зачем дубль - пока не знаю
-     *          'cnt'       => int
-     *       ],
-     *       ...
-     *    ]
-     */
-    public function getWhere_4_list(){
-        $cnt = [];
-        $all = User::find()
-          ->where('status > 0')
-          ->all();
-
-        foreach ($all as $user){
-            $q = $this->source_class::find()
-              ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-              ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
-              ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-              ->where($this->where_1())           
-              ->andWhere(['comparisons.user_id' => $user->id]);
-          
-            $q->addGroupBy('`'.$this->source_table_name.'`.`id`');
-            $c = $q->count();
-            if (!$c) {
-                $c = 0;
-            }
-
-            $cnt[$user->username] = ['id' => $user->id, 'username' => $user->username, 'cnt' => $c]; //Зачем дубль - пока не знаю
-        }
-        
-        return $cnt;
-    }
-
-    /**
-     * 
-     * @return attay
-     *    [
-     *       NOCOMPARE => int,
-     *       MISMATCH  => int,
-     *       PRE_MATCH => int,
-     *       MATCH     => int,
-     *       OTHER     => int
-     *    ]
-     */
-    public function getWhere_6_list(){
-        $q = $this->source_class::find()
-          ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-          ->where(['or like', 'comparisons.status', ['MATCH','%,MATCH,%','MATCH,%','%,MATCH'], false]);
-
-        $q->andWhere( $this->where_6('NOCOMPARE', $this->source_id));
-        //$q->andWhere( $this->filtersIndex->where_7();
-        $q->addGroupBy('`comparisons`.`product_id`');
-
-        $match = $q->count();
-
-        $q->where(['like', 'comparisons.status', 'MISMATCH']);
-        $mismatch = $q->count();
-
-        $q->where(['like', 'comparisons.status', 'PRE_MATCH']);
-        $pre_match = $q->count();
-
-        $q->where(['like', 'comparisons.status', 'OTHER']);
-        $other = $q->count();
-
-        $q = $this->source_class::find()
-          ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ');
-        $q->where(['and',['p_all_compare.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]]);
-
-        if (0 && $this->source_table_name === 'parser_trademarkia_com') {
-          $q->andWhere(['like', 'info', 'add_info']);
-          $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
-          $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
-        }
-
-        $q->andWhere(['and',['hidden_items.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]]);
-
-        $q->addGroupBy('`'.$this->source_table_name.'`.`id`');
-        $nocompare = $q->count();
-
-
-        $out["NOCOMPARE"] = $nocompare;
-        $out["MISMATCH"] = $mismatch;
-        $out["PRE_MATCH"] = $pre_match;
-        $out["MATCH"] = $match;
-        $out["OTHER"] = $other;
-
-        return $out;
     }
 }

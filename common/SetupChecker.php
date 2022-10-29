@@ -21,6 +21,8 @@ class SetupChecker implements BootstrapInterface {
             return new FilterService();
         });
         
+        
+        //Сервис Service
         $container->setSingleton(IndexService::class, [], [Instance::of(FilterService::class)]);
     }
 }
