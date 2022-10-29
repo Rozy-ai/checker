@@ -4,12 +4,8 @@ $(document).ready(function(){
 
 
   $body.on('click','.product-list__product-list-item .slider_close.-in-list',function(){
-    $(this).parents('.product-list__product-list-item').hide();
-  });
-
-  $("#show-all").on("click", function(e) {
-    $('.product-list__product-list-item').show();
-  });
+    $(this).parents('.product-list__product-list-item').remove();
+  })
   
   
   function del_item($this){
@@ -323,7 +319,7 @@ $(document).ready(function(){
     if (!url) return false;
     
     console.log(url);
-
+    
     $.ajax({
       url: url+'&list=1',
       type: "get",
@@ -376,7 +372,7 @@ $(document).ready(function(){
     let height = $('.products__filter-items').height() + $('#w0').height();
     
     if (block.top < height){
-      // console.log( 'go' );
+      console.log( 'go' );
       // -hidden  REMOVE
       $('.navbar__fixed-slider.-hidden').removeClass('-hidden')
       

@@ -74,6 +74,7 @@ window.addEventListener('load', function(){
 
 function statusCheck()
 {
+
     $(".product-list__product-list-item").each(function(index,value){
         let title = $(this).find('.main-item-title').text();
         let mismatch=$(this).find('.mismatch').text();

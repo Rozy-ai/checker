@@ -1,6 +1,7 @@
 
 
 $(function(){
+  console.log('Work script')
   let start_settings = $('.js__settings .js__product.-start-settings');
   console.log(start_settings.data());
   

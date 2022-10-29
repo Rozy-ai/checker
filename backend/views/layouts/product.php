@@ -15,7 +15,8 @@ use yii\web\Session;
 
 ProductAsset::register($this);
 $arrows = $this->params['arrows'];
-$get_ = $this->params['get_'] ?? [];
+$get_ = $this->params['get_']?? [];
+
 
 ?>
 <?php $this->beginPage() ?>
@@ -61,8 +62,8 @@ $get_ = $this->params['get_'] ?? [];
             Comparison::STATUS_MISMATCH => 0,
             Comparison::STATUS_OTHER => 0,
           ];
-
           $item = $this->params['item'];
+
 
           foreach ($item->comparisons as $comparison):
             $statuses [$comparison->status]++;

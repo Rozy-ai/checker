@@ -15,8 +15,7 @@ use backend\models\User;
  *
  * @author koste
  */
-class FilterIndexService 
-{
+class FilterIndexService {
     public $filter_items__profile;
     public $f_items__right_item_show;
     public $f_items__show_n_on_page;
