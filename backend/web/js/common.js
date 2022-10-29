@@ -673,34 +673,42 @@ $(function(){
   let $body = $('body');
   lib.brief_on_hover('.js__p-left, .slider__left-item-img-wrapper-link, .products-list__img-wrapper-link',
     {'offset_left': -170,'offset_top': -50,'arrow_position': 'top'},
-    function($message,$this){
-    let title_ = $this.data("title");
-    if (!title_) title_ = '-';
+
+    function($message, $this) {
+        let title_ = $this.data("title");
+        let categoryTree = $this.data('tree');
+
+        if (!title_) title_ = '-';
+
+        let replace_1 = 'url("';
+        let replace_2 = '")';
+        let img_src = '';
+
+        if ($this.find(".slider__left-item-img").length) {
+          img_src = $this.find(".slider__left-item-img").css('background-image');
+        } else {
+          img_src = $this.find(".products-list__img").css('background-image');
+        }
+
+        if (img_src) {
+          img_src = img_src.replace(replace_1, '');
+          img_src = img_src.replace(replace_2, '');
+        }
   
-    let replace_1 = 'url("';
-    let replace_2 = '")';
-  
-    let img_src = '';
-    if ($this.find(".slider__left-item-img").length){
-      img_src = $this.find(".slider__left-item-img").css('background-image');
-    }else{
-      img_src = $this.find(".products-list__img").css('background-image');
-    }
-    if (img_src){
-      img_src = img_src.replace(replace_1,'');
-      img_src = img_src.replace(replace_2,'');
-    }
-    
-    let title = '<strong>Brand: '+ title_ +'</strong><br>';
-    let description = '<div>'+$this.data("description")+'</div>';
-    if (!img_src) img_src = $this.data('img');
-    let img = '<img style="max-width: 500px; height: auto" src="'+ img_src +'" />';
-    
-    
-    $message.html(title + img);
-    //$message.parents('.BRIEF').css('width', 150);
-    $message.parents('.BRIEF').css('width', 520);
-  });
+        let title = '<span id="zoom-img-category-tree">' + categoryTree + '</span><br><strong>' + title_ + '</strong><br>';
+
+        // let brand = '<strong>Brand' + $this.data('brand') + '</strong><br>';
+        // let title = '<strong>Brand'+ $this.data('brand') +'</strong><br>';
+        let description = '<div>'+$this.data("description")+'</div>';
+        
+        if (!img_src) img_src = $this.data('img');
+        
+        let img = '<img style="max-width: 500px; height: auto" src="'+ img_src +'" />';
+
+        $message.html(title + img);
+        //$message.parents('.BRIEF').css('width', 150);
+        $message.parents('.BRIEF').css('width', 520);
+   });
   
   
   

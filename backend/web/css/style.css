@@ -2093,7 +2093,7 @@ table.tableInfo th {
 }
 .products__products-list td:first-child{
   border-left: 1px solid #f7f7f7;
-  width: 90px;
+  width: 120px;
 }
 .products__products-list td{
   border-right: 1px solid #f7f7f7;
@@ -3642,3 +3642,12 @@ a.a-black {
   top: -8px;
 }
 
+#show-all:hover {
+  color:rgb(55, 61, 66);
+}
+
+#zoom-img-category-tree {
+  font-size: 13px;
+  color: navy;
+  margin-bottom: 5px;
+}
