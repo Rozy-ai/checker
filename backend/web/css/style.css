@@ -1889,7 +1889,7 @@ table.tableInfo th {
 .slider-item__cnt-1 {
   display: block;
   text-align: left;
-  margin-top: 10px;
+  margin-top: 4px;
   padding-left: 6px;
 }
 .cnt-1__stock-n {}
@@ -2093,7 +2093,7 @@ table.tableInfo th {
 }
 .products__products-list td:first-child{
   border-left: 1px solid #f7f7f7;
-  width: 90px;
+  width: 120px;
 }
 .products__products-list td{
   border-right: 1px solid #f7f7f7;
@@ -2101,9 +2101,8 @@ table.tableInfo th {
   vertical-align: middle;
 
 }
-td.products-list__td1{
+.products-list__td1{
   width: 50px;
-  padding: 0.4rem;
 }
 .products-list__td2{
   width: 20%;
@@ -3643,3 +3642,12 @@ a.a-black {
   top: -8px;
 }
 
+#show-all:hover {
+  color:rgb(55, 61, 66);
+}
+
+#zoom-img-category-tree {
+  font-size: 13px;
+  color: navy;
+  margin-bottom: 5px;
+}

@@ -1,30 +1,6 @@
 
 
 $(function(){
-    $.ajaxSetup({
-        error: function(jqXHR, exception) {
-            $('[data-role="content"]').html(jqXHR.responseText);
-            //$('[data-role="content"]').append('<input type="button" value="Press me"/>');
-            //$('[data-role="content"]').trigger('create');
-            if (jqXHR.status === 0) {
-                alert('Нет соединенизая.\n Проверьте ваше подключение к интернету.'); //  не включен инет
-            } else if (jqXHR.status == 404) {
-                alert('Адрес запроса не найден. [404]'); // нет такой страницы
-            } else if (jqXHR.status == 500) {
-                alert('Internal Server Error [500].'); // нет сервера такого
-            } else if (exception === 'parsererror') {
-                alert(jqXHR.responseText);          // ошибка в коде при парсинге
-            } else if (exception === 'timeout') {
-                alert('Истекло время ожидания.'); // недождался ответа
-            } else if (exception === 'abort') {
-                alert('Запрос прервался на стороне сервера.'); // прервался на стороне сервера
-            } else {
-                alert('Не известная ошибка.\n' + jqXHR.responseText); // не знает что это
-            }
-
-        }
-    });
-    
   let start_settings = $('.js__settings .js__product.-start-settings');
   console.log(start_settings.data());
   
@@ -1309,7 +1285,7 @@ $(function(){
   $(window).on('resizeEnd',function(){
     //alert('1')
   });
-  
+ 
   
   
   

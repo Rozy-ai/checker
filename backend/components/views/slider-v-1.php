@@ -99,22 +99,36 @@ $source    = $product->source;
             )
             ?>
 
-            <div class = "slider-item__cnt-1" style = "line-height: 135%; padding: 3px;">
-                <!-- FORK -->
-                <? if ($source->name === 'EBAY'): ?>
-                    <span><span class=" __blue-title">Stock:</span><?=$item->gradeKey?> </span>
-                        
-                    <? if (!empty($options['salesKey'])): ?>
-                        <span><span class=" __blue-title">Sales:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?></span>      
-                    <? endif; ?>
-                <? endif; ?>
 
-                <? if ($source->name === 'CHINA'): ?>
-                    <span><span class=" __blue-title">ROI:</span><?= $item->ROI_Ali; ?></span>
-                <? endif; ?>
-
-                <span><span class=" __blue-title">Price:</span><?= $item->price ?></span>
+            <!-- FORK -->
+            <? if ($source->name === 'EBAY'): ?>
+            <div class="slider-item__cnt-1">
+                <span class="cnt-1__stock-title __blue-title">Stock:</span>
+                <span class="grade cnt-1__stock-n"><?= $item->gradeKey; ?></span>
             </div>
+
+            <? if (!empty($options['salesKey'])): ?>
+            <span class="slider__sales sales">
+                <? if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) !== null): ?>
+                    <span class="__blue-title">Sales:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?>
+                <? else: ?>
+                    <span class="__blue-title">Sales:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?>
+                <? endif; ?>
+            </span>
+            <? endif; ?>
+            <? elseif ($source->name === 'CHINA'): ?>
+            <div class="slider-item__cnt-1">
+                <span class="cnt-1__stock-title __blue-title">ROI:</span>
+                <span class="grade cnt-1__stock-n"><?= $item->ROI_Ali; ?></span>
+            </div>
+            <div class="slider__sales sales" style="margin: 0">
+                <!--<span class="__blue-title">R:</span>--><?= $item->rating; ?>
+            </div>
+            <? endif; ?>
+            <span class="slider__sales sales">
+                <span class="cnt-1__stock-title __blue-title">Price:</span><span class="grade cnt-1__stock-n"><?= $item->price ?></span>
+            </span>
+
             <!-- / FORK -->
 
             <? if (0 && !empty($options['delBtn']) && $options['delBtn'] && $canCompare): ?>

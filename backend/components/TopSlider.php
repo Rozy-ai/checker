@@ -123,7 +123,7 @@ class TopSlider extends Widget
         } else {         
             if ($source->name === 'EBAY'){
                 $footer_right .= $this->getSales($item);
-                $footer_right .= $this->getStock($item);
+                $footer_right .= $this->getStock($item);  
                 $footer_right .=
                     '<span><span class=" __blue-title">Price:</span>'.$item->price.' </span>'.
                     '<span><span class=" __blue-title">Rating:</span>'.$item->rating.' </span>'.
