@@ -13,7 +13,7 @@ use backend\models\User;
  *
  * @author kosten
  */
-class FilterService {
+class Filters {
     public $filter_items__profile;
     public $f_items__right_item_show;       // Не используется
     public $f_items__show_n_on_page;        // Не используется

@@ -4,7 +4,7 @@ namespace common;
 
 use yii\base\BootstrapInterface;
 use yii\di\Instance;
-use backend\services\FilterService;
+use backend\services\Filters;
 use backend\services\IndexService;
 
 /**
@@ -23,6 +23,6 @@ class SetupChecker implements BootstrapInterface {
         
         
         //Сервис Service
-        $container->setSingleton(IndexService::class, [], [Instance::of(FilterService::class)]);
+        $container->setSingleton(IndexService::class, [], [Instance::of(Filters::class)]);
     }
 }

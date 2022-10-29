@@ -31,7 +31,7 @@ use yii\web\Session;
 use yii\web\UrlManager;
 use yii\web\UrlNormalizer;
 use yii\web\UrlRule;
-use backend\services\FilterService;
+use backend\services\Filters;
 use backend\services\IndexService;
 
 
@@ -135,7 +135,7 @@ class ProductController extends Controller{
     $page_n = (int)$this->request->get('page',0);
     
     $no_compare = false;
-    if (User::isAdmin() && !$this->filterService->f_items__comparisons) {
+    if (User::isAdmin() && !$this->indexService->getFilterItemsComparisons()) {
       $no_compare = false;
       $f_items__comparisons = 'YES_NO_OTHER';
       $get_array = Yii::$app->request->get();
@@ -145,7 +145,7 @@ class ProductController extends Controller{
       return $this->redirect(array_merge($get_array,$_url));
     }
     
-    if (!User::isAdmin() && !$this->filterService->f_items__comparisons) {
+    if (!User::isAdmin() && !$this->indexService->getFilterItemsComparisons()) {
       $no_compare = true;
       $f_items__comparisons = 'NOCOMPARE';
       $get_array = Yii::$app->request->get();
@@ -171,9 +171,9 @@ class ProductController extends Controller{
     $where_4_list = $this->indexService->getWhere_4_list();
     $where_6_list = $this->indexService->getWhere_6_list();
 
-    $this->start_import(); // ???
-    
+    //$this->start_import(); // ???    
     $cnt_all = $this->indexService->getCountProducts();
+
     $list = $this->indexService->getProducts();
     $pager = $this->indexService->simple_pager($page_n);
 
@@ -194,7 +194,6 @@ class ProductController extends Controller{
     //$profiles_list = $this->indexService->profiles_list_cnt(); Не понятно
     
     $this->getView()->params['filter_statuses'] = $this->cnt_filter_statuses($this->request->get('filter-items__profile'));
-    
     if ($filterService->f_items__comparisons === 'NOCOMPARE') {
         $no_compare = true;
     }
@@ -224,9 +223,6 @@ class ProductController extends Controller{
       'last_update' => $last_update,
     ]);
   }
-
-
-
 
   /**
    * Get next or prev product
@@ -276,7 +272,7 @@ class ProductController extends Controller{
 
   private function start_import(){
     set_time_limit(60*5);
-    $source_id = $this->source_id;
+    $source_id = $this->source->id;
     $source = Source::get_source((int)$source_id);
     $p_date_in_parser = ImportController::get_max_product_date_in_parser($source);
     // [если дата в source]  меньше  [даты последнего товара(сортировка по дате) в базе парсера] → запускаем импорт

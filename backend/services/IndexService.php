@@ -19,33 +19,33 @@ use common\models\Stats_import_export;
  */
 class IndexService {
 
-    private FilterService $filterService;
+    private Filters $filters;
     
     private Source $source;
-    //private $source_id;
-    //private $source_class;
-    //private $source_table_name;
-    //private $source_table_name_2;
 
     /**
      * 
-     * @param FilterService $filterService - загружается автоматически при первом же вызове и один раз
+     * @param FilterService $filters - загружается автоматически при первом же вызове и один раз
      */
-    public function __construct(FilterService $filterService) {
-        $this->filterService = $filterService;
+    public function __construct(Filters $filters) {
+        $this->filters = $filters;
     }
 
     public function loadParamsToFilters($params) {
-        $this->filterService->filter_items__profile = $params['filter-items__profile'] ?? null;
-        $this->filterService->f_items__right_item_show = $params['filter-items__right-item-show'] ?? null;
-        $this->filterService->f_items__show_n_on_page = $params['filter-items__show_n_on_page'] ?? 10;
-        $this->filterService->f_items__id = $params['filter-items__id'] ?? null;
-        $this->filterService->f_items__comparing_images = $params['filter-items__comparing-images'] ?? null;
-        $this->filterService->f_items__target_image = $params['filter-items__target-image'] ?? null;
-        $this->filterService->f_items__user = $params['filter-items__user'] ?? null;
-        $this->filterService->f_items__comparisons = $params['filter-items__comparisons'] ?? null;
-        $this->filterService->f_items__no_compare = $params['filter-items__no-compare'] ?? null;
+        $this->filters->filter_items__profile = $params['filter-items__profile'] ?? null;
+        $this->filters->f_items__right_item_show = $params['filter-items__right-item-show'] ?? null;
+        $this->filters->f_items__show_n_on_page = $params['filter-items__show_n_on_page'] ?? 10;
+        $this->filters->f_items__id = $params['filter-items__id'] ?? null;
+        $this->filters->f_items__comparing_images = $params['filter-items__comparing-images'] ?? null;
+        $this->filters->f_items__target_image = $params['filter-items__target-image'] ?? null;
+        $this->filters->f_items__user = $params['filter-items__user'] ?? null;
+        $this->filters->f_items__comparisons = $params['filter-items__comparisons'] ?? null;
+        $this->filters->f_items__no_compare = $params['filter-items__no-compare'] ?? null;
         $this->filter_items__sort = $params['filter-items__sort'] ?? null;
+    }
+    
+    public function getFilterItemsComparisons(){
+        return $this->filters->f_items__comparisons;
     }
 
     /**
@@ -125,7 +125,7 @@ class IndexService {
         $source_table_name = $this->source->table_1;
         $source_class = $this->source->class_1;
         
-        $q = $this->source_class::find()
+        $q = $this->source->class_1::find()
                 ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_table_name . '.id ')
                 ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ')
                 ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ');
@@ -136,12 +136,12 @@ class IndexService {
         //    $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
         // }
 
-        $q->andWhere($this->filterService->where_1());                  //Кроме скрытых элементов
+        $q->andWhere($this->filters->where_1());                  //Кроме скрытых элементов
         $q->addGroupBy('`' . $source_table_name . '`.`id`');
         $all = $q->all();
 
         foreach ($all as $a_item) {
-            $c_root = $a_item->info['Categories: Root']; //baseInfo - еще не инициальзированы 
+            $c_root = $a_item->info['Categories: Root']; //baseInfo - еще не инициальзированы
             if (isset($cnt[$c_root])) {
                 $cnt[$c_root]++;
             } else {
@@ -180,7 +180,7 @@ class IndexService {
                     ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_table_name . '.id ')
                     ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ')
                     ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ')
-                    ->where($this->filterService->where_1())
+                    ->where($this->filters->where_1())
                     ->andWhere(['comparisons.user_id' => $user->id]);
 
             $q->addGroupBy('`' . $this->source_table_name . '`.`id`');
@@ -220,7 +220,7 @@ class IndexService {
                 ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ')
                 ->where(['or like', 'comparisons.status', ['MATCH', '%,MATCH,%', 'MATCH,%', '%,MATCH'], false]);
 
-        $q->andWhere($this->where_6('NOCOMPARE', $this->source_id));
+        $q->andWhere($this->filters->where_6('NOCOMPARE', $this->source->id));
         //$q->andWhere( $this->filtersIndex->where_7();
         $q->addGroupBy('`comparisons`.`product_id`');
 
@@ -395,7 +395,7 @@ class IndexService {
 
     public function profiles_list_cnt_2() {
         /* @var $source_class ActiveRecord */
-        $source_class = $this->source_class;
+        $source_class = $this->source->class_1;
         $q0 = $source_class::find()->distinct(true)->select(['profile'])->asArray();
 
         $res_1 = $q0->column();
@@ -441,7 +441,7 @@ class IndexService {
 
     public function cnt_filter_statuses($profile) {
         if ($profile) {
-            $this->filterService->filter_items__profile = $profile;
+            $this->filters->filter_items__profile = $profile;
         }
         /*
           $out['YES_NO_OTHER'] = [
@@ -453,7 +453,7 @@ class IndexService {
         $statuses = Comparison::get_filter_statuses();
 
         foreach ($statuses as $name => $data) {
-            $q_cnt = $this->prepare_record_1($name, $this->filterService->filter_items__profile);
+            $q_cnt = $this->prepare_record_1($name, $this->filters->filter_items__profile);
             $res_cnt = $q_cnt->count();
             $statuses[$name]['cnt'] = $res_cnt;
         }
@@ -467,11 +467,13 @@ class IndexService {
      * @return int
      */
     public function getCountProducts() {
-        if (!$this->source_class || !$this->source_class) {
+        if (!$this->source) {
             throw new \yii\base\InvalidArgumentException();
         }
-        $where = $this->filterService->getAllWheres();
-        $q = $this->source_class::find()->where($where);
+        $where = $this->filters->getAllWheres();
+        $q = $this->source->class_1::find()
+            ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
+            ->where($where);
         return $q->count();
     }
 
@@ -479,11 +481,11 @@ class IndexService {
      * Плучить список продуктов(слева) для вывода, согласно всех фильтров
      */
     public function getProducts() {
-        if (!$this->source_class || !$this->source_class) {
+        if (!$this->source) {
             throw new \yii\base\InvalidArgumentException();
         }
 
-        $where = $this->filterService->getAllWheres();
+        $where = $this->filters->getAllWheres();
         $q = $this->source_class::find()
                 //->select('*') todo: Нужно перечислить только нужные поля для оптимизации
                 ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source_table_name . '.id')
@@ -510,8 +512,8 @@ class IndexService {
         $q->addGroupBy('`' . $this->source_table_name . '`.`id`');
 
         // Рассчитываем нужные для вывода продукты
-        if ($this->filterService->f_items__show_n_on_page !== 'ALL') {
-            $f_items__show_n_on_page = (int) $this->filterService->f_items__show_n_on_page;
+        if ($this->filters->f_items__show_n_on_page !== 'ALL') {
+            $f_items__show_n_on_page = (int) $this->filters->f_items__show_n_on_page;
             $offset = ($page_n - 1) * $f_items__show_n_on_page;
             $q->limit($f_items__show_n_on_page);
         } else {
