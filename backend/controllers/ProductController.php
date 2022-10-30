@@ -175,7 +175,8 @@ class ProductController extends Controller{
     $cnt_all = $this->indexService->getCountProducts();
 
     $list = $this->indexService->getProducts();
-    $pager = $this->indexService->simple_pager($page_n);
+    
+    $pager = $this->indexService->getPager($cnt_all);
 
 
     $this->layout = 'products_list';
@@ -193,7 +194,7 @@ class ProductController extends Controller{
     $profiles_list = $this->indexService->profiles_list_cnt_2();
     //$profiles_list = $this->indexService->profiles_list_cnt(); Не понятно
     
-    $this->getView()->params['filter_statuses'] = $this->cnt_filter_statuses($this->request->get('filter-items__profile'));
+    $this->getView()->params['filter_statuses'] = $this->indexService->cnt_filter_statuses($this->request->get('filter-items__profile'));
     if ($filterService->f_items__comparisons === 'NOCOMPARE') {
         $no_compare = true;
     }
@@ -596,7 +597,7 @@ class ProductController extends Controller{
     };
 
     $profile = $this->request->get('filter-items__profile');
-    $this->getView()->params['filter_statuses'] = $this->cnt_filter_statuses($profile);
+    $this->getView()->params['filter_statuses'] = $this->indexService->cnt_filter_statuses($profile);
 
     $source = Source::get_source($this->source_id);
     $this->getView()->params['breadcrumbs'][] = ['label' => Yii::t('site', 'Products'), 'url' => ['index']];
@@ -1034,14 +1035,7 @@ class ProductController extends Controller{
 
   }
 
-  private function prepare_get_joined($source_class){
-    return $q = $source_class::find()
-      //->select('*')
-      //->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
-      ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-      ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-      ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ');
-  }
+
 
   public function actionGet_products_by_params(){
     \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;

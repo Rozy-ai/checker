@@ -11,6 +11,7 @@ use backend\services\FilterService;
 use backend\models\Source;
 use backend\models\User;
 use common\models\Stats_import_export;
+use common\models\Comparison;
 
 /**
  * Сервис служит для подготовки данных к product/index
@@ -20,8 +21,9 @@ use common\models\Stats_import_export;
 class IndexService {
 
     private Filters $filters;
-    
     private Source $source;
+    private $filter_items__sort = null;
+    private $numberPage = 0;
 
     /**
      * 
@@ -41,10 +43,17 @@ class IndexService {
         $this->filters->f_items__user = $params['filter-items__user'] ?? null;
         $this->filters->f_items__comparisons = $params['filter-items__comparisons'] ?? null;
         $this->filters->f_items__no_compare = $params['filter-items__no-compare'] ?? null;
-        $this->filter_items__sort = $params['filter-items__sort'] ?? null;
+
+        if (isset($params['filter-items__sort'])) {
+            $this->filter_items__sort = $params['filter-items__sort'];
+        }
+
+        if (isset($params['page'])) {
+            $this->numberPage = $params['page'];
+        }
     }
-    
-    public function getFilterItemsComparisons(){
+
+    public function getFilterItemsComparisons() {
         return $this->filters->f_items__comparisons;
     }
 
@@ -74,8 +83,7 @@ class IndexService {
 
         return $this->source->id;
     }
-    
-    
+
     /**
      * Имеет ли данный пользователь доступ к источнику
      * 
@@ -86,11 +94,11 @@ class IndexService {
         if (!$this->source) {
             throw new \yii\base\InvalidArgumentException();
         }
-        
+
         if (!$user_id) {
             $user_id = \Yii::$app->getUser()->id;
         }
-       
+
         $u = User::find()->where(['id' => $user_id])->limit(1)->one();
         $res = $u->user__source_access;
 
@@ -124,13 +132,13 @@ class IndexService {
         $cnt = [];
         $source_table_name = $this->source->table_1;
         $source_class = $this->source->class_1;
-        
+
         $q = $this->source->class_1::find()
                 ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_table_name . '.id ')
                 ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ')
                 ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ');
 
-        // if (0 && $this->source_table_name === 'parser_trademarkia_com'){
+        // if (0 && $this->source->table_1 === 'parser_trademarkia_com'){
         //    $q->andWhere(['like','info','add_info']);
         //    $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
         //    $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
@@ -167,7 +175,7 @@ class IndexService {
         if (!$this->source) {
             throw new \yii\base\InvalidParamException();
         }
-        
+
         $cnt = [];
         $all = User::find()
                 ->where('status > 0')
@@ -183,7 +191,7 @@ class IndexService {
                     ->where($this->filters->where_1())
                     ->andWhere(['comparisons.user_id' => $user->id]);
 
-            $q->addGroupBy('`' . $this->source_table_name . '`.`id`');
+            $q->addGroupBy('`' . $this->source->table_1 . '`.`id`');
             $c = $q->count();
             if (!$c) {
                 $c = 0;
@@ -210,10 +218,10 @@ class IndexService {
         if (!$this->source) {
             throw new \yii\base\InvalidParamException();
         }
-        
+
         $source_table_name = $this->source->table_1;
-        $source_class =  $this->source->class_1;
-        
+        $source_class = $this->source->class_1;
+
         $q = $source_class::find()
                 ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_table_name . '.id ')
                 ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ')
@@ -239,7 +247,7 @@ class IndexService {
                 ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_table_name . '.id ')
                 ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ')
                 ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ');
-        $q->where(['and', ['p_all_compare.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]]);
+        $q->where(['and', ['p_all_compare.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source->id]]]);
 
         if (0 && $source_table_name === 'parser_trademarkia_com') {
             $q->andWhere(['like', 'info', 'add_info']);
@@ -247,7 +255,7 @@ class IndexService {
             $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
         }
 
-        $q->andWhere(['and', ['hidden_items.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]]);
+        $q->andWhere(['and', ['hidden_items.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source->id]]]);
 
         $q->addGroupBy('`' . $source_table_name . '`.`id`');
         $nocompare = $q->count();
@@ -269,14 +277,14 @@ class IndexService {
         //$q = $source_class::find()->distinct(true)->select(['profile'])->asArray();
         /* @var $source_class ActiveRecord */
         $q2 = $source_class::find()
-                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source_table_name . '.id ')
-                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
-                ->innerJoin($this->source_table_name_2, $this->source_table_name_2 . '.`asin` = ' . $this->source_table_name . '.asin')
-                ->where(['and', ['hidden_items.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]])
+                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source->table_1 . '.id ')
+                ->innerJoin($this->source->table_2, $this->source->table_2 . '.`asin` = ' . $this->source->table_1 . '.asin')
+                ->where(['and', ['hidden_items.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source->id]]])
                 ->asArray();
 
-        $q2->select($this->source_table_name . '.id, ' . $this->source_table_name . '.profile')
-                ->groupBy($this->source_table_name . '.id ');
+        $q2->select($this->source->table_1 . '.id, ' . $this->source->table_1 . '.profile')
+                ->groupBy($this->source->table_1 . '.id ');
 
         $q2_load = $q2->all();
         $q2_load_cnt = $q2->count();
@@ -414,22 +422,22 @@ class IndexService {
         $profiles_uniq = $find_uniq($res_1);
 
         $q2 = $source_class::find()
-                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source_table_name . '.id ')
-                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
-                ->innerJoin($this->source_table_name_2, $this->source_table_name_2 . '.`asin` = ' . $this->source_table_name . '.asin')
-                ->where(['and', ['hidden_items.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]]);
+                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source->table_1 . '.id ')
+                ->innerJoin($this->source->table_2, $this->source->table_2 . '.`asin` = ' . $this->source->table_1 . '.asin')
+                ->where(['and', ['hidden_items.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source->id]]]);
 
         $q2->asArray();
 
-        $q2->select($this->source_table_name . '.id, ' . $this->source_table_name . '.profile')
-                ->groupBy($this->source_table_name . '.id ');
+        $q2->select($this->source->table_1 . '.id, ' . $this->source->table_1 . '.profile')
+                ->groupBy($this->source->table_1 . '.id ');
 
         $list_out = [];
         //$q2_load = $q2->all();
         $q2_load_cnt = $q2->count();
         foreach ($profiles_uniq as $p_name) {
             $q2_tmp = clone $q2;
-            $q2_tmp->andWhere(['like', $this->source_table_name . '.`profile`', $p_name]);
+            $q2_tmp->andWhere(['like', $this->source->table_1 . '.`profile`', $p_name]);
             $list_out[$p_name] = $p_name . ' (' . $q2_tmp->count() . ')';
         }
 
@@ -478,7 +486,7 @@ class IndexService {
                 ->leftJoin('p_updated', 'p_updated.p_id = ' . $this->source->table_1 . '.id ')
                 ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source->table_1 . '.id ')
                 ->leftJoin('messages', 'messages.id = comparisons.messages_id')
-            ->where($where);
+                ->where($where);
         return $q->count();
     }
 
@@ -503,23 +511,23 @@ class IndexService {
         $q->innerJoin($this->source->table_2, $this->source->table_2 . '.`asin` = ' . $this->source->table_1 . '.asin');
 
         switch ($this->filter_items__sort) {
-            case 'created_ASC': $q->orderBy($this->source_table_name . '.date_add ASC');
+            case 'created_ASC': $q->orderBy($this->source->table_1 . '.date_add ASC');
                 break;
-            case 'created_DESC': $q->orderBy($this->source_table_name . '.date_add DESC');
+            case 'created_DESC': $q->orderBy($this->source->table1 . '.date_add DESC');
                 break;
             case 'updated_ASC' : $q->orderBy('p_updated.date ASC');
                 break;
             case 'updated_DESC' :$q->orderBy('p_updated.date DESC');
                 break;
-            default: $q->orderBy($this->source_table_name . '.id');
+            default: $q->orderBy($this->source->table_1 . '.id');
         }
 
-        $q->addGroupBy('`' . $this->source_table_name . '`.`id`');
+        $q->addGroupBy('`' . $this->source->table_1 . '`.`id`');
 
         // Рассчитываем нужные для вывода продукты
         if ($this->filters->f_items__show_n_on_page !== 'ALL') {
             $f_items__show_n_on_page = (int) $this->filters->f_items__show_n_on_page;
-            $offset = ($page_n - 1) * $f_items__show_n_on_page;
+            $offset = ($this->numberPage - 1) * $f_items__show_n_on_page;
             $q->limit($f_items__show_n_on_page);
         } else {
             $offset = 0;
@@ -527,35 +535,19 @@ class IndexService {
         $q->offset($offset);
 
         //Получаем нужные продукты (список слева)
-        $list =  $q->all();
-        
+        $list = $q->all();
+
         // В каждый эленент добавляется дополнительна информация
         $cnt_all_right = 0;
-        foreach ($list as $k => $product){
-            $product->source_id = $this->source_id;
+        foreach ($list as $k => $product) {
+            $product->source_id = $this->source->id;
             //$product->baseInfo = $product->info; // Нужно для фкцированного поля baseInfo. Поле $product->info может быть другим в зависимости от парсера 
             //$product->initAddInfo();
 
             $items = $product->addInfo;
             $cnt_all_right += count($items);
         }
-        }
-
-    public function getPager($page_n) {
-        $pages_cnt = 1;
-        // если 8.3 → 9
-        if ($this->f_items__show_n_on_page !== 'ALL' && $f_items__show_n_on_page) {
-            $pages_cnt = $cnt_all / $f_items__show_n_on_page;
-            $on_page_str = ($offset + 1) . ' ─ ' . $f_items__show_n_on_page;
-            $parse = explode('.', $pages_cnt . '');
-            if (isset($parse[1]) && (int) $parse[1] > 0) {
-                $pages_cnt = $parse[0] + 1;
-            }
-        } else {
-            $on_page_str = ($offset + 1) . ' ─ ' . $cnt_all;
-        }
-
-        return $this->simple_pager($pages_cnt, $page_n, 5);
+        return $list;
     }
 
     public function get_last_local_import() {
@@ -572,32 +564,32 @@ class IndexService {
      */
     private function prepare_record_1($comparison, $profile) {
         /* @var $source_class yii\db\ActiveRecord */
-        $source_class = $this->source_class;
+        $source_class = $this->source->class_1;
 
         $q = $this->prepare_get_joined($source_class);
 
-        //->where(['<=>','hidden_items.source_id', $this->source_id])
-        //->where('comparisons_aggregated.source_id = '.(int)$this->source_id );
+        //->where(['<=>','hidden_items.source_id', $this->source->id])
+        //->where('comparisons_aggregated.source_id = '.(int)$this->source->id );
 
 
-        if (0 && $this->source_table_name === 'parser_trademarkia_com') {
+        if (0 && $this->source->table_1 === 'parser_trademarkia_com') {
             $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
             $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
         } else {
-            $q->innerJoin($this->source_table_name_2, $this->source_table_name_2 . '.`asin` = ' . $this->source_table_name . '.asin');
+            $q->innerJoin($this->source->table_2, $this->source->table_2 . '.`asin` = ' . $this->source->table_1 . '.asin');
         }
 
-        $q->addGroupBy('`' . $this->source_table_name . '`.`id`');
+        $q->addGroupBy('`' . $this->source->table_1 . '`.`id`');
 
         $where_0 = [];
-        if (0 && $this->source_table_name === 'parser_trademarkia_com') {
+        if (0 && $this->source->table_1 === 'parser_trademarkia_com') {
             $where_0 = ['like', 'info', 'add_info'];
         }
 
         $where_2 = [];
         $where_3 = ['and',
             ['hidden_items.p_id' => null],
-            ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]],
+            ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source->id]],
         ];  // $item_1__ignore_red = 1
 
 
@@ -618,7 +610,7 @@ class IndexService {
              */
             $where_2 = ['and', "`comparisons`.`status` IS NOT NULL AND comparisons.`status` <> 'MISMATCH'"];
         } elseif ($comparison === 'NOCOMPARE') {
-            $where_2 = ['and', ['p_all_compare.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]];
+            $where_2 = ['and', ['p_all_compare.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source->id]]];
         } else {
             $where_2 = ['`comparisons`.`status`' => $comparison];
         }
@@ -626,7 +618,7 @@ class IndexService {
         $where = ['and', $where_0, $where_2, $where_3];
 
         if ($profile && $profile !== '{{all}}' && $profile !== 'Все') {
-            $q->andWhere(['like', $this->source_table_name . '.`profile`', $profile]);
+            $q->andWhere(['like', $this->source->table_1 . '.`profile`', $profile]);
         }
 
         $q->andWhere($where);
@@ -637,6 +629,13 @@ class IndexService {
 //    exit;
 
         return $q;
+    }
+
+    public function getPager(int $countProducts) {
+        $pages_cnt = ($this->filters->f_items__show_n_on_page !== 'ALL') ?
+                ceil($countProducts / (int) $this->filters->f_items__show_n_on_page) : 1;
+
+        return $this->simple_pager($pages_cnt, $this->numberPage);
     }
 
     private function simple_pager($pages_cnt, $page_n, $left_right_n = 3) {
@@ -685,6 +684,15 @@ class IndexService {
         $pager['in'] = ['pages_cnt' => $pages_cnt, 'left_right_n' => $left_right_n];
 
         return $pager;
+    }
+
+    private function prepare_get_joined($source_class) {
+        return $q = $source_class::find()
+                //->select('*')
+                //->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
+                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source->table_1 . '.id ')
+                ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source->table_1 . '.id ');
     }
 
 }
