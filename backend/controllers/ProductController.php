@@ -31,7 +31,8 @@ use yii\web\Session;
 use yii\web\UrlManager;
 use yii\web\UrlNormalizer;
 use yii\web\UrlRule;
-use backend\services\FilterIndexService;
+use backend\services\Filters;
+use backend\services\IndexService;
 
 
 /**
@@ -112,12 +113,15 @@ class ProductController extends Controller{
 
   }
 
-  public function set_source($source_id = false){
-
-    if (!$source_id){
-      $source_id = $this->request->get('filter-items__source', false);
-      if (!$source_id) $source_id = $this->request->get('source_id', false);
-      if (!$source_id) $source_id = $this->request->post('source_id', false);
+    /**
+     * @inheritdoc
+     * @param IndexService $indexService
+     */
+    public function __construct($id, $module,
+            IndexService $indexService,
+            array $config = []) {
+        parent::__construct($id, $module, $config);
+        $this->indexService = $indexService;
     }
     if ($source_id === false){
 /*
@@ -152,26 +156,12 @@ class ProductController extends Controller{
 
   public function actionIndex(){
     ini_set("memory_limit", "3024M");
-    
-    $filterService = new FilterIndexService();
-    $filterService->filter_items__profile = $this->request->get('filter-items__profile');
-    $filterService->f_items__right_item_show = $this->request->get('filter-items__right-item-show');
-    $filterService->f_items__show_n_on_page = $this->request->get('filter-items__show_n_on_page',10);
-    $filterService->f_items__id = $this->request->get('filter-items__id');
-    $filterService->f_items__comparing_images = $this->request->get('filter-items__comparing-images');
-    $filterService->f_items__target_image = $this->request->get('filter-items__target-image');
-    $filterService->f_items__user = $this->request->get('filter-items__user');
-    $filterService->f_items__comparisons = $this->request->get('filter-items__comparisons'); // ! new
-    $filterService->f_items__no_compare = $this->request->get('filter-items__no-compare');
-    
-    $filterService->source_id           = $this->source_id; //устанавливается в controller::beforeAction()
-    $filterService->source_class        = $this->source_class;
-    $filterService->source_table_name   = $this->source_table_name;
 
+    $this->indexService->loadParamsToFilters( \Yii::$app->request->getQueryParams() );
     $page_n = (int)$this->request->get('page',0);
+    
     $no_compare = false;
-
-    if (User::isAdmin() && !$filterService->f_items__comparisons) {
+    if (User::isAdmin() && !$this->indexService->getFilterItemsComparisons()) {
       $no_compare = false;
       $f_items__comparisons = 'YES_NO_OTHER';
       $get_array = Yii::$app->request->get();
@@ -181,7 +171,7 @@ class ProductController extends Controller{
       return $this->redirect(array_merge($get_array,$_url));
     }
     
-    if (!User::isAdmin() && !$filterService->f_items__comparisons) {
+    if (!User::isAdmin() && !$this->indexService->getFilterItemsComparisons()) {
       $no_compare = true;
       $f_items__comparisons = 'NOCOMPARE';
       $get_array = Yii::$app->request->get();
@@ -202,105 +192,41 @@ class ProductController extends Controller{
     if ($page_n === 0) return $this->redirect($res_url);
 
     $on_page_str = null;
+    
+    $where_3_list = $this->indexService->getWhere_3_list();
+    $where_4_list = $this->indexService->getWhere_4_list();
+    $where_6_list = $this->indexService->getWhere_6_list();
 
-    $where_3_list = $filterService->getWhere_3_list();
-    $where_4_list = $filterService->getWhere_4_list();
-    $where_6_list = $filterService->getWhere_6_list();
-    
-    $where = $filterService->getAllWheres();
-    
-    // source_class = "Parser_trademarkia_com extends Product"
-    $q = $this->source_class::find()
-          //->select('*')
-          ->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
-          ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('p_updated','p_updated.p_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
-          ->leftJoin('messages','messages.id = comparisons.messages_id')
-          ->where($where);
-    
-    $q->innerJoin($this->source_table_name_2,$this->source_table_name_2.'.`asin` = '.$this->source_table_name.'.asin');
-    
-    $sort = $this->request->get('filter-items__sort');
-    if ($sort){
-      if( $sort === 'created_ASC' ) $q->orderBy($this->source_table_name.'.date_add ASC');
-      elseif ( $sort === 'created_DESC' ) $q->orderBy($this->source_table_name.'.date_add DESC');
-      elseif ( $sort === 'updated_ASC' ) $q->orderBy('p_updated.date ASC');
-      elseif ( $sort === 'updated_DESC' ) $q->orderBy('p_updated.date DESC');
-      else $q->orderBy($this->source_table_name.'.id');
-    }else{
-      $q->orderBy($this->source_table_name.'.id');
-    }
-    $q->addGroupBy('`'.$this->source_table_name.'`.`id`');
+    //$this->start_import(); // ???    
+    $cnt_all = $this->indexService->getCountProducts();
 
-    $this->start_import(); // ???
+    $list = $this->indexService->getProducts();
     
-    $x = $this->source_class::find(['id'=>0])->one(); // Эксперимент. Если вначале тустить легкий запрос, то следущий будет быстрее
-    //Запрос, чтобы уздать количество записей
-    $cnt_all = $q->count();
-
-    // Рассчитываем нужные для вывода продукты
-    if ($filterService->f_items__show_n_on_page !== 'ALL'){
-      $f_items__show_n_on_page = (int)$filterService->f_items__show_n_on_page;
-      $offset = ($page_n-1) * $f_items__show_n_on_page;
-      $q->limit($f_items__show_n_on_page);
-    }else{
-      $offset = 0;
-    }
-    $q->offset($offset);
-
-    //Получаем нужные продукты (список слева)
-    $list =    $q->all(); //AfrerFind добавляем информацию в каждый продукт
-    
-    
-    $pages_cnt = 1;
-    // если 8.3 → 9
-    if ($f_items__show_n_on_page !== 'ALL') {
-        $pages_cnt = $cnt_all / $f_items__show_n_on_page;
-        $on_page_str = ($offset+1) . ' ─ ' . $f_items__show_n_on_page;
-        $parse = explode('.',$pages_cnt.'');
-        if (isset($parse[1]) && (int)$parse[1] > 0){
-          $pages_cnt = $parse[0] + 1;
-        }
-    }else{
-        $on_page_str = ($offset+1) . ' ─ ' . $cnt_all;
-    }
-
-    $pager = $this->simple_pager($pages_cnt,$page_n,5);
+    $pager = $this->indexService->getPager($cnt_all);
 
 
     $this->layout = 'products_list';
-    $searchModel = new ProductSearch();
-    $params = $this->request->queryParams;
-    $data = &$params[$searchModel->formName()];
-    if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) === null && empty($data['user'])) {
-      $params ['user'] = \Yii::$app->user->identity->username;
-      $params ['unprocessed'] = true;
-    }
+    
+    //$searchModel = new ProductSearch();
+    //$params = $this->request->queryParams;
+    //$data = &$params[$searchModel->formName()];
+    
+    //if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) === null && empty($data['user'])) {
+    //  $params ['user'] = \Yii::$app->user->identity->username;
+    //  $params ['unprocessed'] = true;
+    //}
     //$dataProvider = $searchModel->search($params);
 
-    $profiles_list = $this->profiles_list_cnt_2();
-    //$profiles_list = $this->profiles_list_cnt();
-    $this->getView()->params['filter_statuses'] = $this->cnt_filter_statuses($this->request->get('filter-items__profile'));
-
+    $profiles_list = $this->indexService->profiles_list_cnt_2();
+    //$profiles_list = $this->indexService->profiles_list_cnt(); Не понятно
+    
+    $this->getView()->params['filter_statuses'] = $this->indexService->cnt_filter_statuses($this->request->get('filter-items__profile'));
     if ($filterService->f_items__comparisons === 'NOCOMPARE') {
         $no_compare = true;
     }
     
-    $last_update = $this->get_last_local_import();
+    $last_update = $this->indexService->get_last_local_import();
     
-    // В каждый эленент добавляется дополнительна информация
-    $cnt_all_right = 0;
-    foreach ($list as $k => $product){
-        $product->source_id = $this->source_id;
-        //$product->baseInfo = $product->info; // Нужно для фкцированного поля baseInfo. Поле $product->info может быть другим в зависимости от парсера 
-        //$product->initAddInfo();
-        
-        $items = $product->addInfo;
-        $cnt_all_right += count($items);
-    }
-
     return $this->render('index', [
       'get_' => $this->request->get(),
       'searchModel' => $searchModel,
@@ -324,194 +250,6 @@ class ProductController extends Controller{
       'last_update' => $last_update,
     ]);
   }
-
-  public function profiles_list_cnt(){
-    $source_class = $this->source_class;
-    //$q = $source_class::find()->distinct(true)->select(['profile'])->asArray();
-    /* @var $source_class ActiveRecord */
-    $q2 = $source_class::find()
-
-      ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-      ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-      ->innerJoin($this->source_table_name_2,$this->source_table_name_2.'.`asin` = '.$this->source_table_name.'.asin')
-
-      ->where(['and',['hidden_items.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]])
-
-      ->asArray();
-
-    $q2->select($this->source_table_name.'.id, ' . $this->source_table_name.'.profile' )
-        ->groupBy($this->source_table_name.'.id ');
-
-    $q2_load = $q2->all();
-    $q2_load_cnt = $q2->count();
-
-    $res_handler = function($data){
-      // нужно отдать
-      //
-      // array
-      //    [profile] => General
-      //    [cnt] => 267
-      // array
-      //    [profile] => Prepod_
-      //    [cnt] => 1
-
-      $out_1 = [];
-
-      foreach ($data as $item){
-        if (!isset($out_1[$item['profile']])) $out_1[$item['profile']] = 0;
-        $out_1[$item['profile']] += 1;
-      }
-
-      $out_2 = [];
-
-      foreach ($out_1 as $k => $v){
-        $arr['profile'] = $k;
-        $arr['cnt'] = $v;
-        $out_2[] = $arr;
-      }
-
-      return $out_2;
-
-    };
-
-    $q2_res = $res_handler($q2_load);
-
-
-    //$cnt_all = $q1->one()['cnt'] ?? 0;
-    // $q2_res = $q2->all();
-/*
-     [0] => Array
-        (
-            [profile] => General
-            [cnt] => 267
-        )
-
-    [1] => Array
-        (
-            [profile] => Prepod_
-            [cnt] => 1
-        )
-
-    [2] => Array
-        (
-            [profile] => General_2
-            [cnt] => 23
-        )
-
-    [3] => Array
-        (
-            [profile] => Prepod
-            [cnt] => 41
-        )
- *
- * */
-
-    $profile_list = [];
-
-    if ($q2_res)
-    foreach ($q2_res as $item){
-      //$item = strtolower($item);
-      $e_items = explode(',', $item['profile']);
-      $profile_list['cnt'][$item['profile']] = $item['cnt'];
-
-      foreach ($e_items as $e_item){
-        $e_item = trim($e_item);
-        $profile_list[$e_item] = $e_item;
-
-        if (count($e_items) > 1) $profile_list['cnt'][$e_item] += $item['cnt'];
-      }
-    }
-
-    // это если считать каждое значение в товаре например и  General + Prepod_ + General_2 даже если они в одном товаре
-    $all = function($profile_list){
-      $out = 0;
-      foreach ($profile_list as $k => $item) {
-        if ($k === 'cnt') continue;
-        $out += $profile_list['cnt'][$item];
-      }
-      return $out;
-    };
-
-
-    $concat_cnt_to_list = function($profile_list){
-      $out = [];
-      foreach ($profile_list as $k => $item) {
-        if ($k === 'cnt') continue;
-        $out[$k] = $item . ' (' . $profile_list['cnt'][$k]  . ')';
-      }
-      return $out;
-    };
-
-    $list_out = $concat_cnt_to_list($profile_list);
-
-    $all_cnt = $all($profile_list);
-    // !!!! что считать если один товар содержит 3 значения то товар же один ... дак выводить цифру 1 или 3
-    $a['{{all}}'] = 'Все ('.$q2_load_cnt.')';
-
-    return array_merge($a,$list_out);
-  }
-
-  public function profiles_list_cnt_2(){
-    /* @var $source_class ActiveRecord */
-    $source_class = $this->source_class;
-    $q0 = $source_class::find()->distinct(true)->select(['profile'])->asArray();
-
-    $res_1 = $q0->column();
-
-    $find_uniq = function($data){
-      $out = [];
-      foreach ($data as $k => $item){
-        $a = explode(',',$item);
-        foreach ($a as $value){
-          $out[$value] = $value;
-        }
-      }
-      return $out;
-    };
-
-    $profiles_uniq = $find_uniq($res_1);
-
-    $q2 = $source_class::find()
-
-      ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-      ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-      ->innerJoin($this->source_table_name_2,$this->source_table_name_2.'.`asin` = '.$this->source_table_name.'.asin')
-
-      ->where(['and',['hidden_items.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]]);
-
-    $q2 ->asArray();
-
-    $q2->select($this->source_table_name.'.id, ' . $this->source_table_name.'.profile' )
-        ->groupBy($this->source_table_name.'.id ');
-
-    $list_out = [];
-    //$q2_load = $q2->all();
-    $q2_load_cnt = $q2->count();
-    foreach ($profiles_uniq as $p_name){
-      $q2_tmp = clone $q2;
-      $q2_tmp ->andWhere(['like', $this->source_table_name.'.`profile`', $p_name]);
-      $list_out[$p_name] =  $p_name.' ('.$q2_tmp->count().')';
-    }
-
-    // !!!! что считать если один товар содержит 3 значения то товар же один ... дак выводить цифру 1 или 3
-    $a['{{all}}'] = 'Все ('.$q2_load_cnt.')';
-
-
-    return array_merge($a,$list_out);
-  }
-
-
-
-  public function get_last_local_import(){
-
-    $s_import = Stats_import_export::find();
-    $s_import->where(['type' => 'IMPORT']);
-    $s_import->orderBy(['created' => SORT_DESC]);
-    $s_import->limit(1);
-    return $s_import->one();
-
-  }
-
 
   /**
    * Get next or prev product
@@ -561,7 +299,7 @@ class ProductController extends Controller{
 
   private function start_import(){
     set_time_limit(60*5);
-    $source_id = $this->source_id;
+    $source_id = $this->source->id;
     $source = Source::get_source((int)$source_id);
     $p_date_in_parser = ImportController::get_max_product_date_in_parser($source);
     // [если дата в source]  меньше  [даты последнего товара(сортировка по дате) в базе парсера] → запускаем импорт
@@ -572,9 +310,21 @@ class ProductController extends Controller{
   }
 
   public function beforeAction($action){
+      
+    $filter_source_id = $this->request->get('filter-items__source', false);
+    if (!$filter_source_id) {
+        $filter_source_id = $this->request->get('source_id', false);
+    }
+    if (!$filter_source_id) {
+        $filter_source_id = $this->request->post('source_id', false);
+    }
 
-    $this->set_source();
-    if ($this->is_source_access() === false){
+    $source_id = $this->indexService->set_source($filter_source_id);
+    if (!$source_id) {
+        $url[] = $_SERVER['REDIRECT_URL'];
+        $get_ = $this->request->get();
+        $get_['filter-items__source'] = 1;
+        $get_['source_id'] = 1;
 
       $user_id = \Yii::$app->getUser()->id;
 
@@ -875,7 +625,7 @@ class ProductController extends Controller{
     };
 
     $profile = $this->request->get('filter-items__profile');
-    $this->getView()->params['filter_statuses'] = $this->cnt_filter_statuses($profile);
+    $this->getView()->params['filter_statuses'] = $this->indexService->cnt_filter_statuses($profile);
 
     $source = Source::get_source($this->source_id);
     $this->getView()->params['breadcrumbs'][] = ['label' => Yii::t('site', 'Products'), 'url' => ['index']];
@@ -897,25 +647,6 @@ class ProductController extends Controller{
       'source_id' => $this->source_id,
 
     ]);
-  }
-
-  private function cnt_filter_statuses($profile){
-    /*
-    $out['YES_NO_OTHER'] = [
-      'hex_color' => '',
-      'name' => 'Result',
-      'name_2' => 'Все отмеченные',
-    ];
-    */
-    $statuses = Comparison::get_filter_statuses();
-
-    foreach ($statuses as $name => $data){
-      $q_cnt =  $this->prepare_record_1($name,$profile);
-      $res_cnt = $q_cnt->count();
-      $statuses[$name]['cnt'] = $res_cnt;
-    }
-
-    return $statuses;
   }
 
   public function actionResult($id){
@@ -1330,94 +1061,6 @@ class ProductController extends Controller{
 
 
 
-  }
-
-  private function prepare_get_joined($source_class){
-    return $q = $source_class::find()
-      //->select('*')
-      //->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
-      ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-      ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-      ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ');
-  }
-
-
-  /**
-   * @param $comparison
-   * @return \yii\db\ActiveQuery
-   */
-  private function prepare_record_1($comparison,$profile){
-    /* @var $source_class yii\db\ActiveRecord */
-    $source_class = $this->source_class;
-
-    $q = $this->prepare_get_joined($source_class);
-
-    //->where(['<=>','hidden_items.source_id', $this->source_id])
-    //->where('comparisons_aggregated.source_id = '.(int)$this->source_id );
-
-
-    if (0 && $this->source_table_name === 'parser_trademarkia_com') {
-      $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
-      $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
-    }else{
-      $q->innerJoin($this->source_table_name_2,$this->source_table_name_2.'.`asin` = '.$this->source_table_name.'.asin');
-    }
-
-    $q->addGroupBy('`'.$this->source_table_name.'`.`id`');
-
-
-    $where_0 = [];
-    if (0 && $this->source_table_name === 'parser_trademarkia_com') {
-      $where_0 = ['like','info','add_info'];
-    }
-
-    $where_2 = [];
-    $where_3 = ['and',
-      ['hidden_items.p_id' => null],
-      ['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]],
-    ];  // $item_1__ignore_red = 1
-
-
-    if ($comparison === 'ALL'){
-
-    }elseif($comparison === 'ALL_WITH_NOT_FOUND'){
-
-      $where_3 = [];
-
-    }elseif($comparison === 'YES_NO_OTHER'){
-      /*
-      $where_2 =
-      [ 'OR' ,
-        ['`comparisons`.`status`' => 'MATCH'],
-        ['`comparisons`.`status`' => 'MISMATCH'],
-        ['`comparisons`.`status`' => 'OTHER'],
-        ['`comparisons`.`status`' => 'PRE_MATCH'],
-      ];
-      */
-      $where_2 = ['and', "`comparisons`.`status` IS NOT NULL AND comparisons.`status` <> 'MISMATCH'"];
-
-    }elseif ($comparison === 'NOCOMPARE'){
-      $where_2 = ['and',['p_all_compare.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]];
-    }else{
-      $where_2 = [ '`comparisons`.`status`' => $comparison ];
-    }
-
-    $where = ['and',  $where_0, $where_2, $where_3];
-
-
-
-    if ($profile && $profile !== '{{all}}' && $profile !== 'Все'){
-      $q ->andWhere(['like', $this->source_table_name.'.`profile`', $profile]);
-    }
-
-    $q ->andWhere($where);
-
-//    echo '<pre>'.PHP_EOL;
-//    print_r($q->createCommand()->getRawSql());
-//    echo PHP_EOL;
-//    exit;
-
-    return $q;
   }
 
 
