@@ -30,7 +30,7 @@ $cnt = 1;
 $variables_left = $this->context->getVariablesLeft($product);
 
 $source     = $product->source;
-$source_id  = $product->source_id;
+$source_id  = $product->source->id;
 ?>
 
 <? if (User::is_detail_view_for_items() || $is_admin = User::isAdmin()):?>
@@ -43,7 +43,7 @@ $source_id  = $product->source_id;
         
 <!-- VIEW 2 -->
 <div class='slider__view-2 [ SLIDER ] product-view__slider'  >
-    <? foreach ($items as $index => $item): ?>
+    <?php foreach ($items as $index => $item): ?>
         <?php
             if ($get_['filter-items__comparisons'] !== 'ALL'){
                 if ( ($no_compare && isset($comparisons[$index])) ){
@@ -193,5 +193,5 @@ $source_id  = $product->source_id;
                 </div>
             </div>
         </div>
-    <? endforeach;?>
+    <?php endforeach;?>
 </div>

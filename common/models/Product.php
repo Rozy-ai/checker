@@ -32,22 +32,31 @@ class Product extends \yii\db\ActiveRecord{
     protected $_baseInfo = [];
     protected $_addInfo = [];
     protected $_source;
-    protected $_source_id;
-
-    public function setSource_id($value) {
-        $this->_source_id = $value;
+    
+    public function getBaseInfo(){
+        if (!$this->_baseInfo && $this->info) {
+            $this->_baseInfo = $this->info;
+        }
+        return $this->_baseInfo;
     }
 
     public function setBaseInfo($base_info) {
         $this->_baseInfo = $base_info;
     }
+    
+    public function getAddInfo(){
+        if (!$this->_addInfo) {
+            $this->initAddInfo();
+        }
+        return $this->_addInfo;
+    }
 
     public function getSource() {
         return $this->_source ?? $this->_source = Source::findOne(['table_1' => str_replace('common\models\\', '', strtolower(get_called_class()))]);
     }
-
-    public function getSource_id() {
-        return $this->_source_id;
+    
+    public function setSource(Source $source){
+        $this->_source = $source;
     }
 
     /**
@@ -160,7 +169,7 @@ class Product extends \yii\db\ActiveRecord{
      */
     public function getComparisons() {
         return $this->hasMany(Comparison::className(), ['product_id' => 'id'])
-                        ->where(['source_id' => $this->source_id])
+                        ->where(['source_id' => $this->source->id])
                         ->indexBy('node');
     }
 
@@ -170,31 +179,20 @@ class Product extends \yii\db\ActiveRecord{
      * @return \yii\db\ActiveQuery
      */
     public function getAggregated() {
-        return $this->hasOne(Comparison\Aggregated::className(), ['product_id' => 'id'])->where(['source_id' => $this->source_id]);
+        return $this->hasOne(Comparison\Aggregated::className(), ['product_id' => 'id'])->where(['source_id' => $this->source->id]);
     }
 
     public function getUpdated() {
-        return $this->hasOne(P_updated::class, ['p_id' => 'id'])->where(['source_id' => $this->source_id]);
+        return $this->hasOne(P_updated::class, ['p_id' => 'id'])->where(['source_id' => $this->source->id]);
     }
 
     public function getUser_visible(){
         return $this->hasOne(P_user_visible::class, ['p_id' => 'id']);
     }
 
-    public function getBaseInfo()
-    {
-        if (!$this->_baseInfo && $this->info) {
-            $this->_baseInfo = $this->info;
-        }
-        return $this->_baseInfo;
-    }
 
-  public function getAddInfo(){
-        if (!$this->_addInfo) {
-            $this->initAddInfo();
-        }
-        return $this->_addInfo;
-    }
+
+
 
 
     /**
@@ -278,9 +276,9 @@ class Product extends \yii\db\ActiveRecord{
     }
 
     public function addition_info_for_price() {
-        $source_id = $this->source_id;
+        $source_id = $this->source->id;
 
-        $keys = Settings__fields_extend_price::find()->where(['source_id' => $source_id])
+        $keys = Settings__fields_extend_price::find()->where(['source_id' => $source->id])
                         ->orderBy(['default' => SORT_DESC])->all();
 
         $b = $this->baseInfo;

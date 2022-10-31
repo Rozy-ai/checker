@@ -274,11 +274,11 @@ $this->params['breadcrumbs'][] = $this->title;
       <? //if(!$item->addInfo) continue; ?>
 
       <?
-      $images_left = preg_split("/[; ]/", $item->baseInfo["Image"]);
+        $images_left = preg_split("/[; ]/", $item->baseInfo["Image"]);
 
-      $images_left[0];
-      $images_left["Title"];
-      $source_id = $item->source_id;
+        $images_left[0];
+        $images_left["Title"];
+        $source_id = $item->source->id;
       ?>
     <!-- ITEM -->
     <tr

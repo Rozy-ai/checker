@@ -29,7 +29,7 @@ $cnt = 1;
 
 $variables_left = $this->context->getVariablesLeft($product);
 
-$source_id = $product->source_id;
+$source_id = $product->source->id;
 $source    = $product->source;
 ?>
 
@@ -44,9 +44,11 @@ $source    = $product->source;
  
 <!-- VIEW 1 -->
 <div class='slider__view-1 <?= $options['class'] ?> [ SLIDER ] product-view__slider'>
-    <? foreach ($items as $index => $item): ?>
+    <?php 
+        foreach ($items as $index => $item): 
+    ?>
 
-    <?
+    <?php
         // Проверка фильтров
         if ($get_['filter-items__comparisons'] !== 'ALL' &&
             $get_['filter-items__comparisons'] !== 'ALL_WITH_NOT_FOUND' &&
@@ -188,5 +190,5 @@ $source    = $product->source;
            class="[ PAGE-N ]  slider__page-n <?= $page === $index ? '-current' : '' ?>"><?= $index + 1 ?><?//=$cnt?></a>
 
     </div>
-    <? $cnt++; endforeach; ?>
+    <?php $cnt++; endforeach; ?>
 </div>
