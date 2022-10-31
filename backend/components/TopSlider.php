@@ -34,7 +34,7 @@ class TopSlider extends Widget
       $return = [];
       $pid =$this->product->id;
 
-      $res = Comparison::find()->where(['product_id' => $this->product->id, 'status' => 'MISMATCH','source_id'=> $this->product->source_id])->all();
+      $res = Comparison::find()->where(['product_id' => $this->product->id, 'status' => 'MISMATCH','source_id'=> $this->product->source->id])->all();
 
       $out = [];
       if ($res){
@@ -172,14 +172,13 @@ class TopSlider extends Widget
 
 
       if ($this->hide_red && $this->get_['filter-items__comparisons'] !== 'MISMATCH' && $this->get_['filter-items__comparisons'] !== 'ALL' && $this->get_['filter-items__comparisons'] !== 'ALL_WITH_NOT_FOUND')
-        $items = $this->hide_red($this->product->getAddInfo());
+        $items = $this->hide_red($this->product->addInfo);
       else
-        $items = $this->product->getAddInfo();
+        $items = $this->product->addInfo;
       
       return $this->render( ($this->right_item_show)? 'slider-v-2': 'slider-v-1', [
         'items' => $items,
         'no_compare' => $this->no_compare,
-        //'items' => $this->product->getAddInfo(),
         'comparisons' => $this->product->comparisons,
         'product' => $this->product,
         'page' => $this->page,
@@ -188,6 +187,7 @@ class TopSlider extends Widget
         'hide_red' => $this->hide_red,
         'compare_item' => $this->compare_item,
         'is_filter_items' => $this->is_filter_items,
+        //'right_item_show' => $this->right_item_show,
         'get_' => $this->get_
       ]);
 

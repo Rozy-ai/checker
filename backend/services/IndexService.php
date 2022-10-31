@@ -32,7 +32,14 @@ class IndexService {
     public function __construct(Filters $filters) {
         $this->filters = $filters;
     }
-
+    
+    public function getSource(){
+        if (!$this->source){
+            $this->set_source();
+        }
+        return $this->source;
+    }
+    
     public function loadParamsToFilters($params) {
         $this->filters->filter_items__profile = $params['filter-items__profile'] ?? null;
         $this->filters->f_items__right_item_show = $params['filter-items__right-item-show'] ?? null;
@@ -55,6 +62,10 @@ class IndexService {
 
     public function getFilterItemsComparisons() {
         return $this->filters->f_items__comparisons;
+    }
+    
+    public function getItemsRightItemShow(){
+        return $this->filters->f_items__right_item_show;
     }
 
     /**
@@ -540,9 +551,9 @@ class IndexService {
         // В каждый эленент добавляется дополнительна информация
         $cnt_all_right = 0;
         foreach ($list as $k => $product) {
-            $product->source_id = $this->source->id;
-            //$product->baseInfo = $product->info; // Нужно для фкцированного поля baseInfo. Поле $product->info может быть другим в зависимости от парсера 
-            //$product->initAddInfo();
+            $product->source = $this->source;
+            $product->baseInfo = $product->info; // Нужно для фкцированного поля baseInfo. Поле $product->info может быть другим в зависимости от парсера 
+            $product->initAddInfo();
 
             $items = $product->addInfo;
             $cnt_all_right += count($items);
@@ -638,7 +649,7 @@ class IndexService {
         return $this->simple_pager($pages_cnt, $this->numberPage);
     }
 
-    private function simple_pager($pages_cnt, $page_n, $left_right_n = 3) {
+    public function simple_pager($pages_cnt, $page_n, $left_right_n = 3) {
         // $pages_cnt 1_|2_3_4_[5]_6_7_8|_9_10_11
         // 5-(cnt3)=2    от 2...
         //                       5
