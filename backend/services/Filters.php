@@ -9,14 +9,16 @@ namespace backend\services;
 use backend\models\User;
 
 /**
- * Description of Filter
+ * Кдасс для составления запроса на получение списка продуктов, отсеянных фильтрами
  *
  * @author kosten
  */
 class Filters {
+    // Названия дибильные. Но оставлено пока так для совместимости с оригиналом по поиску
     public $filter_items__profile;
     public $f_items__right_item_show;       // Не используется
     public $f_items__show_n_on_page;        // Не используется
+    public $f_items__no_compare;            // (where_1) Убрать товары из таблицы hidden_itesm
     public $f_items__id;                    // (where_2) id товара из поля формы для ввода id
     public $f_items__target_image;          // (where_3) categiries_root (select)
     public $f_items__user;                  // (where_4) username пользователя
@@ -24,25 +26,37 @@ class Filters {
     public $f_items__comparisons;           // (where_6) Фильтр выбора товара из поля выбора из Comparisons
                                             // (where_7) Не используется
                                             // (where_8) Выносим в User
-    public $f_items__no_compare;            // Всегда null. Раньше было поле с возможностью отключения
-    
+      
     public $source_id;
     public $source_class;
     public $source_table_name;              //Исходная таблица товаров ( parser_trademarkia_com )
     
+    public function loadFromParams($params){
+        $this->filter_items__profile = $params['filter-items__profile'] ?? null;
+        $this->f_items__right_item_show = $params['filter-items__right-item-show'] ?? null;
+        $this->f_items__show_n_on_page = $params['filter-items__show_n_on_page'] ?? 10;
+        $this->f_items__id = $params['filter-items__id'] ?? null;
+        $this->f_items__comparing_images = $params['filter-items__comparing-images'] ?? null;
+        $this->f_items__target_image = $params['filter-items__target-image'] ?? null;
+        $this->f_items__user = $params['filter-items__user'] ?? null;
+        $this->f_items__comparisons = $params['filter-items__comparisons'] ?? null;
+        $this->f_items__no_compare = $params['filter-items__no-compare'] ?? null;
+    }
+    
     /*
-     * Товара не должно быть в таблице hidden_items
-     * 
-     * Используется leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-     *    hidden_items.p_id      == null
-     *    hidden_items.source_id == null or hidden_items.source_id <> $this->source_id
-     * @param string | null $f_items__no_compare Всегда null. Раньше было поле с возможностью отключения
+     * Фильтр проверки на отсутствие товара в таблице hidden_items
+     *
+     * @param string | null $f_items__no_compare
      * @return array
+     * @throws \InvalidArgumentException
      */
     
     public function where_1($f_items__no_compare = null){
         if ($f_items__no_compare) {
             $this->f_items__no_compare;
+        }
+        if (!$this->source_id){
+            throw new \InvalidArgumentException('Отсутствует обязательный аргумент');
         }
         return (!$this->f_items__no_compare)?
             ['and',['hidden_items.p_id' => null],
@@ -50,6 +64,7 @@ class Filters {
                     ['<>','hidden_items.source_id', $this->source_id]
                 ]
             ]:[];
+        //return "`hidden_items`.`p_id` IS NULL) AND ((`hidden_items`.`source_id` IS NULL) OR (`hidden_items`.`source_id` <> $source_id"
     }
     
     /**
@@ -58,6 +73,7 @@ class Filters {
      * @param string $f_items__id id или asin товара из поля формы для ввода id
      * @param string $source_table_name Имя таблицы источника
      * @return array
+     * @throws \InvalidArgumentException
      */
     public function where_2($f_items__id = null, $source_table_name = null){
         if ($f_items__id){
@@ -65,6 +81,9 @@ class Filters {
         }
         if ($source_table_name){
             $this->source_table_name = $source_table_name;
+        }
+        if (!$this->source_table_name){
+            throw new \InvalidArgumentException('Отсутствует обязательный аргумент');
         }
         return ($this->f_items__id && $this->source_table_name)?
             ['or',[$this->source_table_name.'.id' => $this->items__id],
@@ -116,7 +135,8 @@ class Filters {
     
     
     /**
-     * Фильтр статуса товара из common/models/Comparisons, где список указан константой
+     * Фильтр статуса товара 
+     * Список статусов находится в common/models/Comparisons и является константой
      * 
      * @param type $f_items__comparisons
      * @param type $source_id - id источника товара (sourse->id)
@@ -134,7 +154,7 @@ class Filters {
         }
         
         if ($this->f_items__comparisons === 'NOCOMPARE' && !$this->source_id) {
-            throw new \yii\base\InvalidArgumentException();
+            throw new \InvalidArgumentException("Отсутствует обязательный аргумент для значения $this->f_items__comparisons");
         }
         
         switch ($this->f_items__comparisons){
@@ -150,7 +170,8 @@ class Filters {
     }
     
     /**
-     * Если источник - parser_trademarkia_com, то включить в выборку товары, имеющие в столбце info - значение add_info
+     * Проверка источника на наличие поля add_info
+     * 
      * Если исходная таблица из EBay (parser_trademarkia_com) 
      * @return array
      */
@@ -163,16 +184,16 @@ class Filters {
     }
     
     /**
-     * Запись, правленая админом или никем
+     * Если пользователь не Admin то включить записи правленые этим пользователем или никем
      * 
      * @return array
-     * @throws BadMethodCallException
+     * @throws \BadMethodCallException
      */
     public function where_8(){
         if (!User::isAdmin()) {
             $userId = \Yii::$app->getUser()->id;
             if (!$userId) {
-                throw new BadMethodCallException();
+                throw new \BadMethodCallException();
             }
             return ["IN", 'comparisons.user_id', [$userId, null]];
         } else {
@@ -181,7 +202,8 @@ class Filters {
     }
     
     /**
-     * Вывести товары, с пометкой "Не удалось установить точное соответствие"
+     * Включить в выборку только товары, с пометкой "Не удалось установить точное соответствие"
+     * 
      * Список пометок находится в таблице checker.message
      * Устанавливается на странице сравнения товаров (product/view) на нажатии на правом товаре на синююю кнопку из трех
      * @return array
@@ -191,7 +213,7 @@ class Filters {
     }
     
     /**
-     * Фильтр профиля. Отображается только для администратора
+     * Фильтр профиля. Отображается только для администратора, значит и работает только для администратора
      * Отображается список профилей товара (Prepod, General, ...)
      * Указано в таблице parser_trademarkia_com в поле profile. И список выбирвется из него
      * Вопрос:
@@ -205,21 +227,15 @@ class Filters {
         if ($filter_items__profile){
             $this->filter_items__profile = $filter_items__profile;
         }
-        return ($this->source_table_name && $this->filter_items__profile && $this->filter_items__profile !== '{{all}}' && $this->filter_items__profile !== 'Все')?
+        if (!$source_table_name){
+            throw new InvalidArgumentException('Не установлено значение source_table_name');
+        }
+        return (User::isAdmin() && $this->filter_items__profile !== '{{all}}' && $this->filter_items__profile !== 'Все')?
             ['like', $this->source_table_name.'.`profile`', $this->filter_items__profile] : [];
     }
     
     public function getAllWheres(){
-        $where__1 = ['and', $this->where_1(), $this->where_2(), $this->where_3(), $this->where_4(), $this->where_5(), $this->where_6(),$this->where_7(),$this->where_8(),$this->where_10()];
-        $where__2 = ['and', $this->where_1(), $this->where_2(), $this->where_3(), $this->where_4(), $this->where_5(), $this->where_6(),$this->where_7(),$this->where_9(),$this->where_10()];
-
-        if (!$this->where_1() && !$this->where_2() && !$this->where_3() && !$this->where_4() && !$this->where_5() && !$this->where_6() && !$this->where_7() && !$this->where_8() && !$this->where_10()){
-          $where__1 = ['and', '1+1'];
-        }
-        if (!$this->where_1() && !$this->where_2() && !$this->where_3() && !$this->where_4() && !$this->where_5() && !$this->where_6() && !$this->where_7() && !$this->where_9() && !$this->where_10()) {
-          $where__2 = ['and', '1+1'];
-        }
-
-        return ['or', $where__1, $where__2];
+        return ['and', $this->where_1(), $this->where_2(), $this->where_3(), $this->where_4(), $this->where_5(), 
+                       $this->where_6(), $this->where_7(), $this->where_8(), $this->where_9(), $this->where_10()];
     }
 }

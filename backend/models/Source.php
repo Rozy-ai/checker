@@ -38,29 +38,13 @@ class Source extends \yii\db\ActiveRecord {
         return 'common\models\\' . ucfirst($this->table_2);
     }
     
-    public static function getSources(){
-        $user_id = \Yii::$app->getUser()->id;
-        $u = User::find()->where(['id' => $user_id])->limit(1)->one();
-        $res = $u->user__source_access;
-
-        if (!$res) {
-            return self::find()->all();
-        } else {
-            return self::find()
-                ->leftJoin('user__source_access', 'user__source_access.source_id = source.id')
-                ->where(['user__source_access.user_id' => $user_id])
-                ->all();
-        }
-    }
-    
-    public static function getSource(int $source_id = 0) {
+    public static function getById(int $source_id = 0) {
         if (!$source_id){
             return null;
         }
-        
         return self::findOne(['id' => $source_id]);
     }
-
+    
     //Дальше шлак на удаление
     public function get_class_2() {
         return 'common\models\\' . ucfirst($this->table_2);

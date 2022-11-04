@@ -6,6 +6,9 @@ return [
     ],
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'components' => [
+        'session' => [
+            'class' => 'backend\Services\Session'
+        ],
         'fmtUserData' => [
             'class' => '\backend\formatters\UserDataFormatter',
         ],

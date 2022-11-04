@@ -14,7 +14,9 @@ use common\models\Stats_import_export;
 use common\models\Comparison;
 
 /**
- * Сервис служит для подготовки данных к product/index
+ * Сервис является помощником. Собран весь шлак, что был в контроллере
+ * И служит для принятия и подготовки данных на странице index
+ * Возможно переписать как presenter c интерфейсом для отображения
  *
  * @author kosten
  */
@@ -22,8 +24,9 @@ class IndexService {
 
     private Filters $filters;
     private Source $source;
-    private $filter_items__sort = null;
-    private $numberPage = 0;
+    
+    private $filter_items__sort;
+    private $numberPage;   
 
     /**
      * 
@@ -35,29 +38,35 @@ class IndexService {
     
     public function getSource(){
         if (!$this->source){
-            $this->set_source();
+            $this->setSource();
         }
         return $this->source;
     }
     
-    public function loadParamsToFilters($params) {
-        $this->filters->filter_items__profile = $params['filter-items__profile'] ?? null;
-        $this->filters->f_items__right_item_show = $params['filter-items__right-item-show'] ?? null;
-        $this->filters->f_items__show_n_on_page = $params['filter-items__show_n_on_page'] ?? 10;
-        $this->filters->f_items__id = $params['filter-items__id'] ?? null;
-        $this->filters->f_items__comparing_images = $params['filter-items__comparing-images'] ?? null;
-        $this->filters->f_items__target_image = $params['filter-items__target-image'] ?? null;
-        $this->filters->f_items__user = $params['filter-items__user'] ?? null;
-        $this->filters->f_items__comparisons = $params['filter-items__comparisons'] ?? null;
-        $this->filters->f_items__no_compare = $params['filter-items__no-compare'] ?? null;
-
-        if (isset($params['filter-items__sort'])) {
-            $this->filter_items__sort = $params['filter-items__sort'];
-        }
-
-        if (isset($params['page'])) {
-            $this->numberPage = $params['page'];
-        }
+    /**
+     * Функция загружает входные параметры. 
+     * @param type $params массив входных данных
+     * @return string
+     */
+    public function loadParams($params) {
+        $this->filters->loadFromParams($params);
+        
+        $this->filter_items__sort = $params['filter-items__sort'] ?? null;
+        $this->numberPage         = $params['page'] ?? 0;
+        //$this->setSource($params['filter-items__source'] ?? $params['source_id'] ?? null);
+    }
+    
+    public function setDefaultParams(): bool{
+        
+    }
+    
+    // Временная функция
+    public function test(){
+        $q = $this->source->class_1::find()
+            ->where( $this->filters->where_2() );
+        
+        print_r($q->createCommand()->getRawSql());
+        exit;        
     }
 
     public function getFilterItemsComparisons() {
@@ -66,63 +75,6 @@ class IndexService {
     
     public function getItemsRightItemShow(){
         return $this->filters->f_items__right_item_show;
-    }
-
-    /**
-     * Инициализация источника
-     * 
-     * @param int $source_id - id источника
-     * @return null | 
-     */
-    public function set_source($source_id = false) {
-        if ($source_id === false) {
-            /*
-              if ($s_source = (new Session())->get('source')){
-              $source_id = $s_source['id'];
-              }else{
-              $source_id = 1;
-              }
-             */
-            $source_id = 1;
-        }
-
-        $this->source = Source::findOne(['id' => (int) $source_id]);
-        if (!$this->source) {
-            return null;
-        }
-        //(new Session())->set('source',$source);
-
-        return $this->source->id;
-    }
-
-    /**
-     * Имеет ли данный пользователь доступ к источнику
-     * 
-     * @param int $user_id
-     * @return boolean
-     */
-    public function is_source_access($user_id = false) {
-        if (!$this->source) {
-            throw new \yii\base\InvalidArgumentException();
-        }
-
-        if (!$user_id) {
-            $user_id = \Yii::$app->getUser()->id;
-        }
-
-        $u = User::find()->where(['id' => $user_id])->limit(1)->one();
-        $res = $u->user__source_access;
-
-        // если нет записей... то можно все источники
-        if (!$res) {
-            return true;
-        }
-        foreach ($res as $r) {
-            if ((int) $r->source_id === $this->source->id) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -280,6 +232,11 @@ class IndexService {
         return $out;
     }
 
+    /**
+     * Тут не поятная ересь (нужно проанализироварть)
+     * @return type
+     * @throws \yii\base\InvalidParamException 
+     */
     public function profiles_list_cnt() {
         if (!$this->source) {
             throw new \yii\base\InvalidParamException();
@@ -411,7 +368,11 @@ class IndexService {
 
         return array_merge($a, $list_out);
     }
-
+    
+    /**
+     * Тут не понятная ересь 2
+     * @return type
+     */
     public function profiles_list_cnt_2() {
         /* @var $source_class ActiveRecord */
         $source_class = $this->source->class_1;
@@ -503,6 +464,7 @@ class IndexService {
 
     /**
      * Плучить список продуктов(слева) для вывода, согласно всех фильтров
+     * Есть огнаричение количества на вывод 
      */
     public function getProducts() {
         if (!$this->source) {

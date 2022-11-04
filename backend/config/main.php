@@ -11,20 +11,16 @@ return [
     'language' => 'ru-RU',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'common\SetupChecker'],
     'modules' => [],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-backend_',
         ],
         'user' => [
-            'identityClass' => 'common\models\User',
+            'identityClass' => common\models\User::class,
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
-        ],
-        'session' => [
-            // this is the name of the session cookie used for login on the backend
-            'name' => 'advanced-backend_',
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,

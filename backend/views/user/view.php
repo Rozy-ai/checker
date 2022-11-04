@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('site', 'Users'), 'url' => [
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 
-$productSearch = new ProductSearch();
+$productSearch = new ProductSearch(); //Порнография
 
 ?>
 <div class="user-view">

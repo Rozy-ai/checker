@@ -99,7 +99,7 @@ class Product extends \yii\db\ActiveRecord{
                 $res = $this->get_all_elements_in_array_to_first_level($data, '.');
             }
 
-            $pr = new Product_right(array_merge($out, $res, ['parent_item' => $this->_baseInfo]));
+            $pr = new Product_right(array_merge($out, $res, ['parent_item' => $this->baseInfo]));
             $this->_addInfo[] = $pr;
         }
     }
@@ -213,10 +213,7 @@ class Product extends \yii\db\ActiveRecord{
      */
   public function get_right_items($del_with_status = []){
 //$filter = [Result, NOCOMPARE, PRE_MATCH, MATCH, OTHER, MISMATCH, YES_NO_OTHER, ALL, ALL_WITH_NOT_FOUND,];
-        if (!$this->_addInfo){
-            $this->initAddInfo();
-        }
-        $right_products = $this->_addInfo;
+        $right_products = $this->addInfo;
 
         $res = Comparison::find()
                 ->where(['product_id' => $this->id])

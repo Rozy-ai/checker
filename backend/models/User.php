@@ -6,7 +6,6 @@ use common\models\User__source_access;
 use Yii;
 use common\models\Comparison;
 use common\models\Message;
-use yii\web\Session;
 
 /**
  * This is the model class for table "{{%user}}".

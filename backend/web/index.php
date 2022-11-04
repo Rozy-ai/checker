@@ -1,12 +1,5 @@
 <?php
 /*
-register_shutdown_function( "fatal_handler" );
-function fatal_handler() {
-  $errfile = "unknown file";
-  $errstr  = "shutdown";
-  $errno   = E_CORE_ERROR;
-  $errline = 0;
-
   $error = error_get_last();
 
   if( $error !== NULL) {
@@ -22,8 +15,8 @@ function fatal_handler() {
 
 
 defined('YII_DEBUG') or define('YII_DEBUG', true);
-defined('YII_ENV') or define('YII_ENV', 'prod');
-echo __DIR__.'/../../../../';
+defined('YII_ENV') or define('YII_ENV', 'dev');
+
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../vendor/yiisoft/yii2/Yii.php';
 require __DIR__ . '/../../common/config/bootstrap.php';
