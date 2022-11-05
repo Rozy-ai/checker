@@ -2,8 +2,6 @@
 
 namespace backend\models;
 
-use yii\web\Session;
-
 /**
  * @property int $id
  * @property string $table_1
@@ -17,7 +15,7 @@ use yii\web\Session;
  * @property string $class_2
  * @property string $sources
  */
-class Source extends \yii\db\ActiveRecord {
+class 1Source extends \yii\db\ActiveRecord {
 
     public static function tableName() {
         return 'source';

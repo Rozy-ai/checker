@@ -4,7 +4,7 @@ namespace common\models;
 
 use backend\models\P_updated;
 use backend\models\Settings__fields_extend_price;
-use backend\models\Source;
+use common\models\Source;
 use Yii;
 use yii\BaseYii;
 use yii\db\ActiveRecord;
@@ -31,7 +31,7 @@ use yii\helpers\Json;
 class Product extends \yii\db\ActiveRecord{
     protected $_baseInfo = [];
     protected $_addInfo = [];
-    protected $_source;
+    protected Source $_source;
     
     public function getBaseInfo(){
         if (!$this->_baseInfo && $this->info) {
@@ -75,7 +75,7 @@ class Product extends \yii\db\ActiveRecord{
         $asin = $this->asin;
 
         $source = $this->source;
-        $class_2 = $source->get_class_2(); // Parser_trademarkia_com_result
+        $class_2 = $source->class_2; // Parser_trademarkia_com_result
         $table_2 = $class_2::find()->where(['asin' => $asin])
                         ->orderBy(['parse_at' => SORT_ASC])
                         ->all() ?: [];
@@ -100,6 +100,7 @@ class Product extends \yii\db\ActiveRecord{
             }
 
             $pr = new Product_right(array_merge($out, $res, ['parent_item' => $this->baseInfo]));
+            $pr->source = $this->source;
             $this->_addInfo[] = $pr;
         }
     }

@@ -3,7 +3,7 @@
 /* @var $dataProvider */
 
 use backend\models\Settings__fields_extend_price;
-use backend\models\Source;
+use common\models\Source;
 use yii\helpers\Html;
 
 $this->title = Yii::t('site', 'Поля при наведении на Price');

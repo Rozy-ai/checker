@@ -89,6 +89,14 @@ class Source extends \yii\db\ActiveRecord {
         foreach(self::ids_source_free as $id){
             $res[] = Source::getById($id);
         }
-        return $res[];
+        return $res;
+    }
+    
+    public static function findAllSources(int $id_source, $id_user = 0){
+        $sources = self::getSourcesFree();
+        if ($id_user && !self::isSourceFree($id_source)){
+            $sources = array_merge($sources, User__source_access::findByIdUser($id_user));
+        }
+        return $sources;
     }
 }

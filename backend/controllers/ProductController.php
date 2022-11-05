@@ -2,7 +2,6 @@
 
 namespace backend\controllers;
 
-use common\models\UserIdentity;
 use backend\models\P_all_compare;
 use common\helpers\AppHelper;
 use common\models\HiddenItems;
@@ -21,6 +20,7 @@ use backend\services\IndexService;
 use common\models\Source;
 use common\models\User;
 use backend\services\Session;
+use backend\models\Settings__fields_extend_price;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -137,14 +137,13 @@ class ProductController extends Controller {
             array $config = [])
     {
         parent::__construct($id, $module, $config);
-        //$this->session = $session;
         $this->indexService = $indexService;
     }
     
     /**
      * До того как вызывать какое либо действие, нужно выбрать источник
-     * @param type $action
-     * @return type
+     * 
+     * {@inheritdoc}
      * @throws \yii\web\ForbiddenHttpException
      */
 
@@ -154,6 +153,7 @@ class ProductController extends Controller {
         $id_user   = \Yii::$app->user->id;
         
         $this->source = Source::getForUser($id_user, $id_source);
+        
         if (!$this->source){
             throw new \yii\web\ForbiddenHttpException('Не удалось найти доступный источник');
         }
@@ -161,99 +161,16 @@ class ProductController extends Controller {
         if ($id_source !== $this->source->id){
             \Yii::$app->session[Session::id_source] = $this->source->id;
         }
-        
-        /** @var User */
-        $user = \Yii::$app->user->identity;
-        if ($user) {
-            $this->source = $user->getSource($source_id);
-        } else {
-            $this->source = Source::getById(1);
-        }
-        
-        // Если пользователь зарегистрирован, но просто нет доступа к этому источнику, 
-        // то даем ему шанс и пробуем найти для него другой доступный платный источник
-        if ($user && !$this->source){
-            $sources = $user->getSources();
-            if (is_array($sources)) {
-                $this->source = $sources[0];
-            }
-        }
-
-        if (!$this->source){
-            // Если пользователь зарегистрирован, но просто нет доступа к этому источнику, 
-            // то даем ему шанс и пробуем найти для него другой доступный источник
-            if ($user) {
-                $sources = $user->getSources();
-                //Если нашелся доступный:
-                if (is_array($sources)) {
-                    $this->source = $sources[0];
-                }
-            }
-            
-            // Если опять нету, пробуем ему бесплатный сточник
-            if (!$this->source) {
-                $sources = Source::getSourcesFree();
-                if (is_array($sources)){
-                    $this->source = $sources[0];
-                }
-                // Если и тут нету то тут уж ничего не поделаешь
-                if (!$this->source){
-                    throw new \yii\web\ForbiddenHttpException('Нет доступных источников');
-                }
-            }
-            
-            $url[] = 'product/index';
-            $get_ = $this->request->get();
-            $get_['filter-items__source'] = $this->source->id;
-            $get_['source_id'] = $this->source->id;
-            return $this->redirect(array_merge($url, $get_));
-        }
 
         return parent::beforeAction($action);
     }
 
     public function actionIndex() {
         ini_set("memory_limit", "3024M");
-
-        $this->indexService->loadParams(\Yii::$app->request->getQueryParams());
-        $page_n = (int) $this->request->get('page', 0);
+        $this->indexService->source = $this->source;
+        $this->indexService->loadParams();
         
-        if (isAdmin() && !$this->indexService->getFilterItemsComparisons()) {
-            $no_compare = false;
-            $f_items__comparisons = 'YES_NO_OTHER';
-            $get_array = Yii::$app->request->get();
-            $_url = ['product/index'];
-            if ($page_n === 0) {
-                $_url['page'] = 1;
-            }
-            $_url['filter-items__comparisons'] = "YES_NO_OTHER";
-            return $this->redirect(array_merge($get_array, $_url));
-        }
-
-        if (!User::isAdmin() && !$this->indexService->getFilterItemsComparisons()) {
-            $no_compare = true;
-            $f_items__comparisons = 'NOCOMPARE';
-            $get_array = Yii::$app->request->get();
-            $_url = ['product/index'];
-            if ($page_n === 0)
-                $get_array['page'] = 1;
-            $get_array['filter-items__comparisons'] = "NOCOMPARE";
-            if ($page_n === 0)
-                $_url['page'] = 1;
-            $_url['filter-items__comparisons'] = "NOCOMPARE";
-            return $this->redirect(array_merge($get_array, $_url));
-        }
-
-        // Если $page_n(берет значение из Get запроса 'page') то переходим на страницу 1
-        $get_array = Yii::$app->request->get();
-        $_url[] = 'product/index';
-        $get_array['page'] = 1;
-        $url_construct = array_merge($_url, $get_array);
-        $res_url = Url::toRoute($url_construct);
-        if ($page_n === 0)
-            return $this->redirect($res_url);
-
-        $on_page_str = null;
+        //$on_page_str = null;
 
         $where_3_list = $this->indexService->getWhere_3_list();
         $where_4_list = $this->indexService->getWhere_4_list();
@@ -286,28 +203,44 @@ class ProductController extends Controller {
         }
 
         $last_update = $this->indexService->get_last_local_import();
+        
+        $user = \Yii::$app->user->identity;
 
         return $this->render('index', [
-                    'get_' => $this->request->get(),
-                    'searchModel' => null, //$searchModel,
+                    'last_update'      => $last_update,
+            
+                    'list_source'      => Source::findAllSources($this->source->id, \Yii::$app->user->id),
+                    'active_id_source' => $this->source->id,
+            
+                    'list_profiles'    => $profiles_list,
+                    'active_profiles'  => $this->indexService->itemsProfile,
+            
+                    'count_products_all'      => $this->indexService->getCountProducts(),
+                    'count_products_on_page'  => $this->indexService->getCountProductsOnPage(),
+                    'count_products_right'    => $this->indexService->getCountProductsRight($list),
+                    'is_admin'                => $user && $user->isAdmin(),
+                    'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),
+                    'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
+            
+            
+                    //'get_' => $this->request->get(),
+//                    'searchModel' => null, //$searchModel,
                     //'dataProvider' => $dataProvider,
                     'list' => $list,
                     'cnt_all' => $cnt_all,
-                    'cnt_all_right' => $cnt_all_right,
-                    'on_page' => $on_page_str,
-                    'pages_cnt' => $pages_cnt,
-                    'url_construct' => $url_construct,
-                    'page_n' => $page_n,
+//                    'cnt_all_right' => $cnt_all_right,
+//                    'on_page' => $on_page_str,
+//                    'pages_cnt' => $pages_cnt,
+//                    'url_construct' => $url_construct,
+//                    'page_n' => $page_n,
                     'where_3_list' => $where_3_list,
                     'where_4_list' => $where_4_list,
                     'where_6_list' => $where_6_list,
-                    'profiles_list' => $profiles_list,
-                    'is_admin' => User::isAdmin(),
-                    'no_compare' => $no_compare,
-                    'pager' => $pager,
-                    'sort' => $sort,
-                    'right_item_show' => $this->indexService->getItemsRightItemShow() ? 1 : 0,
-                    'last_update' => $last_update,
+                    
+                    //'no_compare' => $no_compare,
+                    //'pager' => $pager,
+//                    'sort' => $sort,
+                    //'right_item_show' => $this->indexService->getItemsRightItemShow() ? true : false,
         ]);
     }
 

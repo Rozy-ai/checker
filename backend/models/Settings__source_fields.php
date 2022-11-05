@@ -4,7 +4,7 @@ namespace backend\models;
 
 
 use yii\db\ActiveRecord;
-use yii\web\Session;
+use common\models\Source;
 
 //  public $id;
 //  public $title;
@@ -20,26 +20,14 @@ class Settings__source_fields extends ActiveRecord{
     ];
   }
 
-  public static function name_for_source($name,$source_id = false,$type = false){
-    if (!$source_id) {
-      if ( isset( \Yii::$app->view->params['source_id'] ) ){
-        $source_id = \Yii::$app->view->params['source_id'];
-      };
-
-      if (!$source_id) {
-        $s = Source::get_source();
-        $source_id = $s['source_id'];
-      }
-    }
-
+  public static function name_for_source($name, int $source_id, $type = false){
     $q = self::find()
-
       ->select([
         'settings__source_fields.id as id',
         'settings__common_fields.name as c_name',
         'settings__common_fields.description as c_description',
         'settings__source_fields.name as s_name'
-                ])
+    ])
 
       ->innerJoin('settings__common_fields','`settings__common_fields`.`id` = `settings__source_fields`.`settings__common_fields_id`')
       ->where(['source_id' => $source_id]);
@@ -59,23 +47,8 @@ class Settings__source_fields extends ActiveRecord{
     return false;
   }
 
-  public static function data_for_source($name,$source_id = false,$type = false){
-    if (!$source_id) {
-      if ( isset( \Yii::$app->view->params['source_id'] ) ){
-        $source_id = \Yii::$app->view->params['source_id'];
-      };
-
-
-      if (!$source_id) {
-        $s = Source::get_source();
-        $source_id = $s['source_id'];
-      }
-    }
-
-
-
+  public static function data_for_source($name, int $source_id,$type = false){
     $q = self::find()
-
       ->select([
         'settings__source_fields.id as settings__source_fields_id',
         'settings__source_fields.settings__common_fields_id as settings__source_fields_settings__common_fields_id',
@@ -107,14 +80,4 @@ class Settings__source_fields extends ActiveRecord{
 
     return false;
   }
-
-
-
-
-
-  public function getSource(){
-    return $this->hasOne(Source::class, ['id' => 'source_id']);
-  }
-
-
 }

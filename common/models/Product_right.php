@@ -4,14 +4,14 @@ namespace common\models;
 
 
 use backend\models\Settings__source_fields;
-use backend\models\Source;
+use common\models\Source;
 
 class Product_right extends \yii\base\DynamicModel{
   /**
    * @var array|float|int|mixed|string|string[]
    */
   private $compare_status;
-  protected $source;
+  public  Source $source;
 
   public function __construct(array $attributes = [], $config = []){
     parent::__construct($attributes, $config);
@@ -136,7 +136,7 @@ class Product_right extends \yii\base\DynamicModel{
   public function __get($name){
     //echo '<pre>'.PHP_EOL;
 
-    $d = Settings__source_fields::data_for_source($name);
+    $d = Settings__source_fields::data_for_source($name, $this->source->id);
 
     /*
     [settings__source_fields_id] => 2

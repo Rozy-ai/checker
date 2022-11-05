@@ -33,4 +33,19 @@ class Session extends \yii\web\Session{
 
     /** @const string f_items__comparisons    (where_6) Фильтр выбора товара из поля выбора из Comparisons */
     const filter_comparisons = 'filter_comparisons';
+    
+    /** @const string filter-items__sort      Нужно ли сотрировать продукты */
+    const filter_items_sort = 'filter_items_sort';
+    
+    /** @const string filter-items__profile   Доступен только для администратора*/
+    const filter_items_profile = 'filter_items_profile';
+    
+    /** @const string page Номер просматриваемой страницы */
+    const pager_page = 'pager_page';
+    
+    /** @const string page Количество страниц пейджера */
+    const pager_on_page = 'pager_on_page';
+    
+    /** @const string $items__show_n_on_page Сколько товаров отображать на странице */
+    const show_n_on_page = 'show_n_on_page';
 }

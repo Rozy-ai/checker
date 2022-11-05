@@ -8,7 +8,7 @@
 namespace backend\services;
 
 use backend\services\FilterService;
-use backend\models\Source;
+use common\models\Source;
 use backend\models\User;
 use common\models\Stats_import_export;
 use common\models\Comparison;
@@ -23,11 +23,11 @@ use common\models\Comparison;
 class IndexService {
 
     private Filters $filters;
-    private Source $source;
+    public  Source $source;
     
     private $filter_items__sort;
     private $numberPage;   
-
+    private $f_items__show_n_on_page;
     /**
      * 
      * @param FilterService $filters - загружается автоматически при первом же вызове и один раз
@@ -36,28 +36,21 @@ class IndexService {
         $this->filters = $filters;
     }
     
-    public function getSource(){
-        if (!$this->source){
-            $this->setSource();
-        }
-        return $this->source;
-    }
-    
     /**
      * Функция загружает входные параметры. 
      * @param type $params массив входных данных
      * @return string
      */
-    public function loadParams($params) {
-        $this->filters->loadFromParams($params);
+    public function loadParams() {
+        $session = \Yii::$app->session;
+        $this->filters->loadFromSession();
+        $this->filters->source_id = $this->source->id;
+        $this->filters->source_class = $this->source->class_1;
+        $this->filters->source_table_name = $this->source->table_1;
         
-        $this->filter_items__sort = $params['filter-items__sort'] ?? null;
-        $this->numberPage         = $params['page'] ?? 0;
-        //$this->setSource($params['filter-items__source'] ?? $params['source_id'] ?? null);
-    }
-    
-    public function setDefaultParams(): bool{
-        
+        $this->filter_items__sort = $session[Session::filter_items_sort];
+        $this->numberPage         = $session[Session::pager_page]?: $session[Session::pager_page]=1;
+        $this->f_items__show_n_on_page = $session[Session::pager_on_page]?: $session[Session::pager_on_page] = 10;
     }
     
     // Временная функция
@@ -75,6 +68,14 @@ class IndexService {
     
     public function getItemsRightItemShow(){
         return $this->filters->f_items__right_item_show;
+    }
+    
+    public function getItemsProfile(){
+        return $this->filters->f_items__profile;
+    }
+    
+    public function getCountProductsOnPage(){
+        return $this->f_items__show_n_on_page;
     }
 
     /**
@@ -108,7 +109,7 @@ class IndexService {
         // }
 
         $q->andWhere($this->filters->where_1());                  //Кроме скрытых элементов
-        $q->addGroupBy('`' . $source_table_name . '`.`id`');
+        //$q->addGroupBy('`' . $source_table_name . '`.`id`');
         $all = $q->all();
 
         foreach ($all as $a_item) {
@@ -184,56 +185,29 @@ class IndexService {
 
         $source_table_name = $this->source->table_1;
         $source_class = $this->source->class_1;
-
+        
         $q = $source_class::find()
-                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_table_name . '.id ')
-                ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ')
-                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ')
-                ->where(['or like', 'comparisons.status', ['MATCH', '%,MATCH,%', 'MATCH,%', '%,MATCH'], false]);
-
-        $q->andWhere($this->filters->where_6('NOCOMPARE', $this->source->id));
-        //$q->andWhere( $this->filtersIndex->where_7();
-        $q->addGroupBy('`comparisons`.`product_id`');
-
-        $match = $q->count();
-
-        $q->where(['like', 'comparisons.status', 'MISMATCH']);
-        $mismatch = $q->count();
-
-        $q->where(['like', 'comparisons.status', 'PRE_MATCH']);
-        $pre_match = $q->count();
-
-        $q->where(['like', 'comparisons.status', 'OTHER']);
-        $other = $q->count();
-
-        $q = $source_class::find()
-                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_table_name . '.id ')
-                ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ')
-                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ');
-        $q->where(['and', ['p_all_compare.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source->id]]]);
-
-        if (0 && $source_table_name === 'parser_trademarkia_com') {
-            $q->andWhere(['like', 'info', 'add_info']);
-            $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
-            $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
+            ->select(['comparisons.status', 'COUNT(*) as count_statuses'])
+            ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ')
+            ->asArray()
+            ->groupBy('comparisons.status');
+        
+        $data = $q->all();
+        
+        $out = [];
+        foreach ($data as $k => $val){
+            if ($val['status'] == null){
+                $val['status'] = 'NO_COMPARE';
+            }
+            $out[$val['status']] = $val['count_statuses'];
         }
-
-        $q->andWhere(['and', ['hidden_items.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source->id]]]);
-
-        $q->addGroupBy('`' . $source_table_name . '`.`id`');
-        $nocompare = $q->count();
-
-        $out["NOCOMPARE"] = $nocompare;
-        $out["MISMATCH"] = $mismatch;
-        $out["PRE_MATCH"] = $pre_match;
-        $out["MATCH"] = $match;
-        $out["OTHER"] = $other;
-
+        
         return $out;
     }
 
     /**
      * Тут не поятная ересь (нужно проанализироварть)
+     * Не используется
      * @return type
      * @throws \yii\base\InvalidParamException 
      */
@@ -253,6 +227,9 @@ class IndexService {
 
         $q2->select($this->source->table_1 . '.id, ' . $this->source->table_1 . '.profile')
                 ->groupBy($this->source->table_1 . '.id ');
+        
+        print_r($q->createCommand()->getRawSql());
+        exit;             
 
         $q2_load = $q2->all();
         $q2_load_cnt = $q2->count();
@@ -371,26 +348,43 @@ class IndexService {
     
     /**
      * Тут не понятная ересь 2
+     *      Нужно придумать вместо этой хрени 1 запрос
+     * Нужно получить результат:
+     *      array(7) (
+                [Prepod] => (string) Prepod (16)
+                [General] => (string) General (1160)
+                [General_1] => (string) General_1 (0)
+                [General_2] => (string) General_2 (0)
+                [Alex] => (string) Alex (27)
+                [FBA] => (string) FBA (1)
+                [Prepod_var] => (string) Prepod_var (0)
+            )
+     * 
      * @return type
      */
     public function profiles_list_cnt_2() {
         /* @var $source_class ActiveRecord */
         $source_class = $this->source->class_1;
+        
+        //Получить уникальные значения столбца profile
         $q0 = $source_class::find()->distinct(true)->select(['profile'])->asArray();
-
         $res_1 = $q0->column();
-
+        
+        //Так как названий профилей может быть много через запятую и ищем уникальные еше раз
         $find_uniq = function ($data) {
             $out = [];
             foreach ($data as $k => $item) {
                 $a = explode(',', $item);
                 foreach ($a as $value) {
-                    $out[$value] = $value;
+                    if ($value){
+                        $out[$value] = $value;
+                    }
                 }
             }
             return $out;
         };
-
+        
+        // Тут уникальные значения столбца profile
         $profiles_uniq = $find_uniq($res_1);
 
         $q2 = $source_class::find()
@@ -481,6 +475,9 @@ class IndexService {
                 ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source->table_1 . '.id ')
                 ->leftJoin('messages', 'messages.id = comparisons.messages_id')
                 ->where($where);
+        //print_r($q->createCommand()->getRawSql());
+        //exit;
+        
         $q->innerJoin($this->source->table_2, $this->source->table_2 . '.`asin` = ' . $this->source->table_1 . '.asin');
 
         switch ($this->filter_items__sort) {
@@ -497,9 +494,9 @@ class IndexService {
 
         $q->addGroupBy('`' . $this->source->table_1 . '`.`id`');
 
-        // Рассчитываем нужные для вывода продукты
-        if ($this->filters->f_items__show_n_on_page !== 'ALL') {
-            $f_items__show_n_on_page = (int) $this->filters->f_items__show_n_on_page;
+        // Рассчитываем нужные для вывода продукты 
+        if ($this->f_items__show_n_on_page !== 'ALL') {
+            $f_items__show_n_on_page = (int) $this->f_items__show_n_on_page;
             $offset = ($this->numberPage - 1) * $f_items__show_n_on_page;
             $q->limit($f_items__show_n_on_page);
         } else {
@@ -511,18 +508,23 @@ class IndexService {
         $list = $q->all();
 
         // В каждый эленент добавляется дополнительна информация
-        $cnt_all_right = 0;
         foreach ($list as $k => $product) {
             $product->source = $this->source;
-            $product->baseInfo = $product->info; // Нужно для фкцированного поля baseInfo. Поле $product->info может быть другим в зависимости от парсера 
+            $product->baseInfo = $product->info; // Нужно для фицированного поля baseInfo
             $product->initAddInfo();
-
-            $items = $product->addInfo;
-            $cnt_all_right += count($items);
         }
         return $list;
     }
-
+    
+    public function getCountProductsRight($list){
+        $cnt_all_right = 0;
+        foreach ($list as $k => $product) {
+            $items = $product->addInfo;
+            $cnt_all_right += count($items);
+        }
+        return $cnt_all_right;
+    }
+    
     public function get_last_local_import() {
         $s_import = Stats_import_export::find();
         $s_import->where(['type' => 'IMPORT']);
@@ -605,8 +607,8 @@ class IndexService {
     }
 
     public function getPager(int $countProducts) {
-        $pages_cnt = ($this->filters->f_items__show_n_on_page !== 'ALL') ?
-                ceil($countProducts / (int) $this->filters->f_items__show_n_on_page) : 1;
+        $pages_cnt = ($this->f_items__show_n_on_page !== 'ALL') ?
+                ceil($countProducts / (int) $this->f_items__show_n_on_page) : 1;
 
         return $this->simple_pager($pages_cnt, $this->numberPage);
     }

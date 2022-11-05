@@ -15,7 +15,7 @@ use backend\models\User;
  */
 class Filters {
     // Названия дибильные. Но оставлено пока так для совместимости с оригиналом по поиску
-    public $filter_items__profile;
+    public $f_items__profile;
     public $f_items__right_item_show;       // Не используется
     public $f_items__show_n_on_page;        // Не используется
     public $f_items__no_compare;            // (where_1) Убрать товары из таблицы hidden_itesm
@@ -31,8 +31,32 @@ class Filters {
     public $source_class;
     public $source_table_name;              //Исходная таблица товаров ( parser_trademarkia_com )
     
+    public function loadFromSession(){
+        $session = \Yii::$app->session;
+        
+        $this->f_items__profile         = $session[Session::filter_items_profile];
+        $this->f_items__id              = $session[Session::filter_id];
+        $this->f_items__comparing_images= $session[Session::filter_title];
+        $this->f_items__target_image    = $session[Session::filter_target_image];
+        $this->f_items__user            = $session[Session::filter_username];
+        $this->f_items__no_compare      = $session[Session::filter_no_compare];
+        $this->f_items__comparisons     = $session[Session::filter_comparisons];
+        
+        
+        if (!$this->f_items__comparisons){
+            // is admin
+            $identity = \Yii::$app->user->identity;
+            if ($identity && $identity->isAdmin()){
+                $this->f_items__no_compare = $session[Session::filter_comparisons] = 'YES_NO_OTHER';
+            } else {
+                $this->f_items__no_compare = $session[Session::filter_comparisons] = 'NOCOMPARE';
+            }
+        }
+                
+    }
+    
     public function loadFromParams($params){
-        $this->filter_items__profile = $params['filter-items__profile'] ?? null;
+        $this->f_items__profile = $params['filter-items__profile'] ?? null;
         $this->f_items__right_item_show = $params['filter-items__right-item-show'] ?? null;
         $this->f_items__show_n_on_page = $params['filter-items__show_n_on_page'] ?? 10;
         $this->f_items__id = $params['filter-items__id'] ?? null;
@@ -220,22 +244,24 @@ class Filters {
      *     Чтобы вывести список профилей, нужно сформировать список согласно фильтрам иди вообще всех товаров?
      * @return array
      */
-    public function where_10($source_table_name = null, $filter_items__profile = null){
+    public function where_10($source_table_name = null, $f_items__profile = null){
         if ($source_table_name){
             $this->source_table_name = $source_table_name;
         }
-        if ($filter_items__profile){
-            $this->filter_items__profile = $filter_items__profile;
+        if ($f_items__profile){
+            $this->f_items__profile = $f_items__profile;
         }
-        if (!$source_table_name){
+        if (!$this->source_table_name){
             throw new InvalidArgumentException('Не установлено значение source_table_name');
         }
-        return (User::isAdmin() && $this->filter_items__profile !== '{{all}}' && $this->filter_items__profile !== 'Все')?
-            ['like', $this->source_table_name.'.`profile`', $this->filter_items__profile] : [];
+        $identity = \Yii::$app->user->identity;
+        
+        return ($identity && $identity->isAdmin() && $this->f_items__profile !== '{{all}}' && $this->f_items__profile !== 'Все')?
+            ['like', $this->source_table_name.'.`profile`', $this->f_items__profile] : [];
     }
     
     public function getAllWheres(){
         return ['and', $this->where_1(), $this->where_2(), $this->where_3(), $this->where_4(), $this->where_5(), 
-                       $this->where_6(), $this->where_7(), $this->where_8(), $this->where_9(), $this->where_10()];
+                       $this->where_6(), $this->where_7(), $this->where_8(), $this->where_10()];
     }
 }

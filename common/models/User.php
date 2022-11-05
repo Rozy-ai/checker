@@ -18,11 +18,19 @@ use common\models\User__source_access;
  * @author kosten
  */
 class User extends UserEntity {
+    
+    public function isAdmin(){
+        return !empty(\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id));
+    }
 
-    public function isAdmin($id = 0):bool {
+    public static function isAdminStatic($id = 0):bool {
         if (!$id && !$id=$this->id) {
             return false;
         }
         return !empty(\Yii::$app->authManager->getAssignment('admin', $id));
+    }
+    
+    public function is_detail_view_for_items(){
+        return $this->detail_view_for_items ? true : false;
     }
 }

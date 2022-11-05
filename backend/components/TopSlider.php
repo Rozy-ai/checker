@@ -28,6 +28,7 @@ class TopSlider extends Widget
     public $right_item_show;
     public $get_;
     public $is_filter_items;
+    public $source_id;
 
 
     private function hide_red($items){
@@ -59,7 +60,7 @@ class TopSlider extends Widget
     }
 
     function getVariablesLeft($product){
-        $p_key = Settings__fields_extend_price::get_default_price()->name ?: 'Price Amazon';
+        $p_key = Settings__fields_extend_price::get_default_price($product->source->id)->name ?: 'Price Amazon';
         $footer_left = '<span><span class="__blue-title">BSR:</span>' . number_format($product->baseInfo["Sales Rank: Current"], 0, '', ' ') . ' </span>' .
                 '<span><span class="__blue-title">Sales30:</span>' . $product->baseInfo["Sales Rank: Drops last 30 days"] . ' </span>' .
                 '<span><span class="__blue-title">Price:</span>' . $product->baseInfo[$p_key] ?: '-' . ' </span>' .
@@ -157,13 +158,13 @@ class TopSlider extends Widget
 
     public function run(){
 
-      $this->_options['srcKey'] = $srcKey = Settings__source_fields::name_for_source('srcKey');
-      $this->_options['urlKey'] = Settings__source_fields::name_for_source('urlKey');
+      $this->_options['srcKey'] = $srcKey = Settings__source_fields::name_for_source('srcKey', $this->source_id);
+      $this->_options['urlKey'] = Settings__source_fields::name_for_source('urlKey', $this->source_id);
       $this->_options['class'] = '_sliderTop';
-      $this->_options['gradeKey'] = Settings__source_fields::name_for_source('gradeKey');
-      $this->_options['price'] = Settings__source_fields::name_for_source('price');
+      $this->_options['gradeKey'] = Settings__source_fields::name_for_source('gradeKey', $this->source_id);
+      $this->_options['price'] = Settings__source_fields::name_for_source('price', $this->source_id);
       //$this->_options['salesKey'] = 'E_Sales';
-      $this->_options['salesKey'] = Settings__source_fields::name_for_source('salesKey');
+      $this->_options['salesKey'] = Settings__source_fields::name_for_source('salesKey', $this->source_id);
 
 //      [Find_PriceMin_Ali] => 1
 //      [Find_PriceMax_Ali] => 14.47
