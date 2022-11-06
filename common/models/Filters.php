@@ -320,23 +320,22 @@ class Filters {
         $cnt = [];      
         $this->tables = [];
         $q = $this->source->class_1::find()
-              ->select('info');
-        //    ->andWhere($this->getSqlNoCompare());                  //Кроме скрытых элементов
-        //$this->addJoins($q);
+                ->andWhere($this->getSqlNoCompare());                  //Кроме скрытых элементов
+        $this->addJoins($q);
       
         $all = $q->all();
         
         //print_r($q->createCommand()->getRawSql());
         //exit;
     
-        //foreach ($all as $a_item) {
-        //    $c_root = $a_item->info['Categories: Root']; //baseInfo - еще не инициальзированы
-        //    if (isset($cnt[$c_root])) {
-        //        $cnt[$c_root]++;
-        //    } else {
-        //        $cnt[$c_root] = 1;
-        //    }
-        //}
+        foreach ($all as $a_item) {
+            $c_root = $a_item->info['Categories: Root']; //baseInfo - еще не инициальзированы
+            if (isset($cnt[$c_root])) {
+                $cnt[$c_root]++;
+            } else {
+                $cnt[$c_root] = 1;
+            }
+        }
         return $cnt;
     }
     
