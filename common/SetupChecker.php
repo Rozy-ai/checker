@@ -4,10 +4,7 @@ namespace common;
 
 use yii\base\BootstrapInterface;
 use yii\di\Instance;
-use backend\services\Filters;
-use backend\services\IndexService;
-
-//use backend\services\MySession;
+use common\models\Filters;
 
 /**
  * Автозагрузка сервисов
@@ -17,18 +14,10 @@ use backend\services\IndexService;
 class SetupChecker implements BootstrapInterface {
     public function bootstrap($app) {
         $container = \Yii::$container;
-
-        //Подключаем класс сессии
-        ///$container->setSingleton(MySession::class, function() {
-        //    return new MySession();
-        //});    
         
-        //Подключаем сервис c помощью анонимной функции
-        $container->setSingleton(FilterService::class, function() {
-            return new FilterService();
+        //Подключаем класс Filters
+        $container->setSingleton(Filters::class, function() {
+            return new Filters();
         });
-        
-        //Сервис Service
-        $container->setSingleton(IndexService::class, [], [Instance::of(Filters::class)]);
     }
 }

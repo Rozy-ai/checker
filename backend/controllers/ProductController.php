@@ -16,10 +16,10 @@ use yii\filters\AccessControl;
 use yii\db\Expression;
 use common\models\Comparison\Aggregated;
 use yii\data\ActiveDataProvider;
-use backend\services\IndexService;
+use backend\presenters\IndexPresenter;
 use common\models\Source;
 use common\models\User;
-use backend\services\Session;
+use common\models\Session;
 use backend\models\Settings__fields_extend_price;
 
 /**
@@ -27,17 +27,14 @@ use backend\models\Settings__fields_extend_price;
  */
 class ProductController extends Controller {
 
-    /** @var IndexService */
-    public $indexService;
-    
-    /** @var MySession */
-    //public $session;
+    /** @var IndexPresenter */
+    public $indexPresenter;
     
     public $prev = null;
     public $next = null;
     
     /** @var Source Модель источника товаров. Устанавливается в beforeAction */
-    private $source = null;
+    private Source $source;
 
     /*
 
@@ -133,11 +130,11 @@ class ProductController extends Controller {
      * @param IndexService $indexService
      */
     public function __construct($id, $module,
-            IndexService $indexService,
+            IndexPresenter $indexPresenter,
             array $config = [])
     {
         parent::__construct($id, $module, $config);
-        $this->indexService = $indexService;
+        $this->indexPresenter = $indexPresenter;
     }
     
     /**
@@ -166,82 +163,70 @@ class ProductController extends Controller {
     }
 
     public function actionIndex() {
-        ini_set("memory_limit", "3024M");
-        $this->indexService->source = $this->source;
-        $this->indexService->loadParams();
         
-        //$on_page_str = null;
+        $this->indexPresenter->setSource($this->source);
+        $this->indexPresenter->loadFromSession();
 
-        $where_3_list = $this->indexService->getWhere_3_list();
-        $where_4_list = $this->indexService->getWhere_4_list();
-        $where_6_list = $this->indexService->getWhere_6_list();
-
-        //$this->start_import(); // ???    
-        $cnt_all = $this->indexService->getCountProducts();
-
-        $list = $this->indexService->getProducts();
-
-        $pager = $this->indexService->getPager($cnt_all);
-
+        $list = $this->indexPresenter->getListProduct();
         $this->layout = 'products_list';
-
-        //$searchModel = new ProductSearch();
-        //$params = $this->request->queryParams;
-        //$data = &$params[$searchModel->formName()];
-        //if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) === null && empty($data['user'])) {
-        //  $params ['user'] = \Yii::$app->user->identity->username;
-        //  $params ['unprocessed'] = true;
-        //}
-        //$dataProvider = $searchModel->search($params);
-
-        $profiles_list = $this->indexService->profiles_list_cnt_2();
-        //$profiles_list = $this->indexService->profiles_list_cnt(); Не понятно
-
-        $this->getView()->params['filter_statuses'] = $this->indexService->cnt_filter_statuses($this->request->get('filter-items__profile'));
-        if ($this->indexService->getFilterItemsComparisons() === 'NOCOMPARE') {
-            $no_compare = true;
-        }
-
-        $last_update = $this->indexService->get_last_local_import();
-        
+        //$this->getView()->params['filter_statuses'] = $this->indexPresenter->getListComparisons();
+                //$this->indexPresenter->cnt_filter_statuses($this->request->get('filter-items__profile'));
         $user = \Yii::$app->user->identity;
+        
+        return $this->render('test', [
+            //'active_id_source' => $this->source->id,
+            //'list_source'      => Source::findAllSources($this->source->id, $user->id),
 
-        return $this->render('index', [
-                    'last_update'      => $last_update,
+            'where_3_list' => $this->indexPresenter->getListCategoriesRoot(),
+            //'where_4_list' => $this->indexPresenter->getListUser(),
             
-                    'list_source'      => Source::findAllSources($this->source->id, \Yii::$app->user->id),
-                    'active_id_source' => $this->source->id,
+            //'active_profiles' => $this->indexPresenter->getCurrentProfile(),
+            //'list_profiles'=> $this->indexPresenter->getListProfiles(),
             
-                    'list_profiles'    => $profiles_list,
-                    'active_profiles'  => $this->indexService->itemsProfile,
+            //'active_comparison_status' => $this->indexPresenter->getCurrentComparisonStatus(),
+            //'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses(),
+
+            //'last_update' => $this->indexPresenter->getLastLocalImport(),
             
-                    'count_products_all'      => $this->indexService->getCountProducts(),
-                    'count_products_on_page'  => $this->indexService->getCountProductsOnPage(),
-                    'count_products_right'    => $this->indexService->getCountProductsRight($list),
-                    'is_admin'                => $user && $user->isAdmin(),
-                    'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),
-                    'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
-            
-            
-                    //'get_' => $this->request->get(),
-//                    'searchModel' => null, //$searchModel,
-                    //'dataProvider' => $dataProvider,
-                    'list' => $list,
-                    'cnt_all' => $cnt_all,
-//                    'cnt_all_right' => $cnt_all_right,
-//                    'on_page' => $on_page_str,
-//                    'pages_cnt' => $pages_cnt,
-//                    'url_construct' => $url_construct,
-//                    'page_n' => $page_n,
-                    'where_3_list' => $where_3_list,
-                    'where_4_list' => $where_4_list,
-                    'where_6_list' => $where_6_list,
-                    
-                    //'no_compare' => $no_compare,
-                    //'pager' => $pager,
-//                    'sort' => $sort,
-                    //'right_item_show' => $this->indexService->getItemsRightItemShow() ? true : false,
+            //'list' =>$list,
+            //'count_products_all' => $this->indexPresenter->getCountProducts(),
+            //'count_products_on_page'  => $this->indexPresenter->getCountProductsOnPage(),
+            //'count_products_right'    => $this->indexPresenter->getCountProductsOnPageRight($list),       
+
+            //'is_admin'                => $user && $user->isAdmin(),
+            //'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),                
+
+            //'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
         ]);
+
+        /*
+        return $this->render('index', [
+            'active_id_source' => $this->source->id,
+            'list_source'      => Source::findAllSources($this->source->id, $user->id),
+
+            'where_3_list' => $this->indexPresenter->getListCategoriesRoot(),
+            'where_4_list' => $this->indexPresenter->getListUser(),
+            
+            'active_profiles' => $this->indexPresenter->getCurrentProfile(),
+            'list_profiles'=> $this->indexPresenter->getListProfiles(),
+            
+            'active_comparison_status' => $this->indexPresenter->getCurrentComparisonStatus(),
+            'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses(),
+
+            'last_update' => $this->indexPresenter->getLastLocalImport(),
+            
+            'list' =>$list,
+            'count_products_all' => $this->indexPresenter->getCountProducts(),
+            'count_products_on_page'  => $this->indexPresenter->getCountProductsOnPage(),
+            'count_products_right'    => $this->indexPresenter->getCountProductsOnPageRight($list),       
+
+            'is_admin'                => $user && $user->isAdmin(),
+            'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),                
+
+            'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
+        ]);
+         * 
+         */
     }
 
     /**

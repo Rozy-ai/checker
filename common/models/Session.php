@@ -1,14 +1,15 @@
 <?php
 
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
+ * Тут собраны все переменные, которые используются в сесии.
+ * Возможно добавятся функии
  */
 
-namespace backend\services;
+namespace common\models;
 
 /**
  * Класс будет отыечать за передачу данных между запросами
+ * Префикс "filter_" означает что переменная имеет отношение к запросам выборки
  *
  * @author kosten
  */
@@ -27,7 +28,7 @@ class Session extends \yii\web\Session{
     
     /** @const string $f_items__user          (where_4) username пользователя */
     const filter_username = 'filter_username';
-    
+   
     /** @const string $f_items__comparing_images (where_5) Title */
     const filter_title = 'filter_title';
 
@@ -35,17 +36,14 @@ class Session extends \yii\web\Session{
     const filter_comparisons = 'filter_comparisons';
     
     /** @const string filter-items__sort      Нужно ли сотрировать продукты */
-    const filter_items_sort = 'filter_items_sort';
+    const filter_sort = 'filter_sort';
     
     /** @const string filter-items__profile   Доступен только для администратора*/
     const filter_items_profile = 'filter_items_profile';
     
-    /** @const string page Номер просматриваемой страницы */
-    const pager_page = 'pager_page';
-    
-    /** @const string page Количество страниц пейджера */
-    const pager_on_page = 'pager_on_page';
+    /** @const int page Номер просматриваемой страницы */
+    const filter_number_page_current = 'number_page_current';
     
     /** @const string $items__show_n_on_page Сколько товаров отображать на странице */
-    const show_n_on_page = 'show_n_on_page';
+    const filter_count_products_on_page = 'filter_count_products_on_page';
 }

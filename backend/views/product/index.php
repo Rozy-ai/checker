@@ -16,6 +16,9 @@ use yii\helpers\Url;
  * @var array  $list_profiles
  * @var string $active_profiles
  * 
+ * @var array  $list_comparison_statuses
+ * @var array  $active_comparison_status
+ * 
  * @var int    $count_products_all
  * @var int    $count_products_on_page
  * @var int    $count_products_right
@@ -160,15 +163,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="form-group _col-sm-3">
                         <select name="filter-items__comparisons" id="filter-items__comparisons" class="form-control">
                             <!--<option value="">Result</option>-->
-                            <?// array_pop($this->params['filter_statuses']) ?>
-                            <? foreach ( $this->params['filter_statuses'] as $k_status => $status_data):?>
-                            <option
-                                value="<?= $k_status ?>"
-                                <?= isset($get_['filter-items__comparisons']) ? $get_['filter-items__comparisons'] == $k_status ? 'selected' : '' : '' ?>
-
-                                ><?= $status_data['name'] ?> (<?= $status_data['cnt'] ?>)</option>
-                            <? endforeach;?>
-
+                            <?// array_pop($list_statuses) ?>
+                            
+                            <?php 
+                                foreach ( $list_comparison_statuses as $key => $data){
+                                    $is_active = ($key == $active_comparison_status)?'active':'';
+                                    $name = $data['name'];
+                                    $count = $data['count'];
+                                    echo "<option value=$key $is_active>$name ($count)</option>";
+                                }
+                            ?>
 
                             <? if (0):?>
                             <option value="YES_NO_OTHER" <?= ($get_['filter-items__comparisons'] === 'YES_NO_OTHER') ? 'selected' : '' ?>>Result</option>
