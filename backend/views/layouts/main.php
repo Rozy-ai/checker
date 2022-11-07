@@ -48,7 +48,7 @@ if (get_class($this->context->module->controller) === 'backend\controllers\Messa
         ['label' => 'Home', 'url' => ['/site/index']],
     ];
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+        $menuItems[] = ['label' => 'Login', 'url' => ['/auth/login']];
     } else {
         $menuItems[] = ['label' => 'Products', 'url' => ['/product/index']];
         if (Yii::$app->user->can('admin'))
@@ -58,7 +58,7 @@ if (get_class($this->context->module->controller) === 'backend\controllers\Messa
             $menuItems[] = ['label' => 'Stats', 'url' => ['/stats/index']];
         }
         $menuItems[] = '<li>'
-            . Html::beginForm(['/site/logout'], 'post', ['class' => 'form-inline'])
+            . Html::beginForm(['/auth/logout'], 'post', ['class' => 'form-inline'])
             . Html::submitButton(
                 'Logout (' . Yii::$app->user->identity->username . ')',
                 ['class' => 'btn btn-link logout']

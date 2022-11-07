@@ -15,7 +15,7 @@ $menuItems = [
   ['label' => 'Home', 'url' => ['/site/index']],
 ];
 if (Yii::$app->user->isGuest) {
-  $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+  $menuItems[] = ['label' => 'Login', 'url' => ['/auth/login']];
 } else {
   //$menuItems[] = ['label' => 'Products', 'url' => ['/product/index?filter-items__source=1&filter-items__show_n_on_page=10&filter-items__id=&filter-items__target-image=&filter-items__comparing-images=&filter-items__user=&filter-items__comparisons=ALL&filter-items__sort=&filter-items__right-item-show=0&page=1']];
   $menuItems[] = ['label' => 'Products', 'url' => ['/product/index']];
@@ -26,7 +26,7 @@ if (Yii::$app->user->isGuest) {
     $menuItems[] = ['label' => 'Settings', 'url' => ['/settings/index']];
   }
   $menuItems[] = '<li>'
-    . Html::beginForm(['/site/logout'], 'post', ['class' => 'form-inline'])
+    . Html::beginForm(['/auth/logout'], 'post', ['class' => 'form-inline'])
     . Html::submitButton(
       'Logout (' . Yii::$app->user->identity->username . ')',
       ['class' => 'btn btn-link logout']
