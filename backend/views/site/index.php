@@ -15,10 +15,6 @@ $this->title = 'My Yii Application';
         <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
     </div>
 
-  <div style="margin-top: 70px">
-
-  </div>
-
     <div class="body-content">
 
       <div class="row">

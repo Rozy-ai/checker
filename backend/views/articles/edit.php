@@ -8,7 +8,7 @@ use yii\bootstrap4\ActiveForm;
 //$this->title = Yii::t('site', 'Редактирование поля таблицы');
 ?>
 
-<div class="[ ARTICLE-EDIT ] article-edit" style="margin-top: 70px">
+<div class="[ ARTICLE-EDIT ] article-edit">
 <? $form = ActiveForm::begin(['id' => 'articles__edit-item','class' => 'form-control']); ?>
 
 <?= Html::activeHiddenInput($item,'id'); ?>

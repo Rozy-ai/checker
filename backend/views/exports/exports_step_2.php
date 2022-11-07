@@ -22,7 +22,7 @@ $model->addRule(['ignore_step_3'], 'string');
   }
 </style>
 
-<div style="margin-top: 70px">
+<div>
   <h2 class="export_step_2_title" data-source_id="<?=Source::get_source($source_id)['source_id']?>">Выгрузка: Step 2 (<?=Source::get_source($source_id)['source_name']?>)</h2>
   <? $form = ActiveForm::begin(['action' => '/exports/step_3',]); ?>
 
