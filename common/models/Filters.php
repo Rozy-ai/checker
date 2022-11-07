@@ -15,46 +15,46 @@ namespace common\models;
 class Filters {
     /** @var string f_items__show_n_on_page Количество товаров на странице */
     public $f_count_products_on_page;
-    
+
     /** @val string Номер страницы текущий*/
     public $f_number_page_current;
-    
+
     /** @var string f_items__profile */
     public $f_profile;
-    
+
     /** @var string f_items__no_compare     (where_1) Убрать товары из таблицы hidden_itesm */
     public $f_no_compare;
-    
+
     /** @var string f_items__id             (where_2) id товара из поля формы для ввода id*/
     public $f_id;
-    
+
     /** @var string f_items__target_image;  (where_3) categiries_root (select)*/
     public $f_target_image;
-    
+
     /** @var string f_items__user           (where_4) username пользователя*/
     public $f_user;
-    
+
     /** @var string f_items__comparing_images(where_5) Title */
     public $f_comparing_images;
-    
+
     /** @var string f_items__comparisons    (where_6) Фильтр выбора товара из поля выбора из Comparisons*/
     public $f_comparisons;
     //                                      (where_7) Не используется
     //                                      (where_8) Выносим в User
-    
+
     /** @var string filter_items__sort */
     public $f_sort;
-    
+
     /** @var array Массив данных, наполненный именами таблиц для присоединеиня в зависимости от условий */
     private $tables = [];
     public Source $source;
-    
+
     // Сделал так для наглядности нужных параметров
     public function load(array $params){
         //foreach($properties as $key => $value){
         //  $this->{$key} = $value;
         //}
-        
+
         $this->f_count_products_on_page  = $params['f_count_products_on_page'] ?? 10;
         $this->f_number_page_current     = $params['f_number_page_current']    ?? 1;
         $this->f_profile                 = $params['f_profile'];
@@ -66,14 +66,14 @@ class Filters {
         $this->f_comparisons             = $params['f_comparisons'];
         $this->f_sort                    = $params['f_sort'];
     }
-    
+
     public function setSource($source){
         $this->source = $source;
     }
-    
+
     public function loadFromSession(Source $source){
         $session = \Yii::$app->session;
-        
+
         $this->f_profile         = $session[Session::filter_items_profile];
         $this->f_id              = $session[Session::filter_id];
         $this->f_comparing_images= $session[Session::filter_title];
@@ -81,8 +81,8 @@ class Filters {
         $this->f_user            = $session[Session::filter_username];
         $this->f_no_compare      = $session[Session::filter_no_compare];
         $this->f_comparisons     = $session[Session::filter_comparisons];
-        
-        
+
+
         if (!$this->comparisons){
             // is admin
             $identity = \Yii::$app->user->identity;
@@ -92,15 +92,15 @@ class Filters {
                 $this->f_no_compare = $session[Session::filter_comparisons] = 'NOCOMPARE';
             }
         }
-                
+
     }
-    
+
     private function addTable($table_name){
         if (!in_array($table_name, $this->tables)){
             $this->tables[] = $table_name;
         }
     }
-    
+
     /*
      * Фильтр проверки на отсутствие товара в таблице hidden_items
      * where_1
@@ -119,16 +119,16 @@ class Filters {
                         ['OR',['hidden_items.source_id' => null],
                             ['<>','hidden_items.source_id', $this->source->id]
                         ]
-                    ];  
+                    ];
         } else {
             return [];
         }
     }
-    
+
     /**
      * Фильтр поиска товара по id или asin
      * where_2
-     * 
+     *
      * @param string $f_items__id id или asin товара из поля формы для ввода id
      * @param string $source_table_name Имя таблицы источника
      * @return array
@@ -138,17 +138,17 @@ class Filters {
         if (!isset($this->source->table_1)){
             throw new \InvalidArgumentException('Отсутствует обязательный аргумент');
         }
-        
+
         return ($this->f_id)?
             ['or',[$this->source->table_1.'.id' => $this->f_id],
                   [$this->source->table_1.'.asin' => $this->f_id]
             ] : [];
     }
-    
+
     /**
      * Фильтр поиска товара по Categories: Root
      * where_3
-     * 
+     *
      * Ищет в поле info значение  '"Categories: Root": "'.$this->f_items__target_image.'"'
      * Поле info имеется в таблицах parser_trademarkia_com | parser_google | parser_china
      * @param string $f_items__target_image
@@ -162,11 +162,11 @@ class Filters {
         return ($this->f_target_image)?
             ['like', $this->source->table_1.'info', '"Categories: Root": "'.$this->f_target_image.'"'] : [];
     }
-    
+
     /*
      * Фильтр username пользователя. В поле появляются имена пользователей, которые делали выбор на правых товарах.
      * where_4
-     * 
+     *
      * Поле появляется если пользователь admin. И там выбирается 1 из вариантов. Пока только user отображается почему-то.
      * @param string $f_user Выбранный username пользователя
      * @return array
@@ -174,11 +174,11 @@ class Filters {
     public function getSqlUser(){
         return ($this->f_user)?['like', 'users', $this->f_user]:[];
     }
-    
+
     /**
      * Фильтр Title товара
      * (where_5)
-     * 
+     *
      * Отображается на странице product/index
      * @param string $f_items__comparing_images
      * @return array
@@ -186,13 +186,13 @@ class Filters {
     public function getSqlComparingImages(){
         return ($this->f_comparing_images)?['like', 'info', str_replace('/','\/',$this->f_comparing_images)]:[];
     }
-    
+
     /**
      * Фильтр отмеченных сравнений товара
      * (where_6)
-     * 
+     *
      * Список статусов находится в common/models/Comparisons и является константой
-     * 
+     *
      * @param type $f_items__comparisons
      * @param type $source_id - id источника товара (sourse->id)
      * @return array
@@ -202,7 +202,7 @@ class Filters {
         if ($this->f_comparisons === 'NOCOMPARE' && !isset($this->source->id)) {
             throw new \InvalidArgumentException("Отсутствует обязательный аргумент для значения $this->f_comparisons");
         }
-                
+
         switch ($this->f_comparisons){
             case 'MATCH': {
                 $this->addTable('comparisons_aggregated');
@@ -233,12 +233,12 @@ class Filters {
             default:                    return [];
         }
     }
-    
+
     /**
      * Проверка источника на наличие поля add_info
      * (where_7)
-     * 
-     * Если исходная таблица из EBay (parser_trademarkia_com) 
+     *
+     * Если исходная таблица из EBay (parser_trademarkia_com)
      * @return array
      */
     public function getSqlAddInfoExists(){
@@ -248,18 +248,18 @@ class Filters {
                 "info NOT LIKE '%\"add_info\":\"[]\"%'",
                 "info NOT LIKE '%\"add_info\": \"[]\"%'"] : [];
     }
-    
+
     /**
      * Если пользователь не Admin то включить записи правленые этим пользователем или никем
      * (where_8)
-     * 
+     *
      * @return array
      * @throws \BadMethodCallException
      */
     public function getSqlNoInComparisons(){
         $user = \Yii::$app->user->identity;
         $is_admin = ($user && $user->isAdmin());
-        
+
         if (!$is_admin && $user->id) {
             $this->addTable('comparisons');
             return ["IN", 'comparisons.user_id', [$user->id, null]];
@@ -267,11 +267,11 @@ class Filters {
             return [];
         }
     }
-    
+
     /**
      * Включить в выборку только товары, с пометкой "Не удалось установить точное соответствие"
      * (where_9)
-     * 
+     *
      * Список пометок находится в таблице checker.message
      * Устанавливается на странице сравнения товаров (product/view) на нажатии на правом товаре на синююю кнопку из трех
      * @return array
@@ -280,31 +280,32 @@ class Filters {
         $this->addTable('messages');
         return ['messages.settings__visible_all' => '1'];
     }
-    
+
     /**
      * Фильтр профиля. Отображается только для администратора, значит и работает только для администратора
      * (where_10)
-     * 
+     *
      * Отображается список профилей товара (Prepod, General, ...)
      * Указано в таблице parser_trademarkia_com в поле profile. И список выбирвется из него
      * Вопрос:
      *     Чтобы вывести список профилей, нужно сформировать список согласно фильтрам иди вообще всех товаров?
      * @return array
      */
-    public function getSqlProfile(){
+    public function getSqlProfile(): array
+    {
         if (!isset($this->source->table_1)){
             throw new InvalidArgumentException('Не установлено значение source->table_1');
         }
-        $identity = \Yii::$app->user->identity;
-        
-        return ($identity && $identity->isAdmin() && $this->f_profile !== '{{all}}' && $this->f_profile !== 'Все')?
-            ['like', $this->source_table_name.'.`profile`', $this->f_profile] : [];
+        if ((\backend\models\User::isAdmin() && $this->f_profile && $this->f_profile !== '{{all}}' && $this->f_profile !== 'Все')) {
+            return ['like', $this->source->table_1.'.`profile`', $this->f_profile];
+        }
+        return [];
     }
-    
+
     /**
      * Получить список всех категорий ( 'Categories: Root' ) и их количество
      * (todo: Нужно оптимизировать)
-     * @return attay
+     * @return array
      *    [
      *       string => int,
      *       string => int,
@@ -312,22 +313,23 @@ class Filters {
      *       string => int
      *    ]
      */
-    public function getListCategoriesRoot(){
+    public function getListCategoriesRoot(): array
+    {
         //if (!$this->source) {
         //    throw new \yii\base\InvalidParamException();
         //}
 
-        $cnt = [];      
+        $cnt = [];
         $this->tables = [];
         $q = $this->source->class_1::find()
                 ->andWhere($this->getSqlNoCompare());                  //Кроме скрытых элементов
         $this->addJoins($q);
-      
+
         $all = $q->all();
-        
+
         //print_r($q->createCommand()->getRawSql());
         //exit;
-    
+
         foreach ($all as $a_item) {
             $c_root = $a_item->info['Categories: Root']; //baseInfo - еще не инициальзированы
             if (isset($cnt[$c_root])) {
@@ -338,7 +340,7 @@ class Filters {
         }
         return $cnt;
     }
-    
+
     /**
      * Список пользователей с количеством сравнений для каждого
      * (todo: Нужно оптимизировать)
@@ -382,12 +384,12 @@ class Filters {
 
         return $cnt;
     }
-    
+
     /**
      * Список статусов и количество товаров, которые сотвествуют этому фильтру
      * Список статусов находится в common/models/Comparisons и является константой
      * (todo: Нужно оптимизировать)
-     * 
+     *
      * @param type $f_items__comparisons
      * @param type $source_id - id источника товара (sourse->id)
      * @return attay
@@ -407,15 +409,15 @@ class Filters {
 
         $source_table_name = $this->source->table_1;
         $source_class = $this->source->class_1;
-        
+
         $q = $source_class::find()
             ->select(['comparisons.status', 'COUNT(*) as count_statuses'])
             ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ')
             ->asArray()
             ->groupBy('comparisons.status');
-        
+
         $data = $q->all();
-        
+
         $out = [];
         foreach ($data as $k => $val){
             if ($val['status'] == null){
@@ -423,10 +425,10 @@ class Filters {
             }
             $out[$val['status']] = $val['count_statuses'];
         }
-        
+
         return $out;
     }
-    
+
     /**
      * Получить список профилей. Отображается только для администратора, значит и работает только для администратора
      *      Нужно придумать вместо этой хрени 1 запрос
@@ -440,16 +442,16 @@ class Filters {
                 [FBA] => (string) FBA (1)
                 [Prepod_var] => (string) Prepod_var (0)
             )
-     * 
+     *
      * @return array
      */
     public function getListProfiles() {
         $source_class = $this->source->class_1;
-        
+
         //Получить уникальные значения столбца profile
         $q0 = $source_class::find()->distinct(true)->select(['profile'])->asArray();
         $res_1 = $q0->column();
-        
+
         //Так как названий профилей может быть много через запятую и ищем уникальные еше раз
         $find_uniq = function ($data) {
             $out = [];
@@ -463,7 +465,7 @@ class Filters {
             }
             return $out;
         };
-        
+
         // Тут уникальные значения столбца profile
         $profiles_uniq = $find_uniq($res_1);
 
@@ -492,21 +494,21 @@ class Filters {
 
         return array_merge($a, $list_out);
     }
-    
+
     /**
      * Плучить список продуктов(слева) для вывода, согласно всех фильтров
-     * Есть огнаричение количества на вывод 
+     * Есть огнаричение количества на вывод
      */
     public function getListProduct(){
         if (!$this->source) {
             throw new \yii\base\InvalidArgumentException();
         }
-        
+
         $source_table = $this->source->table_1;
-        
+
         $this->tables = [];
         $q = $this->source->class_1::find();
-        
+
         // Получаем все условия запроса:
         $q->where(['and',
             $this->getSqlNoCompare(),
@@ -520,13 +522,13 @@ class Filters {
             //$this->getSqlSettingsMessage(),
             $this->getSqlProfile()
         ]);
-        
+
         // Добавим сортировку:
         switch ($this->f_sort) {
-            case 'created_ASC': 
+            case 'created_ASC':
                 $q->orderBy($source_table . '.date_add ASC');
                 break;
-            case 'created_DESC': 
+            case 'created_DESC':
                 $q->orderBy($source_table . '.date_add DESC');
                 break;
             case 'updated_ASC' :
@@ -537,33 +539,33 @@ class Filters {
                 $this->addTable('p_updated');
                 $q->orderBy('p_updated.date DESC');
                 break;
-            default: 
+            default:
                 $q->orderBy($source_table . '.id');
         }
-        
+
         // Получим все необходимые join
         $this->addJoins($q);
-        
+
         // Отсечем не нужные записи
         if ($this->f_count_products_on_page !== 'ALL'){
             $count_products_on_page = (int)$this->f_count_products_on_page;
-            
+
             $offset = ($this->f_number_page_current - 1) * $count_products_on_page;
             $q->limit($count_products_on_page);
             $q->offset($offset);
         }
-        
+
         return $q->all();
     }
-    
+
     public function getCountProducts(){
         if (!$this->source) {
             throw new \yii\base\InvalidArgumentException();
         }
-        
+
         $this->tables = [];
         $q = $this->source->class_1::find();
-        
+
         // Получаем все условия запроса:
         $q->where(['and',
             $this->getSqlNoCompare(),
@@ -577,26 +579,26 @@ class Filters {
             $this->getSqlSettingsMessage(),
             $this->getSqlProfile()
         ]);
-        
+
         $this->addJoins($q);
-        
+
         return $q->count();
     }
-    
+
     private function addJoins(&$q){
         if (!$this->source) {
             throw new \yii\base\InvalidArgumentException();
-        }        
-        
+        }
+
         $source_table = $this->source->table_1;
-                
+
         // Получим все необходимые join
         foreach ($this->tables as $table){
             switch ($table) {
-                case 'hidden_items':           
-                    $q->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table . '.id '); 
+                case 'hidden_items':
+                    $q->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table . '.id ');
                     break;
-                case 'comparisons_aggregated': 
+                case 'comparisons_aggregated':
                     $q->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $source_table . '.id');
                     break;
                 case 'p_all_compare':
