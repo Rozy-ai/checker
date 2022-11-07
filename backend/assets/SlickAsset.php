@@ -10,13 +10,13 @@ use yii\web\JqueryAsset;
  */
 class SlickAsset extends AssetBundle
 {
-    public $sourcePath = '@bower/slick';
+    public $sourcePath = '@backend/assets/src/slick';
 
     public $css = [
         'slick.css',
         'slick-theme.css'
     ];
-    
+
     public $js = [
         'slick.js',
     ];
