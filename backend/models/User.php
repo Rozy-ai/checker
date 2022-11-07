@@ -13,28 +13,45 @@ use common\models\Message;
  * @property int $id
  * @property string $username
  * @property string $email
+ * @property-read Message[] $messages
+ * @property-read Comparison[] $comparisons
+ * @property-read User__source_access[] $user__source_access
  * @property int $status
  */
 class User extends \yii\db\ActiveRecord{
   /**
    * {@inheritdoc}
    */
-  public static function tableName(){
+  public static function tableName(): string
+  {
     return '{{%user}}';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function rules(){
-    return [[['username', 'email'], 'required'], [['status'], 'integer'], [['username', 'email'], 'string', 'max' => 255], [['username'], 'unique'], [['email'], 'unique'], [['detail_view_for_items'], 'safe'],];
+  public function rules(): array
+  {
+    return [
+        [['username', 'email'], 'required'],
+        [['status'], 'integer'],
+        [['username', 'email'], 'string', 'max' => 255],
+        [['username'], 'unique'],
+        [['email'], 'unique'],
+        [['detail_view_for_items'], 'safe'],
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function attributeLabels(){
-    return ['username' => Yii::t('site', 'Username'), 'email' => Yii::t('site', 'Email'), 'status' => Yii::t('site', 'Status'),];
+  public function attributeLabels(): array
+  {
+    return [
+        'username' => Yii::t('site', 'Username'),
+        'email' => Yii::t('site', 'Email'),
+        'status' => Yii::t('site', 'Status'),
+        ];
   }
 
 
@@ -43,7 +60,8 @@ class User extends \yii\db\ActiveRecord{
    *
    * @return \yii\db\ActiveQuery
    */
-  public function getComparisons(){
+  public function getComparisons(): \yii\db\ActiveQuery
+  {
     return $this->hasMany(Comparison::className(), ['id' => 'user_id']);
   }
 
@@ -52,7 +70,8 @@ class User extends \yii\db\ActiveRecord{
    *
    * @return \yii\db\ActiveQuery
    */
-  public function getMessages(){
+  public function getMessages(): \yii\db\ActiveQuery
+  {
     return $this->hasMany(Message::className(), ['id' => 'message_id'])->viaTable('user_message', ['user_id' => 'id']);
   }
 
@@ -61,21 +80,22 @@ class User extends \yii\db\ActiveRecord{
    *
    * @return \yii\db\ActiveQuery
    */
-  public function getUser__source_access(){
+  public function getUser__source_access(): \yii\db\ActiveQuery
+  {
     return $this->hasMany(User__source_access::class, ['user_id' => 'id']);
   }
 
 
-  public static function isAdmin($uid = false){
-    $out = false;
-    if (!$uid) $uid = \Yii::$app->getUser()->id;
-
-    if ($res = \Yii::$app->authManager->getAssignment('admin', $uid)) {
-      if ($res) {
-        return true;
-      }
+  public static function isAdmin($uid = false): bool
+  {
+      $user = Yii::$app->getUser();
+    if (!$uid) {
+        if ($user->getIsGuest()) {
+            return false;
+        }
+        $uid = $user->id;
     }
-    return $out;
+    return (bool)\Yii::$app->getAuthManager()->getAssignment('admin', $uid);
   }
 
 

@@ -13,6 +13,7 @@ NavBar::begin([
 ]);
 echo Nav::widget([
     'options' => ['class' => 'navbar-nav'],
+    'activateParents' => true,
     'items' => [
         [
             'label' => 'Home',
@@ -30,8 +31,18 @@ echo Nav::widget([
         ],
         [
             'label' => 'Users',
-            'url' => ['/user/index'],
-            'visible' => Yii::$app->user->can('admin')
+            'url' => '#',
+            'visible' => Yii::$app->user->can('admin'),
+            'items' => [
+                [
+                    'label' => 'External users',
+                    'url' => ['/external-users/index'],
+                ],
+                [
+                    'label' => 'Admins',
+                    'url' => ['/user/index'],
+                ],
+            ],
         ],
         [
             'label' => 'Stats',
