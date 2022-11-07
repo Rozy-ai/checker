@@ -4,7 +4,6 @@ namespace common\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Message;
 
 /**
  * MessageSearch represents the model behind the search form of `common\models\Message`.
@@ -42,13 +41,18 @@ class MessageSearch extends Message
      */
     public function search($params)
     {
-        $query = Message::find();
+        $query = Message::find()->alias('message');
 
-        $query->joinWith('users');
-        
+        $query->joinWith('users user');
+        $query->distinct();
+
         // add conditions that should always apply here
 
         $this->load($params);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         if (!$this->validate()) {
             return $dataProvider;
@@ -56,21 +60,17 @@ class MessageSearch extends Message
 
         // grid filtering conditions
         $query->andFilterWhere([
-            '{{%user_message}}.user_id' => $this->user_id
+            'message.user_id' => $this->user_id
         ]);
-
-        $query->andFilterWhere(['like', 'text', $this->text]);
-        $query->andFilterWhere(['like', '{{%user}}.username', $this->user]);
-
-        $countQuery = clone $query;
-        $countQuery->distinct();
-        
-        $query->with('users');
-        
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'totalCount' => $countQuery->count()
-        ]);
+        if ($this->text) {
+            $query->andWhere([
+                'or',
+                ['like', 'message.text', $this->text],
+                ['like', 'message.description', $this->text],
+            ]);
+        }
+        //        $query->andFilterWhere(['like', 'message.text', $this->text]);
+        $query->andFilterWhere(['like', 'user.username', $this->user]);
 
         return $dataProvider;
     }

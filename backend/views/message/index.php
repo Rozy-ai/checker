@@ -60,50 +60,37 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\CheckboxColumn'],
 
-          [
-            'attribute' => 'text',
-            'format' => 'raw',
-            'value' => function ($data) {
-              $html = '';
+            [
+                'attribute' => 'text',
+                'format' => 'raw',
+                'value' => function ($data) {
+                    $html = Html::a($data->text, ['update', 'id' => $data->id], ['data-pjax' => '0']);
+                    $html .= '<div style="color: #7d7d7d">' .$data->description.'</div>';
+                    return $html;
+                }
+            ],
 
-              $data->id;
-              $data->text;
-              $data->description;
-              $link = '/message/update?id='.$data->id;
-
-              $html = Html::a($data->text, $link);
-              $html .= '<div style="color: #7d7d7d">' .$data->description.'</div>';
-
-//              settings__table_rows_id: "5",
-//              settings__compare_symbol: "",
-//              settings__compare_field: ""
-
-              return $html;
-            }
-          ],
-
-          //'text:ntext',
+            //'text:ntext',
 
             [
                 'attribute' => 'user',
                 'format' => 'raw',
                 'value' => function ($model) {
-                    $users = $model->getUsers()->indexBy('id')->select('username')->asArray()->column();
                     $links = [];
-                    foreach ($users as $key => $value)
+                    foreach ($model->users as $user)
                     {
-                        $links [] = Html::a($value, ['message/user', 'user' => $key], ['data-pjax' => 0]);
+                        $links [] = Html::a($user->username, ['message/user', 'user' => $user->id], ['data-pjax' => 0]);
                     }
                     return implode($links, ', ');
                 }
             ],
             [
-              'class' => 'yii\grid\ActionColumn',
-              'visibleButtons' => [
-                'delete' => true,
-                'view' => false,
-                'update' => false
-              ]
+                'class' => 'yii\grid\ActionColumn',
+                'visibleButtons' => [
+                    'delete' => true,
+                    'view' => false,
+                    'update' => false
+                ]
 
             ],
         ],
