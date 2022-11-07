@@ -21,7 +21,7 @@ $get_ = $this->params['get_']?? [];
 ?>
 <?php $this->beginPage() ?>
     <!DOCTYPE html>
-    <html lang="<?= Yii::$app->language ?>" class="__h-100">
+    <html lang="<?= Yii::$app->language ?>" class="h-100">
     <head>
         <meta charset="<?= Yii::$app->charset ?>">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -30,7 +30,7 @@ $get_ = $this->params['get_']?? [];
         <?php $this->head() ?>
     </head>
 
-    <body class="d-flex flex-column __h-100 p-page">
+    <body class="d-flex flex-column h-100 p-page">
 
     <?php $this->beginBody() ?>
 

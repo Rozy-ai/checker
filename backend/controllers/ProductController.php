@@ -29,10 +29,10 @@ class ProductController extends Controller {
 
     /** @var IndexPresenter */
     public $indexPresenter;
-    
+
     public $prev = null;
     public $next = null;
-    
+
     /** @var Source Модель источника товаров. Устанавливается в beforeAction */
     private Source $source;
 
@@ -122,7 +122,7 @@ class ProductController extends Controller {
       ],
       ];
       }
-     * 
+     *
      */
 
     /**
@@ -136,34 +136,34 @@ class ProductController extends Controller {
         parent::__construct($id, $module, $config);
         $this->indexPresenter = $indexPresenter;
     }
-    
+
     /**
      * До того как вызывать какое либо действие, нужно выбрать источник
-     * 
+     *
      * {@inheritdoc}
      * @throws \yii\web\ForbiddenHttpException
      */
 
     public function beforeAction($action) {
-        
+
         $id_source = \Yii::$app->session[Session::id_source];
         $id_user   = \Yii::$app->user->id;
-        
+
         $this->source = Source::getForUser($id_user, $id_source);
-        
+
         if (!$this->source){
             throw new \yii\web\ForbiddenHttpException('Не удалось найти доступный источник');
         }
-        
+
         if ($id_source !== $this->source->id){
-            \Yii::$app->session[Session::id_source] = $this->source->id;
+            \Yii::$app->session->set(Session::id_source, $this->source->id);
         }
 
         return parent::beforeAction($action);
     }
 
     public function actionIndex() {
-        
+
         $this->indexPresenter->setSource($this->source);
         $this->indexPresenter->loadFromSession();
 
@@ -172,29 +172,29 @@ class ProductController extends Controller {
         //$this->getView()->params['filter_statuses'] = $this->indexPresenter->getListComparisons();
                 //$this->indexPresenter->cnt_filter_statuses($this->request->get('filter-items__profile'));
         $user = \Yii::$app->user->identity;
-        
+
         return $this->render('test', [
             //'active_id_source' => $this->source->id,
             //'list_source'      => Source::findAllSources($this->source->id, $user->id),
 
             'where_3_list' => $this->indexPresenter->getListCategoriesRoot(),
             //'where_4_list' => $this->indexPresenter->getListUser(),
-            
+
             //'active_profiles' => $this->indexPresenter->getCurrentProfile(),
             //'list_profiles'=> $this->indexPresenter->getListProfiles(),
-            
+
             //'active_comparison_status' => $this->indexPresenter->getCurrentComparisonStatus(),
             //'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses(),
 
             //'last_update' => $this->indexPresenter->getLastLocalImport(),
-            
+
             //'list' =>$list,
             //'count_products_all' => $this->indexPresenter->getCountProducts(),
             //'count_products_on_page'  => $this->indexPresenter->getCountProductsOnPage(),
-            //'count_products_right'    => $this->indexPresenter->getCountProductsOnPageRight($list),       
+            //'count_products_right'    => $this->indexPresenter->getCountProductsOnPageRight($list),
 
             //'is_admin'                => $user && $user->isAdmin(),
-            //'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),                
+            //'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),
 
             //'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
         ]);
@@ -206,26 +206,26 @@ class ProductController extends Controller {
 
             'where_3_list' => $this->indexPresenter->getListCategoriesRoot(),
             'where_4_list' => $this->indexPresenter->getListUser(),
-            
+
             'active_profiles' => $this->indexPresenter->getCurrentProfile(),
             'list_profiles'=> $this->indexPresenter->getListProfiles(),
-            
+
             'active_comparison_status' => $this->indexPresenter->getCurrentComparisonStatus(),
             'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses(),
 
             'last_update' => $this->indexPresenter->getLastLocalImport(),
-            
+
             'list' =>$list,
             'count_products_all' => $this->indexPresenter->getCountProducts(),
             'count_products_on_page'  => $this->indexPresenter->getCountProductsOnPage(),
-            'count_products_right'    => $this->indexPresenter->getCountProductsOnPageRight($list),       
+            'count_products_right'    => $this->indexPresenter->getCountProductsOnPageRight($list),
 
             'is_admin'                => $user && $user->isAdmin(),
-            'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),                
+            'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),
 
             'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
         ]);
-         * 
+         *
          */
     }
 
@@ -1041,7 +1041,7 @@ class ProductController extends Controller {
         return $out;
 
         if ($all) {
-            
+
         } else
             return ['res' => 'fuck',];
 

@@ -7,7 +7,7 @@ $model->addRule(['comparisons'], 'required');
 $model->addRule(['test'], 'trim');
 ?>
 
-<div style="margin-top: 70px">
+<div>
   <h2>Выгрузка: Step 1</h2>
 
   <? $form = ActiveForm::begin(['action' => '/exports/step_2',]); ?>

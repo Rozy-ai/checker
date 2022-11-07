@@ -8,7 +8,7 @@ use backend\models\Source;
 
 </style>
 
-<div style="margin-top: 70px">
+<div>
   <h2>Import: Result (<?=$source['source_name']?>)</h2>
   <div>
 

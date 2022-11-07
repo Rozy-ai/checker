@@ -5,7 +5,7 @@ use yii\helpers\Html;
 $this->title = Yii::t('site', 'Статьи на главной');
 ?>
 
-<div class="table-responsive" style="margin-top: 70px">
+<div class="table-responsive">
   <h1><?= Html::encode($this->title) ?></h1>
 
   <?= \yii\grid\GridView::widget([

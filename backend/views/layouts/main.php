@@ -22,7 +22,7 @@ if (get_class($this->context->module->controller) === 'backend\controllers\Messa
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
-<html lang="<?= Yii::$app->language ?>" class="_h-100">
+<html lang="<?= Yii::$app->language ?>" class="h-100">
 <head>
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -34,51 +34,13 @@ if (get_class($this->context->module->controller) === 'backend\controllers\Messa
 <?php $this->beginBody() ?>
 
 <header>
-    <?php
-    echo \backend\components\NavBarWidget::widget([]);
-    if (0):
-    NavBar::begin([
-        'brandLabel' => Yii::$app->name,
-        'brandUrl' => Yii::$app->homeUrl,
-        'options' => [
-            'class' => 'navbar navbar-expand-md navbar-dark bg-dark fixed-top',
-        ],
-    ]);
-    $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
-    ];
-    if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Login', 'url' => ['/auth/login']];
-    } else {
-        $menuItems[] = ['label' => 'Products', 'url' => ['/product/index']];
-        if (Yii::$app->user->can('admin'))
-        {
-            $menuItems[] = ['label' => 'Messages', 'url' => ['/message/index']];
-            $menuItems[] = ['label' => 'Users', 'url' => ['/user/index']];
-            $menuItems[] = ['label' => 'Stats', 'url' => ['/stats/index']];
-        }
-        $menuItems[] = '<li>'
-            . Html::beginForm(['/auth/logout'], 'post', ['class' => 'form-inline'])
-            . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->username . ')',
-                ['class' => 'btn btn-link logout']
-            )
-            . Html::endForm()
-            . '</li>';
-    }
-    echo Nav::widget([
-        'options' => ['class' => 'navbar-nav'],
-        'items' => $menuItems,
-    ]);
-    NavBar::end();
-    endif;
-    ?>
+    <?= \backend\components\NavBarWidget::widget([]);?>
 </header>
 
 <main role="main" class="flex-shrink-0">
     <div class="container">
         <?= Breadcrumbs::widget([
-            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+            'links' => $this->params['breadcrumbs'] ?? [],
         ]) ?>
         <?= Alert::widget() ?>
         <?= $content ?>

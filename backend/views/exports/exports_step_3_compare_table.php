@@ -64,7 +64,7 @@ $model->addRule(['profile'], 'string');
   }
 </style>
 
-<div style="margin-top: 70px">
+<div>
   <h2>Выгрузка: Step 3</h2>
   <div style="margin-bottom: 10px">
     Выбрано: <?=Source::get_source($source_id)['source_name']?> (<?= $comparisons?>)

@@ -25,7 +25,7 @@ $model->addRule(['load_file'], 'file',['skipOnEmpty' => false, 'extensions' => '
   }
 </style>
 
-<div style="margin-top: 70px">
+<div>
   <h2>Import: Step 1 (<?=Source::get_source($source_id)['source_name']?>)</h2>
 
   <? $form = ActiveForm::begin(['action' => '/import/step_2',]); ?>

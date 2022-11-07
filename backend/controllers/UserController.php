@@ -11,6 +11,7 @@ use backend\models\UserForm;
 use backend\models\UserSearch;
 use backend\models\AuthAssignment;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -145,13 +146,17 @@ class UserController extends Controller{
    * @return mixed
    * @throws NotFoundHttpException if the model cannot be found
    */
-  public function actionUpdate($id){
+  public function actionUpdate($id, \yii\web\User $user){
     //echo '<pre>'.PHP_EOL;
     //$user = User::find()->where(['id'=>$id])->one();
 
     //User::find()->where(['id'=>$id])->limit(1)->one()->user__source_access;
 
     $model = $this->findModel($id);
+
+      if ((int)$user->getId() !== 1 && (int)$model->id !== (int)$user->getId()) {
+          throw new ForbiddenHttpException();
+      }
 
     $form = new UserForm(['model' => $model, 'scenario' => 'update']);
     if ($this->request->isPost) {

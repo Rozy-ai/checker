@@ -1,3 +1,7 @@
+main {
+  padding: 70px 15px 20px;
+}
+
 .home {
   padding-top: 74px;
   line-height: 1;
@@ -2383,7 +2387,7 @@ table.tableInfo th {
   word-break: break-word;
 }
 .brief_table{
-    width: 100%;   
+    width: 100%;
 }
 
 .brief_table td {
@@ -3640,5 +3644,10 @@ a.a-black {
   display: inline-block;
   position: relative;
   top: -8px;
+}
+
+.navbar-nav .nav-link.logout-link {
+  font-weight: 400;
+  color: #007bff;
 }
 
