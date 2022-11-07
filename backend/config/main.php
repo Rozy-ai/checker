@@ -13,6 +13,20 @@ return [
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log', 'common\SetupChecker'],
     'modules' => [],
+    'as access' => [
+        'class' => \yii\filters\AccessControl::class,
+        'except' => [
+            'auth/login',
+            'gii/*',
+            'debug/*',
+        ],
+        'rules' => [
+            [
+                'allow' => true,
+                'roles' => ['@']
+            ]
+        ]
+    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-backend_',
@@ -21,6 +35,7 @@ return [
             'identityClass' => common\models\User::class,
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
+            'loginUrl' => ['auth/login'],
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
