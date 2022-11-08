@@ -10,6 +10,7 @@ use yii\helpers\Url;
 /*
  * @var object $last_update
  * 
+ * 
  * @var array  $list_source
  * @var int    $active_id_source
  * 
@@ -19,6 +20,7 @@ use yii\helpers\Url;
  * @var array  $list_comparison_statuses
  * @var array  $active_comparison_status
  * 
+ * @var array  $list
  * @var int    $count_products_all
  * @var int    $count_products_on_page
  * @var int    $count_products_right
@@ -269,9 +271,8 @@ $this->params['breadcrumbs'][] = $this->title;
             <? endif;?>
 
             <? foreach ($list as $k => $item):   ?>
-            <?if(!$item->addInfo) continue; ?>
 
-            <?
+            <?php
                 $images_left = preg_split("/[; ]/", $item->baseInfo["Image"]);
 
                 $images_left[0];
@@ -378,15 +379,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td class="products-list__td3">
 
                     <div class="products-list__slider-wrapper <?= (int) $right_item_show === 1 ? '-v-2' : '' ?> js-slider-root">
-                        <?=
-                        TopSlider::widget([
+                        <?php
+                        echo TopSlider::widget([
                             'no_compare' => $no_compare,
                             'product' => $item,
-                            'page' => $pages->page,
+                            //'page' => $pages->page,
                             'hide_red' => true,
                             'right_item_show' => $right_item_show,
                             'is_filter_items' => 1,
-                            'get_' => $get_,
                             'source_id' => $source_id 
                         ])
                         ?>

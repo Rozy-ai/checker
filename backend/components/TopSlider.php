@@ -172,9 +172,9 @@ class TopSlider extends Widget
       $this->_options['salesKey'] = 'E_Sales';
 
 
-      if ($this->hide_red && $this->get_['filter-items__comparisons'] !== 'MISMATCH' && $this->get_['filter-items__comparisons'] !== 'ALL' && $this->get_['filter-items__comparisons'] !== 'ALL_WITH_NOT_FOUND')
-        $items = $this->hide_red($this->product->addInfo);
-      else
+      //if ($this->hide_red && $this->get_['filter-items__comparisons'] !== 'MISMATCH' && $this->get_['filter-items__comparisons'] !== 'ALL' && $this->get_['filter-items__comparisons'] !== 'ALL_WITH_NOT_FOUND')
+      //  $items = $this->hide_red($this->product->addInfo);
+      //else
         $items = $this->product->addInfo;
       
       return $this->render( ($this->right_item_show)? 'slider-v-2': 'slider-v-1', [

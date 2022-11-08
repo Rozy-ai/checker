@@ -55,8 +55,8 @@ class Filters {
         //  $this->{$key} = $value;
         //}
         
-        $this->f_count_products_on_page  = $params['f_count_products_on_page'] ?? 10;
-        $this->f_number_page_current     = $params['f_number_page_current']    ?? 1;
+        $this->f_count_products_on_page  = $params['f_count_products_on_page'];
+        $this->f_number_page_current     = $params['f_number_page_current'];
         $this->f_profile                 = $params['f_profile'];
         $this->f_no_compare              = $params['f_no_compare'];
         $this->f_id                      = $params['f_id'];
@@ -94,13 +94,7 @@ class Filters {
         }
                 
     }
-    
-    private function addTable($table_name){
-        if (!in_array($table_name, $this->tables)){
-            $this->tables[] = $table_name;
-        }
-    }
-    
+       
     /*
      * Фильтр проверки на отсутствие товара в таблице hidden_items
      * where_1
@@ -313,30 +307,16 @@ class Filters {
      *    ]
      */
     public function getListCategoriesRoot(){
-        //if (!$this->source) {
-        //    throw new \yii\base\InvalidParamException();
-        //}
+        $list = \Yii::$app->db->createCommand(
+            'SELECT info->\'$."Categories: Root"\' as cat, count(*) as count FROM parser_trademarkia_com GROUP BY cat')->queryAll(); 
 
-        $cnt = [];      
-        $this->tables = [];
-        $q = $this->source->class_1::find()
-                ->andWhere($this->getSqlNoCompare());                  //Кроме скрытых элементов
-        $this->addJoins($q);
-      
-        $all = $q->all();
-        
-        //print_r($q->createCommand()->getRawSql());
-        //exit;
-    
-        foreach ($all as $a_item) {
-            $c_root = $a_item->info['Categories: Root']; //baseInfo - еще не инициальзированы
-            if (isset($cnt[$c_root])) {
-                $cnt[$c_root]++;
-            } else {
-                $cnt[$c_root] = 1;
+        $new_list = [];
+        if (is_array($list)){
+            foreach ($list as $data){
+                $new_list[$data['cat']] = $data['count'];
             }
         }
-        return $cnt;
+        return $new_list;
     }
     
     /**
@@ -503,23 +483,11 @@ class Filters {
         }
         
         $source_table = $this->source->table_1;
-        
         $this->tables = [];
         $q = $this->source->class_1::find();
         
         // Получаем все условия запроса:
-        $q->where(['and',
-            $this->getSqlNoCompare(),
-            $this->getSqlId(),
-            $this->getSqlCategoriesRoot(),
-            $this->getSqlUser(),
-            $this->getSqlComparingImages(),
-            $this->getSqlComparisons(),
-            $this->getSqlAddInfoExists(),
-            $this->getSqlNoInComparisons(),
-            //$this->getSqlSettingsMessage(),
-            $this->getSqlProfile()
-        ]);
+        $this->addWheres($q);
         
         // Добавим сортировку:
         switch ($this->f_sort) {
@@ -552,8 +520,16 @@ class Filters {
             $q->limit($count_products_on_page);
             $q->offset($offset);
         }
+
+        $list = $q->all();
         
-        return $q->all();
+        //print_r($q->createCommand()->getRawSql());
+        //exit;
+        foreach ($list as $k => $product) {
+            $product->source = $this->source;
+            $product->baseInfo = $product->info;
+        }
+        return $list;
     }
     
     public function getCountProducts(){
@@ -564,7 +540,23 @@ class Filters {
         $this->tables = [];
         $q = $this->source->class_1::find();
         
-        // Получаем все условия запроса:
+        $this->addWheres($q);
+        $this->addJoins($q);
+        
+        return $q->count();
+    }
+    
+    // Добавить таблицу в $this->tables. Далее они пакетом присоединятся к запросу
+    private function addTable($table_name){
+        if (!in_array($table_name, $this->tables)){
+            $this->tables[] = $table_name;
+        }
+    }
+    
+    /**
+     * Вспомогательная функция всех условий запроса для получения списка продуктов
+     */
+    private function addWheres(&$q){
         $q->where(['and',
             $this->getSqlNoCompare(),
             $this->getSqlId(),
@@ -572,15 +564,11 @@ class Filters {
             $this->getSqlUser(),
             $this->getSqlComparingImages(),
             $this->getSqlComparisons(),
-            $this->getSqlAddInfoExists(),
+            //$this->getSqlAddInfoExists(),
             $this->getSqlNoInComparisons(),
-            $this->getSqlSettingsMessage(),
-            $this->getSqlProfile()
-        ]);
-        
-        $this->addJoins($q);
-        
-        return $q->count();
+            //$this->getSqlSettingsMessage(),
+            //$this->getSqlProfile()
+        ]);        
     }
     
     private function addJoins(&$q){
@@ -612,6 +600,7 @@ class Filters {
                     $q->leftJoin('messages', 'messages.id = comparisons.messages_id');
                     break;
             }
-        }
+        };
+        $q->innerJoin($this->source->table_2,$this->source->table_2.'.`asin` = '.$this->source->table_1.'.asin');
     }
 }

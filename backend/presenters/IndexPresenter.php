@@ -21,6 +21,9 @@ class IndexPresenter {
     public Filters $filters;
     public Session $session;
     
+    /** @var bool кратко или подробно отображать список товаров */
+    private bool $isDetailView = false;
+    
     public function __construct(Session $session, Filters $filters) {
         $this->session = $session;
         $this->filters = $filters;
@@ -31,8 +34,12 @@ class IndexPresenter {
         $session = \Yii::$app->session;
         
         $this->filters->load([
-            'f_count_products_on_page'  => $session[Session::filter_count_products_on_page],
-            'f_number_page_current'     => $session[Session::filter_number_page_current],
+            'f_count_products_on_page'  => $session->get(
+                Session::filter_count_products_on_page, 
+                Session::defaults[Session::filter_count_products_on_page]),
+            'f_number_page_current'     => $session->get(
+                Session::filter_number_page_current,
+                Session::defaults[Session::filter_number_page_current]),
             'f_profile'                 => $session[Session::filter_items_profile],
             'f_no_compare'              => $session[Session::filter_no_compare],
             'f_id'                      => $session[Session::filter_id],
@@ -42,19 +49,24 @@ class IndexPresenter {
             'f_comparisons'             => $session[Session::filter_comparisons],
             'f_sort'                    => $session[Session::filter_sort]
         ]);
+        
+        $this->isDetailView = ($session[Session::is_detail_view])? true: false;
     }
     
     public function setSource($source){
         $this->filters->setSource($source);
     }
     
+    public function getNumberPageCurrent(){
+        return $this->filters->f_number_page_current;
+    }
     // ***************************************************************************
     // *** Comparison_status
     // ***************************************************************************
     
     /**
      * Получиить текущий фильтр Comparisons
-     * @return string | null
+     * @return array
      */
     public function getCurrentComparisonStatus(){
         return $this->filters->f_comparisons;
@@ -136,12 +148,12 @@ class IndexPresenter {
     }
     
     public function getCountProductsOnPage(){
-        return $this->filters->f_items__show_n_on_page;
+        return $this->filters->f_count_products_on_page;
     }
     
-    public function getCountProductsOnPageRight(&$list){
+    public function getCountProductsOnPageRight($list){
         $cnt_all_right = 0;
-        foreach ($list as $k => $product) {
+        foreach ($list as $product) {
             $items = $product->addInfo;
             $cnt_all_right += count($items);
         }
@@ -152,11 +164,71 @@ class IndexPresenter {
     // *** Другое
     // ***************************************************************************
     
+    public function isDetailView(){
+        return $this->isDetailView;
+    }
+    
     public function getLastLocalImport() {
         $s_import = Stats_import_export::find();
         $s_import->where(['type' => 'IMPORT']);
         $s_import->orderBy(['created' => SORT_DESC]);
         $s_import->limit(1);
         return $s_import->one();
+    }
+    
+    /**
+     * Сколько товаров отображается на странице
+     * 
+     * @param int $countProducts Общее количество товаров
+     * @param int $countProductsOnPage Количество отображаемых товаров на страние
+     * @return int
+     * @throws InvalidArgumentException
+     */
+    public function getCountPages(int $countProducts, int $countProductsOnPage): int{
+        if ( !$countProductsOnPage ){
+            throw new InvalidArgumentException('Количество отображаемых товаров на страние не может равняться нулю');
+        }
+        return ceil($countProducts/$countProductsOnPage);
+    }
+    
+    /**
+     * Функция для отображения пагинатора
+     * Всю логику работы оставил старой. Позже вернусь
+     * 
+     * @param type $countPages Сколько всего страниц
+     * @param type $numberPageCurrent Номер текущей страницы
+     * @param type $left_right_n - настройка области просмотра
+     */
+    public function getPager(int $countPages, int $numberPageCurrent, $left_right_n = 3){
+        $from = $numberPageCurrent-$left_right_n; //1
+        $add_to_v2 = 0;
+        if ($from <= 0){
+          $add_to_v2 = abs($from)+1; //2
+          $from = 1;
+        }
+        $to = $numberPageCurrent + $left_right_n + $add_to_v2;
+
+        if ($countPages < $to){
+          //$to = $countPages;
+          $add_to_from = $countPages - $to;
+          $from = $numberPageCurrent-$left_right_n+$add_to_from;
+          if ($from < 1) {
+                $from = 1;
+            }
+        }
+
+        if ($from > $countPages && $from > $to) {
+            $from = 1;
+        }
+        if ($to > $countPages) {
+            $to = $countPages;
+        }
+
+        $pager['from'] = $from;
+        $pager['to'] = $to;
+        $pager['this_n'] = $numberPageCurrent;
+        $pager['in'] = ['pages_cnt' => $countPages, 'left_right_n' => $left_right_n];
+
+        return $pager;       
     }
 }
