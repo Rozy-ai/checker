@@ -73,7 +73,6 @@ class Product extends \yii\db\ActiveRecord{
      */
     public function initAddInfo() {
         $asin = $this->asin;
-
         $source = $this->source;
         $class_2 = $source->class_2; // Parser_trademarkia_com_result
         $table_2 = $class_2::find()->where(['asin' => $asin])
@@ -191,7 +190,9 @@ class Product extends \yii\db\ActiveRecord{
         return $this->hasOne(P_user_visible::class, ['p_id' => 'id']);
     }
 
-
+    public function getProductsRight(){
+        
+    }
 
 
 

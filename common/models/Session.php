@@ -42,8 +42,44 @@ class Session extends \yii\web\Session{
     const filter_items_profile = 'filter_items_profile';
     
     /** @const int page Номер просматриваемой страницы */
-    const filter_number_page_current = 'number_page_current';
+    const filter_number_page_current = 'filter_number_page_current';
     
     /** @const string $items__show_n_on_page Сколько товаров отображать на странице */
     const filter_count_products_on_page = 'filter_count_products_on_page';
+    
+    /** @const string $right_item_show Как отображать список товаров, кратко или подробно */
+    const filter_is_detail_view = 'filter_is_detail_view';
+    
+    const defaults = [
+        self::filter_count_products_on_page => 10,
+        self::filter_number_page_current => 1
+    ];
+    
+    /**
+     * @inheritDoc
+     * @return mixin Вернуть значение что установили
+     */
+    public function set($key, $value){
+        parent::set($key, $value);
+        return $value;
+    }
+    
+    /**
+     * Установить значение по умолчанию для переменной key
+     * Если переменная не устанавливлена то установятся все
+     * 
+     * @param string|null $key
+     * @return null|mixin Значение установленной переменной
+     */
+    public static function setToDefault($key = null){
+        if ($key){
+            if (in_array($key, self::defaults)) {
+                return self::set(self::filter_no_compare, self::defaults[$key]);
+            }
+        } else {
+            foreach (self::defaults as $key => $val){
+                self::set($key, $val);
+            }
+        }
+    }
 }

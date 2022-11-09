@@ -9,8 +9,14 @@ namespace common\models;
 
 /**
  * Класс для работы с таблицей Source
- *
- * @author kosten
+ * @property int $id
+ * @property string $name
+ * @property string $table_1
+ * @property string $table_2
+ * @property string $import_local__max_product_name
+ * @property string $import_local__db_import_name
+ * @property string $import__default_q_1
+ * @property string $import__sql_file_path
  */
 class Source extends \yii\db\ActiveRecord {
     const ids_source_free = [1, 2, 3];

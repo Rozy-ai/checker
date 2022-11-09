@@ -3,17 +3,16 @@
 /**
  * Отображение списка подробно
  * 
- * @var $product
- * @var $page
- * @var $comparisons
- * @var $product_id
- * @var $options
- * @var $hide_red
- * @var $no_compare
- * @var $compare_item
- * @var $right_item_show
- * @var $is_filter_items
- * @var $get_
+ * @var string $filter_items_comparisons
+ * @var string $filter_items_profile
+ * @var bool   $is_admin
+ * @var int    $number_page_current
+ * @var $option_class_slider
+ * @var $option_sales_key
+ * @var $option_del_btn
+ * @var $number_node Позиция активного товара начиная от 0
+ * @var Product $product
+ * @var $number_node
  * @var $items
  */
 
@@ -45,7 +44,8 @@ $source_id  = $product->source->id;
 <div class='slider__view-2 [ SLIDER ] product-view__slider'  >
     <?php foreach ($items as $index => $item): ?>
         <?php
-            if ($get_['filter-items__comparisons'] !== 'ALL'){
+        /*
+            if ($filter_items_comparisons !== 'ALL'){
                 if ( ($no_compare && isset($comparisons[$index])) ){
                     if ($comparisons[$index]->status === 'PRE_MATCH' || $comparisons[$index]->status === 'MATCH' || $comparisons[$index]->status === 'MISMATCH' || $comparisons[$index]->status === 'OTHER'){
                         continue;
@@ -53,35 +53,35 @@ $source_id  = $product->source->id;
                 }
             }
             
-            if ($get_['filter-items__comparisons'] !== 'YES_NO_OTHER'){
-                if ($get_['filter-items__comparisons'] !== 'ALL'){
-                    if (!$no_compare && $is_filter_items && $get_['filter-items__comparisons'] ){
-                        if ($comparisons[$index]->status !== $get_['filter-items__comparisons']) {
+            if ($filter_items_comparisons !== 'YES_NO_OTHER'){
+                if ($filter_items_comparisons !== 'ALL'){
+                    if (!$no_compare && $is_filter_items && $filter_items_comparisons ){
+                        if ($comparisons[$index]->status !== $filter_items_comparisons) {
                             continue;
                         }
                     }
                 }
             } else {
-                if (!$no_compare && $is_filter_items && $get_['filter-items__comparisons'] ){
+                if (!$no_compare && $is_filter_items && $filter_items_comparisons ){
                     if (!in_array($comparisons[$index]->status,['PRE_MATCH','OTHER','MISMATCH','MATCH'])){ 
                         continue;                       
                     }
                 }
             }
-
+        */
             // Инициализаця переменных:
             $variables_right = $this->context->getVariablesRight($product->source, $item, false);
 
             $urlKey_right = $item->urlKey;
             $node_id = $index + 1;
-            $current = ($page === $index) ? '&load_next=1' : '&load_next=0';
+            $current = ($number_page_current === $index) ? '&load_next=1' : '&load_next=0';
         ?>
 
         <div
             data-node_id="<?= $node_id ?>"
-            class="tbl [ SLIDER-ITEM ] slider__slider-item -v-2 <?= $page === $index ? '-current' : '' ?> item<?= (int)$node === $index ? " slick-current" : '' ?>"
+            class="tbl [ SLIDER-ITEM ] slider__slider-item -v-2 <?= $number_page_current === $index ? '-current' : '' ?> item<?= (int)$node === $index ? " slick-current" : '' ?>"
         >
-            <div class="tr slider-item__border <?= $page === $index ? '-current' : '' ?> -v-2">
+            <div class="tr slider-item__border <?= $number_page_current === $index ? '-current' : '' ?> -v-2">
                 <div class="[ color-marker ] vertical <?= isset($comparisons[$index]) ? ($comparisons[$index]->status === 'MATCH' ? ' match' : ($comparisons[$index]->status === 'MISMATCH' ? ' mismatch' : ($comparisons[$index]->status === 'PRE_MATCH' ? ' pre_match' : ' other'))) : ' nocompare' ?>">
                 </div>
 
@@ -97,11 +97,11 @@ $source_id  = $product->source->id;
                     <?=
                     Html::a(
                             "<div class=\"slider-item__img\" data-img='" . $variables_right['img_right'] . "' style=\"background-image: url('" . $variables_right['img_right'] . "')\"></div>",
-                            ['view', 'id' => $product_id,
+                            ['view', 'id' => $product->id,
                                 'node' => $node_id,
                                 'source_id' => $source_id,
-                                'comparisons' => $get_['filter-items__comparisons'],
-                                'filter-items__profile' => $get_['filter-items__profile']
+                                'comparisons' => $filter_items_comparisons,
+                                'filter-items__profile' => $filter_items_profile
                             ],
                             ['class' => 'linkImg slider-item__link-img -v-2']
                     )
@@ -137,7 +137,7 @@ $source_id  = $product->source->id;
 
                             <td style="text-align: right;">
                                 <?php $link = Url::to(['product/compare',
-                                    'id'=>$product_id,
+                                    'id'=>$product->id,
                                     'source_id'=>$source_id,
                                     'node'=>($index+1),
                                     'status'=>Comparison::STATUS_PRE_MATCH],true).$current;
@@ -149,7 +149,7 @@ $source_id  = $product->source->id;
                                 </div>
 
                                 <?php $link = Url::to(['product/compare',
-                                    'id'=>$product_id,
+                                    'id'=>$product->id,
                                     'source_id'=>$source_id,
                                     'node'=>($index+1),
                                     'status'=>Comparison::STATUS_MISMATCH],true).$current;
@@ -166,7 +166,7 @@ $source_id  = $product->source->id;
 
                 <div class="td -btn" style="display: none">
                     <?php $link = Url::to(['product/compare',
-                        'id'=>$product_id,
+                        'id'=>$product->id,
                         'source_id'=>$source_id,
                         'node'=>($index+1),
                         'status'=>Comparison::STATUS_MISMATCH],true).$current;
@@ -180,7 +180,7 @@ $source_id  = $product->source->id;
 
                 <div class="td -btn" style="display: none">
                     <?php $link = Url::to(['product/compare',
-                        'id'=>$product_id,
+                        'id'=>$product->id,
                         'source_id'=>$source_id,
                         'node'=>($index+1),
                         'status'=>Comparison::STATUS_MATCH],true).$current;

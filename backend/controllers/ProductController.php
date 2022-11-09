@@ -172,34 +172,11 @@ class ProductController extends Controller {
         //$this->getView()->params['filter_statuses'] = $this->indexPresenter->getListComparisons();
                 //$this->indexPresenter->cnt_filter_statuses($this->request->get('filter-items__profile'));
         $user = \Yii::$app->user->identity;
-
-        return $this->render('test', [
-            //'active_id_source' => $this->source->id,
-            //'list_source'      => Source::findAllSources($this->source->id, $user->id),
-
-            'where_3_list' => $this->indexPresenter->getListCategoriesRoot(),
-            //'where_4_list' => $this->indexPresenter->getListUser(),
-
-            //'active_profiles' => $this->indexPresenter->getCurrentProfile(),
-            //'list_profiles'=> $this->indexPresenter->getListProfiles(),
-
-            //'active_comparison_status' => $this->indexPresenter->getCurrentComparisonStatus(),
-            //'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses(),
-
-            //'last_update' => $this->indexPresenter->getLastLocalImport(),
-
-            //'list' =>$list,
-            //'count_products_all' => $this->indexPresenter->getCountProducts(),
-            //'count_products_on_page'  => $this->indexPresenter->getCountProductsOnPage(),
-            //'count_products_right'    => $this->indexPresenter->getCountProductsOnPageRight($list),
-
-            //'is_admin'                => $user && $user->isAdmin(),
-            //'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),
-
-            //'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
-        ]);
-
-        /*
+        $count_products_all = $this->indexPresenter->getCountProducts();
+        $count_products_on_page = $this->indexPresenter->getCountProductsOnPage();
+        $count_pages = $this->indexPresenter->getCountPages($count_products_all, $count_products_on_page);
+        $current_page  = 1;
+        
         return $this->render('index', [
             'active_id_source' => $this->source->id,
             'list_source'      => Source::findAllSources($this->source->id, $user->id),
@@ -216,17 +193,19 @@ class ProductController extends Controller {
             'last_update' => $this->indexPresenter->getLastLocalImport(),
 
             'list' =>$list,
-            'count_products_all' => $this->indexPresenter->getCountProducts(),
-            'count_products_on_page'  => $this->indexPresenter->getCountProductsOnPage(),
+            'count_products_all'      => $count_products_all,
+            'count_products_on_page'  => min($count_products_on_page, $count_products_all),
             'count_products_right'    => $this->indexPresenter->getCountProductsOnPageRight($list),
+            'pager'                   => $this->indexPresenter->getPager($count_pages, $current_page),
 
             'is_admin'                => $user && $user->isAdmin(),
-            'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),
+            //'filter_is_detail_view'   => $user && $user->is_detail_view_for_items() && $this->indexPresenter->isDetailView(),
+            'filter_is_detail_view'   => false,
 
             'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
+            'no_compare'              => false,
+            'right_item_show'         => $this->indexPresenter->isDetailView()
         ]);
-         *
-         */
     }
 
     /**
