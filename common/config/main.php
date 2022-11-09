@@ -4,10 +4,17 @@ return [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
-    'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
+    'language' => 'ru-RU',
+    'vendorPath' => dirname(__DIR__, 2) . '/vendor',
+    'bootstrap' => ['log'],
     'components' => [
         'session' => [
             'class' => 'common\models\Session'
+        ],
+        'mailer' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            'viewPath' => '@common/mail',
+            'useFileTransport' => YII_ENV_DEV
         ],
         'fmtUserData' => [
             'class' => '\backend\formatters\UserDataFormatter',
@@ -21,6 +28,15 @@ return [
         'assetManager' => [
             'appendTimestamp' => true,
             'forceCopy' => true,
+        ],
+        'log' => [
+            'traceLevel' => YII_DEBUG ? 3 : 0,
+            'targets' => [
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['error', 'warning'],
+                ],
+            ],
         ],
         'i18n'=>[
             'translations'=>[

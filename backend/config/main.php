@@ -8,10 +8,9 @@ $params = array_merge(
 
 return [
     'id' => 'app-backend',
-    'language' => 'ru-RU',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
-    'bootstrap' => ['log', 'common\SetupChecker'],
+    'bootstrap' => ['common\SetupChecker'],
     'modules' => [],
     'as access' => [
         'class' => \yii\filters\AccessControl::class,
@@ -36,15 +35,6 @@ return [
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
             'loginUrl' => ['auth/login'],
-        ],
-        'log' => [
-            'traceLevel' => YII_DEBUG ? 3 : 0,
-            'targets' => [
-                [
-                    'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
-                ],
-            ],
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',

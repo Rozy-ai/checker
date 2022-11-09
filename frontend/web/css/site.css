@@ -1,5 +1,9 @@
-main > .container {
+main {
     padding: 70px 15px 20px;
+}
+
+main > .container {
+    padding: 10px 15px 20px;
 }
 
 .footer {

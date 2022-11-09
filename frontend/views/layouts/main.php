@@ -26,7 +26,6 @@ AppAsset::register($this);
 <?php $this->beginBody() ?>
 
 <header>
-    <h1>Сука</h1>
     <?php
     NavBar::begin([
         'brandLabel' => Yii::$app->name,
@@ -35,27 +34,40 @@ AppAsset::register($this);
             'class' => 'navbar navbar-expand-md navbar-dark bg-dark fixed-top',
         ],
     ]);
-    $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
-        ['label' => 'About', 'url' => ['/site/about']],
-        ['label' => 'Contact', 'url' => ['/site/contact']],
-    ];
-    if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
-    } else {
-        $menuItems[] = '<li>'
-            . Html::beginForm(['/site/logout'], 'post', ['class' => 'form-inline'])
-            . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->username . ')',
-                ['class' => 'btn btn-link logout']
-            )
-            . Html::endForm()
-            . '</li>';
-    }
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav'],
-        'items' => $menuItems,
+        'items' => [
+            [
+                'label' => 'Home',
+                'url' => ['/site/index']
+            ],
+            [
+                'label' => 'About',
+                'url' => ['/site/about']
+            ],
+            [
+                'label' => 'Contact',
+                'url' => ['/site/contact']
+            ],
+            [
+                'label' => 'Signup',
+                'url' => ['/auth/register'],
+                'visible' => Yii::$app->getUser()->getIsGuest()
+            ],
+            [
+                'label' => 'Login',
+                'url' => ['/auth/login'],
+                'visible' => Yii::$app->getUser()->getIsGuest()
+            ],
+            [
+                'label' => 'Logout',
+                'url' => ['/auth/logout'],
+                'linkOptions' => [
+                    'data-method' => 'post'
+                ],
+                'visible' => !Yii::$app->getUser()->getIsGuest()
+            ]
+        ],
     ]);
     NavBar::end();
     ?>

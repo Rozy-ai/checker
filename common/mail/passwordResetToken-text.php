@@ -1,12 +1,12 @@
 <?php
 
-/* @var $this yii\web\View */
-/* @var $user common\models\User */
+/** @var yii\web\View $this */
+/** @var common\models\User $user */
+/** @var string $link */
 
-$resetLink = Yii::$app->urlManager->createAbsoluteUrl(['site/reset-password', 'token' => $user->password_reset_token]);
 ?>
-Hello <?= $user->username ?>,
+Здравствуйте, <?= $user->getName() ?>,
 
-Follow the link below to reset your password:
+Перейдите по ссылке для сброса пароля:
 
-<?= $resetLink ?>
+<?= $link ?>
