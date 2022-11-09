@@ -199,7 +199,8 @@ class ProductController extends Controller {
             'pager'                   => $this->indexPresenter->getPager($count_pages, $current_page),
 
             'is_admin'                => $user && $user->isAdmin(),
-            'is_detail_view_for_items'=> $user && $user->is_detail_view_for_items(),                
+            //'filter_is_detail_view'   => $user && $user->is_detail_view_for_items() && $this->indexPresenter->isDetailView(),
+            'filter_is_detail_view'   => false,
 
             'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
             'no_compare'              => false,

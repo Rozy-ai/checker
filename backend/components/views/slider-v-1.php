@@ -3,17 +3,16 @@
 /**
  * Отображение списка кратко
  * 
- * @var $product
- * @var $page
- * @var $comparisons
- * @var $product_id
- * @var $options
- * @var $hide_red
- * @var $no_compare
- * @var $compare_item
- * @var $right_item_show
- * @var $is_filter_items
- * @var $get_
+ * @var string $filter_items_comparisons
+ * @var string $filter_items_profile
+ * @var bool   $is_admin
+ * @var int    $number_page_current
+ * @var $option_class_slider
+ * @var $option_sales_key
+ * @var $option_del_btn
+ * @var $number_node Позиция активного товара начиная от 0
+ * @var Product $product
+ * @var $number_node
  * @var $items
  */
 
@@ -23,14 +22,18 @@ use yii\helpers\Html;
 use backend\models\User;
 use yii\helpers\Url;
 
+if (!$filter_items_comparisons) $filter_items_comparisons = 'none';
+if (!$filter_items_profile) $filter_items_profile = 'none';
+        
+$source         = $product->source;
+$comparisons    = $product->comparisons;
+
 $node = Yii::$app->request->get('node');
 $canCompare = \Yii::$app->user->can('compare-products', ['product' => $product]);
 $cnt = 1;
 
 $variables_left = $this->context->getVariablesLeft($product);
-
-$source_id = $product->source->id;
-$source    = $product->source;
+$source_id = $source->id;
 ?>
 
 <!-- Если администратор, то показываем в виде ссылки -->
@@ -43,45 +46,46 @@ $source    = $product->source;
 <? endif; ?>
  
 <!-- VIEW 1 -->
-<div class='slider__view-1 <?= $options['class'] ?> [ SLIDER ] product-view__slider'>
+<div class='slider__view-1 <?= $option_class_slider ?> [ SLIDER ] product-view__slider'>
     <?php 
         foreach ($items as $index => $item): 
     ?>
 
     <?php
+    /*
         // Проверка фильтров
-        if ($get_['filter-items__comparisons'] !== 'ALL' &&
-            $get_['filter-items__comparisons'] !== 'ALL_WITH_NOT_FOUND' &&
+        if ($filter_items_comparisons !== 'ALL' &&
+            $filter_items_comparisons !== 'ALL_WITH_NOT_FOUND' &&
             ($no_compare && isset($comparisons[$index])) &&
             ($comparisons[$index]->status === 'PRE_MATCH' || $comparisons[$index]->status === 'MATCH' || $comparisons[$index]->status === 'MISMATCH' || $comparisons[$index]->status === 'OTHER') )
             {
                 continue;
             }
 
-        if ($get_['filter-items__comparisons'] !== 'YES_NO_OTHER'){
-        if ($get_['filter-items__comparisons'] !== 'ALL')
-        if ($get_['filter-items__comparisons'] !== 'ALL_WITH_NOT_FOUND')
-        if (!$no_compare && $is_filter_items && $get_['filter-items__comparisons'] )
-            if ($comparisons[$index]->status !== $get_['filter-items__comparisons']) 
+        if ($filter_items_comparisons !== 'YES_NO_OTHER'){
+        if ($filter_items_comparisons !== 'ALL')
+        if ($filter_items_comparisons !== 'ALL_WITH_NOT_FOUND')
+        if (!$no_compare && $is_filter_items && $filter_items_comparisons )
+            if ($comparisons[$index]->status !== $filter_items_comparisons) 
                 continue;
             } else{
-                if (!$no_compare && $is_filter_items && $get_['filter-items__comparisons'] )
+                if (!$no_compare && $is_filter_items && $filter_items_comparisons )
                 if (!in_array($comparisons[$index]->status,['PRE_MATCH','OTHER','MISMATCH','MATCH'])) 
                     continue;
             }
-
+    */
         //Иниацияализация переменных
         $variables_right = $this->context->getVariablesRight($source, $item, true);
-        $current = ($page === $index) ? '&load_next=1' : '&load_next=0'
+        $current = ($number_page_current === $index) ? '&load_next=1' : '&load_next=0'
     ?>
 
     <div
         data-node_id="<?= $index + 1 ?>"
-        class="[ SLIDER-ITEM ] slider__slider-item <?= $page === $index ? '-current' : '' ?> item<?= (int) $node === $index ? " slick-current" : '' ?>"
+        class="[ SLIDER-ITEM ] slider__slider-item <?= $number_page_current === $index ? '-current' : '' ?> item<?= (int) $node === $index ? " slick-current" : '' ?>"
     >
         <!--slider_images несодержит стилей. Добавлен для отображения TopSlider-->
         <div
-            class="slider-item__border slider_images <?= $page === $index ? '-current' : '' ?>"
+            class="slider-item__border slider_images <?= $number_page_current === $index ? '-current' : '' ?>"
   
             data-description_left   = "<?= htmlspecialchars($variables_left['description_left'])?>"
             data-description_right  = "<?= htmlspecialchars($variables_right['description_right'])?>"
@@ -96,7 +100,7 @@ $source    = $product->source;
             <?=
             Html::a(
                     "<div class=\"slider-item__img\" data-img='" . $variables_right['img_right'] . "' style=\"background-image: url('" . $variables_right['img_right'] . "')\"></div>",
-                    ['view', 'id' => $product_id, 'node' => $index + 1, 'source_id' => $source_id, 'comparisons' => $get_['filter-items__comparisons'], 'filter-items__profile' => $get_['filter-items__profile']],
+                    ['view', 'id' => $product->id, 'node' => $index + 1, 'source_id' => $source_id, 'comparisons' => $filter_items_comparisons, 'filter-items__profile' => $filter_items_profile],
                     ['class' => 'linkImg slider-item__link-img']
             )
             ?>
@@ -109,7 +113,7 @@ $source    = $product->source;
                 <span class="grade cnt-1__stock-n"><?= $item->gradeKey; ?></span>
             </div>
 
-            <? if (!empty($options['salesKey'])): ?>
+            <? if (!empty($option_sales_key)): ?>
             <span class="slider__sales sales">
                 <? if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) !== null): ?>
                     <span class="__blue-title">Sales:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?>
@@ -133,11 +137,11 @@ $source    = $product->source;
 
             <!-- / FORK -->
 
-            <? if (0 && !empty($options['delBtn']) && $options['delBtn'] && $canCompare): ?>
+            <? if (0 && !empty($option_del_btn) && $option_del_btn && $canCompare): ?>
                 <?=
                 Html::a("", [
                     'compare',
-                    'id' => $product_id,
+                    'id' => $product->id,
                     'node' => $index + 1,
                     'status' => Comparison::STATUS_MISMATCH,
                     'return' => true,
@@ -147,7 +151,7 @@ $source    = $product->source;
             <? endif; ?>
 
             <?php $link = Url::to(['product/compare',
-                'id'=>$product_id,
+                'id'=>$product->id,
                 'source_id'=>$source_id,
                 'node'=>($index+1),
                 'status'=>Comparison::STATUS_PRE_MATCH],true).$current;
@@ -159,7 +163,7 @@ $source    = $product->source;
                 >
             </div>
             <?php $link = Url::to(['product/compare',
-                'id'=>$product_id,
+                'id'=>$product->id,
                 'source_id'=>$source_id,
                 'node'=>($index+1),
                 'status'=>Comparison::STATUS_MISMATCH],true).$current;
@@ -175,7 +179,7 @@ $source    = $product->source;
                 <?=
                 Html::a("", [
                     'compare',
-                    'id' => $product_id,
+                    'id' => $product->id,
                     'node' => $index + 1,
                     'status' => Comparison::STATUS_MISMATCH,
                         /* 'return' => true, */
@@ -186,8 +190,8 @@ $source    = $product->source;
 
         </div>
 
-        <a href="/product/view?id=<?= $product->id ?>&source_id=<?= $source_id ?>&node=<?= $index + 1 ?>&comparisons=<?= $get_['filter-items__comparisons'] ?>&filter-items__profile=<?= $get_['filter-items__profile'] ?>"
-           class="[ PAGE-N ]  slider__page-n <?= $page === $index ? '-current' : '' ?>"><?= $index + 1 ?><?//=$cnt?></a>
+        <a href="/product/view?id=<?= $product->id ?>&source_id=<?= $source_id ?>&node=<?= $index + 1 ?>&comparisons=<?= $filter_items_comparisons ?>&filter-items__profile=<?= $filter_items_profile ?>"
+           class="[ PAGE-N ]  slider__page-n <?= $number_page_current === $index ? '-current' : '' ?>"><?= $index + 1 ?><?//=$cnt?></a>
 
     </div>
     <?php $cnt++; endforeach; ?>

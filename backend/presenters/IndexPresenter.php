@@ -50,7 +50,7 @@ class IndexPresenter {
             'f_sort'                    => $session[Session::filter_sort]
         ]);
         
-        $this->isDetailView = ($session[Session::is_detail_view])? true: false;
+        $this->isDetailView = ($session[Session::filter_is_detail_view])? true: false;
     }
     
     public function setSource($source){

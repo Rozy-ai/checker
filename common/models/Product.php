@@ -190,7 +190,9 @@ class Product extends \yii\db\ActiveRecord{
         return $this->hasOne(P_user_visible::class, ['p_id' => 'id']);
     }
 
-
+    public function getProductsRight(){
+        
+    }
 
 
 

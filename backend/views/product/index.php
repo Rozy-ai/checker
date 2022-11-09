@@ -8,8 +8,12 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 /*
- * @var object $last_update
+ * @var string $filter_items_comparisons
+ * @var string $filter_items_profile
+ * @var string $filter_no_compare
+ * @var bool   $filter_is_detail_view
  * 
+ * @var object $last_update
  * 
  * @var array  $list_source
  * @var int    $active_id_source
@@ -26,9 +30,10 @@ use yii\helpers\Url;
  * @var int    $count_products_right
  * 
  * @var bool   $is_admin
- * @var bool   $is_detail_view_for_items
+
  * @var string $default_price_name
  * @var string $f_items__show_n_on_page       Сколько продуктов показывать на странице
+ * @var int    $number_page_current
  */
 
 $this->title = Yii::t('site', 'Products');
@@ -381,13 +386,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="products-list__slider-wrapper <?= (int) $right_item_show === 1 ? '-v-2' : '' ?> js-slider-root">
                         <?php
                         echo TopSlider::widget([
-                            'no_compare' => $no_compare,
+                            'is_detail_view' => $filter_is_detail_view,
+                            'number_page_current' => $number_page_current,
                             'product' => $item,
-                            //'page' => $pages->page,
-                            'hide_red' => true,
-                            'right_item_show' => $right_item_show,
-                            'is_filter_items' => 1,
-                            'source_id' => $source_id 
+                            'filter_items_comparisons' => $filter_items_comparisons,
+                            'filter_items_profile' => $filter_items_profile,
+                            'filter_no_compare' => $filter_no_compare,
                         ])
                         ?>
                     </div>
@@ -398,27 +402,30 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     <div class="slider_close -in-list"><div class="-line -line-1"></div><div class="-line -line-2"></div></div>
 
-                    <?
-                    $statuses = [
-                    Comparison::STATUS_PRE_MATCH => 0,
-                    Comparison::STATUS_MATCH => 0,
-                    Comparison::STATUS_MISMATCH => 0,
-                    Comparison::STATUS_OTHER => 0,
-                    ];
+                    <?php                        
+                        $statuses = [
+                            Comparison::STATUS_PRE_MATCH => 0,
+                            Comparison::STATUS_MATCH => 0,
+                            Comparison::STATUS_MISMATCH => 0,
+                            Comparison::STATUS_OTHER => 0,
+                        ];
 
 
-                    foreach ($item->comparisons as $comparison):
-                    $statuses [$comparison->status]++;
-                    endforeach;
+                        foreach ($item->comparisons as $comparison){
+                            $statuses [$comparison->status]++;
+                        }
                     ?>
 
 
                     <div class="product-list-item__data -first-margin">
-                        <?
-                        echo $ret = Html::tag(
-                        'div',
-                        "<span class='js-pre_match pre_match'>{$statuses[Comparison::STATUS_PRE_MATCH]}</span><span class='js-match match'>{$statuses[Comparison::STATUS_MATCH]}</span><span class='js-mismatch mismatch'>{$statuses[Comparison::STATUS_MISMATCH]}</span><span class='js-other other'>{$statuses[Comparison::STATUS_OTHER]}</span><span class='js-nocompare nocompare'>".count(Comparison::get_no_compare_ids_for_item($item))."</span>",
-                        ['class' => 'product-list-item__compare-statistics']
+                        <?php
+                        echo $ret = Html::tag('div',
+                           "<span class='js-pre_match pre_match'>{$statuses[Comparison::STATUS_PRE_MATCH]}</span>
+                            <span class='js-match match'>{$statuses[Comparison::STATUS_MATCH]}</span>
+                            <span class='js-mismatch mismatch'>{$statuses[Comparison::STATUS_MISMATCH]}</span>
+                            <span class='js-other other'>{$statuses[Comparison::STATUS_OTHER]}</span>
+                            <span class='js-nocompare nocompare'>".count(Comparison::get_no_compare_ids_for_item($item))."</span>",
+                            ['class' => 'product-list-item__compare-statistics']
                         );
                         ?>
 

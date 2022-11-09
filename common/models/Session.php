@@ -48,7 +48,7 @@ class Session extends \yii\web\Session{
     const filter_count_products_on_page = 'filter_count_products_on_page';
     
     /** @const string $right_item_show Как отображать список товаров, кратко или подробно */
-    const is_detail_view = 'is_detail_view';
+    const filter_is_detail_view = 'filter_is_detail_view';
     
     const defaults = [
         self::filter_count_products_on_page => 10,

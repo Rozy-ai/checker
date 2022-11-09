@@ -484,6 +484,7 @@ class Filters {
         
         $source_table = $this->source->table_1;
         $this->tables = [];
+        
         $q = $this->source->class_1::find();
         
         // Получаем все условия запроса:
@@ -517,14 +518,14 @@ class Filters {
             $count_products_on_page = (int)$this->f_count_products_on_page;
             
             $offset = ($this->f_number_page_current - 1) * $count_products_on_page;
-            $q->limit($count_products_on_page);
+            $q->limit(10);
             $q->offset($offset);
         }
+        
+        $q->addGroupBy('`'.$this->source->table_1.'`.`id`');
 
         $list = $q->all();
         
-        //print_r($q->createCommand()->getRawSql());
-        //exit;
         foreach ($list as $k => $product) {
             $product->source = $this->source;
             $product->baseInfo = $product->info;
@@ -601,6 +602,6 @@ class Filters {
                     break;
             }
         };
-        $q->innerJoin($this->source->table_2,$this->source->table_2.'.`asin` = '.$this->source->table_1.'.asin');
+        $q->innerJoin($this->source->table_2, $this->source->table_2.'.`asin` = `'.$this->source->table_1.'`.`asin`');
     }
 }
