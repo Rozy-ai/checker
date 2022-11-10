@@ -61,7 +61,7 @@ echo Nav::widget([
     'items' => [
         [
             'label' => 'Logout (' . Yii::$app->user->identity->username . ')',
-            'url' => ['/site/logout'],
+            'url' => ['auth/logout'],
             'linkOptions' => [
                 'data-method' => 'post',
                 'class' => 'logout-link'
@@ -70,7 +70,7 @@ echo Nav::widget([
         ],
         [
             'label' => 'Login',
-            'url' => ['/site/login'],
+            'url' => ['auth/login'],
             'visible' => Yii::$app->getUser()->getIsGuest()
         ]
     ],
