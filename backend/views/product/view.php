@@ -29,42 +29,42 @@ use yii\widgets\Pjax;
 /* @var $messages common\models\Message[] */
 /* @var $source_id */
 
-$source = \backend\models\Source::get_source();
+
+/* @var $prev */
+/* @var $next */
+/* @var Product $model                      */
+/* @var Source  $source                     */
+/* @var string  $filter_comparisons         */
+/* @var string  $filter_items_profile       */
+/* @var int     $number_node                */
+/* @var bool    $is_admin                   */
 
 $this->title = "#{$model->id}";
 
 \backend\assets\ProductAsset::register($this);
 
 $base = $model->baseInfo;
-
 $add_info = $model->addInfo;
-//$add_info = $compare_items;
 
 $urls = array_keys($add_info);
 
 $pages = new Pagination(['pageSize' => 1, 'totalCount' => count($add_info), 'pageParam' => 'node', 'pageSizeParam' => 'l']);
-$node_idx = $pages->page + 1;
+$node_idx = $pages->page+1;
 
 $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[$pages->page]] : [];
 //$item = $compare_item;
-
-
-// TODO!
-//$item['eBay_stock'] = AddInfoHelper::valueList($model, $pages->page, 'eBay_stock');
-//$item['E_Sales'] = AddInfoHelper::valueList($model, $pages->page, 'E_Sales');
-
-$get_ = $this->params['get_'];
 
 
 ?>
 <div class="js__settings -hidden">
   <div
     class="js__product -start-settings"
-    data-p_id="<?=$p_item->id?>"
-    data-source_id="<?=$source_id?>"
-    data-comparison="<?=$this->params['get_']['comparisons']?>"
-    data-profile="<?=$this->params['get_']['filter-items__profile']?>"
-    data-node="<?=$this->params['get_']['node'] ?? 0 ?>"
+    data-p_id="<?=$model->id?>"
+    data-source_id="<?=$source->id?>"
+    
+    data-comparison="<?=$filter_comparisons?>"
+    data-profile="<?=$filter_items_profile?>"
+    data-node="<?=$number_node ?>"
     >
   </div>
 </div>
@@ -101,19 +101,19 @@ $get_ = $this->params['get_'];
         </div>
         <div class="p-nav-left __item [ __filter [ FILTER ]">
 
-          <div class="filter __comparison">
+<!--          <div class="filter __comparison">
             <select name="" class="filter __comparison-select form-control">
               <? foreach ($this->params['filter_statuses'] as $k_status => $status_data):?>
                 <option
-                  value="<?=$k_status?>"
-                  <?= isset($get_['comparisons'])?     $get_['comparisons'] == $k_status ? 'selected' : ''    : '' ?>
+                  value="<?$k_status?>"
+                  <? isset($get_['comparisons'])?     $get_['comparisons'] == $k_status ? 'selected' : ''    : '' ?>
 
-                ><?=$status_data['name']?> (<?=$status_data['cnt']?>)</option>
+                ><?$status_data['name']?> (<?$status_data['cnt']?>)</option>
               <? endforeach;?>
             </select>
           </div>
 
-        </div>
+        </div>-->
 
       </div><!-- .__left-container -->
 
@@ -174,7 +174,7 @@ $get_ = $this->params['get_'];
             <? if (0):?>
               <div class="slider__left-item__data"><span>ASIN:</span><br><div class="slider__left-item__data-asin" ><?=$base["ASIN"]?></div></div>
             <? endif; ?>
-            <? if (User::isAdmin()):?>
+            <? if ($is_admin):?>
               <div class="slider__left-item__data"><span>Profile:</span><br><?=$p_item->profile?></div>
             <? endif;?>
           </div>
@@ -198,7 +198,7 @@ $get_ = $this->params['get_'];
             <div class="slider__left-item-img" style="background-image: url('<?=$images_left[0]?>')">
 
               <div class="slider__left-item__fade -top">
-                <? if (1 && User::isAdmin()):?>
+                <? if (1 && $is_admin):?>
                   <div class="slider__left-item-img-top-text"><?=$base["Brand"]?></div>
                 <? endif;?>
               </div>

@@ -9,6 +9,17 @@ namespace common\models;
 
 /**
  * Класс содержит набор возможных фильтров получения списка товаров
+ * 
+@property f_count_products_on_page  f_items__show_n_on_page Количество товаров на странице
+@property f_number_page_current     Номер страницы текущий;
+@property f_profile                 Только все товары которые менял пользователь с данной ролью
+@property f_no_compare              f_items__no_compare      (where_1) Товары не должны быть в таблице скрытых товаров
+@property f_id                      f_items__id              (where_2) Товар с данным id
+@property f_target_image            f_items__target_image;   (where_3) categiries_root (select)
+@property f_user                    f_items__user            (where_4) username пользователя
+@property f_comparing_images        f_items__comparing_images(where_5) Title
+@property f_comparisons             = $params['f_comparisons'];
+@property f_sort                    = $params['f_sort'];
  *
  * @author kosten
  */
@@ -41,6 +52,7 @@ class Filters {
     public $f_comparisons;
     //                                      (where_7) Не используется
     //                                      (where_8) Выносим в User
+    
 
     /** @var string filter_items__sort */
     public $f_sort;
@@ -108,11 +120,9 @@ class Filters {
         }
 
         if ($this->f_no_compare){
-            $this->addTable(hidden_items);
+            $this->addTable('hidden_items');
             return  ['and',['hidden_items.p_id' => null],
-                        ['OR',['hidden_items.source_id' => null],
-                            ['<>','hidden_items.source_id', $this->source->id]
-                        ]
+                        ['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source->id]]
                     ];
         } else {
             return [];
@@ -128,7 +138,7 @@ class Filters {
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function getSqlId(){
+    public function getSqlIdOrAsin(){
         if (!isset($this->source->table_1)){
             throw new \InvalidArgumentException('Отсутствует обязательный аргумент');
         }
@@ -137,6 +147,11 @@ class Filters {
             ['or',[$this->source->table_1.'.id' => $this->f_id],
                   [$this->source->table_1.'.asin' => $this->f_id]
             ] : [];
+    }
+    
+    
+    public function getSqlIdGreater(){
+        return ($this->f_id)? [ '>=' , 'id', $this->f_id] : [];
     }
 
     /**
@@ -489,7 +504,19 @@ class Filters {
         $q = $this->source->class_1::find();
 
         // Получаем все условия запроса:
-        $this->addWheres($q);
+        // !!! Если менять тут то нужно менять getCountProducts
+        $q->where(['and',
+            $this->getSqlNoCompare(),
+            $this->getSqlIdOrAsin(),
+            $this->getSqlCategoriesRoot(),
+            $this->getSqlUser(),
+            $this->getSqlComparingImages(),
+            $this->getSqlComparisons(),
+            //$this->getSqlAddInfoExists(),
+            $this->getSqlNoInComparisons(),
+            //$this->getSqlSettingsMessage(),
+            //$this->getSqlProfile()
+        ]);
         
         // Добавим сортировку:
         switch ($this->f_sort) {
@@ -519,7 +546,7 @@ class Filters {
             $count_products_on_page = (int)$this->f_count_products_on_page;
 
             $offset = ($this->f_number_page_current - 1) * $count_products_on_page;
-            $q->limit(10);
+            $q->limit($count_products_on_page);
             $q->offset($offset);
         }
         
@@ -542,8 +569,23 @@ class Filters {
         $this->tables = [];
         $q = $this->source->class_1::find();
         
-        $this->addWheres($q);
+        
+        // !!! Если менять тут то нужно менять getListProducts
+        $q->where(['and',
+            $this->getSqlNoCompare(),
+            $this->getSqlIdOrAsin(),
+            $this->getSqlCategoriesRoot(),
+            $this->getSqlUser(),
+            $this->getSqlComparingImages(),
+            $this->getSqlComparisons(),
+            //$this->getSqlAddInfoExists(),
+            $this->getSqlNoInComparisons(),
+            //$this->getSqlSettingsMessage(),
+            //$this->getSqlProfile()
+        ]); 
+        
         $this->addJoins($q);
+        
         
         return $q->count();
     }
@@ -553,24 +595,6 @@ class Filters {
         if (!in_array($table_name, $this->tables)){
             $this->tables[] = $table_name;
         }
-    }
-    
-    /**
-     * Вспомогательная функция всех условий запроса для получения списка продуктов
-     */
-    private function addWheres(&$q){
-        $q->where(['and',
-            $this->getSqlNoCompare(),
-            $this->getSqlId(),
-            $this->getSqlCategoriesRoot(),
-            $this->getSqlUser(),
-            $this->getSqlComparingImages(),
-            $this->getSqlComparisons(),
-            //$this->getSqlAddInfoExists(),
-            $this->getSqlNoInComparisons(),
-            //$this->getSqlSettingsMessage(),
-            //$this->getSqlProfile()
-        ]);        
     }
 
     private function addJoins(&$q){
@@ -604,5 +628,32 @@ class Filters {
             }
         };
         $q->innerJoin($this->source->table_2, $this->source->table_2.'.`asin` = `'.$this->source->table_1.'`.`asin`');
+    }
+    
+    public function getProduct(){
+        if (!$this->source) {
+            throw new \yii\base\InvalidArgumentException();
+        }
+
+        $source_table = $this->source->table_1;
+        $this->tables = [];
+        
+        $q = $this->source->class_1::find();
+        
+        $q->where(['and',
+            $this->getSqlComparisons(), // where_6
+            $this->getSqlNoCompare(),   // $item_1__ignore_red
+            $this->getSqlIdGreater()
+        ]);
+        
+        $this->addJoins($q);
+        
+        $q->orderBy($source_table.'.id ASC');
+        $q->limit(1);
+        return $q->one();
+    }
+    
+    public function getProductNext(){
+        
     }
 }

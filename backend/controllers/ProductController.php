@@ -17,10 +17,12 @@ use yii\db\Expression;
 use common\models\Comparison\Aggregated;
 use yii\data\ActiveDataProvider;
 use backend\presenters\IndexPresenter;
+use backend\presenters\ProductPresenter;
 use common\models\Source;
 use common\models\User;
 use common\models\Session;
 use backend\models\Settings__fields_extend_price;
+use common\models\Product;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -29,6 +31,9 @@ class ProductController extends Controller {
 
     /** @var IndexPresenter */
     public $indexPresenter;
+    
+    /** @var ProductPresenter */
+    public $productPresenter;
 
     public $prev = null;
     public $next = null;
@@ -169,16 +174,16 @@ class ProductController extends Controller {
 
         $list = $this->indexPresenter->getListProduct();
         $this->layout = 'products_list';
-        //$this->getView()->params['filter_statuses'] = $this->indexPresenter->getListComparisons();
-                //$this->indexPresenter->cnt_filter_statuses($this->request->get('filter-items__profile'));
         $user = \Yii::$app->user->identity;
         $count_products_all = $this->indexPresenter->getCountProducts();
         $count_products_on_page = $this->indexPresenter->getCountProductsOnPage();
         $count_pages = $this->indexPresenter->getCountPages($count_products_all, $count_products_on_page);
         $current_page  = 1;
+                
+        $is_admin = $user && $user->isAdmin();
         
         return $this->render('index', [
-            'active_id_source' => $this->source->id,
+            'source'           => $this->source,
             'list_source'      => Source::findAllSources($this->source->id, $user->id),
 
             'where_3_list' => $this->indexPresenter->getListCategoriesRoot(),
@@ -198,13 +203,11 @@ class ProductController extends Controller {
             'count_products_right'    => $this->indexPresenter->getCountProductsOnPageRight($list),
             'pager'                   => $this->indexPresenter->getPager($count_pages, $current_page),
 
-            'is_admin'                => $user && $user->isAdmin(),
-            //'filter_is_detail_view'   => $user && $user->is_detail_view_for_items() && $this->indexPresenter->isDetailView(),
-            'filter_is_detail_view'   => false,
+            'is_admin'                => $is_admin,
+            'filter_is_detail_view'   => $this->indexPresenter->isDetailView(),
 
             'default_price_name'      => Settings__fields_extend_price::get_default_price($this->source->id)->name?: 'Price Amazon',
-            'no_compare'              => false,
-            'right_item_show'         => $this->indexPresenter->isDetailView()
+            'no_compare'              => false
         ]);
     }
 
@@ -267,8 +270,35 @@ class ProductController extends Controller {
             // статистика в $this->getView()->params['local_import_stat']
         }
     }
+    
+    public function actionView(){
+        $this->layout = 'product';
+        $this->productPresenter->loadFromParams(\Yii::$app->request->params);
+        
+        $model = $this->productPresenter->getProduct();
+        
+        // В модель добавдяем дополнительную информацию
+        $model->source_id = $this->source->id;
+        $model->baseInfo = $model->info;
 
-    public function actionView($id) {
+        $prev = null;
+        $next = null;
+        
+        $compare_item = $this->productPresenter->getItemCompare($model->addInfo);
+        $identity = \Yii::$app->user->identity;
+        
+        return $this->render('view', [
+            'prev' => $prev,
+            'next' => $next,
+            //'arrows' => $arrows,
+            'item' => $model,
+            'source' => $this->source,
+            'compare_item' => $compare_item,
+            'is_admin' => $identity && $identity->isAdmin()
+        ]);
+    }
+
+    public function actionView1($id) {
 
         // http://checker.loc/product/view?id=6369&direction=next&item_1__ignore_red=1
         // http://checker.loc/product/view?id=6369&direction=next
@@ -725,96 +755,38 @@ class ProductController extends Controller {
         }
     }
 
+    /**
+     * Сюда приходит, если пользователь нажал крестик на левом товаре
+     * Идет ссылка вида /product/missall?id_product=9719&id_source=1
+     * Запрос get/post
+     * @return type
+     */
     public function actionMissall() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        $id = $this->request->post('id');
-        if (!$id) {
-            $id = $this->request->get('id');
-            if (!$id) {
-                echo '<pre>' . PHP_EOL;
-                print_r('не указан id');
-                echo PHP_EOL;
-                exit;
-            }
+        if (\Yii::$app->request->isGet){
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost){
+            $params = \Yii::$app->request->post();
         }
-
-        $model = $this->findModel($id);
-
-        $nodes = array_values($model->addInfo);
-        $urls = array_keys($model->addInfo);
-
-        if ($nodes) {
-            foreach ($nodes as $node => $addInfo) {
-                $comparisonModel = Comparison::findOne(['product_id' => $id, 'node' => $node, 'source_id' => $this->source_id]);
-
-                if (!$comparisonModel && isset($nodes[$node])) {
-                    $comparisonModel = new Comparison([
-                        'product_id' => $model->id,
-                        'user_id' => Yii::$app->user->id,
-                        'node' => $node,
-                        'source_id' => $this->source_id
-                    ]);
-                }
-                $comparisonModel->setStatus(Comparison::STATUS_MISMATCH, null, $urls[$node]);
-
-                $res = $comparisonModel->save();
-            }
-        } else {
-            $comparisonModel = Comparison::findOne(['product_id' => $id, 'node' => -1, 'source_id' => $this->source_id]);
-            if (!$comparisonModel) {
-                $comparisonModel = new Comparison([
-                    'product_id' => $model->id,
-                    'user_id' => Yii::$app->user->id,
-                    'node' => -1,
-                    'source_id' => $this->source_id
-                ]);
-            }
-            $comparisonModel->setStatus(Comparison::STATUS_MISMATCH, null, '');
-            $res = $comparisonModel->save();
-
-            $find = HiddenItems::find()->where(['p_id' => $id, 'source_id' => $this->source_id])->one();
-            if (!$find) {
-                $h = new HiddenItems();
-                $h->p_id = $id;
-                $h->source_id = $this->source_id;
-                $h->insert();
-            }
+  
+        if (!$params['id_product'] || !$params['id_source'] || !$params['url']){
+            throw new InvalidArgumentException();
         }
-
-
-        $url['get'] = [];
-        $url['scheme'] = ''; //'http';
-        $url['host'] = ''; // 'checker.loc';
-        $url['path'] = ''; // '/product/view';
-        $url['query'] = ''; // id=2344&source_id=2
-        if (isset($_SERVER['HTTP_REFERER'])) {
-            $parse_url = parse_url($_SERVER['HTTP_REFERER']);
-            $url = array_merge($url, $parse_url);
-            if (isset($parse_url['query'])) {
-                $query = $parse_url['query'];
-                parse_str($query, $get_);
-                $url['get'] = $get_;
-            }
+        
+        $url        = $params['url'];
+        $id_product = (int)$params['id_product'];
+        $id_source  = (int)$params['id_source'];
+        $confirm_to_action = (bool)$params['confirm'];
+        
+        // На входе подается переменная source_id.
+        // И в сесии у нас есть source_id
+        // По идее эти данные должны совпадать. Если будет работать то на вход source_id можно не запрашивать
+        if ($this->source->id !== $id_source){
+            throw new InvalidArgumentException('id источника не совпадает');
         }
-
-        if (!$this->request->isPost) {
-            if ($url['path'] === '/product/view') {
-                $this->get_model_for_next($id);
-            }
-        }
-
-        return [
-            'res' => 'ok',
-        ];
-
-        /*
-          if (Yii::$app->request->get('return')){
-          return $this->redirect($this->request->referrer);
-          } else {
-          return $this->redirect(['view', 'id' => $this->getNextModel($id)->id]);
-          }
-         */
+        
+        return $this->indexPresenter->missmatchToAll($this->source->class_1, $url, $id_product, $id_source, $confirm_to_action);
     }
 
     private function get_model_for_next($id) {
@@ -879,7 +851,7 @@ class ProductController extends Controller {
      * @param int $id ID
      * @param $item_1__ignore_red
      * @param $direction
-     * @return array|\yii\db\ActiveRecord
+     * @return array|\yii\db\Act iveRecord
      */
     protected function findModel($id, $item_1__ignore_red = 0, $direction = 'next') {
         $model = null;

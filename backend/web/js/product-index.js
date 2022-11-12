@@ -7,6 +7,9 @@ $(document).ready(function(){
     $(this).parents('.product-list__product-list-item').remove();
   })
   
+  $("#show-all").on("click", function(e) {
+    $('.product-list__product-list-item').show();
+  });
   
   function del_item($this){
     let p_id = $this.data('pid');
@@ -139,22 +142,36 @@ $(document).ready(function(){
     
     
   });
-
-  /* присваивание левому товару статуса STATUS_NOT_FOUND */
-  $body.on('click','.product-list__item-mismatch-all',function(e){
-    e.stopPropagation();
-    let $this = $(this);
-    let $root = $this.parents('.product-list__product-list-item');
-    let url = $this.data('url');
-    
-    $.ajax({
-    	url: url,
-    	type: "GET",
-    	beforeSend: function() {},
+  
+  function sendToMissall(data, root, element){
+      $.ajax({
+    	url: data['url'],
+    	type: "POST",
+        data: data,
     	dataType: "json",
     	success: function(response){
-            if (response.res === 'ok'){
-                $root.remove();
+            switch (response.status){
+                case 'have_match':
+                    let q = confirm(response.message);
+                    if (!q) {
+                        element.show();
+                        return; 
+                    }
+                    data['confirm'] = true;
+                    sendToMissall(data, root);     
+                    break;
+                case 'ok':
+                    if (!$('input[name=filter-items__no-compare]:checked').length){
+                      root.remove();
+                    }else{
+                      root.find('.product-view__slider').remove();
+                    }
+                    break;
+                case 'error': 
+                    alert(response.message);
+                    break;
+                default:
+                    alert('Не удалось получить ожидаемый ответ от сервера');
             }
     	},
         error: function (jqXHR, exception) {
@@ -174,9 +191,19 @@ $(document).ready(function(){
                     alert('Uncaught Error. ' + jqXHR.responseText);
             }
         }
-    });
-    
+    });    
+  }
+
+  /* присваивание левому товару статуса STATUS_NOT_FOUND */
+  $body.on('click','.product-list__item-mismatch-all',function(e){
+    e.stopPropagation();
+    let $this = $(this);
+    $this.hide();
+    let $root = $this.parents('.product-list__product-list-item');
+    let data = $this.data();
+    sendToMissall(data, $root, $this);
   });
+  
   
   /*
   $body.on('click','.products-list__td2  .product-list-item__btn-red',function(e){

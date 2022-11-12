@@ -177,7 +177,6 @@ $(function(){
       dataType: "json",
       success: function(response){
         if (response.res === 'ok'){
-          
           $('.id-layout__right-arrow .next')[0].click();
         }
       }

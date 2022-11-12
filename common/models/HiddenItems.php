@@ -4,6 +4,10 @@ namespace common\models;
 
 use yii\db\ActiveRecord;
 
+/**
+ * Это таблица для левых товаров
+ */
+
 class HiddenItems extends ActiveRecord{
 
     const STATUS_NO_CHECK = 0;

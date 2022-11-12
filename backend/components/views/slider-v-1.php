@@ -28,7 +28,6 @@ if (!$filter_items_profile) $filter_items_profile = 'none';
 $source         = $product->source;
 $comparisons    = $product->comparisons;
 
-$node = Yii::$app->request->get('node');
 $canCompare = \Yii::$app->user->can('compare-products', ['product' => $product]);
 $cnt = 1;
 
@@ -81,7 +80,7 @@ $source_id = $source->id;
 
     <div
         data-node_id="<?= $index + 1 ?>"
-        class="[ SLIDER-ITEM ] slider__slider-item <?= $number_page_current === $index ? '-current' : '' ?> item<?= (int) $node === $index ? " slick-current" : '' ?>"
+        class="[ SLIDER-ITEM ] slider__slider-item <?= $number_page_current === $index ? '-current' : '' ?> item<?= (int) $number_node === $index ? " slick-current" : '' ?>"
     >
         <!--slider_images несодержит стилей. Добавлен для отображения TopSlider-->
         <div
@@ -100,7 +99,7 @@ $source_id = $source->id;
             <?=
             Html::a(
                     "<div class=\"slider-item__img\" data-img='" . $variables_right['img_right'] . "' style=\"background-image: url('" . $variables_right['img_right'] . "')\"></div>",
-                    ['view', 'id' => $product->id, 'node' => $index + 1, 'source_id' => $source_id, 'comparisons' => $filter_items_comparisons, 'filter-items__profile' => $filter_items_profile],
+                    ['view', 'id' => $product->id, 'number_node' => $index + 1, 'source_id' => $source_id, 'comparisons' => $filter_items_comparisons, 'filter-items__profile' => $filter_items_profile],
                     ['class' => 'linkImg slider-item__link-img']
             )
             ?>
@@ -142,7 +141,7 @@ $source_id = $source->id;
                 Html::a("", [
                     'compare',
                     'id' => $product->id,
-                    'node' => $index + 1,
+                    'number_node' => $index + 1,
                     'status' => Comparison::STATUS_MISMATCH,
                     'return' => true,
                         ], ['class' => 'btn del']
@@ -153,7 +152,7 @@ $source_id = $source->id;
             <?php $link = Url::to(['product/compare',
                 'id'=>$product->id,
                 'source_id'=>$source_id,
-                'node'=>($index+1),
+                'number_node'=>($index+1),
                 'status'=>Comparison::STATUS_PRE_MATCH],true).$current;
             ?>
             <div
@@ -165,7 +164,7 @@ $source_id = $source->id;
             <?php $link = Url::to(['product/compare',
                 'id'=>$product->id,
                 'source_id'=>$source_id,
-                'node'=>($index+1),
+                'number_node'=>($index+1),
                 'status'=>Comparison::STATUS_MISMATCH],true).$current;
             ?>
             <div
@@ -180,7 +179,7 @@ $source_id = $source->id;
                 Html::a("", [
                     'compare',
                     'id' => $product->id,
-                    'node' => $index + 1,
+                    'number_node' => $index + 1,
                     'status' => Comparison::STATUS_MISMATCH,
                         /* 'return' => true, */
                         ], ['class' => 'slider__red_button', 'target' => '_blank']

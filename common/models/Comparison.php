@@ -4,7 +4,7 @@ namespace common\models;
 
 use backend\models\P_all_compare;
 use backend\models\P_updated;
-use backend\models\Source;
+use common\models\Source;
 use backend\models\User;
 use common\models\HiddenItems;
 use Yii;
@@ -13,10 +13,12 @@ use common\behaviors\StatsBehavior;
 use yii\db\ActiveRecord as ActiveRecordAlias;
 
 /**
- * This is the model class for table "{{%comparisons}}".
+ * Эта таблица для правых  товаров
  *
  * @property int $user_id
  * @property int $product_id
+ * @property int $source_id
+ * @property int $node
  * @property string $status
  * @property string|null $message
  *
@@ -100,10 +102,10 @@ class Comparison extends ActiveRecordAlias {
     }
 
     public static function get_name_status($status_code) {
-//    	if ($status_code === 'MISMATCH') return 'Mismatch (No)';
-//      if ($status_code === 'PRE_MATCH') return 'Pre_match (?)';
-//      if ($status_code === 'MATCH') return 'Match (Yes)';
-//    	if ($status_code === 'OTHER') return 'Other';
+    	if ($status_code === 'MISMATCH') return 'Mismatch (No)';
+        if ($status_code === 'PRE_MATCH') return 'Pre_match (?)';
+        if ($status_code === 'MATCH') return 'Match (Yes)';
+    	if ($status_code === 'OTHER') return 'Other';
     }
 
     public static function get_status_by_code($status_code) {
@@ -156,15 +158,15 @@ class Comparison extends ActiveRecordAlias {
      * {@inheritdoc}
      */
     public function rules() {
-        $class = Source::get_source()['source_class'];
+//        $class = Source::get_source()['source_class'];
 
         return [
             [['user_id', 'product_id', 'status'], 'required'],
             [['user_id', 'product_id', 'source_id'], 'integer'],
             [['messages_id'], 'safe'],
             [['status', 'message'], 'string'],
-            [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => $class::className(), 'targetAttribute' => ['product_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+//            [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => $class::className(), 'targetAttribute' => ['product_id' => 'id']],
+//            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
@@ -257,8 +259,10 @@ class Comparison extends ActiveRecordAlias {
 
         return $this;
     }
-
+    
+    /**
     public function afterSave($insert, $changedAttributes) {
+
         $class = Source::get_source()['source_class'];
         $res = 'SHOW';
         $p_id = $this->product_id;
@@ -307,9 +311,6 @@ class Comparison extends ActiveRecordAlias {
         }
         P_updated::date_updated($p_id, $source_id);
 
-        /**/
-
-        /* для таблицы p_all_compare */
         $all_compared = false;
         if ((int) $count === (int) $res_all_comparison_2)
             $all_compared = true;
@@ -333,7 +334,10 @@ class Comparison extends ActiveRecordAlias {
 
         parent::afterSave($insert, $changedAttributes);
     }
-
+    
+ 
+    */
+        
     public function getMessages() {
         return $this->hasOne(Message::class, ['id' => 'messages_id']);
     }

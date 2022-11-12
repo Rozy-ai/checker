@@ -17,6 +17,12 @@ class Session extends \yii\web\Session{
     /** @const int id источника */
     const id_source = 'id_source';
     
+    /** @const string Направленелие поиска следущего товара */
+    const direction_next_product = 'direction_next_product';
+    
+    /** @const string */
+    const item_2_show_all = 'item_2__show_all';
+    
     /** @const string $f_items__no_compare    (where_1) Убрать товары из таблицы hidden_itesm */
     const filter_no_compare = 'filter_no_compare';
     
@@ -50,11 +56,19 @@ class Session extends \yii\web\Session{
     /** @const string $right_item_show Как отображать список товаров, кратко или подробно */
     const filter_is_detail_view = 'filter_is_detail_view';
     
+    /** @const array Значения по умолчанию */
     const defaults = [
         self::filter_count_products_on_page => 10,
-        self::filter_number_page_current => 1
+        self::filter_number_page_current => 1,
+        self::filter_comparisons => 'PRE_MATCH',
+        self::filter_no_compare => true,
+        self::id_source => 1,
+       
     ];
     
+    public function getWithDefault($key) {
+        return parent::get($key, self::defaults[$key]);
+    }
     /**
      * @inheritDoc
      * @return mixin Вернуть значение что установили
@@ -80,6 +94,15 @@ class Session extends \yii\web\Session{
             foreach (self::defaults as $key => $val){
                 self::set($key, $val);
             }
+        }
+    }
+    
+    public static function loadFromParams(array $params){
+        foreach ($params as $key => $value){
+            if (!$value) {
+                $value = self::defaults[$key];
+            }
+            self::set($key, $value);
         }
     }
 }

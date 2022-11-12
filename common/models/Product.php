@@ -9,6 +9,7 @@ use Yii;
 use yii\BaseYii;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
+use common\models\Comparison;
 
 /**
  * This is the model class for table "{{%parser_trademarkia_com}}".
@@ -32,6 +33,16 @@ class Product extends \yii\db\ActiveRecord{
     protected $_baseInfo = [];
     protected $_addInfo = [];
     protected Source $_source;
+    
+    /**
+     * Получить модель Product по заданному id
+     * 
+     * @param int $id
+     * @return Product|null
+     */
+    public static function getById(int $id){
+        return static::findOne(['id' => $id]);
+    }
     
     public function getBaseInfo(){
         if (!$this->_baseInfo && $this->info) {
@@ -194,7 +205,18 @@ class Product extends \yii\db\ActiveRecord{
         
     }
 
-
+    /**
+     * Имеет ли продукт правые товары со статусом STATUS_MATCH или STATUS_PRE_MATCH
+     * @return bool
+     */
+    public function isExistsItemsWithMatch(){
+        return Comparison::find()
+                ->where(['product_id' => $this->id, ])
+                ->andWhere(['or', 
+                    ['status' => Comparison::STATUS_MATCH],
+                    ['status' => Comparison::STATUS_PRE_MATCH]])
+                ->exists();
+    }
 
 
     /**

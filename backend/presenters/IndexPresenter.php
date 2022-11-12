@@ -11,6 +11,7 @@ use common\models\Session;
 use common\models\Filters;
 use common\models\Stats_import_export;
 use common\models\Comparison;
+use common\models\HiddenItems;
 
 /**
  * Превставитель для страницы product/index, содержащий логику
@@ -34,23 +35,26 @@ class IndexPresenter {
         $session = \Yii::$app->session;
         
         $this->filters->load([
-            'f_count_products_on_page'  => $session->get(
-                Session::filter_count_products_on_page, 
-                Session::defaults[Session::filter_count_products_on_page]),
-            'f_number_page_current'     => $session->get(
-                Session::filter_number_page_current,
-                Session::defaults[Session::filter_number_page_current]),
-            'f_profile'                 => $session[Session::filter_items_profile],
-            'f_no_compare'              => $session[Session::filter_no_compare],
-            'f_id'                      => $session[Session::filter_id],
-            'f_target_image'            => $session[Session::filter_target_image],
-            'f_user'                    => $session[Session::filter_username],
-            'f_comparing_images'        => $session[Session::filter_title],
-            'f_comparisons'             => $session[Session::filter_comparisons],
-            'f_sort'                    => $session[Session::filter_sort]
+            'f_count_products_on_page' => $session->getWithDefault(Session::filter_count_products_on_page),
+            'f_number_page_current'    => $session->getWithDefault(Session::filter_number_page_current),
+            'f_no_compare'             => $session->getWithDefault(Session::filter_no_compare),
+
+            'f_profile'                => $session->get(Session::filter_items_profile),
+            'f_id'                     => $session->get(Session::filter_id),
+            'f_target_image'           => $session->get(Session::filter_target_image),
+            'f_user'                   => $session->get(Session::filter_username),
+            'f_comparing_images'       => $session->get(Session::filter_title),
+            'f_comparisons'            => $session->get(Session::filter_comparisons),
+            'f_sort'                   => $session->get(Session::filter_sort)
         ]);
         
         $this->isDetailView = ($session[Session::filter_is_detail_view])? true: false;
+    }
+    
+    public function loadFromParams(array $params){
+        $session = \Yii::$app->session;
+        $session->loadFromParams($params);
+        $this->loadFromSession();
     }
     
     public function setSource($source){
@@ -231,4 +235,80 @@ class IndexPresenter {
 
         return $pager;       
     }
+    
+    /**
+     * Функция для присвоения статуса STATUS_MISMATCH всем правым товарам 
+     * и присвоения левому товару статуса STATUS_NOT_FOUND
+     * 
+     * @param string $classProduct
+     * @param type $url
+     * @param int $id_product
+     * @param int $id_source
+     * @param bool $confirmToAction
+     * @return json array [
+     *      'status' = ok | have_match | error
+     *      'message' Сообщение для пользователя
+     * ]
+     */
+    public function missmatchToAll(string $classProduct, $url, int $id_product, int $id_source, bool $confirmToAction = false){
+        $product = $classProduct::getById($id_product);
+        if (!$confirmToAction && $product->isExistsItemsWithMatch()){
+            return [
+                'status'    => 'have_match',
+                'message'   => 'У даннного продукта имеются товары со статутом Match/Prematch которые будут изменены на Missmatch. Продолжить?'
+            ];
+        }
+               
+        $add_info = $product->addInfo;
+       
+        try{
+            //Всем товарам справа присвоить статус STATUS_MISMATCH
+            if (is_array($add_info)){
+                foreach ($add_info as $number_node => $item){
+                    $comparison = Comparison::findOne([
+                        'product_id' => $id_product, 
+                        'node' => $item->id, 
+                        'source_id' => $id_source]);
+                    if ($comparison){
+                        if ($comparison->status != Comparison::STATUS_MISMATCH){
+                            $comparison->status = Comparison::STATUS_MISMATCH;
+                            $comparison->save();
+                        }
+                        //$comparison->setStatus(Comparison::STATUS_MISMATCH); 
+                    } else {
+                        $comparison = new Comparison([
+                            'product_id' => $id_product,
+                            'user_id' => \Yii::$app->user->id,
+                            'node' => $item->id,
+                            'source_id' => $id_source,
+                            'status' => Comparison::STATUS_MISMATCH
+                        ]);
+                        $comparison->save();
+                    }                    
+                }
+            }
+            
+            // Добавить товар в список скрытых (Добавить в таблицу hidden_items)
+            $find = HiddenItems::find()->where(['p_id' => $id_product, 'source_id' => $id_source])->one();
+            if (!$find) {
+                $h = new HiddenItems([
+                    'p_id'      => $id_product,
+                    'source_id' => $id_source,
+                    'status'    => HiddenItems::STATUS_NOT_FOUND,
+                ]);
+                $h->save();
+            }
+        } catch (\Exception $ex) {
+            \Yii::error($ex->getLine().':'.$ex->getMessage());
+            return [
+                'status' => 'error',
+                'message' => 'При сохранении данных возникла ошибка'
+            ];
+        }
+
+        return [
+            'status' => 'ok'
+        ];
+    }
+    
 }

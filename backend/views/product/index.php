@@ -16,7 +16,7 @@ use yii\helpers\Url;
  * @var object $last_update
  * 
  * @var array  $list_source
- * @var int    $active_id_source
+ * @var int    $source
  * 
  * @var array  $list_profiles
  * @var string $active_profiles
@@ -36,8 +36,8 @@ use yii\helpers\Url;
  * @var int    $number_page_current
  */
 
-$this->title = Yii::t('site', 'Products');
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = $source->name . " | " . Yii::t('site', 'Products');
+$this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 
 \backend\assets\IconsAsset::register($this);
 \backend\assets\ProductIndexAsset::register($this);
@@ -49,16 +49,16 @@ $this->params['breadcrumbs'][] = $this->title;
             <form action="" class="products__filter-form" >
                 <div class="form-row js-title-and-source_selector">
                     <div class="form-group _col-sm-2" style="width: 128px">
-                        <div class="titleName" style="margin-top: 5px;"><?= Html::encode($this->title) ?></div>
+                        <div class="titleName" style="margin-top: 5px;"><?= Html::encode(Yii::t('site', 'Products')) ?></div>
                     </div>
 
                     <div class="form-group _col-sm-2" style="width: 128px">
                         <select name="filter-items__source" id="filter-items__source" class="form-control">
                             <?php
                                 if ($list_source){
-                                    foreach ($list_source as $source){
-                                        $selected = ($source->id===$active_id_source)?'selected':'';
-                                        echo "<option value=$source->id $selected>$source->name</option>";
+                                    foreach ($list_source as $item){
+                                        $selected = ($item->id===$source->id)?'selected':'';
+                                        echo "<option value=$item->id $selected>$item->name</option>";
                                     }
                                 }
                             ?>
@@ -92,7 +92,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         $profile_path = $get_['filter-items__profile'] ?? 'Все';
                         if ($profile_path === '{{all}}') $profile_path = 'Все';
                     ?>
-                    <div class="cnt-items col-sm-6">Показаны записи <?= $count_products_on_page ?> из <?= $count_products_all; ?> (<?= $count_products_right ?>) Источник <?= $selected_source_name ?> / <?= $profile_path ?></div>
+                    <div class="cnt-items col-sm-6">Показаны записи <?= $count_products_on_page ?> из <?= $count_products_all; ?> (<?= $count_products_right ?>) Источник <?= $source->name ?> / <?= $profile_path ?></div>
 
                     <? $pages_n_list = [10,20,50,100,200]?>
                     <div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">
@@ -110,7 +110,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="form-group _col-sm-2" style="width: 128px">
                         <input
                             value="<?= $get_['filter-items__id'] ?>"
-                            type="text" class="form-control" placeholder="id" id="filter-items__id" name="filter-items__id">
+                            type="text" class="form-control" placeholder="ASIN" id="filter-items__id" name="filter-items__id">
                     </div>
 
 
@@ -214,8 +214,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     <? if ($is_detail_view_for_items || $is_admin): ?>
                     <div class="form-group _col-sm-3" >
                         <select name="filter-items__right-item-show" id="filter-items__right-item-show" class="form-control ">
-                            <option value="0" <?= ($right_item_show) ?: 'selected' ?>>Кратко</option>
-                            <option value="1" <?= ($right_item_show) ? 'selected' : '' ?>>Подробно</option>
+                            <option value="0" <?= ($filter_is_detail_view) ?: 'selected' ?>>Кратко</option>
+                            <option value="1" <?= ($filter_is_detail_view) ? 'selected' : '' ?>>Подробно</option>
                         </select>
                     </div>
 
@@ -242,6 +242,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="form-group _col-sm-3">
                         <a href="/product/" class="btn btn-secondary">Сбросить</a>
                     </div>
+                    
+                    <div class="form-group _col-sm-3">
+                      <button id="show-all" class="btn btn-secondary">Показать все</button>
+                    </div>                    
                 </div>
             </form>
 
@@ -298,41 +302,51 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div
                         class="product-list-item__data js-addition-info-for-price"
                         data-addition_info_for_price='<?= $item->addition_info_for_price(); ?>'
-                        >
+                    >
                         <span>Price:</span><br>
                         <?= ($item->baseInfo[$default_price_name]) ?: '-' ?>
                     </div>
-                    <div class="product-list-item__data"><span>Status:</span><br><?= $item->baseInfo["Brand_R"] ?></div>
-                    <? if (0):?>
-                    <div class="product-list-item__data"><span>ASIN:</span><br><div class="product-list-item__data-asin" ><?= $item->baseInfo["ASIN"] ?></div></div>
-                    <? endif; ?>
-
+                    
+                    <div class="product-list-item__data"><span>Brand:</span><br><?=$item->baseInfo["Brand_R"]?></div>
+                    <div class="product-list-item__data"><span>FBA/FBM:</span><br><?= $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"] ?></div>
                     <? if ($is_admin):?>
                     <div class="product-list-item__data"><span>Profile:</span><br><?= $item->profile ?></div>
                     <? endif;?>
 
                 </td>
                 <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
-
+                    <div><?= $item->baseInfo["ASIN"] ?></div>
                     <div class="products-list__img-wrapper">
+                    <?php
+                        $title = '';
+                        $brand = $item->baseInfo['Brand'];
+                        $manufacturer = $item->baseInfo['Manufacturer'];
+                        $categoriesTree = $item->baseInfo["Categories: Tree"];
 
+                        if (empty($manufacturer)) {
+                            $title .= 'Brand: ' . Html::encode($brand);
+                        } else {
+                            $title .= 'Manufacturer: ' . Html::encode($manufacturer);
+                        }
+                    ?>
                         <div
-                            data-title="<?= Html::encode($item->baseInfo['Brand']) ?>"
-                            data-description="<?= Html::encode($item->baseInfo['Title']) ?>"
+                            data-tree="<?= $categoriesTree ?>"
+                            data-title="<?= $title ?>"
+                            data-description="<?=Html::encode($item->baseInfo['Title'])?>"
                             class="products-list__img-wrapper-link"
-                            data-link = "<?=
-                            Url::to(['product/view',
+                            data-link = "<?= Url::to([
+                                'product/view',
                                 'id' => $item->id,
                                 'source_id' => $source_id,
                                 'comparisons' => $get_['filter-items__comparisons'],
-                                'filter-items__profile' => $get_['filter-items__profile']])
-                            ?>"
-                            >
+                                'filter-items__profile' => $get_['filter-items__profile']
+                            ])?>"
+                        >
                             <div class="products-list__img" style="background-image: url('<?= explode(';', $item->baseInfo['Image'])[0] ?>')">
 
                                 <div class="slider__left-item__fade -top">
                                     <? if ($is_admin):?>
-                                    <div class="slider__left-item-img-top-text"><?= $item->baseInfo["Brand"] ?></div>
+                                        <div class="slider__left-item-img-top-text"><?=Html::encode($item->baseInfo['Categories: Root'])?></div>
                                     <? endif;?>
                                 </div>
 
@@ -340,14 +354,14 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <div class="slider__left-item__fade -bottom">
                                     <div class="slider__left-item__text">
                                         <?//= $base['Sales Rank: Current'] .'/'. $base['Sales Rank: Drops last 30 days'] ?>
-
-<?= Html::encode($item->baseInfo['Categories: Root']) ?>
-
+                                        <?= Html::encode($item->baseInfo['Brand']) ?>
 
                                         <div
                                             class="[ button-x-2 ] product-list__item-mismatch-all"
-                                            data-url= <?= Url::to(['product/missall', 'id' => $item->id, 'source_id' => $source_id]) ?>
-                                            ></div>
+                                            data-url= <?= Url::to(['product/missall'])?>
+                                            data-id_product=<?=$item->id?>
+                                            data-id_source=<?=$source_id?>
+                                        ></div>
 
 
                                     </div>
@@ -383,7 +397,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 </td>
                 <td class="products-list__td3">
 
-                    <div class="products-list__slider-wrapper <?= (int) $right_item_show === 1 ? '-v-2' : '' ?> js-slider-root">
+                    <div class="products-list__slider-wrapper <?= (int) $filter_is_detail_view === 1 ? '-v-2' : '' ?> js-slider-root">
                         <?php
                         echo TopSlider::widget([
                             'is_detail_view' => $filter_is_detail_view,
@@ -443,13 +457,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     <? if ($is_admin):?>
                     <div class="product-list-item__data"><span>Пользователь:</span><br>
-<?= empty($item->aggregated->users) ? "не&nbsp;задано" : $item->aggregated->users; ?>
+                        $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
+                        
+                        <div class="product-list-item__data"><span>Profile:</span><br>
+                            <?= $item->profile ?>
+                        </div>                        
                     </div>
                     <? endif;?>
 
                     <div class="product-list-item__date " style="margin-bottom: 10px">
                         <div class="product-list-item__date-title">Добавлено:</div>
-                        <div><?= date('d.m.Y', strtotime($item->date_add)); ?></div>
+                        <div><?=date('d.m.Y H:i',strtotime($item->date_add)); ?></div>
 
                         <? if ($item->updated): ?>
                         <div class="product-list-item__date-title" style="margin-top: 5px">Обновлено:</div>
@@ -484,7 +502,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
                     <div class="actions_for_right-visible-items">
-                        <? if (!(int)$right_item_show && $get_['filter-items__comparisons'] === 'NOCOMPARE'):?>
+                        <? if (!(int)$filter_is_detail_view && $get_['filter-items__comparisons'] === 'NOCOMPARE'):?>
 
 
                         <div
