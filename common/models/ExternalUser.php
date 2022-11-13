@@ -18,6 +18,8 @@ use yii\behaviors\TimestampBehavior;
  * @property int $created_at
  * @property int|null $updated_at
  * @property null|string $password
+ * @property-read Billing[] $billings
+ * @property-read string $name
  */
 class ExternalUser extends \yii\db\ActiveRecord
 {
@@ -30,6 +32,12 @@ class ExternalUser extends \yii\db\ActiveRecord
         self::STATUS_ACTIVE => 'Активен',
         self::STATUS_BLOCKED => 'Заблокирован',
     ];
+
+    /**
+     * @var float
+     */
+    public float $balance = 0;
+
 
     public function behaviors(): array
     {
@@ -133,6 +141,21 @@ class ExternalUser extends \yii\db\ActiveRecord
     {
         $this->auth_key = Yii::$app->getSecurity()->generateRandomString();
         return $this;
+    }
+
+    /**
+     * Gets query for [[Billings]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBillings(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(Billing::class, ['user_id' => 'id']);
+    }
+
+    public function getBalance(): float
+    {
+        return $this->getBillings()->where(['status' => Billing::STATUS_PAID])->sum('sum') ?: 0;
     }
 
     public function beforeSave($insert): bool

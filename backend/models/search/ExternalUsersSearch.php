@@ -2,9 +2,11 @@
 
 namespace backend\models\search;
 
+use backend\models\Billing;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use backend\models\ExternalUser;
+use yii\db\Expression;
 
 /**
  * ExternalUsersSearch represents the model behind the search form of `backend\models\ExternalUser`.
@@ -19,7 +21,7 @@ class ExternalUsersSearch extends ExternalUser
         return [
             [['id'], 'integer'],
             [['created_at', 'updated_at'], 'date', 'format' => 'php:d.m.Y'],
-            [['login', 'email'], 'safe'],
+            [['login', 'email', 'balance'], 'safe'],
         ];
     }
 
@@ -32,12 +34,25 @@ class ExternalUsersSearch extends ExternalUser
      */
     public function search(array $params): ActiveDataProvider
     {
-        $query = ExternalUser::find();
+        $balanceQuery = Billing::find()
+            ->alias('billing')
+            ->select(new Expression('COALESCE(SUM([[billing]].[[sum]]), 0)'))
+            ->where(['billing.status' => Billing::STATUS_PAID, 'billing.user_id' => new Expression('[[user]].[[id]]')]);
+        $query = ExternalUser::find()->alias('user')
+            ->select(['user.*', 'balance' => $balanceQuery]);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'attributes' => [
+                    'id',
+                    'login',
+                    'email',
+                    'balance',
+                ]
+            ]
         ]);
 
         $this->load($params);
@@ -50,13 +65,13 @@ class ExternalUsersSearch extends ExternalUser
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
-            'FROM_UNIXTIME(admin.createdAt, "%d.%m.%Y")' => $this->created_at,
-            'FROM_UNIXTIME(admin.updatedAt, "%d.%m.%Y")' => $this->updated_at,
+            'user.id' => $this->id,
+            'FROM_UNIXTIME(user.created_at, "%d.%m.%Y")' => $this->created_at,
+            'FROM_UNIXTIME(user.updated_at, "%d.%m.%Y")' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['like', 'login', $this->login])
-            ->andFilterWhere(['like', 'email', $this->email]);
+        $query->andFilterWhere(['like', 'user.login', $this->login])
+            ->andFilterWhere(['like', 'user.email', $this->email]);
 
         return $dataProvider;
     }

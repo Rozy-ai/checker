@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use backend\models\Source;
 use common\models\User__source_access;
+use common\models\UserEntity;
 use Yii;
 use common\models\User as CommonUser;
 use backend\models\User;
@@ -236,15 +237,14 @@ class UserController extends Controller{
     }
 
 
-    public function actionAjax()
+    public function actionAjax(): \yii\web\Response
     {
         $model = User::find();
-        $model->where(['status' => CommonUser::STATUS_ACTIVE]);
+        $model->where(['status' => UserEntity::STATUS_ACTIVE]);
         $model->andFilterWhere(['like', 'username', Yii::$app->request->get('search')]);
         $items = $model->select('username')->limit(10)->asArray()->column();
 
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        return $items;
+        return $this->asJson($items);
     }
 
     /**

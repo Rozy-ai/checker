@@ -30,6 +30,11 @@ echo Nav::widget([
             'visible' => Yii::$app->user->can('admin')
         ],
         [
+            'label' => 'Billing',
+            'url' => ['/billing/index'],
+            'visible' => Yii::$app->user->can('admin')
+        ],
+        [
             'label' => 'Users',
             'url' => '#',
             'visible' => Yii::$app->user->can('admin'),
