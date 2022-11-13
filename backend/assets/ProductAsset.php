@@ -18,6 +18,7 @@ class ProductAsset extends AssetBundle
         'css/style.css',
         'css/product.css',
         'https://unpkg.com/swiper@8/swiper-bundle.min.css',
+        'https://use.fontawesome.com/releases/v5.3.1/css/all.css',
         'js/zoom/jquery.ez-plus.css',
     ];
 

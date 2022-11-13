@@ -4,6 +4,7 @@
 /* @var $a backend\controllers\ArticlesController */
 
 $this->title = 'My Yii Application';
+echo \yii\helpers\VarDumper::dumpAsString(Yii::$app->getUser()->can('admin'));
 ?>
 <div class="site-index">
 

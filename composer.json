@@ -22,11 +22,12 @@
         "twbs/bootstrap-icons": "1.7.2",
         "ckeditor/ckeditor": "4.*",
         "mihaildev/yii2-ckeditor": "*",
-      "ext-json": "*",
+        "ext-json": "*",
         "phpoffice/phpspreadsheet": "^1.19",
         "phpoffice/phpexcel": "^1.8",
-      "ext-pdo": "*",
-      "ext-mysqli": "*"
+        "ext-pdo": "*",
+        "ext-mysqli": "*",
+        "kartik-v/yii2-widget-datepicker": "^1.4"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

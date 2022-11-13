@@ -2,62 +2,59 @@
 
 namespace backend\controllers;
 
-use backend\models\ExternalUser;
-use backend\models\search\ExternalUsersSearch;
+use backend\models\Billing;
+use backend\models\search\BillingSearch;
+use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Request;
+use yii\web\Response;
+use yii\web\User;
 use yii\widgets\ActiveForm;
 
 /**
- * ExternalUsersController implements the CRUD actions for ExternalUser model.
+ * BillingController implements the CRUD actions for Billing model.
  */
-class ExternalUsersController extends Controller
+class BillingController extends Controller
 {
     /**
      * @inheritDoc
      */
     public function behaviors(): array
     {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
+        return array_merge(
+            parent::behaviors(),
+            [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['admin']
+                        ],
+                    ],
                 ],
-            ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['admin']
+                'verbs' => [
+                    'class' => VerbFilter::className(),
+                    'actions' => [
+                        'delete' => ['POST'],
                     ],
                 ],
             ]
-        ];
-    }
-
-    public function actionAjax(Request $request): \yii\web\Response
-    {
-        $model = ExternalUser::find();
-        $model->andFilterWhere(['like', 'login', $request->get('search')]);
-        $items = $model->select('login')->asArray()->column();
-
-        return $this->asJson($items);
+        );
     }
 
     /**
-     * Lists all ExternalUser models.
+     * Lists all Billing models.
      *
      * @param Request $request
      * @return string
      */
     public function actionIndex(Request $request): string
     {
-        $searchModel = new ExternalUsersSearch();
+        $searchModel = new BillingSearch();
         $dataProvider = $searchModel->search($request->queryParams);
 
         return $this->render('index', [
@@ -67,7 +64,7 @@ class ExternalUsersController extends Controller
     }
 
     /**
-     * Displays a single ExternalUser model.
+     * Displays a single Billing model.
      * @param int $id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
@@ -80,17 +77,20 @@ class ExternalUsersController extends Controller
     }
 
     /**
-     * Creates a new ExternalUser model.
+     * Creates a new Billing model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
-    public function actionCreate(Request $request)
+    public function actionCreate(Request $request, User $user)
     {
-        $model = new ExternalUser();
+        $model = new Billing();
 
         if ($request->getIsPost()) {
+            $model->admin_id = $user->getId();
+            $model->setPaid();
+            $model->setSourceAdmin();
             if ($model->load($request->post())) {
-                if ($request->post('ajax') === 'external-user-form') {
+                if ($request->post('ajax') === 'billing-form') {
                     return $this->asJson(ActiveForm::validate($model));
                 }
                 if ($model->save()) {
@@ -107,7 +107,7 @@ class ExternalUsersController extends Controller
     }
 
     /**
-     * Updates an existing ExternalUser model.
+     * Updates an existing Billing model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id ID
      * @return string|\yii\web\Response
@@ -118,7 +118,7 @@ class ExternalUsersController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load($request->post())) {
-            if ($request->post('ajax') === 'external-user-form') {
+            if ($request->post('ajax') === 'billing-form') {
                 return $this->asJson(ActiveForm::validate($model));
             }
             if ($model->save()) {
@@ -132,11 +132,13 @@ class ExternalUsersController extends Controller
     }
 
     /**
-     * Deletes an existing ExternalUser model.
+     * Deletes an existing Billing model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
-     * @return \yii\web\Response
+     * @return Response
      * @throws NotFoundHttpException if the model cannot be found
+     * @throws \Throwable
+     * @throws StaleObjectException
      */
     public function actionDelete(int $id): \yii\web\Response
     {
@@ -146,15 +148,15 @@ class ExternalUsersController extends Controller
     }
 
     /**
-     * Finds the ExternalUser model based on its primary key value.
+     * Finds the Billing model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id ID
-     * @return ExternalUser the loaded model
+     * @return Billing the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel(int $id): ExternalUser
+    protected function findModel(int $id): Billing
     {
-        if (($model = ExternalUser::findOne(['id' => $id])) !== null) {
+        if (($model = Billing::findOne(['id' => $id])) !== null) {
             return $model;
         }
 

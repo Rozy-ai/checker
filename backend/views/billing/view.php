@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
-/** @var backend\models\ExternalUser $model */
+/** @var backend\models\Billing $model */
 
 $this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'External Users', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Billings', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="external-user-view">
+<div class="billing-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -30,19 +30,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'login',
-            'email:email',
-            [
-                'attribute' => 'status',
-                'value' => $model->statusText()
-            ],
-            [
-                'attribute' => 'balance',
-                'format' => 'currency',
-                'value' => $model->getBalance()
-            ],
-            'created_at:datetime',
-            'updated_at:datetime',
+            'user_id',
+            'status',
+            'sum',
+            'description',
+            'source',
+            'date',
+            'admin_id',
         ],
     ]) ?>
 

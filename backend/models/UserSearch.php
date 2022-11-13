@@ -14,7 +14,7 @@ class UserSearch extends User
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['status'], 'integer'],
@@ -55,7 +55,7 @@ class UserSearch extends User
             return $dataProvider;
         }
         $query->where(['<>', 'status', \common\models\User::STATUS_DELETED]);
-        
+
         // grid filtering conditions
         $query->andFilterWhere([
             'status' => $this->status,

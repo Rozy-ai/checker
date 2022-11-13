@@ -34,6 +34,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'login',
             'email:email',
             [
+                'attribute' => 'balance',
+                'format' => 'currency',
+                'filter' => false,
+            ],
+            [
                 'class' => ActionColumn::class,
                 'options' => [
                     'style' => 'width: 100px'
