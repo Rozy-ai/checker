@@ -16,7 +16,7 @@ return [
             'viewPath' => '@common/mail',
             'useFileTransport' => YII_ENV_DEV
         ],
-        'fmtUserData' => [
+        'formatter' => [
             'class' => '\backend\formatters\UserDataFormatter',
         ],
         'authManager' => [

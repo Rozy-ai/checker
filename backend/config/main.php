@@ -31,6 +31,7 @@ return [
             'csrfParam' => '_csrf-backend_',
         ],
         'user' => [
+            'class' => \backend\components\User::class,
             'identityClass' => common\models\User::class,
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],

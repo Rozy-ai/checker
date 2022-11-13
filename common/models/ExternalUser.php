@@ -153,9 +153,13 @@ class ExternalUser extends \yii\db\ActiveRecord
         return $this->hasMany(Billing::class, ['user_id' => 'id']);
     }
 
+    private $_balance;
     public function getBalance(): float
     {
-        return $this->getBillings()->where(['status' => Billing::STATUS_PAID])->sum('sum') ?: 0;
+        if ($this->_balance === null) {
+            $this->_balance = $this->getBillings()->where(['status' => Billing::STATUS_PAID])->sum('sum') ?: 0;
+        }
+        return $this->_balance;
     }
 
     public function beforeSave($insert): bool

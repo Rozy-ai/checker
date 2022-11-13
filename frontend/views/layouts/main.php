@@ -49,6 +49,11 @@ AppAsset::register($this);
                 'label' => 'Contact',
                 'url' => ['/site/contact']
             ],
+        ],
+    ]);
+    echo Nav::widget([
+        'options' => ['class' => 'navbar-nav ml-auto'],
+        'items' => [
             [
                 'label' => 'Signup',
                 'url' => ['/auth/register'],
@@ -60,13 +65,25 @@ AppAsset::register($this);
                 'visible' => Yii::$app->getUser()->getIsGuest()
             ],
             [
-                'label' => 'Logout',
-                'url' => ['/auth/logout'],
-                'linkOptions' => [
-                    'data-method' => 'post'
-                ],
-                'visible' => !Yii::$app->getUser()->getIsGuest()
-            ]
+                'label' => Yii::$app->getUser()->getName(),
+                'url' => '#',
+                'visible' => !Yii::$app->getUser()->getIsGuest(),
+                'items' => [
+                    [
+                        'label' => 'Billing',
+                        'url' => ['billing/index'],
+                        'visible' => !Yii::$app->getUser()->getIsGuest()
+                    ],
+                    [
+                        'label' => 'Logout',
+                        'url' => ['/auth/logout'],
+                        'linkOptions' => [
+                            'data-method' => 'post'
+                        ],
+                        'visible' => !Yii::$app->getUser()->getIsGuest()
+                    ]
+                ]
+            ],
         ],
     ]);
     NavBar::end();

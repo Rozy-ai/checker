@@ -18,7 +18,7 @@ $productSearch = new ProductSearch(); //Порнография
 <div class="user-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    
+
     <p>
         <?= Html::a(Yii::t('site', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?php if (! \Yii::$app->authManager->getAssignment('admin', $model->id)): ?>
@@ -40,7 +40,7 @@ $productSearch = new ProductSearch(); //Порнография
             'email:email',
             [
                 'attribute' => 'status',
-                'value' => function ($model) { return Yii::$app->fmtUserData->asStatus($model->status); }
+                'format' => 'status'
             ],
             [
                 'attribute' => 'created_at',

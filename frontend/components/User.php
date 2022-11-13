@@ -22,4 +22,12 @@ class User extends \yii\web\User
         }
         return $this->getIdentity()->login;
     }
+
+    public function getBalance(): ?float
+    {
+        if ($this->getIsGuest()) {
+            return null;
+        }
+        return $this->getIdentity()->getBalance();
+    }
 }

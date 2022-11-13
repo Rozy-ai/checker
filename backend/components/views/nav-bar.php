@@ -65,7 +65,7 @@ echo Nav::widget([
     'options' => ['class' => 'navbar-nav ml-auto'],
     'items' => [
         [
-            'label' => 'Logout (' . Yii::$app->user->identity->username . ')',
+            'label' => 'Logout (' . Yii::$app->getUser()->getName() . ')',
             'url' => ['auth/logout'],
             'linkOptions' => [
                 'data-method' => 'post',
