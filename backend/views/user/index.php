@@ -54,7 +54,7 @@ $authManager = \Yii::$app->authManager;
             'email',
             [
                 'attribute' => 'status',
-                'value' => function ($model) { return Yii::$app->fmtUserData->asStatus($model->status); },
+                'format' => 'status',
                 'filter' => Html::activeDropDownList($searchModel, 'status', User::getStatuses(),
                                                      ['prompt' => '', 'class' => 'form-control'])
             ],
