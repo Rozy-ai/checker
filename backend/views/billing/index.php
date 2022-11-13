@@ -75,6 +75,7 @@ Pjax::begin();
             ],
             [
                 'class' => ActionColumn::className(),
+                'visibleButtons' => ['update' => false, 'delete' => false],
             ],
         ],
     ]); ?>
