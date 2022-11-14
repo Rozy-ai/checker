@@ -406,6 +406,7 @@ $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
                             'filter_items_comparisons' => $filter_items_comparisons,
                             'filter_items_profile' => $filter_items_profile,
                             'filter_no_compare' => $filter_no_compare,
+                            'source' => $source
                         ])
                         ?>
                     </div>
@@ -458,7 +459,7 @@ $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
                     <? if ($is_admin):?>
                     <div class="product-list-item__data"><span>Пользователь:</span><br>
                         $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
-                        
+                       
                         <div class="product-list-item__data"><span>Profile:</span><br>
                             <?= $item->profile ?>
                         </div>                        
@@ -671,7 +672,8 @@ TableView::widget([
                                 'class' => 'sliderTop sliderProducts',
                                 'salesKey' => '',
                                 'delBtn' => true,
-                            ]
+                            ],
+                            'source' => $source
                         ]), ['class' => 'comparingImg']);
             }
         ],

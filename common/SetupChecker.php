@@ -5,6 +5,8 @@ namespace common;
 use yii\base\BootstrapInterface;
 use yii\di\Instance;
 use common\models\Filters;
+use backend\presenters\IndexPresenter;
+use backend\presenters\ProductPresenter;
 
 /**
  * Автозагрузка сервисов
@@ -19,5 +21,11 @@ class SetupChecker implements BootstrapInterface {
         $container->setSingleton(Filters::class, function() {
             return new Filters();
         });
+        
+        //Сервис IndexPresenter
+        //$container->setSingleton(IndexPresenter::class, [], [Instance::of(IndexPresenter::class)]);
+        
+        //Сервис ProductPresenter
+        //$container->setSingleton(ProductPresenter::class, [], [Instance::of(ProductPresenter::class)]);
     }
 }

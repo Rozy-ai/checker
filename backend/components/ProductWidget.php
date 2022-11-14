@@ -84,7 +84,8 @@ class ProductWidget extends Widget
     public $model;
     public $compare_items;
     public $compare_item;
-    public $source_id;
+    public $source;
+    public $is_admin;
 
   public function __construct($config = []){
     $this->_left = array_fill_keys(self::LEFT_ALLOWED, "");
@@ -122,7 +123,8 @@ class ProductWidget extends Widget
         'model' => $this->model,
         'compare_item' => $this->compare_item,
         'compare_items' => $this->compare_items,
-        'source_id' => $this->source_id
+        'source' => $this->source,
+        'is_admin' => $this->is_admin
       ]);
     }
 }

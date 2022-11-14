@@ -7,20 +7,24 @@
 
 namespace common\models;
 
+use common\models\User;
+
 /**
- * Класс содержит набор возможных фильтров получения списка товаров
+ * Класс содержит набор возможных фильтров 
+ * и для получения списка этого фильтра в формате [ name => count ]
  * 
-@property f_count_products_on_page  f_items__show_n_on_page Количество товаров на странице
-@property f_number_page_current     Номер страницы текущий;
-@property f_profile                 Только все товары которые менял пользователь с данной ролью
-@property f_no_compare              f_items__no_compare      (where_1) Товары не должны быть в таблице скрытых товаров
-@property f_id                      f_items__id              (where_2) Товар с данным id
-@property f_target_image            f_items__target_image;   (where_3) categiries_root (select)
-@property f_user                    f_items__user            (where_4) username пользователя
-@property f_comparing_images        f_items__comparing_images(where_5) Title
-@property f_comparisons             = $params['f_comparisons'];
-@property f_sort                    = $params['f_sort'];
- *
+ * @property f_profile                 Только все товары которые менял пользователь с данной ролью
+ * @property f_no_compare              f_items__no_compare      (where_1) Товары не должны быть в таблице скрытых товаров
+ * @property f_target_image            f_items__target_image;   (where_3) categiries_root (select)
+ * 
+ * @property f_user                    f_items__user            (where_4) username пользователя
+ * @property f_id                      f_items__id              (where_2) Товар с данным id
+ * @property f_comparing_images        f_items__comparing_images(where_5) Title
+ * @property f_comparisons             f_items__comparisons     (where_6) Фильтр выбора товара из поля выбора из Comparisons
+ * @property f_count_products_on_page  f_items__show_n_on_page            Количество товаров на странице
+ * @property f_number_page_current                                        Номер страницы текущий;
+ * @property f_sort                    created_ASC | created_DESC | updated_ASC | updated_DESC
+ * 
  * @author kosten
  */
 class Filters {
@@ -53,7 +57,6 @@ class Filters {
     //                                      (where_7) Не используется
     //                                      (where_8) Выносим в User
     
-
     /** @var string filter_items__sort */
     public $f_sort;
 
@@ -305,7 +308,7 @@ class Filters {
         if (!isset($this->source->table_1)){
             throw new InvalidArgumentException('Не установлено значение source->table_1');
         }
-        if ((\backend\models\User::isAdmin() && $this->f_profile && $this->f_profile !== '{{all}}' && $this->f_profile !== 'Все')) {
+        if ((User::isAdmin() && $this->f_profile && $this->f_profile !== '{{all}}' && $this->f_profile !== 'Все')) {
             return ['like', $this->source->table_1.'.`profile`', $this->f_profile];
         }
         return [];
@@ -630,6 +633,12 @@ class Filters {
         $q->innerJoin($this->source->table_2, $this->source->table_2.'.`asin` = `'.$this->source->table_1.'`.`asin`');
     }
     
+    /**
+     * Получить модель продуктов согласно всем фильтрам
+     * 
+     * @return Product
+     * @throws \yii\base\InvalidArgumentException
+     */
     public function getProduct(){
         if (!$this->source) {
             throw new \yii\base\InvalidArgumentException();
@@ -650,10 +659,9 @@ class Filters {
         
         $q->orderBy($source_table.'.id ASC');
         $q->limit(1);
-        return $q->one();
-    }
-    
-    public function getProductNext(){
-        
+        $product = $q->one();
+        $product->source = $this->source;
+        $product->baseInfo = $product->info;
+        return $product;
     }
 }

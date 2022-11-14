@@ -97,12 +97,12 @@ class Session extends \yii\web\Session{
         }
     }
     
-    public static function loadFromParams(array $params){
+    public function loadFromParams(array $params){
         foreach ($params as $key => $value){
             if (!$value) {
                 $value = self::defaults[$key];
             }
-            self::set($key, $value);
+            $this->set($key, $value);
         }
     }
 }

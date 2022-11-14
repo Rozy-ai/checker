@@ -6,7 +6,9 @@ namespace common\models;
 use backend\models\Settings__source_fields;
 use common\models\Source;
 
-class Product_right extends \yii\base\DynamicModel{
+
+
+class Product_right extends \yii\base\DynamicModel{   
   /**
    * @var array|float|int|mixed|string|string[]
    */
@@ -16,9 +18,13 @@ class Product_right extends \yii\base\DynamicModel{
   public function __construct(array $attributes = [], $config = []){
     parent::__construct($attributes, $config);
 
-
     //$this->source = Source::get_source();
   }
+  
+  public static function getById($id){
+      return self::findOne(['id' => $id]);
+  }
+  
 
   private function calculate_step_1($str){
     $re = '/\(\((.+?)\)\)|\{\{(.+?)\}\}|(\[\[.+?\]\])|(.+?)/m';

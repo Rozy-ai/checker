@@ -19,7 +19,7 @@
 
 use common\models\Comparison;
 use yii\helpers\Html;
-use backend\models\User;
+use common\models\User;
 use yii\helpers\Url;
 
 $node = Yii::$app->request->get('node');
@@ -30,9 +30,10 @@ $variables_left = $this->context->getVariablesLeft($product);
 
 $source     = $product->source;
 $source_id  = $product->source->id;
+$identity = \Yii::$app->user->identity;
 ?>
 
-<? if (User::is_detail_view_for_items() || $is_admin = User::isAdmin()):?>
+<? if ($identity && ($identity->is_detail_view_for_items() || $identity->isAdmin())): ?>
     <div class="main-item-title ">
         <? if ($is_admin): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
             <?= $variables_left['description_left'] ?>

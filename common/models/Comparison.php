@@ -33,72 +33,55 @@ class Comparison extends ActiveRecordAlias {
     const STATUS_PRE_MATCH = 'PRE_MATCH';
 
     private static $status_data = [
-        'PRE_MATCH' => [
-            'hex_color' => 'D7C000',
-            'name' => 'Prematch',
-            'name_2' => 'Да, предварительное',
+      'PRE_MATCH' => [
+          'hex_color' => 'D7C000',
+          'name' => 'Prematch',
+          'name_2' => 'Да, предварительное',
         ],
-        'MATCH' => [
-            'hex_color' => '',
-            'name' => 'Match',
-            'name_2' => 'Да',
+      'MATCH' => [
+          'hex_color' => '',
+          'name' => 'Match',
+          'name_2' => 'Да',
         ],
-        'OTHER' => [
-            'hex_color' => '',
-            'name' => 'Other',
-            'name_2' => 'Другое',
+      'OTHER' => [
+          'hex_color' => '',
+          'name' => 'Other',
+          'name_2' => 'Другое',
         ],
-        'MISMATCH' => [
-            'hex_color' => '',
-            'name' => 'Mismatch',
-            'name_2' => 'Нет',
+      'MISMATCH' => [
+          'hex_color' => '',
+          'name' => 'Mismatch',
+          'name_2' => 'Нет',
         ],
     ];
 
-    public static function get_filter_statuses() {
-        return [
-            'PRE_MATCH' => [
-                'hex_color' => 'D7C000',
-                'name' => 'Prematch',
-                'name_2' => 'Да, предварительное',
-            ],
-            'MATCH' => [
-                'hex_color' => '',
-                'name' => 'Match',
-                'name_2' => 'Да',
-            ],
-            'OTHER' => [
-                'hex_color' => '',
-                'name' => 'Other',
-                'name_2' => 'Другое',
-            ],
-            'MISMATCH' => [
-                'hex_color' => '',
-                'name' => 'Mismatch',
-                'name_2' => 'Нет',
-            ],
-            
-            'NO_COMPARE' => [
-                'hex_color' => '',
-                'name' => 'Nocompare',
-                'name_2' => 'Не отмеченные',
-            ],
-            'YES_NO_OTHER' => [
-                'hex_color' => '',
-                'name' => 'Result',
-                'name_2' => 'Все отмеченные',
-            ],
-            'ALL' => [
-                'hex_color' => '',
-                'name' => 'All',
-                'name_2' => 'Все',
-            ],
-            'ALL_WITH_NOT_FOUND' => [
-                'hex_color' => '',
-                'name' => 'All, with not found',
-                'name_2' => 'Все, с ненаденными',
-            ]
-        ];
+    public static function get_filter_statuses(){
+      $out['NOCOMPARE'] = [
+        'hex_color' => '',
+        'name' => 'Nocompare',
+        'name_2' => 'Не отмеченные',
+      ];
+
+      $out = array_merge($out,self::$status_data);
+
+      $out['YES_NO_OTHER'] = [
+        'hex_color' => '',
+        'name' => 'Result',
+        'name_2' => 'Все отмеченные',
+      ];
+
+      $out['ALL'] = [
+        'hex_color' => '',
+        'name' => 'All',
+        'name_2' => 'Все',
+      ];
+      $out['ALL_WITH_NOT_FOUND'] = [
+        'hex_color' => '',
+        'name' => 'All, with not found',
+        'name_2' => 'Все, с ненаденными',
+      ];
+      return $out;
+
     }
 
     public static function get_name_status($status_code) {
@@ -107,8 +90,12 @@ class Comparison extends ActiveRecordAlias {
         if ($status_code === 'MATCH') return 'Match (Yes)';
     	if ($status_code === 'OTHER') return 'Other';
     }
-
+       
+    /**
+     * @param type $status_code
+     */
     public static function get_status_by_code($status_code) {
+
         foreach (self::get_filter_statuses() as $k => $item) {
             if ($status_code === $k)
                 return $item;
@@ -224,7 +211,38 @@ class Comparison extends ActiveRecordAlias {
 
         return $statuses;
     }
-
+    
+    /**
+     * Делает в таблице Comparisons папись о сравнении со статусом $status
+     * @param string $status 
+     * @param int $id_source
+     * @param int $id_product
+     * @param int $id_item
+     * @param type $message
+     */
+    public static function setStatus(string $status, int $id_source, int $id_product, int $id_item, $message = '' ){
+        $comparison = self::findOne([
+            'product_id'    => $id_product, 
+            'node'          => $id_item, 
+            'source_id'     => $id_source]);
+        if ($comparison){
+            if ($comparison->status != $status){
+                $comparison->status = $status;
+                $comparison->save();
+            }
+        } else {
+            $comparison = new self([
+                'source_id' => $id_source,
+                'product_id' => $id_product,
+                'node' => $id_item,
+                'user_id' => \Yii::$app->user->id,
+                'status' => $status,
+                'message' => $message,
+            ]);
+            $comparison->save();
+        }
+    }
+/*
     public function setStatus($status, $msgid = null, $url = null, $pid = false) {
         $this->status = $status;
         $this->message = null;
@@ -259,7 +277,7 @@ class Comparison extends ActiveRecordAlias {
 
         return $this;
     }
-    
+*/   
     /**
     public function afterSave($insert, $changedAttributes) {
 
@@ -373,4 +391,7 @@ class Comparison extends ActiveRecordAlias {
         return false;
     }
 
+    public static function addOrUpdate(){
+        
+    }
 }

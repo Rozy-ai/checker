@@ -674,7 +674,7 @@ $(function(){
   lib.brief_on_hover('.js__p-left, .slider__left-item-img-wrapper-link, .products-list__img-wrapper-link',
     {'offset_left': -170,'offset_top': -50,'arrow_position': 'top'},
     function($message,$this){
-    let title_ = $this.data("title");
+    let title_ = $this.data("tree");
     if (!title_) title_ = '-';
   
     let replace_1 = 'url("';

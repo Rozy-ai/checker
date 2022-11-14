@@ -39,7 +39,7 @@ $authManager = \Yii::$app->authManager;
             [
                 'attribute' => 'username',
                 'format' => 'raw',
-                'value' => function (\backend\models\User $user) {
+                'value' => function (User $user) {
                     if ((int)$user->id === 1) {
                         return $user->username;
                     }
@@ -94,7 +94,7 @@ $authManager = \Yii::$app->authManager;
 
                 },
                 'visibleButtons' => [
-                    'view' => function(\backend\models\User $user) {
+                    'view' => function(User $user) {
                         // Нельзя войти под самим собой и под суперадмином
                         return (int)$user->id !== 1 && (int)$user->id !== (int)Yii::$app->getUser()->getId();
                     },
@@ -111,7 +111,7 @@ $authManager = \Yii::$app->authManager;
                     'view' => false,
                     'update' => false,
                     'delete' =>
-                        function (\backend\models\User $model) {
+                        function (User $model) {
                             // Нельзя удалить суперадмина и себя
                             if ((int)$model->id === 1 || Yii::$app->getUser()->getId() === $model->id) {
                                 return false;

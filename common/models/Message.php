@@ -3,7 +3,7 @@
 namespace common\models;
 
 use Yii;
-use backend\models\User;
+use common\models\User;
 
 /**
  * This is the model class for table "{{%messages}}".
