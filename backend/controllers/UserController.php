@@ -2,12 +2,11 @@
 
 namespace backend\controllers;
 
-use backend\models\Source;
+use common\models\Source;
 use common\models\User__source_access;
 use common\models\UserEntity;
 use Yii;
-use common\models\User as CommonUser;
-use backend\models\User;
+use common\models\User;
 use backend\models\UserForm;
 use backend\models\UserSearch;
 use backend\models\AuthAssignment;
@@ -92,7 +91,7 @@ class UserController extends Controller{
      * @return mixed
      */
   public function actionCreate(){
-    $model = new CommonUser();
+    $model = new User();
     $form = new UserForm(['model' => $model, 'scenario' => 'create']);
 
     if ($this->request->isPost) {
@@ -116,10 +115,11 @@ class UserController extends Controller{
 
     /***************/
     $model_2 = new User__source_access();
-    $model_2_source_list = Source::get_sources();
+    $model_2_source_list = Source::getSourcesPaidByIdUser();
+    
     $model_2_source_list_out = [];
     foreach ($model_2_source_list as $s_list) {
-      $model_2_source_list_out[$s_list->id] = $s_list->name;
+        $model_2_source_list_out[$s_list->id] = $s_list->name;
     }
 
 //    $model_2_res_user = User__source_access::find()->all();

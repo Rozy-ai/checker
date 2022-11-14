@@ -26,6 +26,8 @@ class TopSlider extends Widget {
     public $filter_items_comparisons;
     public $filter_items_profile;
     public $filter_no_compare;
+    public $compare_item;
+    public $source;
 
     private function hide_red($items) {
         $return = [];
@@ -56,7 +58,7 @@ class TopSlider extends Widget {
     }
 
     function getVariablesLeft($product) {
-        $p_key = Settings__fields_extend_price::get_default_price($product->source->id)->name ?: 'Price Amazon';
+        $p_key = Settings__fields_extend_price::get_default_price($this->source->id)->name ?: 'Price Amazon';
         $footer_left = '<span><span class="__blue-title">BSR:</span>' . number_format($product->baseInfo["Sales Rank: Current"], 0, '', ' ') . ' </span>' .
                 '<span><span class="__blue-title">Sales30:</span>' . $product->baseInfo["Sales Rank: Drops last 30 days"] . ' </span>' .
                 '<span><span class="__blue-title">Price:</span>' . $product->baseInfo[$p_key] ?: '-' . ' </span>' .
@@ -162,8 +164,8 @@ class TopSlider extends Widget {
         $items = $this->product->addInfo;
         $this->is_detail_view = false;
         return $this->render(($this->is_detail_view) ? 'slider-v-2' : 'slider-v-1', [
-            'is_admin' => $this->is_admin,
-            'number_page_current'   => $this->number_page_current,
+            'is_admin'              => $this->is_admin,
+            'number_page_current'  => $this->number_page_current,
             'option_class_slider'   => $this->_options['class'],
             'option_sales_key'      => $this->_options['sales_key'],
             'option_del_btn'        => $this->_options['option_del_btn'],
@@ -172,6 +174,8 @@ class TopSlider extends Widget {
             'filter_items_profile'     => $this->filter_items_profile,
             'items'                 => $items,
             'no_compare'            => $this->filter_no_compare,
+            'compare_item'          => $this->compare_item,
+            'source'                => $this->source
         ]);
     }
 }

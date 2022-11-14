@@ -13,9 +13,9 @@ use yii\helpers\Html;
 /* @var $p_item */
 /* @var $p_right */
 /* @var $addition_info_for_price */
+/* @var Source $source */
 
 if(!isset($middleVal)) $middleVal = 0;
-$source = \backend\models\Source::get_source();
 
 ?>
   <tr class="my_tr">
@@ -53,8 +53,8 @@ $source = \backend\models\Source::get_source();
         <? if ($leftTitle === 'EAN/UPC'):?>
         <?
           $url = '';
-          if ($source['source_name'] === 'EBAY') $url = $p_item->baseInfo['Ebay_url'];
-          if ($source['source_name'] === 'CHINA') $url = $p_right['Url_Search_Ali'];
+          if ($source->name === 'EBAY') $url = $p_item->baseInfo['Ebay_url'];
+          if ($source->name === 'CHINA') $url = $p_right['Url_Search_Ali'];
         ?>
           <? if ($url) : ?>
           <a class="btn btn-outline-secondary" href="<?=$url?>" target="_blank"

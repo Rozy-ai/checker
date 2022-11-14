@@ -14,9 +14,10 @@ use yii\bootstrap4\NavBar;
 use yii\web\Session;
 
 ProductAsset::register($this);
-$arrows = $this->params['arrows'];
-$get_ = $this->params['get_']?? [];
 
+$list_comparison_statuses = $this->params['list_comparison_statuses'] ?? '';
+$active_comparison_status = $this->params['active_comparison_status']?? '';
+$product = $this->params['product'];
 
 ?>
 <?php $this->beginPage() ?>
@@ -56,18 +57,16 @@ $get_ = $this->params['get_']?? [];
           ]) ?>
 
           <?
-          $statuses = [
+          $list_comparison_statuses = [
             Comparison::STATUS_PRE_MATCH => 0,
             Comparison::STATUS_MATCH => 0,
             Comparison::STATUS_MISMATCH => 0,
             Comparison::STATUS_OTHER => 0,
           ];
-          $item = $this->params['item'];
 
-
-          foreach ($item->comparisons as $comparison):
-            $statuses [$comparison->status]++;
-          endforeach;
+          //foreach ($product->comparisons as $comparison):
+          //  $list_comparison_statuses [$comparison->status]++;
+          //endforeach;
           ?>
 
             <div class="[ PRODUCT-STATISTICS ]  product-page__product-statistics">
@@ -75,24 +74,31 @@ $get_ = $this->params['get_']?? [];
               <div class="product-page__product-statistics-part-2">
                 <span class="product-page__product-statistics-title">Обработано:</span>
                 <?
-                $counted = $item->aggregated ? $item->aggregated->counted : 0;
-                $ret = Html::tag('span',"{$counted}/" . count($item->getAddInfo()),
+                $counted = $product->aggregated ? $product->aggregated->counted : 0;
+                $ret = Html::tag('span',"{$counted}/" . count($product->addInfo),
                   ['class' => 'name product-list-item__processed']);
                 //$ret .= '<br/>';
                 echo $ret;
                 ?>
               </div>
 
-              <?
+              <?php
               echo $ret = Html::tag(
                 'div',
-                "<span class='js-pre_match pre_match' data-text_brief='Yes?'>{$statuses[Comparison::STATUS_PRE_MATCH]}</span><span class='js-match match' data-text_brief='Yes'>{$statuses[Comparison::STATUS_MATCH]}</span><span class='js-mismatch mismatch' data-text_brief='No'>{$statuses[Comparison::STATUS_MISMATCH]}</span><span class='js-other other' data-text_brief='Other'>{$statuses[Comparison::STATUS_OTHER]}</span><span class='js-nocompare nocompare' data-text_brief='Nocompare'>".count(Comparison::get_no_compare_ids_for_item($item))."</span>"."<span data-text_brief='reset' class='js css -reset_filter_1234 -hidden'>показать все</span>",
+                      
+                "<span class='js-pre_match pre_match' data-text_brief='Yes?'>{$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]}</span>"
+                ."<span class='js-match match' data-text_brief='Yes'>{$list_comparison_statuses[Comparison::STATUS_MATCH]}</span>"
+                ."<span class='js-mismatch mismatch' data-text_brief='No'>{$list_comparison_statuses[Comparison::STATUS_MISMATCH]}</span>"
+                ."<span class='js-other other' data-text_brief='Other'>{$list_comparison_statuses[Comparison::STATUS_OTHER]}</span>"
+                ."<span class='js-nocompare nocompare' data-text_brief='Nocompare'>".count(Comparison::get_no_compare_ids_for_item($product))."</span>"
+                ."<span data-text_brief='reset' class='js css -reset_filter_1234 -hidden'>показать все</span>",
+                        
                 ['class' => 'product-list-item__compare-statistics product-page__product-statistics-1234','style' => '']
               );
               ?>
               <span
                 style="float: left;"
-                class="js-reset-compare product-page__reset-compare -margin" data-p_id="<?=$item->id?>" data-source_id="<?=$this->params['source_id']?>">
+                class="js-reset-compare product-page__reset-compare -margin" data-p_id="<?=$product->id?>" data-source_id="<?=$this->params['source_id']?>">
                 Отменить выбор
               </span>
 
@@ -126,13 +132,15 @@ $get_ = $this->params['get_']?? [];
 
                         <div class="arrow__filter-comparison">
                           <select name="" id="arrow__filter-comparison">
-                            <? foreach ($this->params['filter_statuses'] as $k_status => $status_data):?>
-                            <option
-                              value="<?=$k_status?>"
-                              <?= isset($get_['comparisons'])?     $get_['comparisons'] == $k_status ? 'selected' : ''    : '' ?>
-
-                            ><?=$status_data['name']?> (<?=$status_data['cnt']?>)</option>
-                            <? endforeach;?>
+                            <?php 
+                                $filter_statuses = Comparison::get_filter_statuses();
+                                foreach ($filter_statuses as $k_status => $status_data):?>
+                                <option
+                                    value="<?=$k_status?>"
+                                    <?= isset($get_['comparisons'])?     $get_['comparisons'] == $k_status ? 'selected' : ''    : '' ?>
+                                >11
+                                </option>
+                            <?php endforeach;?>
                           </select>
                         </div>
 

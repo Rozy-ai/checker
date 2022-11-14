@@ -12,6 +12,7 @@ use common\models\Filters;
 use common\models\Stats_import_export;
 use common\models\Comparison;
 use common\models\HiddenItems;
+use common\models\P_user_visible;
 
 /**
  * Превставитель для страницы product/index, содержащий логику
@@ -31,7 +32,7 @@ class IndexPresenter {
     }
     
     //Загрузка параметров из сесиии. Можно легко переделать на get или post
-    public function loadFromSession(){
+    private function loadFromSession(){
         $session = \Yii::$app->session;
         
         $this->filters->load([
@@ -233,7 +234,7 @@ class IndexPresenter {
         $pager['this_n'] = $numberPageCurrent;
         $pager['in'] = ['pages_cnt' => $countPages, 'left_right_n' => $left_right_n];
 
-        return $pager;       
+        return $pager;
     }
     
     /**
@@ -265,26 +266,7 @@ class IndexPresenter {
             //Всем товарам справа присвоить статус STATUS_MISMATCH
             if (is_array($add_info)){
                 foreach ($add_info as $number_node => $item){
-                    $comparison = Comparison::findOne([
-                        'product_id' => $id_product, 
-                        'node' => $item->id, 
-                        'source_id' => $id_source]);
-                    if ($comparison){
-                        if ($comparison->status != Comparison::STATUS_MISMATCH){
-                            $comparison->status = Comparison::STATUS_MISMATCH;
-                            $comparison->save();
-                        }
-                        //$comparison->setStatus(Comparison::STATUS_MISMATCH); 
-                    } else {
-                        $comparison = new Comparison([
-                            'product_id' => $id_product,
-                            'user_id' => \Yii::$app->user->id,
-                            'node' => $item->id,
-                            'source_id' => $id_source,
-                            'status' => Comparison::STATUS_MISMATCH
-                        ]);
-                        $comparison->save();
-                    }                    
+                    Comparison::setStatus(Comparison::STATUS_MISMATCH, $id_source, $id_product, $item->id);
                 }
             }
             
@@ -306,6 +288,42 @@ class IndexPresenter {
             ];
         }
 
+        return [
+            'status' => 'ok'
+        ];
+    }
+    
+    /**
+     * Установить статус правого товара
+     * 
+     * @param type $id_product Левый товар
+     * @param type $id_item Правый товар
+     * @param type $id_source id источника
+     * @param type $status Статус, в который нужно установить товар
+     * @return type
+     */
+    public function setStatusProductRight($id_product, $id_item, $id_source, $status, $message=''){
+        
+        try{
+            Comparison::setStatus($status, $id_source, $id_product, $id_item, $message);
+            
+            if ($status == Comparison::STATUS_OTHER && $message && User::isAdmin()){
+                if (!P_user_visible::findOne(['p_id' => $id_product])) {
+                    
+                    $puv = new P_user_visible();
+                    $puv->p_id = $id_product;
+                    $puv->save();
+                }
+            }
+
+        } catch (\Exception $ex) {
+            return [
+                \Yii::error($ex->getLine().':'.$ex->getMessage()),
+                'status' => 'error',
+                'message' => 'При обновлении базы данных возникла ошибка'
+            ];
+        }
+        
         return [
             'status' => 'ok'
         ];

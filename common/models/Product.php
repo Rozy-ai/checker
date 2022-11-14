@@ -13,11 +13,17 @@ use common\models\Comparison;
 
 /**
  * This is the model class for table "{{%parser_trademarkia_com}}".
- *
+ * 
+ * todo: Сделать этот класс универсальным под любую таблицу из списка:
+ *          Parser_trademarkia_com
+ *          Parser_Google
+ *          Parser_china
+ *       В зависимости от источника
+ *  
  * @property int $id
  * @property string|null $title
  * @property string|null $categories
- * @property string $asin
+ * @property string      $asin
  * @property string|null $info
  * @property string|null $comparsion_info
  * @property string|null $results_all_all
@@ -69,18 +75,10 @@ class Product extends \yii\db\ActiveRecord{
     public function setSource(Source $source){
         $this->_source = $source;
     }
-
+  
     /**
-     * {@inheritdoc}
-     */
-  public static function tableName(){
-        return '!!!!';
-        //return '{{%parser_trademarkia_com}}';
-    }
-
-    /**
-     * Служит для того чтобы загрузить для продукта дополнительную инфу
-     * $this->_addinfo = new Product_right(.....)
+     * Заполняет свойсьво _addInfo массивом из правых элементов
+     * @return Product_right[]
      */
     public function initAddInfo() {
         $asin = $this->asin;
@@ -115,27 +113,28 @@ class Product extends \yii\db\ActiveRecord{
         }
     }
 
+    // Добавляет ключи и зачения которые хранятся в поле addInfo
     private function get_all_elements_in_array_to_first_level($array, $separator = '_', $level_prefix = '') {
         $_tmp = [];
         $from_deep = [];
 
-    if (!is_array($array)) return $array;
-    foreach ($array as $k => $val){
+        if (!is_array($array)) return $array;
+        foreach ($array as $k => $val){
 
-            if (is_array($val)) {
-                $from_deep = $this->get_all_elements_in_array_to_first_level($val, $separator, $k);
-                $_tmp = array_merge($_tmp, $from_deep);
-            } else {
-                if ($level_prefix)
-                    $key = $level_prefix . $separator . $k;
-                else
-                    $key = $k;
+                if (is_array($val)) {
+                    $from_deep = $this->get_all_elements_in_array_to_first_level($val, $separator, $k);
+                    $_tmp = array_merge($_tmp, $from_deep);
+                } else {
+                    if ($level_prefix)
+                        $key = $level_prefix . $separator . $k;
+                    else
+                        $key = $k;
 
-                $_tmp[$key] = $val;
+                    $_tmp[$key] = $val;
+                }
             }
-        }
 
-        return array_merge($_tmp, $from_deep);
+            return array_merge($_tmp, $from_deep);
     }
 
     /**
@@ -201,10 +200,6 @@ class Product extends \yii\db\ActiveRecord{
         return $this->hasOne(P_user_visible::class, ['p_id' => 'id']);
     }
 
-    public function getProductsRight(){
-        
-    }
-
     /**
      * Имеет ли продукт правые товары со статусом STATUS_MATCH или STATUS_PRE_MATCH
      * @return bool
@@ -217,6 +212,7 @@ class Product extends \yii\db\ActiveRecord{
                     ['status' => Comparison::STATUS_PRE_MATCH]])
                 ->exists();
     }
+    
 
 
     /**

@@ -6,6 +6,7 @@ use backend\models\Settings__fields_extend_price;
 use common\helpers\AppHelper;
 use common\models\Comparison;
 use yii\helpers\Html;
+use common\models\Source;
 
 
 /**
@@ -19,14 +20,14 @@ use yii\helpers\Html;
  * @var $arrows
  * @var $compare_item
  * @var $compare_items
- * @var $source_id
+ * @var Source $source
+ * @var bool   $is_admin
  */
 
 $get_ = $this->params['get_'];
 
 $images_left = preg_split("/[; ]/", $left["Image"]);
 $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
-$source = \backend\models\Source::get_source();
 ?>
 
 
@@ -49,8 +50,8 @@ $source = \backend\models\Source::get_source();
 
         <?
         $url = '';
-        if ($source['source_name'] === 'EBAY') $url = $left['Ebay_search'];
-        if ($source['source_name'] === 'CHINA') $url = $right['Url_Search_Ali'];
+        if ($source->name === 'EBAY') $url = $left['Ebay_search'];
+        if ($source->name === 'CHINA') $url = $right['Url_Search_Ali'];
         ?>
         <? if ($url):?>
           <a href="<?=$url?>" target="_blank" class="compare__left-item-title-l-1 ">
@@ -128,7 +129,7 @@ $source = \backend\models\Source::get_source();
                 class="<?=$class?>"
                 data-pid="<?=$product_id?>"
                 data-nid="<?=$index?>"
-                data-source_id="<?=$source_id?>"
+                data-source_id="<?=$source->id?>"
                 value="<?=$index?>"
                 <?=((int)$node_idx === $index)? 'selected="true"' : '' ?>
               >#<?=$index?> | <?=$r_item->r_Title?></option>
@@ -285,7 +286,7 @@ $source = \backend\models\Source::get_source();
         <div class="control">
           <span
             <? if (0):?>
-            href="/product/missall?id=<?=$product_id?>&source_id=<?=$source_id?>&return=1&"
+            href="/product/missall?id=<?=$product_id?>&source_id=<?=$source->id?>&return=1&"
             <? endif;?>
             data-url = "/product/missall"
             data-id = "<?=$product_id?>"
@@ -383,7 +384,7 @@ $source = \backend\models\Source::get_source();
                     class="<?=$class?>"
                     data-pid="<?=$product_id?>"
                     data-nid="<?=$index?>"
-                    data-source_id="<?=$source_id?>"
+                    data-source_id="<?=$source->id?>"
                     value="<?=$index?>"
                     <?=((int)$node_idx === $index)? 'selected="true"' : '' ?>
                   >#<?=$index?> | <?=$r_item->r_Title?></option>
@@ -472,7 +473,7 @@ $source = \backend\models\Source::get_source();
             'canCompare' => $canCompare,
             'product_id' => $product_id,
             'node_idx' => $node_idx,
-            'source_id' => $source_id
+            'source_id' => $source->id
           ]) ?>
         </div>
       </div>
@@ -506,7 +507,7 @@ $source = \backend\models\Source::get_source();
 
     <? if ($table_rows) foreach ($table_rows as $t_row): ?>
 
-      <?
+      <?php
 
       $options = [];
       $options['compare_items'] = $compare_items;
@@ -527,7 +528,7 @@ $source = \backend\models\Source::get_source();
         $options['leftValue'] = $left["Package: Length (cm)"] . 'x' . $left["Package: Width (cm)"] . 'x' . $left["Package: Height (cm)"];
       }
       if ($t_row->title == 'Price'){
-        $p_key = Settings__fields_extend_price::get_default_price()->name ?: 'Price Amazon' ;
+        $p_key = Settings__fields_extend_price::get_default_price($source->id)->name ?: 'Price Amazon' ;
 
         //$options['leftValue'] = '!!!!';
         $options['leftValue'] = $left[$p_key]?: '-';
@@ -540,7 +541,7 @@ $source = \backend\models\Source::get_source();
         $options['middleVal'] = is_numeric($E_Sales) && is_numeric($A_Sales) ? $E_Sales - $A_Sales : 0;
         $options['leftValue'] = $left["Sales Rank: Current"] . " (" . $left["Sales Rank: 30 days avg."].')';
       }
-
+      $options['source'] = $source;
       ?>
 
 
@@ -556,7 +557,7 @@ $source = \backend\models\Source::get_source();
   </tbody>
 </table>
 
-  <? if (\backend\models\User::isAdmin()):?>
+  <? if ($is_admin):?>
   <div
     data-pid="<?=$product_id?>"
     class="btn btn-primary [ USER-VISIBLE-FIELDS ] compare__user-visible-fields" style="margin-bottom: 10px;">

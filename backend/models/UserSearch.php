@@ -4,13 +4,17 @@ namespace backend\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use backend\models\User;
+use common\models\User;
 
 /**
  * UserSearch represents the model behind the search form of `backend\models\User`.
  */
-class UserSearch extends User
+class UserSearch extends Model
 {
+    public $username;
+    public $email;
+    public $status;
+    
     /**
      * {@inheritdoc}
      */
@@ -18,7 +22,8 @@ class UserSearch extends User
     {
         return [
             [['status'], 'integer'],
-            [['username', 'email'], 'safe'],
+            [['status'], 'in', 'range' => [User::STATUS_ACTIVE, User::STATUS_INACTIVE, User::STATUS_DELETED]],
+            [['username', 'email'], 'string', 'max' => 255],
         ];
     }
 

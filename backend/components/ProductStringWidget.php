@@ -18,6 +18,7 @@ class ProductStringWidget extends Widget
     public $compare_items;
     public $p_item;
     public $p_right;
+    public $source;
 
     public function run(){
 
@@ -40,6 +41,7 @@ class ProductStringWidget extends Widget
         'p_item' => $this->p_item,
         'p_right' => $this->p_right,
         'addition_info_for_price' => $addition_info_for_price,
+        'source' => $this->source
       ]);
     }
 }
