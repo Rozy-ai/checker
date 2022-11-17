@@ -75,6 +75,7 @@ class Filters {
         $this->f_profile                 = $params['f_profile'];
         $this->f_no_compare              = $params['f_no_compare'];
         $this->f_id                      = $params['f_id'];
+        $this->f_asin                    = $params['f_asin'];
         $this->f_target_image            = $params['f_target_image'];
         $this->f_user                    = $params['f_user'];
         $this->f_comparing_images        = $params['f_comparing_images'];
@@ -152,6 +153,13 @@ class Filters {
             ] : [];
     }
     
+    public function getSqlAsin(){
+        if (!isset($this->source->table_1)){
+            throw new \InvalidArgumentException('Отсутствует обязательный аргумент');
+        }
+        return ($this->f_asin)?
+            ['like', $this->source->table_1.'ASIN', $this->f_asin.'____'] : [];
+    }
     
     public function getSqlIdGreater(){
         return ($this->f_id)? [ '>=' , 'id', $this->f_id] : [];
@@ -510,7 +518,7 @@ class Filters {
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where(['and',
             $this->getSqlNoCompare(),
-            $this->getSqlIdOrAsin(),
+            $this->getSqlAsin(),
             $this->getSqlCategoriesRoot(),
             $this->getSqlUser(),
             $this->getSqlComparingImages(),
@@ -576,7 +584,7 @@ class Filters {
         // !!! Если менять тут то нужно менять getListProducts
         $q->where(['and',
             $this->getSqlNoCompare(),
-            $this->getSqlIdOrAsin(),
+            $this->getSqlAsin(),
             $this->getSqlCategoriesRoot(),
             $this->getSqlUser(),
             $this->getSqlComparingImages(),

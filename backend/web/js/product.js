@@ -924,7 +924,7 @@ $(function(){
   
   $body.on('click','.js__dynamic-link',function(){
     let $this = $(this);
-    let node_id = $this.data('node_id') ?? 1;
+    let node_id = $this.data('node_id')?$this.data('node_id'):1;
     console.log('node_id: ' + node_id);
     let p_id = $this.data('p_id');
   

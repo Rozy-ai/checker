@@ -296,7 +296,6 @@ $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 
                 >
                 <td class="products-list__td1">
-                    <div class="product-list-item__data" style="white-space: nowrap"><span>Asin:</span><br><?= (strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin ?></div>
                     <div class="product-list-item__data"><span>BSR:</span><br><?= number_format($item->baseInfo["Sales Rank: Current"], 0, '', ' '); ?></div>
                     <div class="product-list-item__data"><span>Sales30:</span><br><?= $item->baseInfo["Sales Rank: Drops last 30 days"] ?></div>
                     <div
@@ -315,7 +314,7 @@ $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 
                 </td>
                 <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
-                    <div><?= $item->baseInfo["ASIN"] ?></div>
+                    <div><?= (strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin ?></div>
                     <div class="products-list__img-wrapper">
                     <?php
                         $title = '';
