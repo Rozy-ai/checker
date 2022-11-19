@@ -23,7 +23,7 @@ use common\models\Comparison;
 /* @var $active_comparison_status */
 /* $var $list_comparison_statuses */
 
-/* @var $filter_items_profile */
+/* @var $f_profile */
 /* @var $number_node */
 /* @var $is_admin */
 
@@ -48,7 +48,7 @@ $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[
         data-p_id="<?= $model->id ?>"
         data-source_id="<?= $source->id ?>"
         data-comparison="<?= $active_comparison_status ?>"
-        data-profile="<?= $filter_items_profile ?>"
+        data-profile="<?= $f_profile ?>"
         data-node="<?= $number_node ?? 0 ?>"
         >
     </div>
@@ -88,11 +88,9 @@ $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[
                     <div class="filter __comparison">
                         <select name="" class="filter __comparison-select form-control">
                             <?php 
-                                foreach ( $list_comparison_statuses as $key => $data){
+                                foreach ( $list_comparison_statuses as $key => $name){
                                     $is_active = ($key == $active_comparison_status)?'active':'';
-                                    $name = $data['name'];
-                                    $count = $data['count'];
-                                    echo "<option value=$key $is_active>$name ($count)</option>";
+                                    echo "<option value=$key $is_active>$name</option>";
                                 }
                             ?>
                         </select>

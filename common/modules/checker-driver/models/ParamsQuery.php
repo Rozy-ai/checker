@@ -8,7 +8,7 @@
 /**
  * Description of ParamsQuery
  *
- * @author koste
+ * @author kosten
  */
 class ParamsQuery {
     public $filter_items__profile;

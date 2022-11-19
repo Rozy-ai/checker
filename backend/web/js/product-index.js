@@ -511,52 +511,67 @@ $(document).ready(function () {
     };
     cb.set();
     $('#product-index-pjax').on('pjax:end', cb.set);
-
-
     $('.sliderTop').slick({
         infinite: true,
         arrows: true,
         slidesToShow: 3,
         slidesToScroll: lib._visible_cnt_right_items(),
     });
+    
+    function addActionChangeFilter(id_filter, name_filter){
+        let filter = $('#'+id_filter);
+        filter.on('change', function (e) {
+            e.stopPropagation();
+            let value = $(filter).val();
+            $.ajax({
+                method: "post",
+                url: "/product/change-filter",
+                dataType:'json',
+                data: { 
+                    'name': name_filter,
+                    'value': value
+                },
+                success:function(data){
+                    switch (data.status){
+                        case 'ok':                      
+                            var container = $("#id_table_container");
+                            container.html(data.html);
+                            break;
+                        case 'info':
+                            alert(data.message);
+                            break;
+                        case 'error':
+                            alert(data.message);
+                            break;
+                    }
+                    lib.slider_init();
 
+                    for (var key in data.other){
+                        elem = $('#'+key);
+                        elem.html(data.other[key]);
+                    }
+                },
+                error:function(res){
+                    console.log(res.responseText);
+                }
+            });
+        });        
+    }
+    
+    addActionChangeFilter('id_f_asin', 'f_asin');
+    addActionChangeFilter('id_f_categories_root', 'f_categories_root');
+    addActionChangeFilter('id_f_title', 'f_title');
+    addActionChangeFilter('id_f_status', 'f_status');
+    addActionChangeFilter('id_f_username', 'f_username');
+    addActionChangeFilter('id_f_comparison_status', 'f_comparison_status');
+    addActionChangeFilter('id_f_sort', 'f_sort');
+    addActionChangeFilter('id_f_count_products_on_page', 'f_count_products_on_page');
+    addActionChangeFilter('id_f_detail_view', 'f_detail_view');
+    addActionChangeFilter('id_f_profile', 'f_profile');
 
-    /*
-     $body.on('click','.js-import-from-sql',function(){
-     let $this = $(this);
-     let source_id = $this.data('source_id');
-     
-     let dataToSend = {};
-     dataToSend.use_import_sql_file_path = 1;
-     dataToSend.source_id = source_id;
-     $.ajax({
-     url: "/import/step_2",
-     type: "POST",
-     data: dataToSend,
-     beforeSend: function() {
-     
-     },
-     dataType: "json",
-     success: function(response){
-     if (response.res === 'ok'){
-     
-     //console.log(response.info);
-     let res = response.info;
-     let str = 'Результат импорта из sql фаила:' + "\n";
-     for (let i in res){
-     str += i +':'+ res[i] + "\n";
-     }
-     alert(str);
-     //document.location.reload();
-     }
-     }
-     });
-     
-     })
-     */
-
-
-
+    //$body.on('change', '.product-list__item-mismatch-all', function (e) {
+    //    e.stopPropagation();
+    //});
 });
 
 

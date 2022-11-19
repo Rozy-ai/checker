@@ -12,7 +12,7 @@ $model->addRule(['test'], 'trim');
 
   <? $form = ActiveForm::begin(['action' => '/exports/step_2',]); ?>
     <?= $form->field($model, 'source_id')->dropDownList(
-      \backend\models\Source::get_sources_for_form()
+      \common\models\Source::get_sources_for_form()
     )->label('Выберите источник:'); ?>
 
 

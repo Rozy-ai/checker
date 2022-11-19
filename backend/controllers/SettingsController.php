@@ -7,7 +7,7 @@ use backend\models\Settings__fields_extend_price;
 use backend\models\Settings__list;
 use backend\models\Settings__source_fields;
 use backend\models\Settings__table_rows;
-use backend\models\Source;
+use common\models\Source;
 use common\models\Product;
 use Yii;
 use yii\base\Model;

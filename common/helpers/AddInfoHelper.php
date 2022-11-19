@@ -2,7 +2,7 @@
 
 namespace common\helpers;
 
-use backend\models\Source;
+use common\models\Source;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use common\models\Comparison;

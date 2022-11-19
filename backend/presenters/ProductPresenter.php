@@ -22,7 +22,7 @@ class ProductPresenter {
     
     public $filter_items_source;
     public $direction;
-    public $filter_no_compare;
+    public $f_no_compare;
     public $item_2__show_all;
     public $comparisons;
     public $number_node;
@@ -33,26 +33,27 @@ class ProductPresenter {
     }
     
     //Загрузка параметров из сесиии. Можно легко переделать на get или post
-    private function loadFromSession(){
+    /*
+    //private function loadFromSession(){
         $session = \Yii::$app->session;
         
-        $this->filter_items_source  = $session->getWithDefault(Session::id_source);
+        $filters = new Filters();
+        $filters->loadFromSession();
+        
+        $this->filter_items_source  = $filters->f_source;
         $this->direction            = $session->getWithDefault(Session::direction_next_product);
-        $this->filter_no_compare    = $session->getWithDefault(Session::filter_no_compare);
+        $this->f_no_compare         = $session->getWithDefault(Session::f_no_compare);
         $this->item_2__show_all     = $session->getWithDefault(Session::item_2_show_all);
         $this->comparisons          = $session->getWithDefault(Session::filter_comparisons);
     }
+
     
     public function loadFromParams(array $params){
         $session = \Yii::$app->session;
         $session->loadFromParams($params);
         $this->loadFromSession();
     }
-    
-    public function setSource($source){
-        $this->filters->setSource($source);
-    }
-    
+
     public function getProduct(){
         $product = $this->filters->getProduct();
         
@@ -64,7 +65,7 @@ class ProductPresenter {
         //    $arrows['right']['ignore_checked'] = $this->get_arrows($id, $_model, 'next', 1);
         //    $arrows['right']['ignore_dont_checked'] = $this->get_arrows($id, $_model, 'next', 0);
     }
-    
+*/    
     /*
      * Получить следущий сравниванемый продукт
      * todo: AppHelper::get_item_by_number_key заменить на выбор следущего правого продукта согласно фильтрам
@@ -82,15 +83,7 @@ class ProductPresenter {
     // ***************************************************************************
     // *** Comparison_status
     // ***************************************************************************
-    
-    /**
-     * Получиить текущий фильтр Comparisons
-     * @return array
-     */
-    public function getCurrentComparisonStatus(){
-        return $this->filters->f_comparisons;
-    }
-    
+
     /**
      * Список статусов и количество товаров, которые сотвествуют этому фильтру
      * Список статусов находится в common/models/Comparisons и является константой
@@ -105,10 +98,11 @@ class ProductPresenter {
      *    ]
      * @throws \yii\base\InvalidArgumentException
      */
+    /*
     public function getListComparisonStatuses(){
-        $names = Comparison::get_filter_statuses();
         $out = [];
-        $data = $this->filters->getListComparisonStatuses();
+        $data = Comparison::getStatuses();
+
         foreach ($data as $key => $count){
             $out[$key] = [
                 'name'  => $names[$key]['name'],
@@ -117,7 +111,7 @@ class ProductPresenter {
         }
         return $out;
     }
-   
+    */
     /**
      * Список статусов и количество для статистики продуктов
      * 

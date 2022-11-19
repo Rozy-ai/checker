@@ -3,8 +3,8 @@
 /**
  * Отображение списка кратко
  * 
- * @var string $filter_items_comparisons
- * @var string $filter_items_profile
+ * @var string $f_comparison_status
+ * @var string $f_profile
  * @var bool   $is_admin
  * @var int    $number_page_current
  * @var $option_class_slider
@@ -21,9 +21,6 @@ use common\models\Comparison;
 use yii\helpers\Html;
 use common\models\User;
 use yii\helpers\Url;
-
-if (!$filter_items_comparisons) $filter_items_comparisons = 'none';
-if (!$filter_items_profile) $filter_items_profile = 'none';
         
 $source         = $product->source;
 $comparisons    = $product->comparisons;
@@ -52,27 +49,60 @@ $identity = \Yii::$app->user->identity;
         foreach ($items as $index => $item): 
     ?>
 
-    <?
-        // Проверка фильтров
-        if ($filter_items_comparisons !== 'ALL' &&
-            $filter_items_comparisons !== 'ALL_WITH_NOT_FOUND' &&
-            ($no_compare && isset($comparisons[$index])) &&
-            ($comparisons[$index]->status === 'PRE_MATCH' || $comparisons[$index]->status === 'MATCH' || $comparisons[$index]->status === 'MISMATCH' || $comparisons[$index]->status === 'OTHER') )
-            {
-                continue;
-            }
+    <?php
+        $comparison = $comparisons[$item->id];
 
-        if ($filter_items_comparisons !== 'YES_NO_OTHER'){
-        if ($filter_items_comparisons !== 'ALL')
-        if ($filter_items_comparisons !== 'ALL_WITH_NOT_FOUND')
-        if (!$no_compare && $is_filter_items && $filter_items_comparisons )
-            if ($comparisons[$index]->status !== $filter_items_comparisons) 
-                continue;
-            } else{
-                if (!$no_compare && $is_filter_items && $filter_items_comparisons )
-                if (!in_array($comparisons[$index]->status,['PRE_MATCH','OTHER','MISMATCH','MATCH'])) 
-                    continue;
+        if (isset($comparison->status)){
+            if ($f_comparison_status == 'NOCOMPARE'){
+                if ($comparison->status != 'NOCOMPARE') continue;
+            } elseif ($f_comparison_status == 'PRE_MATCH'){
+                if ($comparison->status != 'PRE_MATCH') continue;
+            } elseif ($f_comparison_status == 'MATCH') {
+                if ($comparison->status != 'MATCH') continue;
+            } elseif ($f_comparison_status == 'OTHER') {
+                if ($comparison->status != 'OTHER') continue; 
+            } elseif($f_comparison_status == 'YES_NO_OTHER') {
+                if ($comparison->status != 'PRE_MATCH' &&
+                    $comparison->status != 'MATCH' &&
+                    $comparison->status != 'OTHER') return;
+            } elseif ($f_comparison_status == 'MISSMATCH') {
+                if ($f_comparison_status != 'MISSMATCH') return;
             }
+            
+            /*
+           
+
+        if (isset($comparison->status)){
+            switch ($f_comparison_status){
+                case 'NOCOMPARE':
+                    if ($comparison->status != 'NOCOMPARE') {
+                        continue 2;
+                    }; break;
+                case 'PRE_MATCH':
+                    if ($comparison->status != 'PRE_MATCH') {
+                        continue 2;
+                    }; break;
+                case 'MATCH':
+                    if ($comparison->status != 'MATCH') {
+                        continue 2;
+                    }; break;
+                case 'OTHER':
+                    if ($comparison->status != 'OTHER') {
+                        continue 2;
+                    }; break;                    
+                case 'YES_NO_OTHER':
+                    if (!in_array($comparison->status,['PRE_MATCH', 'MATCH', 'OTHER'])) {
+                        continue 2;
+                    }; break;
+                case 'MISSMATCH':
+                    if ($comparison->status != 'MISSMATCH') {
+                        continue 2;
+                    }; break;  
+            }
+             * 
+             */
+        }               
+        
         //Иниацияализация переменных
         $variables_right = $this->context->getVariablesRight($source, $item, true);
         $current = ($number_page_current === $index) ? '&load_next=1' : '&load_next=0'
@@ -99,7 +129,7 @@ $identity = \Yii::$app->user->identity;
             <?=
             Html::a(
                     "<div class=\"slider-item__img\" data-img='" . $variables_right['img_right'] . "' style=\"background-image: url('" . $variables_right['img_right'] . "')\"></div>",
-                    ['view', 'id' => $product->id, 'number_node' => $index + 1, 'source_id' => $source_id, 'comparisons' => $filter_items_comparisons, 'filter-items__profile' => $filter_items_profile],
+                    ['view', 'id' => $product->id, 'number_node' => $index + 1, 'source_id' => $source_id, 'comparisons' => $f_comparison_status, 'filter-items__profile' => $f_profile],
                     ['class' => 'linkImg slider-item__link-img']
             )
             ?>
@@ -160,7 +190,7 @@ $identity = \Yii::$app->user->identity;
 
         </div>
 
-        <a href="/product/view?id=<?= $product->id ?>&source_id=<?= $source_id ?>&node=<?= $index + 1 ?>&comparisons=<?= $filter_items_comparisons ?>&filter-items__profile=<?= $filter_items_profile ?>"
+        <a href="/product/view?id=<?= $product->id ?>&source_id=<?= $source_id ?>&node=<?= $index + 1 ?>&comparisons=<?= $f_comparison_status ?>&filter-items__profile=<?= $f_profile ?>"
            class="[ PAGE-N ]  slider__page-n <?= $number_page_current === $index ? '-current' : '' ?>"><?= $index + 1 ?><?//=$cnt?></a>
 
     </div>

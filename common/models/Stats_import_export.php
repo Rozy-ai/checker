@@ -14,5 +14,11 @@ class Stats_import_export extends \yii\db\ActiveRecord
         return '{{%stats__import_export}}';
     }
 
-
+    public static function getLastLocalImport(){
+        return self::find()
+            ->where(['type' => 'IMPORT'])
+            ->orderBy(['created' => SORT_DESC])
+            ->limit(1)
+            ->one();       
+    }
 }

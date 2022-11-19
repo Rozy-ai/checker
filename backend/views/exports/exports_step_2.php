@@ -1,6 +1,6 @@
 <?
 /* @var $profiles_list */
-use backend\models\Source;
+use common\models\Source;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 $model = new \yii\base\DynamicModel(['source_id','comparisons','test','use_previous_saved','profile','ignore_step_3']);

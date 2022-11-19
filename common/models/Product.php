@@ -311,7 +311,7 @@ class Product extends \yii\db\ActiveRecord{
 
         return json_encode($out);
     }
-
+/*
     public static function profiles_list($source_id) {
 
         $s = Source::get_source($source_id);
@@ -327,7 +327,7 @@ class Product extends \yii\db\ActiveRecord{
 
         $profile_list['{{all}}'] = 'Все';
         foreach ($q->column() as $item){
-//$item = strtolower($item);
+        //$item = strtolower($item);
             $e_items = explode(',', $item);
             foreach ($e_items as $e_item){
                 $e_item = trim($e_item);
@@ -337,5 +337,133 @@ class Product extends \yii\db\ActiveRecord{
 
         return $profile_list;
     }
+*/
+    /**
+     * Получить список продуктов согласно фильтрам
+     * 
+     * @param Source  $source
+     * @param Filters $filters
+     * @return Product[]
+     */
+    public static function getListProducts(Source $source, Filters $filters, bool $is_admin){
+        $source_table_name = $source->table_1;
+        $source_table2_name = $source->table_2;
+        
+        $q = new FiltersQuery($source->class_1);   
+        
+        // !!! Если менять тут то нужно менять getCountProducts
+        $q->where(['and',
+            $q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
+            $q->getSqlAsin($source_table_name, $filters->f_asin),
+            $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
+            $q->getSqlTille($source_table_name, $filters->f_title),
+            $q->getSqlStatus($filters->f_status),
+            $q->getSqlUsername($source_table_name, $filters->f_username),
+            $q->getSqlComparisonStatus($filters->f_comparison_status),
+            $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile)
+            //$q->getSqlAddInfoExists($source_table_name),
+            //$q->getSqlNoInComparisons(),
+            //$q->getSqlSettingsMessage(),
+        ]);
+        
+        // Добавим сортировку:
+        switch ($filters->f_sort) {
+            case 'created_ASC':
+                $q->orderBy($source_table_name.'.date_add ASC');
+                break;
+            case 'created_DESC':
+                $q->orderBy($source_table_name.'.date_add DESC');
+                break;
+            case 'updated_ASC' :
+                $q->addTable('p_updated');
+                $q->orderBy('p_updated.date ASC');
+                break;
+            case 'updated_DESC' :
+                $q->addTable('p_updated');
+                $q->orderBy('p_updated.date DESC');
+                break;
+            default:
+                $q->orderBy($source_table_name.'.id');
+        }
 
+        // Получим все необходимые join
+        $q->addJoins($source_table_name, $source_table2_name);
+
+        // Отсечем не нужные записи
+        if ($filters->f_count_products_on_page !== 'ALL'){
+            $count_products_on_page = (int)$filters->f_count_products_on_page;
+
+            $offset = ($filters->f_number_page_current - 1) * $count_products_on_page;
+            $q->limit($count_products_on_page);
+            $q->offset($offset);
+        }
+        
+        $q->addGroupBy($source_table_name.'.id'); // Это для того чтобы отсечь дубли
+        
+        $list = $q->all();
+        
+        foreach ($list as $k => $product) {
+            $product->source = $source;
+            $product->baseInfo = $product->info;
+        }
+        return $list;
+    }
+    
+    public static function getCountProducts(Source $source, Filters $filters, bool $is_admin){
+        $source_table_name = $source->table_1;
+        $source_table2_name = $source->table_2;
+        
+        $q = new FiltersQuery($source->class_1);
+        
+        // !!! Если менять тут то нужно менять getCountProducts
+        $q->where(['and',
+            $q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
+            $q->getSqlAsin($source_table_name, $filters->f_asin),
+            $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
+            $q->getSqlTille($source_table_name, $filters->f_title),
+            $q->getSqlStatus($filters->f_status),
+            $q->getSqlUsername($source_table_name, $filters->f_username),
+            $q->getSqlComparisonStatus($filters->f_comparison_status),
+            $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile)
+            
+            //$q->getSqlAddInfoExists($source_table_name),
+            //$q->getSqlNoInComparisons(),
+            //$q->getSqlSettingsMessage(),
+        ]);
+        
+        // Получим все необходимые join
+        $q->addJoins($source_table_name, $source_table2_name);
+        
+        $q->addGroupBy($source_table_name.'.id');
+        
+        return $q->count();
+    }
+    
+    /**
+     * Получить модель продуктов согласно всем фильтрам
+     * 
+     * @return Product
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public static function getProduct(Source $source, Filters $filters){
+        $source_table_name = $source->table_1;
+        $source_table2_name = $source->table_2;
+
+        $q = new FiltersQuery($source->class_1);
+        
+        $q->where(['and',
+            $q->getSqlComparisonStatus($filters->f_comparison_status),
+            $q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
+            $q->getSqlIdGreater($source_table_name, $filters->f_id)
+        ]);
+        
+       $q->addJoins($source_table_name, $source_table2_name);
+        
+        $q->orderBy($source_table_name.'.id ASC');
+        $q->limit(1);
+        $product = $q->one();
+        $product->source = $source;
+        $product->baseInfo = $product->info;
+        return $product;
+    }
 }

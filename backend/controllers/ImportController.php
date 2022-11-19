@@ -4,7 +4,7 @@ namespace backend\controllers;
 
 use backend\models\P_all_compare;
 use backend\models\P_updated;
-use backend\models\Source;
+use common\models\Source;
 use backend\models\Stats__import_export;
 use common\models\Comparison;
 use common\models\HiddenItems;
@@ -183,7 +183,7 @@ class ImportController extends \yii\web\Controller{
     $source_id = $dynamicModel['source_id'] ?? Null;
 
     if (!$source_id) $source_id = $this->request->post('source_id',false);
-
+    if (!$source_id) $source_id = $this->request->get('source_id',false);
     if (!$source_id) {
       echo '<pre>'.PHP_EOL;
       print_r('нет $source_id');

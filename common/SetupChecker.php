@@ -5,6 +5,7 @@ namespace common;
 use yii\base\BootstrapInterface;
 use yii\di\Instance;
 use common\models\Filters;
+use common\models\Session;
 use backend\presenters\IndexPresenter;
 use backend\presenters\ProductPresenter;
 
@@ -21,6 +22,11 @@ class SetupChecker implements BootstrapInterface {
         $container->setSingleton(Filters::class, function() {
             return new Filters();
         });
+
+        $container->setSingleton(Session::class, function() {
+            return new Session();
+        });        
+        
         
         //Сервис IndexPresenter
         //$container->setSingleton(IndexPresenter::class, [], [Instance::of(IndexPresenter::class)]);

@@ -23,9 +23,9 @@ class TopSlider extends Widget {
     public $is_hide_red = false;
     public $number_page_current;
     public $product;
-    public $filter_items_comparisons;
-    public $filter_items_profile;
-    public $filter_no_compare;
+    public $f_comparison_status;
+    public $f_profile;
+    public $f_no_compare;
     public $compare_item;
     public $source;
 
@@ -162,18 +162,18 @@ class TopSlider extends Widget {
         $this->_options['salesKey'] = 'E_Sales';
         
         $items = $this->product->addInfo;
-        $this->is_detail_view = false;
+
         return $this->render(($this->is_detail_view) ? 'slider-v-2' : 'slider-v-1', [
             'is_admin'              => $this->is_admin,
-            'number_page_current'  => $this->number_page_current,
+            'number_page_current'   => $this->number_page_current,
             'option_class_slider'   => $this->_options['class'],
             'option_sales_key'      => $this->_options['sales_key'],
             'option_del_btn'        => $this->_options['option_del_btn'],
             'product'               => $this->product,
-            'filter_items_comparisons' => $this->filter_items_comparisons,
-            'filter_items_profile'     => $this->filter_items_profile,
+            'f_comparison_status' => $this->f_comparison_status,
+            'f_profile'     => $this->f_profile,
             'items'                 => $items,
-            'no_compare'            => $this->filter_no_compare,
+            'no_compare'            => $this->f_no_compare,
             'compare_item'          => $this->compare_item,
             'source'                => $this->source
         ]);

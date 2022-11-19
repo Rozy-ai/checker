@@ -13,68 +13,40 @@ use common\models\Stats_import_export;
 use common\models\Comparison;
 use common\models\HiddenItems;
 use common\models\P_user_visible;
+use common\models\Source;
 
 /**
  * Превставитель для страницы product/index, содержащий логику
+ * То, что здесь содерится можно былло раскидать по моделям. Но многих моделей нет
  *
  * @author kosten
  */
 class IndexPresenter {
-    public Filters $filters;
-    public Session $session;
+    private Source  $source;
     
-    /** @var bool кратко или подробно отображать список товаров */
-    private bool $isDetailView = false;
+    use TraitListFilters;
     
-    public function __construct(Session $session, Filters $filters) {
-        $this->session = $session;
-        $this->filters = $filters;
+    public function loadFromParams(array $params){  
+        $this->filters->loadByParams($params);
     }
     
-    //Загрузка параметров из сесиии. Можно легко переделать на get или post
-    private function loadFromSession(){
-        $session = \Yii::$app->session;
-        
-        $this->filters->load([
-            'f_count_products_on_page' => $session->getWithDefault(Session::filter_count_products_on_page),
-            'f_number_page_current'    => $session->getWithDefault(Session::filter_number_page_current),
-            'f_no_compare'             => $session->getWithDefault(Session::filter_no_compare),
-
-            'f_profile'                => $session->get(Session::filter_items_profile),
-            'f_id'                     => $session->get(Session::filter_id),
-            'f_target_image'           => $session->get(Session::filter_target_image),
-            'f_user'                   => $session->get(Session::filter_username),
-            'f_comparing_images'       => $session->get(Session::filter_title),
-            'f_comparisons'            => $session->get(Session::filter_comparisons),
-            'f_sort'                   => $session->get(Session::filter_sort)
-        ]);
-        
-        $this->isDetailView = ($session[Session::filter_is_detail_view])? true: false;
+    public function setSource(Source $source){
+        $this->source = $source;
+        $this->loadTraitListFilters($this->source);
     }
     
-    public function loadFromParams(array $params){
-        $session = \Yii::$app->session;
-        $session->loadFromParams($params);
-        $this->loadFromSession();
+    public function getListSource(){
+        return array_merge(
+            Source::getSourcesPaidByIdUser(\Yii::$app->user->id),
+            Source::getSourcesFree());
     }
     
-    public function setSource($source){
-        $this->filters->setSource($source);
-    }
+    public function getListCountProductsOnPage(){
+        return [10,20,50,100,200];
+    }   
     
     public function getNumberPageCurrent(){
         return $this->filters->f_number_page_current;
-    }
-    // ***************************************************************************
-    // *** Comparison_status
-    // ***************************************************************************
-    
-    /**
-     * Получиить текущий фильтр Comparisons
-     * @return array
-     */
-    public function getCurrentComparisonStatus(){
-        return $this->filters->f_comparisons;
     }
     
     /**
@@ -92,10 +64,10 @@ class IndexPresenter {
      * @throws \yii\base\InvalidArgumentException
      */
     public function getListComparisonStatuses(){
-        $names = Comparison::get_filter_statuses();
+        $data = Comparison::get_filter_statuses();
         $out = [];
-        $data = $this->filters->getListComparisonStatuses();
-        foreach ($data as $key => $count){
+        
+        foreach ($data as $key => $value){
             $out[$key] = [
                 'name'  => $names[$key]['name'],
                 'count' => $count
@@ -103,59 +75,7 @@ class IndexPresenter {
         }
         return $out;
     }
-    
-    //public function getListComparisonStatus(){
-    //    return Comparison::get_filter_statuses();
-    //}
-    
-    // ***************************************************************************
-    // *** Profile
-    // ***************************************************************************
-    
-    public function getCurrentProfile(){
-        return $this->filters->f_profile;
-    }
-    
-    // ***************************************************************************
-    // *** CategoriesRoot
-    // ***************************************************************************
-    
-    public function getListCategoriesRoot(){
-        return $this->filters->getListCategoriesRoot();
-    }
-    
-    // ***************************************************************************
-    // *** Users
-    // ***************************************************************************    
-    
-    public function getListUser(){
-        return $this->filters->getListUser();
-    }
-    
-    // ***************************************************************************
-    // *** Profiles
-    // ***************************************************************************
-    
-    public function getListProfiles(){
-        return $this->filters->getListProfiles();
-    }
-    
-    // ***************************************************************************
-    // *** Products
-    // ***************************************************************************    
 
-    public function getListProduct(){
-        return $this->filters->getListProduct();
-    }
-    
-    public function getCountProducts(){
-        return $this->filters->getCountProducts();
-    }
-    
-    public function getCountProductsOnPage(){
-        return $this->filters->f_count_products_on_page;
-    }
-    
     public function getCountProductsOnPageRight($list){
         $cnt_all_right = 0;
         foreach ($list as $product) {
@@ -163,14 +83,6 @@ class IndexPresenter {
             $cnt_all_right += count($items);
         }
         return $cnt_all_right;
-    }
-    
-    // ***************************************************************************
-    // *** Другое
-    // ***************************************************************************
-    
-    public function isDetailView(){
-        return $this->isDetailView;
     }
     
     public function getLastLocalImport() {
@@ -251,8 +163,17 @@ class IndexPresenter {
      *      'message' Сообщение для пользователя
      * ]
      */
-    public function missmatchToAll(string $classProduct, $url, int $id_product, int $id_source, bool $confirmToAction = false){
-        $product = $classProduct::getById($id_product);
+    public function missmatchToAll($url, int $id_product, int $id_source, bool $confirmToAction = false){
+        $source = Source::getById($id_source);
+        if (!$source){
+            return [
+                'status'    => 'error',
+                'message'   => 'Не удалось найти источник'
+            ];
+        }
+        
+
+        $product = $source->class_1::getById($id_product);
         if (!$confirmToAction && $product->isExistsItemsWithMatch()){
             return [
                 'status'    => 'have_match',
@@ -329,4 +250,13 @@ class IndexPresenter {
         ];
     }
     
+    public function changeFiltersByParams(array $params){
+        foreach ($params as $key => $value){
+            if ($value) {
+                switch ($key){
+                    case 'filter_asin': $this->filters->f_asin = $value; break;
+                }
+            }
+        }
+    }
 }

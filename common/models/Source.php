@@ -8,6 +8,7 @@
 namespace common\models;
 
 use common\models\User__source_access;
+use common\models\Source;
 
 /**
  * Класс для работы с таблицей Source
@@ -69,7 +70,7 @@ class Source extends \yii\db\ActiveRecord {
         if ($id_user) {
             // Проверяем на доступность источника
             if ($id_source) {
-                if (User__source_access::isExists($id_source, $id_user)){
+                if (User__source_access::isExists($id_source, $id_user)) {
                     return self::getById($id_source);
                 }
             }
@@ -106,22 +107,22 @@ class Source extends \yii\db\ActiveRecord {
             $res[] = Source::getById($id);
         }
         return $res;
-    } 
-    
+    }
+
     /**
      * Получить спсок доступных платных источников
      * @param int id_user
      * @return Sources[]
-     */ 
-    public static function getSourcesPaidByIdUser($id_user = 0){
+     */
+    public static function getSourcesPaidByIdUser($id_user = 0) {
         if (!$id_user) {
             $sources = self::find()->all();
         } else {
             $sources = Source::find()
-                            ->leftJoin('user__source_access', 'user__source_access.source_id = source.id')
-                            ->where(['user__source_access.user_id' => $id_user]);
-            print_r($sources->createCommand()->getRawSql());
-            exit;
+                    ->leftJoin('user__source_access', 'user__source_access.source_id = source.id')
+                    ->where(['user__source_access.user_id' => $id_user])
+                    ->asArray()
+                    ->all();
         }
         return $sources;
     }
@@ -135,12 +136,57 @@ class Source extends \yii\db\ActiveRecord {
      */
     public static function findAllSources(int $id_source, $id_user = 0) {
         $id_sources_free = self::ids_source_free;
-        $id_sources_paid = ($id_user)?User__source_access::findIdSources($id_user):[];
+        $id_sources_paid = ($id_user) ? User__source_access::findIdSources($id_user) : [];
         $id_sources = array_unique(array_merge($id_sources_free, $id_sources_paid));
         $sources = [];
-        foreach ($id_sources as $id_source){
+        foreach ($id_sources as $id_source) {
             $sources[] = Source::getById($id_source);
         }
         return $sources;
     }
+
+    public static function get_source($source_id = false) {
+        if (!$source_id) {
+            $source_id = \Yii::$app->request->get('filter-items__source', false);
+            if (!$source_id)
+                $source_id = \Yii::$app->request->get('source_id', false);
+        }
+//    //echo '<pre>'.PHP_EOL;
+//    print_r((new Session())->get('source'));
+//    //echo PHP_EOL;
+//    exit;
+        if ($source_id === false) {
+            /*
+              if ($s_source = (new Session())->get('source')){
+              $source_id = $s_source['id'];
+              }else{
+              $source_id = 1;
+              }
+             */
+            $source_id = 1;
+        }
+
+        $source = Source::findOne(['id' => (int) $source_id]);
+
+        $out['source_id'] = $source_id;
+        $out['source_name'] = $source->name;
+        $out['source_table_name'] = $source->table_1;
+        $out['source_table_name_2'] = $source->table_2;
+        $out['source_class'] = 'common\models\\' . ucfirst($source->table_1);
+
+        $out['import_local__max_product_date'] = $source->import_local__max_product_date;
+        $out['import_local__db_import_name'] = $source->import_local__db_import_name;
+        $out['import__default_q_1'] = $source->import__default_q_1;
+        $out['import__sql_file_path'] = $source->import__sql_file_path;
+
+        return $out;
+    }
+
+    /**
+     * Получить модель источника из сессии
+     */
+    public static function getBySession() {
+        return self::getById(\Yii::$app->session->get('f_source'));
+    }
+
 }

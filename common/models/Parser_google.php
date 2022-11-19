@@ -3,7 +3,7 @@
 namespace common\models;
 
 use backend\models\P_updated;
-use backend\models\Source;
+use common\models\Source;
 use Yii;
 use yii\helpers\Json;
 

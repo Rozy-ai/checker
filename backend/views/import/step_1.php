@@ -1,6 +1,6 @@
 <?
 /* @var $profiles_list */
-use backend\models\Source;
+use common\models\Source;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

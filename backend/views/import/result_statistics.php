@@ -2,7 +2,7 @@
 /* @var $source */
 /* @var $source_id */
 /* @var $stat */
-use backend\models\Source;
+use common\models\Source;
 ?>
 <style>
 
@@ -31,7 +31,8 @@ use backend\models\Source;
 
   <div class="row">
     <div class="col">
-      <span onclick="window.location = '/product/index?filter-items__source=<?=$source_id?>&filter-items__profile=%D0%92%D1%81%D0%B5&filter-items__show_n_on_page=10&filter-items__id=&filter-items__target-image=&filter-items__comparing-images=&filter-items__user=&filter-items__comparisons=NOCOMPARE&filter-items__sort=&filter-items__right-item-show=0&page=1';" class="btn btn-secondary btn-block">Назад</span>
+        <span onclick="window.location = '/product/index';" class="btn btn-secondary btn-block">Назад</span>
+      <!--<span onclick="window.location = '/product/index?filter-items__source=<?=$source_id?>&filter-items__profile=%D0%92%D1%81%D0%B5&filter-items__show_n_on_page=10&filter-items__id=&filter-items__target-image=&filter-items__comparing-images=&filter-items__user=&filter-items__comparisons=NOCOMPARE&filter-items__sort=&filter-items__right-item-show=0&page=1';" class="btn btn-secondary btn-block">Назад</span>-->
     </div>
   </div>
 

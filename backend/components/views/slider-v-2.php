@@ -3,8 +3,8 @@
 /**
  * Отображение списка подробно
  * 
- * @var string $filter_items_comparisons
- * @var string $filter_items_profile
+ * @var string $f_comparison_status
+ * @var string $f_profile
  * @var bool   $is_admin
  * @var int    $number_page_current
  * @var $option_class_slider
@@ -46,7 +46,7 @@ $identity = \Yii::$app->user->identity;
     <?php foreach ($items as $index => $item): ?>
         <?php
         /*
-            if ($filter_items_comparisons !== 'ALL'){
+            if ($f_comparison_status !== 'ALL'){
                 if ( ($no_compare && isset($comparisons[$index])) ){
                     if ($comparisons[$index]->status === 'PRE_MATCH' || $comparisons[$index]->status === 'MATCH' || $comparisons[$index]->status === 'MISMATCH' || $comparisons[$index]->status === 'OTHER'){
                         continue;
@@ -54,16 +54,16 @@ $identity = \Yii::$app->user->identity;
                 }
             }
             
-            if ($filter_items_comparisons !== 'YES_NO_OTHER'){
-                if ($filter_items_comparisons !== 'ALL'){
-                    if (!$no_compare && $is_filter_items && $filter_items_comparisons ){
-                        if ($comparisons[$index]->status !== $filter_items_comparisons) {
+            if ($f_comparison_status !== 'YES_NO_OTHER'){
+                if ($f_comparison_status !== 'ALL'){
+                    if (!$no_compare && $is_filter_items && $f_comparison_status ){
+                        if ($comparisons[$index]->status !== $f_comparison_status) {
                             continue;
                         }
                     }
                 }
             } else {
-                if (!$no_compare && $is_filter_items && $filter_items_comparisons ){
+                if (!$no_compare && $is_filter_items && $f_comparison_status ){
                     if (!in_array($comparisons[$index]->status,['PRE_MATCH','OTHER','MISMATCH','MATCH'])){ 
                         continue;                       
                     }
@@ -101,8 +101,8 @@ $identity = \Yii::$app->user->identity;
                             ['view', 'id' => $product->id,
                                 'node' => $node_id,
                                 'source_id' => $source_id,
-                                'comparisons' => $filter_items_comparisons,
-                                'filter-items__profile' => $filter_items_profile
+                                'comparisons' => $f_comparison_status,
+                                'filter-items__profile' => $f_profile
                             ],
                             ['class' => 'linkImg slider-item__link-img -v-2']
                     )

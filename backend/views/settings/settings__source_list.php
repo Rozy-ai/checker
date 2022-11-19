@@ -3,7 +3,7 @@
 /* @var $dataProvider */
 
 use backend\models\Settings__common_fields;
-use backend\models\Source;
+use common\models\Source;
 use yii\helpers\Html;
 
 $this->title = Yii::t('site', 'Список источников');

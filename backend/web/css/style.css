@@ -2100,6 +2100,7 @@ table.tableInfo th {
   width: 90px;
 }
 .products__products-list td{
+  padding: .4em;
   border-right: 1px solid #f7f7f7;
   position: relative;
   vertical-align: middle;

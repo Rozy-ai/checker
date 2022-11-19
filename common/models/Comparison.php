@@ -54,8 +54,52 @@ class Comparison extends ActiveRecordAlias {
           'name_2' => 'Нет',
         ],
     ];
+    
+    public static function getFilterStatuses(){
+        return [
+            'NOCOMPARE' => [
+                'hex_color' => '',
+                'name' => 'Nocompare',
+                'name_2' => 'Не отмеченные',                
+            ],
+            'PRE_MATCH' => [
+                'hex_color' => 'D7C000',
+                'name' => 'Prematch',
+                'name_2' => 'Да, предварительное',
+            ],
+            'MATCH' => [
+                'hex_color' => '',
+                'name' => 'Match',
+                'name_2' => 'Да',
+            ],
+            'OTHER' => [
+                'hex_color' => '',
+                'name' => 'Other',
+                'name_2' => 'Другое',
+            ],
+            'YES_NO_OTHER' => [
+                'hex_color' => '',
+                'name' => 'Result',
+                'name_2' => 'Все отмеченные',
+            ],
+            'MISMATCH' => [
+                'hex_color' => '',
+                'name' => 'Mismatch',
+                'name_2' => 'Нет',
+            ],
+            'ALL' => [
+                'hex_color' => '',
+                'name' => 'All',
+                'name_2' => 'Все',
+            ]
+        ];
+    }
+    
+
 
     public static function get_filter_statuses(){
+      $out = self::$status_data;
+      
       $out['NOCOMPARE'] = [
         'hex_color' => '',
         'name' => 'Nocompare',
@@ -89,6 +133,24 @@ class Comparison extends ActiveRecordAlias {
         if ($status_code === 'PRE_MATCH') return 'Pre_match (?)';
         if ($status_code === 'MATCH') return 'Match (Yes)';
     	if ($status_code === 'OTHER') return 'Other';
+    }
+    
+        /**
+     * 
+     * @return array [
+     *      key => status_name
+     *      key => status_name
+     * ]
+     */
+    public static function getStatuses() {
+        $statuses = [
+            self::STATUS_MISMATCH => Yii::t('site', 'MISMATCH'),
+            self::STATUS_MATCH => Yii::t('site', 'MATCH'),
+            self::STATUS_OTHER => Yii::t('site', 'OTHER'),
+            self::STATUS_PRE_MATCH => Yii::t('site', 'PRE_MATCH'),
+        ];
+
+        return $statuses;
     }
        
     /**
@@ -199,17 +261,6 @@ class Comparison extends ActiveRecordAlias {
      */
     public function getUser() {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
-    }
-
-    public static function getStatuses() {
-        $statuses = [
-            self::STATUS_MISMATCH => Yii::t('site', 'MISMATCH'),
-            self::STATUS_MATCH => Yii::t('site', 'MATCH'),
-            self::STATUS_OTHER => Yii::t('site', 'OTHER'),
-            self::STATUS_PRE_MATCH => Yii::t('site', 'PRE_MATCH'),
-        ];
-
-        return $statuses;
     }
     
     /**

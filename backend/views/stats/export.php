@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'format' => 'raw',
         'value' => function ($itm) {
 
-          return \backend\models\Source::get_source($itm['source_id'])['source_name'];
+          return \common\models\Source::get_source($itm['source_id'])['source_name'];
         },
         'options' => [ 'class' => 'source_id']
       ],

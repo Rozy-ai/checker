@@ -7,7 +7,7 @@
 /* @var $profile */
 /* @var $ignore_step_3 */
 
-use backend\models\Source;
+use common\models\Source;
 use yii\helpers\Html;
 use yii\jui\JuiAsset;
 use yii\widgets\ActiveForm;
