@@ -180,7 +180,7 @@ class Product extends \yii\db\ActiveRecord{
     public function getComparisons() {
         return $this->hasMany(Comparison::className(), ['product_id' => 'id'])
                         ->where(['source_id' => $this->source->id])
-                        ->indexBy('node');
+                        ->indexBy('product_right_id');
     }
 
     /**

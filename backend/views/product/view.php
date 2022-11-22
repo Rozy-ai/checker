@@ -220,8 +220,6 @@ TopSlider::widget([
     'product' => $model,
     'number_page_current' => $pages->page,
     'source' => $source
-        //'hide_red' => ($item_2__show_all)? false : true,
-        //'compare_item' => $compare_item,
 ])
 ?>
 

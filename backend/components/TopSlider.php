@@ -29,34 +29,6 @@ class TopSlider extends Widget {
     public $compare_item;
     public $source;
 
-    private function hide_red($items) {
-        $return = [];
-        $pid = $this->product->id;
-
-        $res = Comparison::find()->where(['product_id' => $this->product->id, 'status' => 'MISMATCH', 'source_id' => $this->product->source->id])->all();
-
-        $out = [];
-        if ($res) {
-            foreach ($res as $r) {
-                $out[] = $r->node;
-            }
-        }
-
-        $cnt = -1;
-        foreach ($items as $idx => $item) {
-            $cnt++;
-            if (in_array($cnt, $out)) {
-                continue;
-            }
-
-            $return[$idx] = $item;
-        }
-
-        return $return;
-
-        //$hidden_items = '';
-    }
-
     function getVariablesLeft($product) {
         $p_key = Settings__fields_extend_price::get_default_price($this->source->id)->name ?: 'Price Amazon';
         $footer_left = '<span><span class="__blue-title">BSR:</span>' . number_format($product->baseInfo["Sales Rank: Current"], 0, '', ' ') . ' </span>' .
@@ -159,7 +131,6 @@ class TopSlider extends Widget {
         $this->_options['gradeKey'] = Settings__source_fields::name_for_source('gradeKey', $source->id);
         $this->_options['price'] = Settings__source_fields::name_for_source('price', $source->id);
         $this->_options['salesKey'] = Settings__source_fields::name_for_source('salesKey', $source->id);
-        $this->_options['salesKey'] = 'E_Sales';
         
         $items = $this->product->addInfo;
 
@@ -167,11 +138,11 @@ class TopSlider extends Widget {
             'is_admin'              => $this->is_admin,
             'number_page_current'   => $this->number_page_current,
             'option_class_slider'   => $this->_options['class'],
-            'option_sales_key'      => $this->_options['sales_key'],
+            'option_sales_key'      => $this->_options['salesKey'],
             'option_del_btn'        => $this->_options['option_del_btn'],
             'product'               => $this->product,
-            'f_comparison_status' => $this->f_comparison_status,
-            'f_profile'     => $this->f_profile,
+            'f_comparison_status'   => $this->f_comparison_status,
+            'f_profile'             => $this->f_profile,
             'items'                 => $items,
             'no_compare'            => $this->f_no_compare,
             'compare_item'          => $this->compare_item,

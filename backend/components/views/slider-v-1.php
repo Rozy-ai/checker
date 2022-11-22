@@ -51,7 +51,7 @@ $identity = \Yii::$app->user->identity;
 
     <?php
         $comparison = $comparisons[$item->id];
-
+        /*
         if (isset($comparison->status)){
             if ($f_comparison_status == 'NOCOMPARE'){
                 if ($comparison->status != 'NOCOMPARE') continue;
@@ -68,40 +68,34 @@ $identity = \Yii::$app->user->identity;
             } elseif ($f_comparison_status == 'MISSMATCH') {
                 if ($f_comparison_status != 'MISSMATCH') return;
             }
-            
-            /*
-           
-
-        if (isset($comparison->status)){
-            switch ($f_comparison_status){
-                case 'NOCOMPARE':
-                    if ($comparison->status != 'NOCOMPARE') {
-                        continue 2;
-                    }; break;
-                case 'PRE_MATCH':
-                    if ($comparison->status != 'PRE_MATCH') {
-                        continue 2;
-                    }; break;
-                case 'MATCH':
-                    if ($comparison->status != 'MATCH') {
-                        continue 2;
-                    }; break;
-                case 'OTHER':
-                    if ($comparison->status != 'OTHER') {
-                        continue 2;
-                    }; break;                    
-                case 'YES_NO_OTHER':
-                    if (!in_array($comparison->status,['PRE_MATCH', 'MATCH', 'OTHER'])) {
-                        continue 2;
-                    }; break;
-                case 'MISSMATCH':
-                    if ($comparison->status != 'MISSMATCH') {
-                        continue 2;
-                    }; break;  
-            }
-             * 
-             */
-        }               
+        */      
+        
+        switch ($f_comparison_status){
+            case 'NOCOMPARE':
+                if ($comparison) {
+                    continue 2;
+                }; break;
+            case 'PRE_MATCH':
+                if (!$comparison || $comparison->status != 'PRE_MATCH') {
+                    continue 2;
+                }; break;
+            case 'MATCH':
+                if (!$comparison || $comparison->status != 'MATCH') {
+                    continue 2;
+                }; break;
+            case 'OTHER':
+                if (!$comparison || $comparison->status != 'OTHER') {
+                    continue 2;
+                }; break;                    
+            case 'YES_NO_OTHER':
+                if (!$comparison || !in_array($comparison->status,['PRE_MATCH', 'MATCH', 'OTHER'])) {
+                    continue 2;
+                }; break;
+            case 'MISMATCH':
+                if (!$comparison || $comparison->status != 'MISMATCH') {
+                    continue 2;
+                }; break;
+        }
         
         //Иниацияализация переменных
         $variables_right = $this->context->getVariablesRight($source, $item, true);
@@ -124,7 +118,7 @@ $identity = \Yii::$app->user->identity;
             data-footer_right       = "<?= htmlspecialchars($variables_right['footer_right'])?>"
             data-count_images_right = "<?= htmlspecialchars($variables_right['count_images_right'])?>"             
         >
-            <div class="[ color-marker ] horizontal <?= isset($comparisons[$index]) ? ($comparisons[$index]->status === 'MATCH' ? ' match' : ($comparisons[$index]->status === 'MISMATCH' ? ' mismatch' : ($comparisons[$index]->status === 'PRE_MATCH' ? ' pre_match' : ' other'))) : ' nocompare' ?>"></div>
+            <div class="[ color-marker ] horizontal <?= isset($comparisons[$item->id]) ? ($comparisons[$item->id]->status === 'MATCH' ? ' match' : ($comparisons[$item->id]->status === 'MISMATCH' ? ' mismatch' : ($comparisons[$item->id]->status === 'PRE_MATCH' ? ' pre_match' : ' other'))) : ' nocompare' ?>"></div>
 
             <?=
             Html::a(
@@ -144,13 +138,10 @@ $identity = \Yii::$app->user->identity;
 
             <? if (!empty($option_sales_key)): ?>
             <span class="slider__sales sales">
-                <? if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) !== null): ?>
-                    <span class="__blue-title">Sales:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?>
-                <? else: ?>
-                    <span class="__blue-title">Sales:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?>
-                <? endif; ?>
+                <span class="__blue-title">Sold:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?>
             </span>
             <? endif; ?>
+            
             <? elseif ($source->name === 'CHINA'): ?>
             <div class="slider-item__cnt-1">
                 <span class="cnt-1__stock-title __blue-title">ROI:</span>
@@ -173,17 +164,22 @@ $identity = \Yii::$app->user->identity;
                 'status'=>Comparison::STATUS_PRE_MATCH],true).$current;
             ?>
             <div
-                class="slider__yellow_button _slider__green_button -v-2 -v-3 -min <?= $comparisons[$index]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
+                class="slider__yellow_button _slider__green_button -v-2 -v-3 -min <?= $comparisons[$item->id]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
                 data-link = "<?= Html::encode($link) ?>"
-            >
-            </div>
-
-            <div
-                class="slider__red_button -min <?= $comparisons[$index]->status === 'MISMATCH' ? '-hover' : '' ?>"
                 data-url = "/product/compare"
                 data-id_source = "<?=$source_id?>"
                 data-id_product = "<?=$product->id?>"
                 data-id_item = "<?=$item->id?>"
+            >
+            </div>
+
+            <div
+                class="slider__red_button -min <?= $comparisons[$item->id]->status === 'MISMATCH' ? '-hover' : '' ?>"
+                data-url = "/product/compare"
+                data-id_source = "<?=$source_id?>"
+                data-id_product = "<?=$product->id?>"
+                data-id_item = "<?=$item->id?>"
+                data-status = <?= Comparison::STATUS_MISMATCH ?>
             >
 
             </div>

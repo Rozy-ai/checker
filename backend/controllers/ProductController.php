@@ -25,6 +25,7 @@ use backend\models\Settings__fields_extend_price;
 use common\models\Product;
 use common\models\Filters;
 use common\models\Stats_import_export;
+use common\models\Product_right;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -205,6 +206,43 @@ class ProductController extends Controller {
             'last_update'               => Stats_import_export::getLastLocalImport()
             
         ]);
+    }
+    
+    public function actionStart() {
+        $source = Source::getById(1);
+        if (!($source instanceof Source)) {
+            echo "Не удалось найти источник";
+            return 1;
+        }
+
+        $filters = new Filters();
+        $filters->setToDefault();
+        $filters->f_source = $source->id;
+
+        $products = Product::getListProducts($source, $filters, true);
+        if (!is_array($products) || !count($products)) {
+            echo "Не удалось получить список продуктов";
+            return 1;
+        }
+
+        $all = count($products);
+        $k = 100 / $all;
+        if ($k == 0) {
+            echo "Нет товаров для преобразования";
+            return 1;
+        }
+
+        $count_rebased = 0;
+        foreach ($products as $i => $product) {                     
+            $items = $product->addInfo;
+            foreach ($items as $index => $item) {               
+                $item->source = $source;
+                print_r($item->id);
+                exit;                    
+            }
+        }
+        echo "count rebased = " . $count_rebased;
+        return 0;
     }
     
     /**
@@ -436,13 +474,32 @@ class ProductController extends Controller {
             $params = \Yii::$app->request->post();
         }
                 
+        $status     = (string) $params['status'];
         $id_product = (int)$params['id_product'];
         $id_item    = (int)$params['id_item'];
         $id_source  = (int)$params['id_source'];
+        $message    = (string)$params['message'];
         
-        return $this->indexPresenter->setStatusProductRight($id_product, $id_item, $id_source, Comparison::STATUS_MISMATCH);
+        if (!$status || !$id_product || !$id_item || !$id_source){
+            return [
+                'status' => 'error',
+                'message' => 'Не хватает исходных данных'
+            ];
+        }
+        
+        try{
+            if (!Comparison::setStatus($status, $id_source, $id_product, $id_item, $message)){
+                throw new \Exception('Не удалось сохранить данные в базу данных');
+            }
+        } catch (\Exception $ex) {
+            return [
+                'status' => 'error',
+                'message' => $ex->getMessage()
+            ];
+        }
+        return [ 'status' => 'ok' ];
     }
-
+    
     /**
      * Сюда приходит, если пользователь нажал крестик на левом товаре
      * Запрос get/post

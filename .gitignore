@@ -36,3 +36,6 @@ phpunit.phar
 # ignore generated files
 /git
 /vendor.rar
+/backend/tmp/
+checker.sql
+composer.lock

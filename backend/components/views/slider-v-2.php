@@ -45,31 +45,32 @@ $identity = \Yii::$app->user->identity;
 <div class='slider__view-2 [ SLIDER ] product-view__slider'  >
     <?php foreach ($items as $index => $item): ?>
         <?php
-        /*
-            if ($f_comparison_status !== 'ALL'){
-                if ( ($no_compare && isset($comparisons[$index])) ){
-                    if ($comparisons[$index]->status === 'PRE_MATCH' || $comparisons[$index]->status === 'MATCH' || $comparisons[$index]->status === 'MISMATCH' || $comparisons[$index]->status === 'OTHER'){
-                        continue;
-                    }
-                }
+            switch ($f_comparison_status){
+                case 'NOCOMPARE':
+                    if ($comparison) {
+                        continue 2;
+                    }; break;
+                case 'PRE_MATCH':
+                    if (!$comparison || $comparison->status != 'PRE_MATCH') {
+                        continue 2;
+                    }; break;
+                case 'MATCH':
+                    if (!$comparison || $comparison->status != 'MATCH') {
+                        continue 2;
+                    }; break;
+                case 'OTHER':
+                    if (!$comparison || $comparison->status != 'OTHER') {
+                        continue 2;
+                    }; break;                    
+                case 'YES_NO_OTHER':
+                    if (!$comparison || !in_array($comparison->status,['PRE_MATCH', 'MATCH', 'OTHER'])) {
+                        continue 2;
+                    }; break;
+                case 'MISMATCH':
+                    if (!$comparison || $comparison->status != 'MISMATCH') {
+                        continue 2;
+                    }; break;
             }
-            
-            if ($f_comparison_status !== 'YES_NO_OTHER'){
-                if ($f_comparison_status !== 'ALL'){
-                    if (!$no_compare && $is_filter_items && $f_comparison_status ){
-                        if ($comparisons[$index]->status !== $f_comparison_status) {
-                            continue;
-                        }
-                    }
-                }
-            } else {
-                if (!$no_compare && $is_filter_items && $f_comparison_status ){
-                    if (!in_array($comparisons[$index]->status,['PRE_MATCH','OTHER','MISMATCH','MATCH'])){ 
-                        continue;                       
-                    }
-                }
-            }
-        */
             // Инициализаця переменных:
             $variables_right = $this->context->getVariablesRight($product->source, $item, false);
 
@@ -83,7 +84,7 @@ $identity = \Yii::$app->user->identity;
             class="tbl [ SLIDER-ITEM ] slider__slider-item -v-2 <?= $number_page_current === $index ? '-current' : '' ?> item<?= (int)$node === $index ? " slick-current" : '' ?>"
         >
             <div class="tr slider-item__border <?= $number_page_current === $index ? '-current' : '' ?> -v-2">
-                <div class="[ color-marker ] vertical <?= isset($comparisons[$index]) ? ($comparisons[$index]->status === 'MATCH' ? ' match' : ($comparisons[$index]->status === 'MISMATCH' ? ' mismatch' : ($comparisons[$index]->status === 'PRE_MATCH' ? ' pre_match' : ' other'))) : ' nocompare' ?>">
+                <div class="[ color-marker ] vertical <?= isset($comparisons[$item->id]) ? ($comparisons[$item->id]->status === 'MATCH' ? ' match' : ($comparisons[$item->id]->status === 'MISMATCH' ? ' mismatch' : ($comparisons[$item->id]->status === 'PRE_MATCH' ? ' pre_match' : ' other'))) : ' nocompare' ?>">
                 </div>
 
                 <div class="td -img"
@@ -144,7 +145,7 @@ $identity = \Yii::$app->user->identity;
                                     'status'=>Comparison::STATUS_PRE_MATCH],true).$current;
                                 ?>
                                 <div
-                                    class="slider__yellow_button -v-2 <?= $comparisons[$index]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
+                                    class="slider__yellow_button -v-2 <?= $comparisons[$item->id]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
                                     data-link = "<?= Html::encode($link) ?>"
                                 >
                                 </div>
@@ -156,7 +157,7 @@ $identity = \Yii::$app->user->identity;
                                     'status'=>Comparison::STATUS_MISMATCH],true).$current;
                                 ?>
                                 <div
-                                    class="slider__red_button -v-2 <?= $comparisons[$index]->status === 'MISMATCH' ? '-hover' : '' ?>"
+                                    class="slider__red_button -v-2 <?= $comparisons[$item->id]->status === 'MISMATCH' ? '-hover' : '' ?>"
                                     data-link = "<?= Html::encode($link) ?>"
                                 >
                                 </div>

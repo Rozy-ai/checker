@@ -24,7 +24,7 @@ class ProductPresenter {
     public $direction;
     public $f_no_compare;
     public $item_2__show_all;
-    public $comparisons;
+    //public $comparisons;
     public $number_node;
     
     public function __construct(Session $session, Filters $filters) {

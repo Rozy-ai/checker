@@ -149,8 +149,9 @@ $(document).ready(function () {
 
 
     /*
+     * Вспомогатеьная функция отправки AJAX
      * 
-     * @param {array} data Обязательно доджен содержать 
+     * @param {array} data Обязательно доджен содержать data['url']
      * @param {function} onSuсcess
      * @returns {}
      * 
@@ -187,7 +188,7 @@ $(document).ready(function () {
     
 
     /**
-     * присваивание левому товару статуса STATUS_NOT_FOUND
+     * Присваивание левому товару статуса STATUS_NOT_FOUND
      */
     $body.on('click', '.product-list__item-mismatch-all', function (e) {
         e.stopPropagation();
@@ -228,6 +229,7 @@ $(document).ready(function () {
     /**************************************************************************
      *** Buttons
      **************************************************************************/
+    
     /* RED BTN */
     $('body').on('click', '.slider__red_button', function (e) {
         let $this = $(this);
@@ -238,7 +240,8 @@ $(document).ready(function () {
         sendAjaxFromButton($data, (response) => {
             if (response.status == 'ok'){
                 lib.change_statistics_cnt($item, 'mismatch');
-
+               
+/*
                 // определяем какой это view 1 (short) || view 2 (detail)
                 let $view__slider = $this.parents('.product-view__slider');
 
@@ -269,7 +272,9 @@ $(document).ready(function () {
                         $root.remove();
                     }
                 }
+            */
             };
+
             this.show();
         });
     });

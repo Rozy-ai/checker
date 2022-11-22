@@ -86,11 +86,6 @@ class Comparison extends ActiveRecordAlias {
                 'hex_color' => '',
                 'name' => 'Mismatch',
                 'name_2' => 'Нет',
-            ],
-            'ALL' => [
-                'hex_color' => '',
-                'name' => 'All',
-                'name_2' => 'Все',
             ]
         ];
     }
@@ -273,9 +268,9 @@ class Comparison extends ActiveRecordAlias {
      */
     public static function setStatus(string $status, int $id_source, int $id_product, int $id_item, $message = '' ){
         $comparison = self::findOne([
-            'product_id'    => $id_product, 
-            'node'          => $id_item, 
-            'source_id'     => $id_source]);
+            'product_id'        => $id_product, 
+            'product_right_id'  => $id_item, 
+            'source_id'         => $id_source]);
         if ($comparison){
             if ($comparison->status != $status){
                 $comparison->status = $status;
@@ -285,13 +280,15 @@ class Comparison extends ActiveRecordAlias {
             $comparison = new self([
                 'source_id' => $id_source,
                 'product_id' => $id_product,
-                'node' => $id_item,
+                'product_right_id' => $id_item,
                 'user_id' => \Yii::$app->user->id,
                 'status' => $status,
                 'message' => $message,
+                'node' => 1
             ]);
-            $comparison->save();
+            return $comparison->save();
         }
+        return true;
     }
 /*
     public function setStatus($status, $msgid = null, $url = null, $pid = false) {

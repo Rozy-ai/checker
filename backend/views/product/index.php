@@ -182,7 +182,7 @@ $local_import_stat = null;
 
                     <div class="form-group _col-sm-3">
                         <select name="f_comparison_status" id="id_f_comparison_status" class="form-control">
-                            <option value="">Comparison status</option>
+                            <option value="">All</option>
                             <?php 
                                 foreach ( $list_comparison_statuses as $key => $data){
                                     $name = $data['name'];

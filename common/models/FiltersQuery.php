@@ -49,7 +49,7 @@ class FiltersQuery extends \yii\db\ActiveQuery{
                 case 'p_all_compare':
                     $this->leftJoin('p_all_compare', 'p_all_compare.p_id='.$source_table_name.'.id ');
                     break;
-                case '':
+                case 'p_updated':
                     $this->leftJoin('p_updated', 'p_updated.p_id = ' .$source_table_name. '.id ');
                     break;
                 case 'comparisons':

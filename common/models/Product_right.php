@@ -13,7 +13,7 @@ class Product_right extends \yii\base\DynamicModel{
    * @var array|float|int|mixed|string|string[]
    */
   private $compare_status;
-  public  Source $source;
+  public  $source;
 
   public function __construct(array $attributes = [], $config = []){
     parent::__construct($attributes, $config);
@@ -25,7 +25,10 @@ class Product_right extends \yii\base\DynamicModel{
       return self::findOne(['id' => $id]);
   }
   
-
+  public function getStatusComparison(){
+      return $this->hasOne(Comparison::class, ['product_right_id' => 'id']);
+  }
+  
   private function calculate_step_1($str){
     $re = '/\(\((.+?)\)\)|\{\{(.+?)\}\}|(\[\[.+?\]\])|(.+?)/m';
 
