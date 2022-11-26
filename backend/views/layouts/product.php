@@ -83,18 +83,18 @@ $product = $this->params['product'];
               </div>
 
               <?php
-              echo $ret = Html::tag(
-                'div',
-                      
-                "<span class='js-pre_match pre_match' data-text_brief='Yes?'>{$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]}</span>"
-                ."<span class='js-match match' data-text_brief='Yes'>{$list_comparison_statuses[Comparison::STATUS_MATCH]}</span>"
-                ."<span class='js-mismatch mismatch' data-text_brief='No'>{$list_comparison_statuses[Comparison::STATUS_MISMATCH]}</span>"
-                ."<span class='js-other other' data-text_brief='Other'>{$list_comparison_statuses[Comparison::STATUS_OTHER]}</span>"
-                ."<span class='js-nocompare nocompare' data-text_brief='Nocompare'>".count(Comparison::get_no_compare_ids_for_item($product))."</span>"
-                ."<span data-text_brief='reset' class='js css -reset_filter_1234 -hidden'>показать все</span>",
-                        
-                ['class' => 'product-list-item__compare-statistics product-page__product-statistics-1234','style' => '']
-              );
+                echo $ret = Html::tag(
+                  'div',
+
+                  "<span class='js-pre_match pre_match' data-text_brief='Yes?'>{$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]}</span>"
+                  ."<span class='js-match match' data-text_brief='Yes'>{$list_comparison_statuses[Comparison::STATUS_MATCH]}</span>"
+                  ."<span class='js-mismatch mismatch' data-text_brief='No'>{$list_comparison_statuses[Comparison::STATUS_MISMATCH]}</span>"
+                  ."<span class='js-other other' data-text_brief='Other'>{$list_comparison_statuses[Comparison::STATUS_OTHER]}</span>"
+                  ."<span class='js-nocompare nocompare' data-text_brief='Nocompare'>".count(Comparison::get_no_compare_ids_for_item($product))."</span>"
+                  ."<span data-text_brief='reset' class='js css -reset_filter_1234 -hidden'>показать все</span>",
+
+                  ['class' => 'product-list-item__compare-statistics product-page__product-statistics-1234','style' => '']
+                );
               ?>
               <span
                 style="float: left;"

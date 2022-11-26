@@ -31,6 +31,7 @@ class Comparison extends ActiveRecordAlias {
     const STATUS_MATCH = 'MATCH';
     const STATUS_OTHER = 'OTHER';
     const STATUS_PRE_MATCH = 'PRE_MATCH';
+    const STATUS_NOCOMPARE = 'NOCOMPARE';
 
     private static $status_data = [
       'PRE_MATCH' => [
@@ -130,7 +131,7 @@ class Comparison extends ActiveRecordAlias {
     	if ($status_code === 'OTHER') return 'Other';
     }
     
-        /**
+    /**
      * 
      * @return array [
      *      key => status_name
@@ -146,6 +147,39 @@ class Comparison extends ActiveRecordAlias {
         ];
 
         return $statuses;
+    }
+    
+    // 
+    
+    /**
+     * Возвращает список статусов
+     * 
+     * @param int $id_product - id левого товара для поиска по соотвестстующим правым
+     * @return array[
+     *      MISSMATCH => [
+     *          'name' => 'abcdf',
+     *          'count' => 12345
+     *      ],
+     *      ...
+     * }
+     */
+    public static function getListStatusForStatictic(int $id_product){
+        $q = self::find()
+                ->select([ self::tableName().'.status', 'COUNT(*) as count_statuses'])
+                ->groupBy( self::tableName().'.status')
+                ->asArray();
+        if ($id_product){
+            $q->andWhere([self::tableName().'.product_id' => $id_product]);
+        }
+        
+        $q->indexBy('status');
+        $data = $q->all();
+        
+        $out[self::STATUS_PRE_MATCH] = $data[self::STATUS_PRE_MATCH]['count_statuses'] ?? 0;
+        $out[self::STATUS_MATCH]     = $data[self::STATUS_MATCH]['count_statuses']     ?? 0;
+        $out[self::STATUS_OTHER]     = $data[self::STATUS_OTHER]['count_statuses']     ?? 0;
+        $out[self::STATUS_MISMATCH]  = $data[self::STATUS_MISMATCH]['count_statuses']  ?? 0;
+        return $out;
     }
        
     /**

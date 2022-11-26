@@ -542,6 +542,7 @@ $(function(){
  */
   
   /* RED BTN */
+  /*
   $('body').on('click','.slider__red_button',function(e){
     let $this = $(this);
     let $root = $this.parents('.slider__slider-item');
@@ -582,13 +583,13 @@ $(function(){
     });
     
   })
-  
+  */
   /* GREEN BTN */
   $('body').on('click','.slider__yellow_button',function(e){
     
     let $this = $(this);
     let $item = $this.parents('.slider__slider-item');
-    lib.change_statistics_cnt($item,'pre_match');
+    //lib.change_statistics_cnt($item,'pre_match');
     
     //let $slider_block = $this.parents('.products-list__slider-wrapper');
     //let $root = $this.parents('.product-list__product-list-item');
@@ -617,7 +618,6 @@ $(function(){
     });
     
   })
-  
   
   
   

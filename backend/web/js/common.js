@@ -468,7 +468,7 @@ lib.inputHandler = function (wrapper, selector, callback, options) {
     $(wrapper).on('keyup', selector, processing); //keydown
 };
 
-
+/*
 lib.change_statistics_cnt = function ($item, action) {
     let $root = $item.parents('.product-list__product-list-item');
     if (!$root.length) {
@@ -555,9 +555,8 @@ lib.change_statistics_cnt = function ($item, action) {
         let a_nn = nn.split('/');
         processed_block.text((parseInt(a_nn[0]) + 1) + '/' + a_nn[1])
     }
-
-
 }
+*/
 
 lib.slider_refresh = function slider_refresh(selector) {
     let _selector = selector || '._sliderTop';
@@ -615,7 +614,7 @@ lib.reset_compare_item = function ($this) {
     $compare_items.find('.slider__yellow_button').removeClass('-hover');
     $compare_items.find('.slider__red_button').removeClass('-hover');
 
-    lib.change_statistics_cnt($this, 'reset');
+    //lib.change_statistics_cnt($this, 'reset');
 
     if (!p_id)
         return false;

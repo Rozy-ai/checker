@@ -44,6 +44,15 @@ use common\models\Comparison;
     $images_left[0];
     $images_left["Title"];
     $source_id = $item->source->id;
+    
+    $list_comparison_statuses = Comparison::getListStatusForStatictic($item->id);
+    
+    $list_comparison_statuses[Comparison::STATUS_NOCOMPARE] = count($item->addInfo)
+        -$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]
+        -$list_comparison_statuses[Comparison::STATUS_MATCH]
+        -$list_comparison_statuses[Comparison::STATUS_MISMATCH]
+        -$list_comparison_statuses[Comparison::STATUS_OTHER]
+            
     ?>
     <!-- ITEM -->
     <tr
@@ -71,7 +80,7 @@ use common\models\Comparison;
 
         </td>
         <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
-            <div><?= (strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin ?></div>
+            <div><?= (!$is_admin && strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin ?></div>
             <div class="products-list__img-wrapper">
                 <?php
                 $title = '';
@@ -176,39 +185,25 @@ use common\models\Comparison;
 
             <div class="slider_close -in-list"><div class="-line -line-1"></div><div class="-line -line-2"></div></div>
 
-            <?php
-            $statuses = [
-                Comparison::STATUS_PRE_MATCH => 0,
-                Comparison::STATUS_MATCH => 0,
-                Comparison::STATUS_MISMATCH => 0,
-                Comparison::STATUS_OTHER => 0,
-            ];
-
-            foreach ($item->comparisons as $comparison) {
-                $statuses [$comparison->status]++;
-            }
-            ?>
-
-
             <div class="product-list-item__data -first-margin">
                 <?php
                 echo $ret = Html::tag('div',
-                        "<span class='js-pre_match pre_match'>{$statuses[Comparison::STATUS_PRE_MATCH]}</span>
-                        <span class='js-match match'>{$statuses[Comparison::STATUS_MATCH]}</span>
-                        <span class='js-mismatch mismatch'>{$statuses[Comparison::STATUS_MISMATCH]}</span>
-                        <span class='js-other other'>{$statuses[Comparison::STATUS_OTHER]}</span>
-                        <span class='js-nocompare nocompare'>" . count(Comparison::get_no_compare_ids_for_item($item)) . "</span>",
+                        "<span class='js-pre_match pre_match'>{$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]}</span>
+                        <span class='js-match match'>{$list_comparison_statuses[Comparison::STATUS_MATCH]}</span>
+                        <span class='js-mismatch mismatch'>{$list_comparison_statuses[Comparison::STATUS_MISMATCH]}</span>
+                        <span class='js-other other'>{$list_comparison_statuses[Comparison::STATUS_OTHER]}</span>
+                        <span class='js-nocompare nocompare'>" . $list_comparison_statuses[Comparison::STATUS_NOCOMPARE] . "</span>",
                         ['class' => 'product-list-item__compare-statistics']
                 );
                 ?>
 
                 <span class="-title">Обработано:</span>
-                <?
-                $counted = $item->aggregated ? $item->aggregated->counted : 0;
-                $ret = Html::tag('div',"{$counted}/" . count($item->getAddInfo()),
-                ['class' => 'name product-list-item__processed']);
-                //$ret .= '<br/>';
-                echo $ret;
+                <?php
+                    $counted = $item->aggregated ? $item->aggregated->counted : 0;
+                    $ret = Html::tag('div',"{$counted}/" . count($item->getAddInfo()),
+                    ['class' => 'name product-list-item__processed']);
+                    //$ret .= '<br/>';
+                    echo $ret;
                 ?>
             </div>
 

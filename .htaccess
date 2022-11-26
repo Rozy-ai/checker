@@ -1,4 +1,0 @@
-RewriteEngine on
-
-RewriteCond %{REQUEST_URI} ^/
-RewriteRule ^(\/?.*)$ backend/web/$1 [L]

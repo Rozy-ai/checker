@@ -186,8 +186,9 @@ $local_import_stat = null;
                             <?php 
                                 foreach ( $list_comparison_statuses as $key => $data){
                                     $name = $data['name'];
+                                    $count = $data['count'];
                                     $is_active = ($key == $f_comparison_status)?'selected':'';
-                                    $st = "<option value=$key $is_active>$name</option>";
+                                    $st = "<option value=$key $is_active>$name ($count)</option>";
                                     echo $st;
                                 }
                             ?>

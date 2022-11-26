@@ -14,6 +14,7 @@ use common\models\Comparison;
 use common\models\HiddenItems;
 use common\models\P_user_visible;
 use common\models\Source;
+use common\models\Product;
 
 /**
  * Превставитель для страницы product/index, содержащий логику
@@ -49,33 +50,6 @@ class IndexPresenter {
         return $this->filters->f_number_page_current;
     }
     
-    /**
-     * Список статусов и количество товаров, которые сотвествуют этому фильтру
-     * Список статусов находится в common/models/Comparisons и является константой
-     * 
-     * @return attay
-     *    [
-     *       NOCOMPARE => int,
-     *       MISMATCH  => int,
-     *       PRE_MATCH => int,
-     *       MATCH     => int,
-     *       OTHER     => int
-     *    ]
-     * @throws \yii\base\InvalidArgumentException
-     */
-    public function getListComparisonStatuses(){
-        $data = Comparison::get_filter_statuses();
-        $out = [];
-        
-        foreach ($data as $key => $value){
-            $out[$key] = [
-                'name'  => $names[$key]['name'],
-                'count' => $count
-            ];
-        }
-        return $out;
-    }
-
     public function getCountProductsOnPageRight($list){
         $cnt_all_right = 0;
         foreach ($list as $product) {
@@ -257,6 +231,29 @@ class IndexPresenter {
                     case 'filter_asin': $this->filters->f_asin = $value; break;
                 }
             }
+        }
+    }
+    
+    public function deleteProduct(int $id_source, int $id_product){
+        try{
+            $source = Source::getById($id_source);
+            if (!($source instanceof Source)){
+                throw new \Exception('Не удаось найти источник по данному id');
+            }
+            
+            $product = $source->class_1::getById($id_product);
+            $product->source = $source;
+            if (!($product instanceof Product)){
+                throw new \Exception('Не удалось найти товар по данному id');
+            }
+        
+            $product->delete();
+        } catch(\Exception $ex){
+            \Yii::$app->error($ex->getCode().': '.$ex->getMessage());
+            return [
+                'status' => 'error',
+                'message' => $ex->message
+            ];
         }
     }
 }

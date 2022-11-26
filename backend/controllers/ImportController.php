@@ -30,7 +30,7 @@ class ImportController extends \yii\web\Controller{
 //    print_r($source->import_local__db_import_name);
 //
     $db_name = $source['import_local__db_import_name'];
-    $tbl_name = $source['source_table_name'];
+    $tbl_name = $source->table_1;
     if (!$db_name || !$tbl_name) return false;
 
     $db_name__tbl_name = '`'.$db_name.'`.`'.$tbl_name.'`';
@@ -413,6 +413,7 @@ class ImportController extends \yii\web\Controller{
   }
 
   public static function sql_cmd($sql,$bind_array = [],$type = 'execute'){
+    ///$sql = SELECT * FROM `ebay`.`parser_trademarkia_com` ORDER BY `ebay`.`parser_trademarkia_com`.`date_add` DESC LIMIT 1
     // $sql = "SELECT * FROM checker.$tbl_2 WHERE checker.$tbl_2.asin = :asin";
     // $res = $this->sql_cmd($sql,'query',[':asin' => $asin]);
     $db = self::getConnection();

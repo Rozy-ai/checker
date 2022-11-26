@@ -75,9 +75,9 @@ class Product extends \yii\db\ActiveRecord{
     public function setSource(Source $source){
         $this->_source = $source;
     }
-  
+      
     /**
-     * Заполняет свойсьво _addInfo массивом из правых элементов
+     * Заполняет свойство _addInfo массивом из правых элементов
      * @return Product_right[]
      */
     public function initAddInfo() {
@@ -178,9 +178,10 @@ class Product extends \yii\db\ActiveRecord{
      * @return \yii\db\ActiveQuery
      */
     public function getComparisons() {
-        return $this->hasMany(Comparison::className(), ['product_id' => 'id'])
-                        ->where(['source_id' => $this->source->id])
-                        ->indexBy('product_right_id');
+        return Comparison::find()
+            ->where(['product_id' => $this->id, 'source_id' => $this->source->id])
+            ->indexBy('product_right_id')
+            ->all();
     }
 
     /**
@@ -465,5 +466,32 @@ class Product extends \yii\db\ActiveRecord{
         $product->source = $source;
         $product->baseInfo = $product->info;
         return $product;
+    }
+    
+    public function delete() {
+        $transaction = \Yii::$app->db->beginTransaction();
+        
+        try {
+            $comparisons = $this->getComparisons();
+            foreach ($comparisons as $comparison){
+                if (!$comparison->delete()){
+                    throw new \Exception("Не удалось удались запись сравнения");
+                }
+            }
+
+            $items = $this->_source->class_2::findAll(['asin' => $this->asin]);
+            foreach ($items as $item){
+                if (!$item->delete()){
+                    throw new \Exception("Не удалось удались правый товар");
+                }
+            }
+            if (!parent::delete()){
+                throw new \Exception("Не удалось удались левый товар");
+            }
+            $transaction->commit();
+        } catch (\Exception $ex) {
+            $transaction->rollBack();
+            throw new \Exception($ex->message);
+        };
     }
 }

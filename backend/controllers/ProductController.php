@@ -175,7 +175,7 @@ class ProductController extends Controller {
         $list = Product::getListProducts($source, $filters, $is_admin);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
         $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
-                
+        
         return $this->render('index', [
             'f_source'                  =>$filters->f_source,
             'f_profile'                 =>$filters->f_profile,
@@ -362,14 +362,12 @@ class ProductController extends Controller {
         return $source['import_local__max_product_date'] < $p_date_in_parser;
     }
 
-    private function start_import() {
+    private function start_import($source) {
         set_time_limit(60 * 5);
-        $source_id = $this->source->id;
-        $source = Source::get_source((int) $source_id);
         $p_date_in_parser = ImportController::get_max_product_date_in_parser($source);
         // [если дата в source]  меньше  [даты последнего товара(сортировка по дате) в базе парсера] → запускаем импорт
         if ($p_date_in_parser && $this->do_it_need_to_update($source, $p_date_in_parser)) {
-            \Yii::$app->runAction('import/local_import', ['source_id' => (int) $source_id, 'p_date_in_parser' => $p_date_in_parser]);
+            \Yii::$app->runAction('import/local_import', ['source_id' => (int) $source->id, 'p_date_in_parser' => $p_date_in_parser]);
             // статистика в $this->getView()->params['local_import_stat']
         }
     }
@@ -877,6 +875,21 @@ class ProductController extends Controller {
 
         return $pager;
     }
+    
+    public function actionDeleteProduct(){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (\Yii::$app->request->isGet){
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost){
+            $params = \Yii::$app->request->post();
+        }
+                
+        $id_source  = (int)$params['id_source'];
+        $id_product = (int)$params['id_product'];
+        
+        return $this->indexPresenter->deleteProduct($id_source, $id_product);
+    }
 
     public function actionDel_item() {
         $p_id = $this->request->get('id');
@@ -896,7 +909,7 @@ class ProductController extends Controller {
 
         $res->delete();
 
-// json
+        // json
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         return [
             'res' => 'ok',

@@ -16,7 +16,7 @@ $(document).ready(function () {
         let source_id = $this.data('source_id');
 
         $.ajax({
-            url: "/product/del_item?id=" + p_id + '&source_id=' + source_id,
+            url: "/product/delete-product?id_product=" + p_id + '&id_source=' + source_id,          
             type: "GET",
             beforeSend: function () {
                 $this.css('opacity', '0.5');
@@ -239,7 +239,7 @@ $(document).ready(function () {
 
         sendAjaxFromButton($data, (response) => {
             if (response.status == 'ok'){
-                lib.change_statistics_cnt($item, 'mismatch');
+                //lib.change_statistics_cnt($item, 'mismatch');
                
 /*
                 // определяем какой это view 1 (short) || view 2 (detail)
@@ -287,7 +287,7 @@ $(document).ready(function () {
         let $item = $this.parents('.slider__slider-item');
 
         //lib.change_statistics_cnt($item,'match');
-        lib.change_statistics_cnt($item, 'pre_match');
+        //lib.change_statistics_cnt($item, 'pre_match');
 
         let $slider_block = $this.parents('.products-list__slider-wrapper');
         let $root = $this.parents('.product-list__product-list-item');

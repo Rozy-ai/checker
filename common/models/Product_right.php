@@ -21,13 +21,18 @@ class Product_right extends \yii\base\DynamicModel{
     //$this->source = Source::get_source();
   }
   
-  public static function getById($id){
-      return self::findOne(['id' => $id]);
-  }
+  //public static function getById($id){
+  //    return self::find(['id' => $id])->one();
+  //}
   
   public function getStatusComparison(){
       return $this->hasOne(Comparison::class, ['product_right_id' => 'id']);
   }
+  
+  //public static function findByAsin($asin){
+  //    $class = self::class;
+  //    return $class::find(['asin' => $asin])->all();
+  //}
   
   private function calculate_step_1($str){
     $re = '/\(\((.+?)\)\)|\{\{(.+?)\}\}|(\[\[.+?\]\])|(.+?)/m';
