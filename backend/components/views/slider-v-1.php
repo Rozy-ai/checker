@@ -156,13 +156,6 @@ $identity = \Yii::$app->user->identity;
             </span>
 
             <!-- / FORK -->
-            
-            <?php $link = Url::to(['product/compare',
-                'id'=>$product->id,
-                'source_id'=>$source_id,
-                'number_node'=>($index+1),
-                'status'=>Comparison::STATUS_PRE_MATCH],true).$current;
-            ?>
             <div
                 class="slider__yellow_button _slider__green_button -v-2 -v-3 -min <?= $comparisons[$item->id]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
                 data-link = "<?= Html::encode($link) ?>"
@@ -170,6 +163,7 @@ $identity = \Yii::$app->user->identity;
                 data-id_source = "<?=$source_id?>"
                 data-id_product = "<?=$product->id?>"
                 data-id_item = "<?=$item->id?>"
+                data-status = <?= Comparison::STATUS_PRE_MATCH ?>
             >
             </div>
 

@@ -472,6 +472,9 @@ class Product extends \yii\db\ActiveRecord{
         $transaction = \Yii::$app->db->beginTransaction();
         
         try {
+            Comparison::deleteAll(['product_id' => $this->id, 'source_id' => $this->source->id]);
+            $this->_source->class_2->deleteAll(['asin' => $this->asin]);
+            /*
             $comparisons = $this->getComparisons();
             foreach ($comparisons as $comparison){
                 if (!$comparison->delete()){
@@ -485,6 +488,7 @@ class Product extends \yii\db\ActiveRecord{
                     throw new \Exception("Не удалось удались правый товар");
                 }
             }
+             */
             if (!parent::delete()){
                 throw new \Exception("Не удалось удались левый товар");
             }

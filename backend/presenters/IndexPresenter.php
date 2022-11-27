@@ -256,4 +256,16 @@ class IndexPresenter {
             ];
         }
     }
+    
+    public function resetCompareProduct(int $id_source, int $id_product){
+        $transaction = \Yii::$app->db->beginTransaction();
+        try{
+            Comparison::deleteAll(['product_id' => $id_product, 'source_id' => $id_source]);
+            HiddenItems::deleteAll(['p_id' => $id_product, 'source_id' => $id_source]);
+            $transaction->commit();
+        } catch (\Exception $ex) {
+            $transaction->rollback();
+            throw $ex;
+        }
+    }
 }

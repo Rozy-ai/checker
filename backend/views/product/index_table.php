@@ -241,8 +241,9 @@ use common\models\Comparison;
 
                     <div
                         class="js-reset-compare product-list-item__reset-compare -margin"
-                        data-p_id="<?= $item->id ?>"
-                        data-source_id="<?= $source_id ?>"
+                        data-url = "/product/reset-compare"
+                        data-id_product="<?= $item->id ?>"
+                        data-id_source="<?= $source_id ?>"
                         >
                         Отменить
                     </div>

@@ -101,6 +101,43 @@
 
 var lib = {};
 
+    /*
+     * Вспомогатеьная функция отправки AJAX
+     * 
+     * @param {array} data Обязательно доджен содержать data['url']
+     * @param {function} onSuсcess
+     * @returns {}
+     * 
+     */
+    lib.sendAjaxFromButton = function(data, onSuccess) {
+        $.ajax({
+            url: data['url'],
+            type: "POST",
+            data: data,
+            dataType: "json",
+            success: function (response) {
+                onSuccess(response);
+            },
+            error: function (jqXHR, exception) {
+                if (jqXHR.status === 0) {
+                    alert('Not connect. Verify Network.');
+                } else if (jqXHR.status === 404) {
+                    alert('Requested page not found (404).');
+                } else if (jqXHR.status === 500) {
+                    alert('Internal Server Error (500).');
+                } else if (exception === 'parsererror') {
+                    alert('Requested JSON parse failed.');
+                } else if (exception === 'timeout') {
+                    alert('Time out error.');
+                } else if (exception === 'abort') {
+                    alert('Ajax request aborted.');
+                } else {
+                    alert('Uncaught Error. ' + jqXHR.responseText);
+                }
+            }
+        });
+    }
+
 lib.url = class {
 
     get_params() {
@@ -592,9 +629,31 @@ lib.slider_init = function slider_init(start_slide) {
 }
 
 lib.reset_compare_item = function ($this) {
+    let $data = $this.data();
+    let $item = $this.parents('.product-list__product-list-item'); // Родительский блок
+    
+    lib.sendAjaxFromButton($data, (response) => {
+        if (response.status === 'ok'){
+            let $compare_items = $item.find('.slider__slider-item'); // Блок, содержащий правый товар
+            $compare_items.find('.color-marker')
+                    .removeClass('pre_match')
+                    .removeClass('match')
+                    .removeClass('nocompare')
+                    .removeClass('other')
+                    .removeClass('mismatch')
+                    .addClass('nocompare');
+            $compare_items.find('.slider__yellow_button').removeClass('-hover');
+            $compare_items.find('.slider__red_button').removeClass('-hover');            
+        } else if ( response.status === 'error'){
+            alert(response.message);
+        }
+    });
+};
+
+/*
+lib.reset_compare_item = function ($this) {
     let p_id = $this.data('p_id');
     let source_id = $this.data('source_id');
-    //let $item = $this.parents('.product-list__product-list-item');
 
     let $item = $this.parents('.product-list__product-list-item');
     if (!$item.length) {
@@ -629,18 +688,13 @@ lib.reset_compare_item = function ($this) {
         }
     });
 }
+*/
 
 $(function () {
-    $('body').on('click', '.js-reset-compare', function () {
-
+    $('body').on('click', '.js-reset-compare', function (e) {
+        e.stopPropagation();
         let $this = $(this);
         lib.reset_compare_item($this);
-
-        console.log('reload');
-        if ($('#filter-items__comparisons').val() === 'MISMATCH') {
-            window.location.reload();
-        }
-
     })
 
 

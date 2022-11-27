@@ -156,7 +156,8 @@ $(document).ready(function () {
      * @returns {}
      * 
      */
-    function sendAjaxFromButton(data, onSuccess) {
+    /*
+    function lib.sendAjaxFromButton(data, onSuccess) {
         $.ajax({
             url: data['url'],
             type: "POST",
@@ -184,7 +185,7 @@ $(document).ready(function () {
             }
         });
     }
-    
+    */
     
 
     /**
@@ -206,7 +207,7 @@ $(document).ready(function () {
                         return;
                     }
                     $data['confirm'] = true;
-                    sendAjaxFromButton($data, onResponce);
+                    lib.sendAjaxFromButton($data, onResponce);
                     break;
                 case 'ok':
                     if (!$('input[name=filter-items__no-compare]:checked').length) {
@@ -223,7 +224,7 @@ $(document).ready(function () {
             }            
         }
  
-        sendAjaxFromButton($data, onResponce);
+        lib.sendAjaxFromButton($data, onResponce);
     });
 
     /**************************************************************************
@@ -237,51 +238,41 @@ $(document).ready(function () {
         let $item = $this.parents('.slider__slider-item');
         let $data = $this.data();
 
-        sendAjaxFromButton($data, (response) => {
+        lib.sendAjaxFromButton($data, (response) => {
             if (response.status == 'ok'){
-                //lib.change_statistics_cnt($item, 'mismatch');
-               
-/*
-                // определяем какой это view 1 (short) || view 2 (detail)
-                let $view__slider = $this.parents('.product-view__slider');
+                $item.find('.color-marker').removeClass('nocompare').removeClass('other').removeClass('pre_match').removeClass('match').addClass('mismatch');
+                $item.find('.slider__yellow_button').removeClass('-hover');
+                $item.find('.slider__red_button').addClass('-hover');
+            } else
+            if (response.status == 'error'){
+                alert(response.message);
+            }
 
-                let view = '.slider__view-1'; // short
-                if (!$view__slider.hasClass('slider__view-1')) {
-                    view = '.slider__view-2';  // detail
-                }
-
-                let $slider_block = $this.parents('.products-list__slider-wrapper');
-
-                let $root = $this.parents('.product-list__product-list-item');
-
-                let f_comparison_val = $('#filter-items__comparisons').val();
-                if (f_comparison_val !== 'MISMATCH' && f_comparison_val !== 'ALL') {
-                    //$item.remove();
-                    let $slider = $root.find('._sliderTop');
-                    // c первого по ТЕКУЩИЙ
-                    let this_index = $item.prevAll().length;
-                    $slider.slick('slickRemove', this_index);
-                }
-
-                if (!$slider_block.find(view + ' .slider__red_button').length) {
-                    $slider_block.remove();
-
-                    let u = new URL(window.location.href);
-                    let params = u.searchParams;
-                    if (!$('input[name=filter-items__no-compare]:checked').length) {
-                        $root.remove();
-                    }
-                }
-            */
-            };
-
-            this.show();
+            $this.show();
         });
     });
 
-
-
     /* YELLOW BTN */
+    $('body').on('click', '.slider__yellow_button', function (e) {
+        let $this = $(this);
+        $this.hide();
+        let $item = $this.parents('.slider__slider-item');
+        let $data = $this.data();
+        
+        lib.sendAjaxFromButton($data, (response) => {
+            if (response.status == 'ok'){
+                $item.find('.color-marker').removeClass('nocompare').removeClass('other').removeClass('mismatch').removeClass('match').addClass('pre_match');
+                $item.find('.slider__red_button').removeClass('-hover');
+                $item.find('.slider__yellow_button').addClass('-hover');
+            }
+            if (response.status == 'error'){
+                alert(response.message);
+            }
+            $this.show();
+        })
+    })
+    
+    /*
     $('body').on('click', '.slider__yellow_button', function (e) {
         let $this = $(this);
         let $item = $this.parents('.slider__slider-item');
@@ -346,94 +337,7 @@ $(document).ready(function () {
         });
 
     })
-
-
-
-
-    /* RED BTN */
-    /*
-     $('body').on('click','.slider__red_button',function(e){
-     let $this = $(this);
-     let $item = $this.parents('.slider__slider-item');
-     
-     lib.change_statistics_cnt($item,'mismatch');
-     
-     // определяем какой это view 1 (short) || view 2 (detail)
-     let $view__slider = $this.parents('.product-view__slider');
-     
-     let view = '.slider__view-1'; // short
-     if (!$view__slider.hasClass('slider__view-1')){
-     view = '.slider__view-2';  // detail
-     }
-     
-     let $slider_block = $this.parents('.products-list__slider-wrapper');
-     
-     let $root = $this.parents('.product-list__product-list-item');
-     
-     if ($('#filter-items__comparisons').val() !== 'MISMATCH'){
-     if ($('#filter-items__comparisons').val() !== 'ALL'){
-     //$item.remove();
-     
-     let $slider = $root.find('._sliderTop');
-     // c первого по ТЕКУЩИЙ
-     let this_index = $item.prevAll().length;
-     $slider.slick('slickRemove', this_index);
-     }
-     }
-     
-     if (!$slider_block.find(view + ' .slider__red_button').length){
-     $slider_block.remove();
-     
-     let u = new URL(window.location.href);
-     let params = u.searchParams;
-     if (!$('input[name=filter-items__no-compare]:checked').length){
-     $root.remove();
-     }
-     }
-     
-     let url = $this.data('link');
-     if (!url) return false;
-     
-     console.log(url);
-     
-     $.ajax({
-     url: url+'&list=1',
-     type: "get",
-     beforeSend: function() {},
-     dataType: "json",
-     success: function(response){
-     $item.find('.color-marker')
-     .removeClass('other')
-     .removeClass('pre_match')
-     .removeClass('nocompare')
-     .removeClass('match')
-     .addClass('mismatch');
-     $item.find('.slider__yellow_button').removeClass('-hover');
-     $item.find('.slider__red_button').addClass('-hover');
-     
-     },
-     error: function (jqXHR, exception) {
-     if (jqXHR.status === 0) {
-     alert('Not connect. Verify Network.');
-     } else if (jqXHR.status == 404) {
-     alert('Requested page not found (404).');
-     } else if (jqXHR.status == 500) {
-     alert('Internal Server Error (500).');
-     } else if (exception === 'parsererror') {
-     alert('Requested JSON parse failed.');
-     } else if (exception === 'timeout') {
-     alert('Time out error.');
-     } else if (exception === 'abort') {
-     alert('Ajax request aborted.');
-     } else {
-     alert('Uncaught Error. ' + jqXHR.responseText);
-     }
-     }
-     });
-     
-     })
-     */
-
+*/
     let submit = $('.products__filter-submit')[0];
     $('.products__filter-form select').on('change', function () {
         submit.click();

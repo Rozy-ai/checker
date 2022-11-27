@@ -445,18 +445,38 @@ class ProductController extends Controller {
         return true;
     }
 
-    public function actionReset_compare($id) {
-        $p_id = Yii::$app->request->get('id');
-        $source_id = Yii::$app->request->get('source_id');
-
-        Comparison::deleteAll(['product_id' => $p_id, 'source_id' => $source_id]);
-        HiddenItems::deleteAll(['p_id' => $p_id, 'source_id' => $source_id]);
-        P_all_compare::deleteAll(['p_id' => $p_id, 'source_id' => $source_id]);
-
-        // json
+    /**
+     *  Сюда приходит после нажатия на снопку сбросить для левого товара
+     */
+    public function actionResetCompare(){
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (\Yii::$app->request->isGet){
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost){
+            $params = \Yii::$app->request->post();
+        }
+        
+        $id_product = (int)$params['id_product'];
+        $id_source  = (int)$params['id_source'];
+        
+        if (!$id_product || !$id_source){
+            return [
+                'status' => 'error',
+                'message' => 'Не хватает исходных данных'
+            ];
+        }
+        
+        try{
+            $this->indexPresenter->ResetCompareProduct($id_source, $id_product);
+        } catch (\Exception $ex) {
+            return [
+                'status' => 'error',
+                'message' => $ex->getMessage()           
+            ];
+        }
         return [
-            'res' => 'ok',
+            'status' => 'ok'
         ];
     }
 
