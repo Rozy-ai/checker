@@ -47,15 +47,25 @@ $(document).ready(function () {
         });
     }
 
-    $body.on('click', '.js-del-item', function () {
+    $body.on('click', '.js-del-item', function (e) {
+        e.stopPropagation();
         let q = confirm('Уверены?');
-        if (!q)
+        if (!q) 
             return false;
-
+        
         let $this = $(this);
-        let $root_item = $this.parents('.product-list__product-list-item');
-        del_item($root_item);
-
+        let $data = $this.data();
+        
+        lib.sendAjaxFromButton($data, (response) => {
+            if (response.status === 'ok'){
+                let html = response.html_index_table;
+                var container = $("#id_table_container");
+                container.html(html);
+                lib.slider_init();
+            } else if ( response.status === 'error'){
+                alert(response.message);
+            }
+        });
     });
 
     $body.on('click', '.js-del-all-visible-items', function () {
@@ -135,58 +145,7 @@ $(document).ready(function () {
             }
 
         }
-
-
-        /*
-         *
-         if ($('#filter-items__comparisons').val() !== 'YES_NO_OTHER' && $('#filter-items__comparisons').val() !== 'PRE_MATCH'){
-         $root.remove();
-         }
-         * */
-
-
     });
-
-
-    /*
-     * Вспомогатеьная функция отправки AJAX
-     * 
-     * @param {array} data Обязательно доджен содержать data['url']
-     * @param {function} onSuсcess
-     * @returns {}
-     * 
-     */
-    /*
-    function lib.sendAjaxFromButton(data, onSuccess) {
-        $.ajax({
-            url: data['url'],
-            type: "POST",
-            data: data,
-            dataType: "json",
-            success: function (response) {
-                onSuccess(response);
-            },
-            error: function (jqXHR, exception) {
-                if (jqXHR.status === 0) {
-                    alert('Not connect. Verify Network.');
-                } else if (jqXHR.status === 404) {
-                    alert('Requested page not found (404).');
-                } else if (jqXHR.status === 500) {
-                    alert('Internal Server Error (500).');
-                } else if (exception === 'parsererror') {
-                    alert('Requested JSON parse failed.');
-                } else if (exception === 'timeout') {
-                    alert('Time out error.');
-                } else if (exception === 'abort') {
-                    alert('Ajax request aborted.');
-                } else {
-                    alert('Uncaught Error. ' + jqXHR.responseText);
-                }
-            }
-        });
-    }
-    */
-    
 
     /**
      * Присваивание левому товару статуса STATUS_NOT_FOUND
@@ -195,7 +154,6 @@ $(document).ready(function () {
         e.stopPropagation();
         let $this = $(this);
         $this.hide();
-        let $root = $this.parents('.product-list__product-list-item');
         let $data = $this.data();
         
         function onResponce(response){
@@ -210,11 +168,10 @@ $(document).ready(function () {
                     lib.sendAjaxFromButton($data, onResponce);
                     break;
                 case 'ok':
-                    if (!$('input[name=filter-items__no-compare]:checked').length) {
-                        $root.remove();
-                    } else {
-                        $root.find('.product-view__slider').remove();
-                    }
+                    let html = response.html_index_table;
+                    var container = $("#id_table_container");
+                    container.html(html);
+                    lib.slider_init();
                     break;
                 case 'error':
                     alert(response.message);
@@ -233,18 +190,19 @@ $(document).ready(function () {
     
     /* RED BTN */
     $('body').on('click', '.slider__red_button', function (e) {
+        e.stopPropagation();
         let $this = $(this);
         $this.hide();
-        let $item = $this.parents('.slider__slider-item');
         let $data = $this.data();
 
         lib.sendAjaxFromButton($data, (response) => {
             if (response.status == 'ok'){
-                $item.find('.color-marker').removeClass('nocompare').removeClass('other').removeClass('pre_match').removeClass('match').addClass('mismatch');
-                $item.find('.slider__yellow_button').removeClass('-hover');
-                $item.find('.slider__red_button').addClass('-hover');
+                let html = response.html_index_table;
+                var container = $("#id_table_container");
+                container.html(html);
+                lib.slider_init();
             } else
-            if (response.status == 'error'){
+            if (response.status === 'error'){
                 alert(response.message);
             }
 
@@ -254,18 +212,30 @@ $(document).ready(function () {
 
     /* YELLOW BTN */
     $('body').on('click', '.slider__yellow_button', function (e) {
+        e.stopPropagation();
         let $this = $(this);
         $this.hide();
         let $item = $this.parents('.slider__slider-item');
         let $data = $this.data();
         
         lib.sendAjaxFromButton($data, (response) => {
-            if (response.status == 'ok'){
-                $item.find('.color-marker').removeClass('nocompare').removeClass('other').removeClass('mismatch').removeClass('match').addClass('pre_match');
+            if (response.status === 'ok'){
+                let html = response.html_index_table;
+                var container = $("#id_table_container");
+                container.html(html);
+                lib.slider_init();
+                /*
+                $item.find('.color-marker')
+                    .removeClass('nocompare')
+                    .removeClass('other')
+                    .removeClass('mismatch')
+                    .removeClass('match')
+                    .addClass('pre_match');
                 $item.find('.slider__red_button').removeClass('-hover');
                 $item.find('.slider__yellow_button').addClass('-hover');
+                */
             }
-            if (response.status == 'error'){
+            if (response.status === 'error'){
                 alert(response.message);
             }
             $this.show();

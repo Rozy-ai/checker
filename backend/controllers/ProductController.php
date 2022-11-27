@@ -208,6 +208,9 @@ class ProductController extends Controller {
         ]);
     }
     
+    /*
+     * Временная экспериментальная функция для замены node на id_product (Не используется)
+     */
     public function actionStart() {
         $source = Source::getById(1);
         if (!($source instanceof Source)) {
@@ -288,33 +291,204 @@ class ProductController extends Controller {
         $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
-        $list = Product::getListProducts($source, $filters, $is_admin);
         
-        $f_count_products_on_page = $filters->f_count_products_on_page;
-        $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
-        $count_products_right = $this->indexPresenter->getCountProductsOnPageRight($list);
-        $source_name = $source->name;
-        $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}')?$filters->f_profile: 'Все';
-        
-        return [
-            'status' => 'ok',
-            'message' => '',
-            'html' => $this->renderPartial('index_table', [
-                'list' => $list,
-                'local_import_stat' => null,
-                'is_admin' => $is_admin,
-                'f_comparison_status' => $filters->f_comparison_status,
-                'f_profile' => $filters->f_profile,
-                'f_no_compare' => $filters->f_no_compare,
-                'source' => $source,            
-            ]),
-            'other' => [
-                'id_block_count' => "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path"
-            ]
-        ];
+        return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
 
     /**
+     *  Сюда приходит после нажатия на снопку сбросить для левого товара
+     *  Требуется перерисовка списка продуктов
+     */
+    public function actionResetCompare(){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (\Yii::$app->request->isGet){
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost){
+            $params = \Yii::$app->request->post();
+        }
+        
+        $id_product = (int)$params['id_product'];
+        $id_source  = (int)$params['id_source'];
+        
+        if (!$id_product || !$id_source){
+            return [
+                'status' => 'error',
+                'message' => 'Не хватает исходных данных',
+            ];
+        }
+        
+        try{
+            $this->indexPresenter->ResetCompareProduct($id_source, $id_product);
+        } catch (\Exception $ex) {
+            return [
+                'status' => 'error',
+                'message' => $ex->getMessage()
+            ];
+        }
+        
+        $filters = new Filters();
+        $filters->loadFromSession();
+        if (!$filters->isExistsDefaultParams()){
+            return [
+                'status' => 'error',
+                'message' => 'В сесии не хватает данных'
+            ];
+        }
+        
+        $source = Source::getById($filters->f_source);
+        $user = \Yii::$app->user->identity;
+        $is_admin = $user && $user->isAdmin();
+        
+        return $this->getRequestWithUpdateList($source, $filters, $is_admin);
+    }
+
+    /**
+     * Сюда приходит после нажатия крестика на правом товаре
+     */
+    public function actionCompare() {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (\Yii::$app->request->isGet){
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost){
+            $params = \Yii::$app->request->post();
+        }
+                
+        $status     = (string) $params['status'];
+        $id_product = (int)$params['id_product'];
+        $id_item    = (int)$params['id_item'];
+        $id_source  = (int)$params['id_source'];
+        $message    = (string)$params['message'];
+        
+        if (!$status || !$id_product || !$id_item || !$id_source){
+            return [
+                'status' => 'error',
+                'message' => 'Не хватает исходных данных'
+            ];
+        }
+        
+        try{
+            if (!Comparison::setStatus($status, $id_source, $id_product, $id_item, $message)){
+                throw new \Exception('Не удалось сохранить данные в базу данных');
+            }
+        } catch (\Exception $ex) {
+            return [
+                'status' => 'error',
+                'message' => $ex->getMessage()
+            ];
+        }
+        
+        $filters = new Filters();
+        $filters->loadFromSession();
+        if (!$filters->isExistsDefaultParams()){
+            return [
+                'status' => 'error',
+                'message' => 'В сесии не хватает данных'
+            ];
+        }
+        
+        $source = Source::getById($filters->f_source);
+        $user = \Yii::$app->user->identity;
+        $is_admin = $user && $user->isAdmin();
+        
+        return $this->getRequestWithUpdateList($source, $filters, $is_admin);
+    }
+    
+    /**
+     * Сюда приходит, если пользователь нажал крестик на левом товаре
+     * Запрос get/post
+     * @return type
+     */
+    public function actionMissall() {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (\Yii::$app->request->isGet){
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost){
+            $params = \Yii::$app->request->post();
+        }
+  
+        if (!$params['id_product'] || !$params['id_source'] || !$params['url']){
+            //throw new InvalidArgumentException();
+            return [
+                'status'    => 'error',
+                'message'   => 'Не верные входящие переменные'
+            ];
+        }
+        
+        $url        = $params['url'];
+        $id_product = (int)$params['id_product'];
+        $id_source  = (int)$params['id_source'];
+        $confirm_to_action = (bool)$params['confirm'];
+        
+        try{
+            if ( !$this->indexPresenter->missmatchToAll($url, $id_product, $id_source, $confirm_to_action) ){
+                return [
+                    'status'    => 'have_match',
+                    'message'   => 'У даннного продукта имеются товары со статутом Match/Prematch которые будут изменены на Missmatch. Продолжить?'
+                ];
+            }
+        } catch (\Exception $ex) {
+            return [
+                'status'    => 'error',
+                'message'   => $ex->getMessage()
+            ];            
+        }
+        
+        $filters = new Filters();
+        $filters->loadFromSession();
+        if (!$filters->isExistsDefaultParams()){
+            return [
+                'status' => 'error',
+                'message' => 'В сесии не хватает данных'
+            ];
+        }
+        $source = Source::getById($id_source);
+        $user = \Yii::$app->user->identity;
+        $is_admin = $user && $user->isAdmin();
+        
+        return $this->getRequestWithUpdateList($source, $filters, $is_admin);
+    }
+    
+    public function actionDeleteProduct(){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (\Yii::$app->request->isGet){
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost){
+            $params = \Yii::$app->request->post();
+        }
+                
+        $id_source  = (int)$params['id_source'];
+        $id_product = (int)$params['id_product'];
+        
+        try{
+            $this->indexPresenter->deleteProduct($id_source, $id_product);
+        } catch (\Exception $ex) {
+            return [
+                'status' => 'error',
+                'message' => $ex->message
+            ];
+        }
+        
+        $filters = new Filters();
+        $filters->loadFromSession();
+        if (!$filters->isExistsDefaultParams()){
+            return [
+                'status' => 'error',
+                'message' => 'В сесии не хватает данных'
+            ];
+        }
+        
+        $source = Source::getById($filters->f_source);
+        $user = \Yii::$app->user->identity;
+        $is_admin = $user && $user->isAdmin();
+        
+        return $this->getRequestWithUpdateList($source, $filters, $is_admin);
+    }
+    
+        /**
      * Get next or prev product
      * @param $currentId int id product
      * @param bool $prev bool prev or next pfroduct
@@ -443,110 +617,6 @@ class ProductController extends Controller {
             }
         }
         return true;
-    }
-
-    /**
-     *  Сюда приходит после нажатия на снопку сбросить для левого товара
-     */
-    public function actionResetCompare(){
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        if (\Yii::$app->request->isGet){
-            $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost){
-            $params = \Yii::$app->request->post();
-        }
-        
-        $id_product = (int)$params['id_product'];
-        $id_source  = (int)$params['id_source'];
-        
-        if (!$id_product || !$id_source){
-            return [
-                'status' => 'error',
-                'message' => 'Не хватает исходных данных'
-            ];
-        }
-        
-        try{
-            $this->indexPresenter->ResetCompareProduct($id_source, $id_product);
-        } catch (\Exception $ex) {
-            return [
-                'status' => 'error',
-                'message' => $ex->getMessage()           
-            ];
-        }
-        return [
-            'status' => 'ok'
-        ];
-    }
-
-    /**
-     * Сюда приходит после нажатия крестика на правом товаре
-     */
-    public function actionCompare() {
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        if (\Yii::$app->request->isGet){
-            $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost){
-            $params = \Yii::$app->request->post();
-        }
-                
-        $status     = (string) $params['status'];
-        $id_product = (int)$params['id_product'];
-        $id_item    = (int)$params['id_item'];
-        $id_source  = (int)$params['id_source'];
-        $message    = (string)$params['message'];
-        
-        if (!$status || !$id_product || !$id_item || !$id_source){
-            return [
-                'status' => 'error',
-                'message' => 'Не хватает исходных данных'
-            ];
-        }
-        
-        try{
-            if (!Comparison::setStatus($status, $id_source, $id_product, $id_item, $message)){
-                throw new \Exception('Не удалось сохранить данные в базу данных');
-            }
-        } catch (\Exception $ex) {
-            return [
-                'status' => 'error',
-                'message' => $ex->getMessage()
-            ];
-        }
-        return [ 'status' => 'ok' ];
-    }
-    
-    /**
-     * Сюда приходит, если пользователь нажал крестик на левом товаре
-     * Запрос get/post
-     * @return type
-     */
-    public function actionMissall() {
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        if (\Yii::$app->request->isGet){
-            $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost){
-            $params = \Yii::$app->request->post();
-        }
-  
-        if (!$params['id_product'] || !$params['id_source'] || !$params['url']){
-            //throw new InvalidArgumentException();
-            return [
-                'status'    => 'error',
-                'message'   => 'Не верные входящие переменные'
-            ];
-        }
-        
-        $url        = $params['url'];
-        $id_product = (int)$params['id_product'];
-        $id_source  = (int)$params['id_source'];
-        $confirm_to_action = (bool)$params['confirm'];
-        
-        $result = $this->indexPresenter->missmatchToAll($url, $id_product, $id_source, $confirm_to_action);
-        return $result;
     }
 
     private function get_model_for_next($id) {
@@ -896,20 +966,7 @@ class ProductController extends Controller {
         return $pager;
     }
     
-    public function actionDeleteProduct(){
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        if (\Yii::$app->request->isGet){
-            $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost){
-            $params = \Yii::$app->request->post();
-        }
-                
-        $id_source  = (int)$params['id_source'];
-        $id_product = (int)$params['id_product'];
-        
-        return $this->indexPresenter->deleteProduct($id_source, $id_product);
-    }
 
     public function actionDel_item() {
         $p_id = $this->request->get('id');
@@ -936,4 +993,31 @@ class ProductController extends Controller {
         ];
     }
 
+    private function getRequestWithUpdateList(Source $source, Filters $filters, bool $is_admin){
+        $list = Product::getListProducts($source, $filters, $is_admin);
+        
+        $f_count_products_on_page = $filters->f_count_products_on_page;
+        $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
+        $count_products_right = $this->indexPresenter->getCountProductsOnPageRight($list);
+        $source_name = $source->name;
+        $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}')?$filters->f_profile: 'Все';
+        
+        return [
+            'status' => 'ok',
+            'message' => '',
+            'html_index_table' => $this->renderPartial('index_table', [
+                'list' => $list,
+                'local_import_stat' => null,
+                'is_admin' => $is_admin,
+                'f_comparison_status' => $filters->f_comparison_status,
+                'f_profile' => $filters->f_profile,
+                'f_no_compare' => $filters->f_no_compare,
+                'source' => $source,            
+            ]),
+            'other' => [
+                'id_block_count' => "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path"
+            ]
+        ];
+    }
+            
 }

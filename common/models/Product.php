@@ -473,7 +473,7 @@ class Product extends \yii\db\ActiveRecord{
         
         try {
             Comparison::deleteAll(['product_id' => $this->id, 'source_id' => $this->source->id]);
-            $this->_source->class_2->deleteAll(['asin' => $this->asin]);
+            $this->source->class_2::deleteAll(['asin' => $this->asin]);
             /*
             $comparisons = $this->getComparisons();
             foreach ($comparisons as $comparison){

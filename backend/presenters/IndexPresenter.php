@@ -126,41 +126,39 @@ class IndexPresenter {
     /**
      * Функция для присвоения статуса STATUS_MISMATCH всем правым товарам 
      * и присвоения левому товару статуса STATUS_NOT_FOUND
-     * 
-     * @param string $classProduct
+     *  
      * @param type $url
      * @param int $id_product
      * @param int $id_source
      * @param bool $confirmToAction
-     * @return json array [
-     *      'status' = ok | have_match | error
-     *      'message' Сообщение для пользователя
-     * ]
+     * @return boolean
+     *     false Выставление статусов прервано по причине того что товар имеет сравнения. Нужно подтверждение
+     *     true  Выставление статусов прошло успешно
+     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     public function missmatchToAll($url, int $id_product, int $id_source, bool $confirmToAction = false){
         $source = Source::getById($id_source);
-        if (!$source){
-            return [
-                'status'    => 'error',
-                'message'   => 'Не удалось найти источник'
-            ];
+        if (!$source) {
+            throw new \InvalidArgumentException('Не удалось найти источник');
         }
-        
 
         $product = $source->class_1::getById($id_product);
+        if (!$product) {
+            throw new \InvalidArgumentException('Не удалось найти продукт');
+        }
+
         if (!$confirmToAction && $product->isExistsItemsWithMatch()){
-            return [
-                'status'    => 'have_match',
-                'message'   => 'У даннного продукта имеются товары со статутом Match/Prematch которые будут изменены на Missmatch. Продолжить?'
-            ];
+            return false;
         }
                
         $add_info = $product->addInfo;
        
+        $transaction = \Yii::$app->db->beginTransaction();
         try{
             //Всем товарам справа присвоить статус STATUS_MISMATCH
             if (is_array($add_info)){
-                foreach ($add_info as $number_node => $item){
+                foreach ($add_info as $item){
                     Comparison::setStatus(Comparison::STATUS_MISMATCH, $id_source, $id_product, $item->id);
                 }
             }
@@ -175,17 +173,14 @@ class IndexPresenter {
                 ]);
                 $h->save();
             }
+            $transaction->commit();
         } catch (\Exception $ex) {
+            $transaction->rollback();
             \Yii::error($ex->getLine().':'.$ex->getMessage());
-            return [
-                'status' => 'error',
-                'message' => 'При сохранении данных возникла ошибка'
-            ];
+            throw new \Exception('При выставлении статусов возникла ошибка');
         }
 
-        return [
-            'status' => 'ok'
-        ];
+        return true;
     }
     
     /**
@@ -235,26 +230,18 @@ class IndexPresenter {
     }
     
     public function deleteProduct(int $id_source, int $id_product){
-        try{
-            $source = Source::getById($id_source);
-            if (!($source instanceof Source)){
-                throw new \Exception('Не удаось найти источник по данному id');
-            }
-            
-            $product = $source->class_1::getById($id_product);
-            $product->source = $source;
-            if (!($product instanceof Product)){
-                throw new \Exception('Не удалось найти товар по данному id');
-            }
-        
-            $product->delete();
-        } catch(\Exception $ex){
-            \Yii::$app->error($ex->getCode().': '.$ex->getMessage());
-            return [
-                'status' => 'error',
-                'message' => $ex->message
-            ];
+        $source = Source::getById($id_source);
+        if (!($source instanceof Source)){
+            throw new \Exception('Не удаось найти источник по данному id');
         }
+
+        $product = $source->class_1::getById($id_product);
+        $product->source = $source;
+        if (!($product instanceof Product)){
+            throw new \Exception('Не удалось найти товар по данному id');
+        }
+
+        $product->delete();
     }
     
     public function resetCompareProduct(int $id_source, int $id_product){

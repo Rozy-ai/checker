@@ -628,13 +628,18 @@ lib.slider_init = function slider_init(start_slide) {
 
 }
 
+//Убирает все полосы статусов с товаров
 lib.reset_compare_item = function ($this) {
     let $data = $this.data();
-    let $item = $this.parents('.product-list__product-list-item'); // Родительский блок
     
     lib.sendAjaxFromButton($data, (response) => {
         if (response.status === 'ok'){
-            let $compare_items = $item.find('.slider__slider-item'); // Блок, содержащий правый товар
+            let html = response.html_index_table;
+            var container = $("#id_table_container");
+            container.html(html);
+            lib.slider_init();
+            /**
+            let $compare_items = $item.find('.slider__slider-item'); // Все правые товары
             $compare_items.find('.color-marker')
                     .removeClass('pre_match')
                     .removeClass('match')
@@ -643,7 +648,8 @@ lib.reset_compare_item = function ($this) {
                     .removeClass('mismatch')
                     .addClass('nocompare');
             $compare_items.find('.slider__yellow_button').removeClass('-hover');
-            $compare_items.find('.slider__red_button').removeClass('-hover');            
+            $compare_items.find('.slider__red_button').removeClass('-hover');
+            */
         } else if ( response.status === 'error'){
             alert(response.message);
         }

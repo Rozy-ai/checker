@@ -67,7 +67,7 @@ class Filters {
         'f_count_products_on_page' => 10,
         'f_number_page_current' => 1,
         //'f_comparison_status' => 'PRE_MATCH',
-        //'f_no_compare' => 'NOCOMPARE',
+        'f_no_compare' => 'NOCOMPARE',
     ];
     
     /**
