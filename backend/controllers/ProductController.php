@@ -549,7 +549,7 @@ class ProductController extends Controller {
     public function actionView(){
         $this->layout = 'product';
         
-        $source = Source::getBySession();
+        //$source = Source::getBySession();
         if (!$source) {
             Yii::$app->session->setFlash('нет данных для отображения станицы');
             return $this->redirect('/product/index');
@@ -800,7 +800,7 @@ class ProductController extends Controller {
             $_item['id'] = $item->id;
             $_item['asin'] = $item->asin;
             $_item['img_main'] = $item->get_first_image();
-            $_item['status'] = $item->get_status();
+            $_item['status'] = $item->getStatus();
             //   /product/view?id=8009&node=1&source_id=1&comparisons=PRE_MATCH
             $_item['link'] = '/product/view?id=' . $parent_id . '&source_id=' . (int) $this->source_id . '&comparisons=' . $this->request->post('comparison') . '&profile=' . $this->request->post('profile');
 

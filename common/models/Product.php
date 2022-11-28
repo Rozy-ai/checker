@@ -107,7 +107,7 @@ class Product extends \yii\db\ActiveRecord{
                 $res = $this->get_all_elements_in_array_to_first_level($data, '.');
             }
 
-            $pr = new Product_right(array_merge($out, $res, ['parent_item' => $this->baseInfo]));
+            $pr = new Product_right($source, array_merge($out, $res, ['parent_item' => $this->baseInfo]));
             $pr->source = $this->source;
             $this->_addInfo[] = $pr;
         }
@@ -251,7 +251,7 @@ class Product extends \yii\db\ActiveRecord{
             }
             $status = $status ?: 'NOCOMPARE';
 
-            $this->_addInfo[$k]->set_status($status);
+            $this->_addInfo[$k]->setStatus($status);
 
             $node_to_status[$k] = $status;
             /*

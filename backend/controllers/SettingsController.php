@@ -37,7 +37,6 @@ class SettingsController extends Controller{
     }
     if (!$id || !Yii::$app->user->can('admin')) exit;
 
-
     $item = Settings__table_rows::findOne($id);
     $item->delete();
 

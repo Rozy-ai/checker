@@ -114,7 +114,7 @@ class TopSlider extends Widget {
             'images_right' => $images_right,
             'count_images_right' =>
             "<div class='slider-camera-container float-right'>" .
-            "<span class='slider-text'>" . count(preg_split("/[; |,|\|]/", $item['images_E'])) .
+            "<span class='slider-text'>" . count(preg_split("/[; |,|\|]/", $item->images_E)) .
             "</span>" .
             "<img class='fa slider-camera' src='/img/slider_camera.png' alt=''>" .
             "</div>"

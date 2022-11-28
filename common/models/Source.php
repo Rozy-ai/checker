@@ -24,6 +24,14 @@ use common\models\Source;
 class Source extends \yii\db\ActiveRecord {
 
     const ids_source_free = [1, 2];
+    
+    /**
+     * Массив соответствия поля источнка с общими полями исрользуемыми в приложении
+     * @var array[
+     *    'key_source' => 'key_common'
+     * ]
+     */
+    public $fields;
 
     public function rules() {
         return [
@@ -185,8 +193,8 @@ class Source extends \yii\db\ActiveRecord {
     /**
      * Получить модель источника из сессии
      */
-    public static function getBySession() {
-        return self::getById(\Yii::$app->session->get('f_source'));
-    }
+    //public static function getBySession() {
+    //    return self::getById(\Yii::$app->session->get('f_source'));
+    //}
 
 }
