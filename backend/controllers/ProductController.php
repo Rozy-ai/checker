@@ -193,8 +193,8 @@ class ProductController extends Controller {
             'list_profiles'             =>$this->indexPresenter->getListProfiles(),
             'list_count_products_on_page'=>$this->indexPresenter->getListCountProductsOnPage(),
             'list_categories_root'      =>$this->indexPresenter->getListCategoriesRoot(),
-            'list_username'             =>[],//$this->indexPresenter->getListUser(),
-            'list_comparison_statuses'  => Comparison::getFilterStatuses(),
+            'list_username'             =>$this->indexPresenter->getListUser(),
+            'list_comparison_statuses'  =>$this->indexPresenter->getListComparisonStatuses(),
 
             'list'                      => $list,
             'count_products_all'        => $count_products_all,
@@ -204,7 +204,6 @@ class ProductController extends Controller {
             'count_pages'               => $count_pages,
             'source'                    => $source,
             'last_update'               => Stats_import_export::getLastLocalImport()
-            
         ]);
     }
     
@@ -360,6 +359,7 @@ class ProductController extends Controller {
         $id_item    = (int)$params['id_item'];
         $id_source  = (int)$params['id_source'];
         $message    = (string)$params['message'];
+        $is_last    = (bool) $params['is_last'];
         
         if (!$status || !$id_product || !$id_item || !$id_source){
             return [
@@ -369,16 +369,14 @@ class ProductController extends Controller {
         }
         
         try{
-            if (!Comparison::setStatus($status, $id_source, $id_product, $id_item, $message)){
-                throw new \Exception('Не удалось сохранить данные в базу данных');
-            }
+            $this->indexPresenter->changeStatusProductRight($status, $id_source, $id_product, $id_item, $message, $is_last);
         } catch (\Exception $ex) {
             return [
                 'status' => 'error',
                 'message' => $ex->getMessage()
             ];
         }
-        
+                
         $filters = new Filters();
         $filters->loadFromSession();
         if (!$filters->isExistsDefaultParams()){

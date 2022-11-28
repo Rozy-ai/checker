@@ -17,6 +17,7 @@ namespace backend\presenters;
 
 use common\models\Source;
 use common\models\User;
+use common\models\Comparison;
 
 /**
  * Description of TraitListOfFilters
@@ -79,9 +80,28 @@ trait TraitListFilters {
         if (!$this->source_table_class || !$this->source_table_name) {
             throw new \yii\base\InvalidParamException();
         }
-
-        $cnt = [];
+        
+        $name_user = User::tableName();
+        $name_comparisons  = Comparison::tableName();
+        
+        // select user.username, count(comparisons.status) as count_comparisons
+        // from comparisons
+        // left join user on user.id = comparisons.user_id
+        // group by user.username;
+        $all = Comparison::find()
+           ->select([
+               $name_user.'.id', 
+               $name_user.'.username as name', 
+               'count('.$name_comparisons.'.status) as count'])
+           ->leftJoin($name_user, $name_user.'.id='.$name_comparisons.'.user_id')
+           ->groupBy($name_user.'.username')
+           ->asArray()
+           ->indexBy('id')
+           ->all();
+        return $all;
+        /*
         $all = User::find()
+                ->select(['username'])
                 ->where('status > 0')
                 ->all();
 
@@ -109,6 +129,8 @@ trait TraitListFilters {
         }
 
         return $cnt;
+        * 
+        */
     }
 
     /**
@@ -129,6 +151,8 @@ trait TraitListFilters {
      * @throws \yii\base\InvalidArgumentException
      */
     public function getListComparisonStatuses(){
+        //return Comparison::getFilterStatuses();
+        
         if (!$this->source_table_class || !$this->source_table_name) {
             throw new \yii\base\InvalidParamException();
         }
@@ -141,12 +165,16 @@ trait TraitListFilters {
 
         $data = $q->all();
 
+        $list_comparisons = Comparison::getFilterStatuses();
         $out = [];
         foreach ($data as $k => $val){
             if ($val['status'] == null){
-                $val['status'] = 'NO_COMPARE';
+                $val['status'] = 'NOCOMPARE';
             }
-            $out[$val['status']] = $val['count_statuses'];
+            $out[$val['status']] = [
+                'name'  => $list_comparisons[$val['status']]['name'],
+                'count' => $val['count_statuses']
+            ];
         }
 
         return $out;

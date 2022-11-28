@@ -169,12 +169,15 @@ $local_import_stat = null;
                     <div class="form-group _col-sm-3">
                         <select name="f_username" id="id_f_username" class="form-control">
                             <option value="">User</option>
-                            <? foreach ($list_username as $where_4_item):?>
-                            <option
-                                value="<?= $where_4_item['username'] ?>"
-                                <?= ($f_username == $where_4_item['username']) ? 'selected' : '' ?>
-                            ><?= $where_4_item['username'] ?> (<?= $where_4_item['cnt'] ?>)</option>
-                            <? endforeach;?>
+                            <?php
+                                foreach ($list_username as $key => $data){
+                                    $name = $data['name'];
+                                    $count = $data['count'];
+                                    $is_active = ($key == $f_username)?'selected':'';
+                                    $st = "<option value=$key $is_active>$name ($count)</option>";
+                                    echo $st;                                    
+                                }
+                            ?>
                         </select>
                     </div>
                     <? endif;?>
@@ -233,7 +236,7 @@ $local_import_stat = null;
 
                     <? endif; ?>
 
-                    <? if (1): ?>
+                    <? if (0): ?>
                     <div class="custom-control custom-switch">
                         <div style="margin: 12px 10px 12px 0">
                             <input

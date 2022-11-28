@@ -295,10 +295,10 @@ class Comparison extends ActiveRecordAlias {
     /**
      * Делает в таблице Comparisons папись о сравнении со статусом $status
      * @param string $status 
-     * @param int $id_source
-     * @param int $id_product
-     * @param int $id_item
-     * @param type $message
+     * @param int    $id_source
+     * @param int    $id_product
+     * @param int    $id_item
+     * @param string $message
      */
     public static function setStatus(string $status, int $id_source, int $id_product, int $id_item, $message = '' ){
         $comparison = self::findOne([

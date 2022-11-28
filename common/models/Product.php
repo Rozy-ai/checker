@@ -498,4 +498,12 @@ class Product extends \yii\db\ActiveRecord{
             throw new \Exception($ex->message);
         };
     }
+    
+    public function isProductRightWithNoCompareExists(){
+        $table_class = $this->_source->class_1;
+        $table_name  = $this->_source->table_1;
+        
+        return $table_class::find()
+            ->leftJoin();
+    }
 }

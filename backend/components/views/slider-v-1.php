@@ -31,6 +31,10 @@ $cnt = 1;
 $variables_left = $this->context->getVariablesLeft($product);
 $source_id = $source->id;
 $identity = \Yii::$app->user->identity;
+
+// Переменная введена для производительности, чтобы в actionCompare() потом 
+// не искать количество правых товаров и количество товаров имеющих сравнение
+$is_last = ((count($items)-count($comparisons)) <= 1);
 ?>
 
 <!-- Если администратор, то показываем в виде ссылки -->
@@ -50,25 +54,7 @@ $identity = \Yii::$app->user->identity;
     ?>
 
     <?php
-        $comparison = $comparisons[$item->id];
-        /*
-        if (isset($comparison->status)){
-            if ($f_comparison_status == 'NOCOMPARE'){
-                if ($comparison->status != 'NOCOMPARE') continue;
-            } elseif ($f_comparison_status == 'PRE_MATCH'){
-                if ($comparison->status != 'PRE_MATCH') continue;
-            } elseif ($f_comparison_status == 'MATCH') {
-                if ($comparison->status != 'MATCH') continue;
-            } elseif ($f_comparison_status == 'OTHER') {
-                if ($comparison->status != 'OTHER') continue; 
-            } elseif($f_comparison_status == 'YES_NO_OTHER') {
-                if ($comparison->status != 'PRE_MATCH' &&
-                    $comparison->status != 'MATCH' &&
-                    $comparison->status != 'OTHER') return;
-            } elseif ($f_comparison_status == 'MISSMATCH') {
-                if ($f_comparison_status != 'MISSMATCH') return;
-            }
-        */      
+        $comparison = $comparisons[$item->id]; 
         
         switch ($f_comparison_status){
             case 'NOCOMPARE':
@@ -163,7 +149,8 @@ $identity = \Yii::$app->user->identity;
                 data-id_source = "<?=$source_id?>"
                 data-id_product = "<?=$product->id?>"
                 data-id_item = "<?=$item->id?>"
-                data-status = <?= Comparison::STATUS_PRE_MATCH ?>
+                data-status = "<?= Comparison::STATUS_PRE_MATCH ?>"
+                data-is_last = "<?=$is_last?>"
             >
             </div>
 
@@ -173,7 +160,8 @@ $identity = \Yii::$app->user->identity;
                 data-id_source = "<?=$source_id?>"
                 data-id_product = "<?=$product->id?>"
                 data-id_item = "<?=$item->id?>"
-                data-status = <?= Comparison::STATUS_MISMATCH ?>
+                data-status = "<?= Comparison::STATUS_MISMATCH ?>"
+                data-is_last = "<?=$is_last?>"
             >
 
             </div>

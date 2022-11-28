@@ -255,4 +255,46 @@ class IndexPresenter {
             throw $ex;
         }
     }
+    
+    /**
+     * 
+     * @param type $status
+     * @param type $id_source
+     * @param type $id_product
+     * @param type $id_item
+     * @param type $message
+     * @param type $is_last
+     * @throws \Exception
+     */
+    public function changeStatusProductRight($status, $id_source, $id_product, $id_item, $message, $is_last){
+        $transaction = \Yii::$app->db->beginTransaction();
+        try{
+            if (!Comparison::setStatus($status, $id_source, $id_product, $id_item, $message)){
+                throw new \Exception('Не удалось сохранить данные в базу данных');
+            }
+            //После смены статуса на правом товаре если это быд последний товар,
+            //То необходимо добавить левый товар в таблицу hidden_items
+            if ($is_last){
+                // Добавить товар в список скрытых (Добавить в таблицу hidden_items)
+                $find = HiddenItems::find()->where(['p_id' => $id_product, 'source_id' => $id_source])->one();
+                if (!$find) {
+                    $h = new HiddenItems([
+                        'p_id'      => $id_product,
+                        'source_id' => $id_source,
+                        'status'    => HiddenItems::STATUS_NOT_FOUND,
+                    ]);
+                    if (!$h->save()){
+                        throw new \Exception('Не удалось занест левый товар в базу данных');
+                    }
+                }else{
+                    throw new \Exception('Запись товара уже существует в таблице hidden_items');
+                }
+            }
+            $transaction->commit();
+        } catch (\Exception $ex) {
+            $transaction->rollback();
+            throw $ex;
+        }
+        
+    }
 }

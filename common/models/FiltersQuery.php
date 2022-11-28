@@ -140,7 +140,14 @@ class FiltersQuery extends \yii\db\ActiveQuery{
      * @return array
      */
     public function getSqlUsername(string $source_table_name, $f_username):array {
-        return ($f_username)?['like', $source_table_name.'.users', $f_username]:[];
+        if ($f_username){
+            $this->addTable('comparisons');
+            return ['comparisons.user_id' => $f_username];
+        } else {
+            return [];
+        }
+        //return ($f_username)?['and', ]
+        //return ($f_username)?['like', $source_table_name.'.users', $f_username]:[];
     }
     
     public function getSqlStatus($f_status):array {
