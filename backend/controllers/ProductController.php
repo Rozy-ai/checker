@@ -544,17 +544,26 @@ class ProductController extends Controller {
         }
     }
     
+    //http://localhost/product/view?id=8012&source_id=1&comparisons=&filter-items__profile=%7B%7Ball%7D%7D
     public function actionView(){
         $this->layout = 'product';
         
-        //$source = Source::getBySession();
-        if (!$source) {
-            Yii::$app->session->setFlash('нет данных для отображения станицы');
+        if (\Yii::$app->request->isGet){
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost){
+            $params = \Yii::$app->request->post();
+        }
+        
+        $id_product = (int)$params['id'];
+        $id_source  = (int)$params['source_id'];
+        
+        if (!$id_product || !$id_source){
             return $this->redirect('/product/index');
         }
         
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($id_source);
         
         $model = Product::getProduct($source, $filters);
 
@@ -1010,7 +1019,8 @@ class ProductController extends Controller {
                 'f_comparison_status' => $filters->f_comparison_status,
                 'f_profile' => $filters->f_profile,
                 'f_no_compare' => $filters->f_no_compare,
-                'source' => $source,            
+                'f_is_detail_view' => $filters->f_detail_view,
+                'source' => $source,
             ]),
             'other' => [
                 'id_block_count' => "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path"

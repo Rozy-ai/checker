@@ -13,8 +13,8 @@
 }*/
 
 //if (!empty(getenv('IS_DEV')) || !empty($_ENV['IS_DEV'])) {
-    defined('YII_DEBUG') or define('YII_DEBUG', true);
-    defined('YII_ENV') or define('YII_ENV', 'dev');
+    defined('YII_DEBUG') or define('YII_DEBUG', true);  // true | false
+    defined('YII_ENV') or define('YII_ENV', 'dev');     // prod | dev | test
 //}
 
 require __DIR__ . '/../../vendor/autoload.php';

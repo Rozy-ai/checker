@@ -26,7 +26,6 @@ $source         = $product->source;
 $comparisons    = $product->comparisons;
 
 $canCompare = \Yii::$app->user->can('compare-products', ['product' => $product]);
-$cnt = 1;
 
 $variables_left = $this->context->getVariablesLeft($product);
 $source_id = $source->id;
@@ -39,13 +38,13 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 
 <!-- Если администратор, то показываем в виде ссылки -->
 
-<? if ($identity && ($identity->is_detail_view_for_items() || $identity->isAdmin())): ?>
+<?php if ($identity && ($identity->is_detail_view_for_items() || $identity->isAdmin())): ?>
     <div class="main-item-title ">
         <? if ($is_admin): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
             <?= $variables_left['description_left'] ?>
         <? if ($is_admin): ?></a><? endif; ?>
     </div>
-<? endif; ?>
+<?php endif; ?>
  
 <!-- VIEW 1 -->
 <div class='slider__view-1 <?= $option_class_slider ?> [ SLIDER ] product-view__slider'>
@@ -144,7 +143,6 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
             <!-- / FORK -->
             <div
                 class="slider__yellow_button _slider__green_button -v-2 -v-3 -min <?= $comparisons[$item->id]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
-                data-link = "<?= Html::encode($link) ?>"
                 data-url = "/product/compare"
                 data-id_source = "<?=$source_id?>"
                 data-id_product = "<?=$product->id?>"

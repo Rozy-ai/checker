@@ -16,7 +16,7 @@ class AppHelper{
     $cnt = 1;
     foreach ($array as $item){
       if ($cnt === (int)$n) {
-        $item->setAttributeLabel('node_id', $cnt);
+        //$item->setAttributeLabel('node_id', $cnt);
         //$item['node_id'] = $cnt;
         return $item;
       }
@@ -31,7 +31,7 @@ class AppHelper{
     foreach ($array as $k => $item){
       /* @var $item Product_right */
       if ($k > (int)$n) {
-        $item->setAttributeLabel('node_id', $k);
+        //$item->setAttributeLabel('node_id', $k);
         //$item['node_id'] = $k;
         //$item->node_id = $k;
         return $item;

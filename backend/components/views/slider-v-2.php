@@ -22,24 +22,27 @@ use yii\helpers\Html;
 use common\models\User;
 use yii\helpers\Url;
 
-$node = Yii::$app->request->get('node');
+$source         = $product->source;
+$comparisons    = $product->comparisons;
+
 $canCompare = \Yii::$app->user->can('compare-products', ['product' => $product]);
-$cnt = 1;
 
 $variables_left = $this->context->getVariablesLeft($product);
-
-$source     = $product->source;
-$source_id  = $product->source->id;
+$source_id = $source->id;
 $identity = \Yii::$app->user->identity;
+
+// Переменная введена для производительности, чтобы в actionCompare() потом 
+// не искать количество правых товаров и количество товаров имеющих сравнение
+$is_last = ((count($items)-count($comparisons)) <= 1);
 ?>
 
-<? if ($identity && ($identity->is_detail_view_for_items() || $identity->isAdmin())): ?>
+<?php if ($identity && ($identity->is_detail_view_for_items() || $identity->isAdmin())): ?>
     <div class="main-item-title ">
         <? if ($is_admin): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
             <?= $variables_left['description_left'] ?>
         <? if ($is_admin): ?></a><? endif; ?>
     </div>
-<? endif; ?>
+<?php endif; ?>
         
 <!-- VIEW 2 -->
 <div class='slider__view-2 [ SLIDER ] product-view__slider'  >
@@ -49,33 +52,32 @@ $identity = \Yii::$app->user->identity;
                 case 'NOCOMPARE':
                     if ($comparison) {
                         continue 2;
-                    }; break;
+                    } break;
                 case 'PRE_MATCH':
                     if (!$comparison || $comparison->status != 'PRE_MATCH') {
                         continue 2;
-                    }; break;
+                    } break;
                 case 'MATCH':
                     if (!$comparison || $comparison->status != 'MATCH') {
                         continue 2;
-                    }; break;
+                    } break;
                 case 'OTHER':
                     if (!$comparison || $comparison->status != 'OTHER') {
                         continue 2;
-                    }; break;                    
+                    } break;                    
                 case 'YES_NO_OTHER':
                     if (!$comparison || !in_array($comparison->status,['PRE_MATCH', 'MATCH', 'OTHER'])) {
                         continue 2;
-                    }; break;
+                    } break;
                 case 'MISMATCH':
                     if (!$comparison || $comparison->status != 'MISMATCH') {
                         continue 2;
-                    }; break;
+                    } break;
             }
             // Инициализаця переменных:
             $variables_right = $this->context->getVariablesRight($product->source, $item, false);
 
             $urlKey_right = $item->urlKey;
-            $node_id = $index + 1;
             $current = ($number_page_current === $index) ? '&load_next=1' : '&load_next=0';
         ?>
 
@@ -138,27 +140,25 @@ $identity = \Yii::$app->user->identity;
                             </td>
 
                             <td style="text-align: right;">
-                                <?php $link = Url::to(['product/compare',
-                                    'id'=>$product->id,
-                                    'source_id'=>$source_id,
-                                    'node'=>($index+1),
-                                    'status'=>Comparison::STATUS_PRE_MATCH],true).$current;
-                                ?>
                                 <div
                                     class="slider__yellow_button -v-2 <?= $comparisons[$item->id]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
-                                    data-link = "<?= Html::encode($link) ?>"
+                                    data-url = "/product/compare"
+                                    data-id_source = "<?=$source_id?>"
+                                    data-id_product = "<?=$product->id?>"
+                                    data-id_item = "<?=$item->id?>"
+                                    data-status = "<?= Comparison::STATUS_PRE_MATCH ?>"
+                                    data-is_last = "<?=$is_last?>"
                                 >
                                 </div>
 
-                                <?php $link = Url::to(['product/compare',
-                                    'id'=>$product->id,
-                                    'source_id'=>$source_id,
-                                    'node'=>($index+1),
-                                    'status'=>Comparison::STATUS_MISMATCH],true).$current;
-                                ?>
                                 <div
                                     class="slider__red_button -v-2 <?= $comparisons[$item->id]->status === 'MISMATCH' ? '-hover' : '' ?>"
-                                    data-link = "<?= Html::encode($link) ?>"
+                                    data-url = "/product/compare"
+                                    data-id_source = "<?=$source_id?>"
+                                    data-id_product = "<?=$product->id?>"
+                                    data-id_item = "<?=$item->id?>"
+                                    data-status = "<?= Comparison::STATUS_MISMATCH ?>"
+                                    data-is_last = "<?=$is_last?>"                                
                                 >
                                 </div>
                             </td>
