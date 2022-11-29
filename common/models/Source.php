@@ -9,6 +9,7 @@ namespace common\models;
 
 use common\models\User__source_access;
 use common\models\Source;
+use backend\models\Settings__source_fields;
 
 /**
  * Класс для работы с таблицей Source
@@ -25,13 +26,7 @@ class Source extends \yii\db\ActiveRecord {
 
     const ids_source_free = [1, 2];
     
-    /**
-     * Массив соответствия поля источнка с общими полями исрользуемыми в приложении
-     * @var array[
-     *    'key_source' => 'key_common'
-     * ]
-     */
-    public $fields;
+    private $dataFields;
 
     public function rules() {
         return [
@@ -153,16 +148,19 @@ class Source extends \yii\db\ActiveRecord {
         return $sources;
     }
 
+    /**
+     * Эта х**ня оставлена для совместимости, ибо весь проект использует эту функцию
+     * и я в душе не представляю, есть ли данные в  \Yii::$app->request->get
+     * @param type $source_id
+     * @return type
+     */
     public static function get_source($source_id = false) {
         if (!$source_id) {
             $source_id = \Yii::$app->request->get('filter-items__source', false);
             if (!$source_id)
                 $source_id = \Yii::$app->request->get('source_id', false);
         }
-//    //echo '<pre>'.PHP_EOL;
-//    print_r((new Session())->get('source'));
-//    //echo PHP_EOL;
-//    exit;
+
         if ($source_id === false) {
             /*
               if ($s_source = (new Session())->get('source')){
@@ -189,12 +187,11 @@ class Source extends \yii\db\ActiveRecord {
 
         return $out;
     }
-
-    /**
-     * Получить модель источника из сессии
-     */
-    //public static function getBySession() {
-    //    return self::getById(\Yii::$app->session->get('f_source'));
-    //}
-
+    
+    function getDataFields($name){
+        if (!$this->dataFields){
+            $this->dataFields = Settings__source_fields::data_for_source_all($this->id);
+        }
+        return $this->dataFields[$name];
+    }
 }

@@ -48,6 +48,8 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 <div class='slider__view-2 [ SLIDER ] product-view__slider'  >
     <?php foreach ($items as $index => $item): ?>
         <?php
+            $comparison = $comparisons[$item->id];
+        
             switch ($f_comparison_status){
                 case 'NOCOMPARE':
                     if ($comparison) {

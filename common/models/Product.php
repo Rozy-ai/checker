@@ -108,7 +108,6 @@ class Product extends \yii\db\ActiveRecord{
             }
 
             $pr = new Product_right($source, array_merge($out, $res, ['parent_item' => $this->baseInfo]));
-            $pr->source = $this->source;
             $this->_addInfo[] = $pr;
         }
     }

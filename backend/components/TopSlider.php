@@ -125,12 +125,12 @@ class TopSlider extends Widget {
         $this->is_admin = $this->is_admin;
         $source = $this->product->source;
 
-        $this->_options['srcKey'] = $srcKey = Settings__source_fields::name_for_source('srcKey', $source->id);
-        $this->_options['urlKey'] = Settings__source_fields::name_for_source('urlKey', $source->id);
-        $this->_options['class'] = '_sliderTop';
-        $this->_options['gradeKey'] = Settings__source_fields::name_for_source('gradeKey', $source->id);
-        $this->_options['price'] = Settings__source_fields::name_for_source('price', $source->id);
-        $this->_options['salesKey'] = Settings__source_fields::name_for_source('salesKey', $source->id);
+        //$this->_options['srcKey'] = $srcKey = Settings__source_fields::name_for_source('srcKey', $source->id);
+        //$this->_options['urlKey'] = Settings__source_fields::name_for_source('urlKey', $source->id);
+        //$this->_options['class'] = '_sliderTop';
+        //$this->_options['gradeKey'] = Settings__source_fields::name_for_source('gradeKey', $source->id);
+        //$this->_options['price'] = Settings__source_fields::name_for_source('price', $source->id);
+        //$this->_options['salesKey'] = Settings__source_fields::name_for_source('salesKey', $source->id);
         
         $items = $this->product->addInfo;
 
