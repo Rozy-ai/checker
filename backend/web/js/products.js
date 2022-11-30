@@ -81,7 +81,7 @@ function statusCheck()
         let processed=$(this).find('.product-list-item__processed').text();
         let total=processed.split('/');
 
-        console.log(title+' '+mismatch+' - '+total[1])
+        //console.log(title+' '+mismatch+' - '+total[1])
         if (parseInt(mismatch)==parseInt(total[1]))
         {
             $(this).find('.products-list__td1 .product-list-item__data:last-child').html('<span>Status:</span> ');

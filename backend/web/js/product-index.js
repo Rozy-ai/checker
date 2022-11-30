@@ -323,7 +323,7 @@ $(document).ready(function () {
         let height = $('.products__filter-items').height() + $('#w0').height();
 
         if (block.top < height) {
-            console.log('go');
+            //console.log('go');
             // -hidden  REMOVE
             $('.navbar__fixed-slider.-hidden').removeClass('-hidden')
 
@@ -340,7 +340,7 @@ $(document).ready(function () {
         } else {
 
 
-            console.log('back');
+            //console.log('back');
             $('.navbar__fixed-slider').addClass('-hidden')
             if ($('.position-2 .products__filter-items').length)
                 $('.position-1').append($('.position-2 .products__filter-items'))

@@ -1,20 +1,16 @@
 <?php
 
-/**
- * Отображение списка подробно
- * 
- * @var string $f_comparison_status
- * @var string $f_profile
- * @var bool   $is_admin
- * @var int    $number_page_current
- * @var $option_class_slider
- * @var $option_sales_key
- * @var $option_del_btn
- * @var $number_node Позиция активного товара начиная от 0
- * @var Product $product
- * @var $number_node
- * @var $items
- */
+ /** Отображение списка подробно */
+
+ /** @var string $f_comparison_status                       */
+ /** @var string $f_profile                                 */
+ /** @var bool   $is_admin                                  */
+ /** @var int    $number_page_current                       */
+ /** @var $option_class_slider                              */
+ /** @var $option_sales_key                                 */
+ /** @var $option_del_btn                                   */
+ /** @var Product $product                                  */
+ /** @var array $items                                      */
 
 
 use common\models\Comparison;
@@ -36,7 +32,7 @@ $identity = \Yii::$app->user->identity;
 $is_last = ((count($items)-count($comparisons)) <= 1);
 ?>
 
-<?php if ($identity && ($identity->is_detail_view_for_items() || $identity->isAdmin())): ?>
+<?php if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?>
     <div class="main-item-title ">
         <? if ($is_admin): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
             <?= $variables_left['description_left'] ?>
