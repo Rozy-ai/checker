@@ -59,9 +59,11 @@ $(document).ready(function () {
         lib.sendAjaxFromButton($data, (response) => {
             if (response.status === 'ok'){
                 let html = response.html_index_table;
-                var container = $("#id_table_container");
-                container.html(html);
-                lib.slider_init();
+                if (typeof(html) !== "undefined" && html !== null){
+                    var container = $("#id_table_container");
+                    container.html(html);
+                    lib.slider_init();
+                }
             } else if ( response.status === 'error'){
                 alert(response.message);
             }
@@ -169,9 +171,11 @@ $(document).ready(function () {
                     break;
                 case 'ok':
                     let html = response.html_index_table;
-                    var container = $("#id_table_container");
-                    container.html(html);
-                    lib.slider_init();
+                    if (typeof(html) !== "undefined" && html !== null){
+                        var container = $("#id_table_container");
+                        container.html(html);
+                        lib.slider_init();
+                    }
                     break;
                 case 'error':
                     alert(response.message);
@@ -198,9 +202,11 @@ $(document).ready(function () {
         lib.sendAjaxFromButton($data, (response) => {
             if (response.status == 'ok'){
                 let html = response.html_index_table;
-                var container = $("#id_table_container");
-                container.html(html);
-                lib.slider_init();
+                if (typeof(html) !== "undefined" && html !== null){
+                    var container = $("#id_table_container");
+                    container.html(html);
+                    lib.slider_init();
+                }
             } else
             if (response.status === 'error'){
                 alert(response.message);
@@ -221,9 +227,11 @@ $(document).ready(function () {
         lib.sendAjaxFromButton($data, (response) => {
             if (response.status === 'ok'){
                 let html = response.html_index_table;
-                var container = $("#id_table_container");
-                container.html(html);
-                lib.slider_init();
+                if (typeof(html) !== "undefined" && html !== null){
+                    var container = $("#id_table_container");
+                    container.html(html);
+                    lib.slider_init();
+                }
                 /*
                 $item.find('.color-marker')
                     .removeClass('nocompare')
@@ -406,15 +414,20 @@ $(document).ready(function () {
                 method: "post",
                 url: "/product/change-filter",
                 dataType:'json',
-                data: { 
+                data: {
                     'name': name_filter,
                     'value': value
                 },
                 success:function(data){
                     switch (data.status){
-                        case 'ok':                      
-                            var container = $("#id_table_container");
-                            container.html(data.html);
+                        case 'ok':
+
+                            let html = data.html_index_table;
+                            if (typeof(html) !== "undefined" && html !== null){
+                                var container = $("#id_table_container");
+                                container.html(html);
+                                lib.slider_init();
+                            }
                             break;
                         case 'info':
                             alert(data.message);

@@ -86,8 +86,9 @@ $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[
                 </div>
                 <div class="p-nav-left __item [ __filter [ FILTER ]">
                     <div class="filter __comparison">
-                        <select name="" class="filter __comparison-select form-control">
-                            <?php 
+                        <select name="f_comparison_status" id="id_f_comparison_status_view" class="filter __comparison-select form-control">
+                            <option value="">All</option>
+                            <?php
                                 foreach ( $list_comparison_statuses as $key => $name){
                                     $is_active = ($key == $active_comparison_status)?'active':'';
                                     echo "<option value=$key $is_active>$name</option>";

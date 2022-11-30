@@ -34,10 +34,9 @@ class ProductController extends Controller {
 
     /** @var IndexPresenter */
     public $indexPresenter;
-    
+
     /** @var ProductPresenter */
     public $productPresenter;
-
     public $prev = null;
     public $next = null;
 
@@ -140,8 +139,7 @@ class ProductController extends Controller {
     public function __construct($id, $module,
             IndexPresenter $indexPresenter,
             ProductPresenter $productPresenter,
-            array $config = [])
-    {
+            array $config = []) {
         parent::__construct($id, $module, $config);
         $this->indexPresenter = $indexPresenter;
         $this->productPresenter = $productPresenter;
@@ -152,21 +150,21 @@ class ProductController extends Controller {
         $filters->loadFromSession();
         $source = null;
         // Если страница загружвется в первый раз, то будут отсутствовать обязательные параметры
-        if ($filters->isExistsDefaultParams()){
+        if ($filters->isExistsDefaultParams()) {
             $source = Source::getById($filters->f_source);
         } else {
-            $id_user = \Yii::$app->user->id;            
+            $id_user = \Yii::$app->user->id;
             $source = Source::getForUser($id_user);
-            
-            if (!$source){
+
+            if (!$source) {
                 throw new \yii\web\ForbiddenHttpException('Не удалось найти доступный источник');
             }
-            
+
             $filters->setToDefault();
             $filters->f_source = $source->id;
             $filters->saveToSession();
         }
-        
+
         $this->indexPresenter->setSource($source);
 
         $this->layout = 'products_list';
@@ -175,38 +173,36 @@ class ProductController extends Controller {
         $list = Product::getListProducts($source, $filters, $is_admin);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
         $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
-        
-        return $this->render('index', [
-            'f_source'                  =>$filters->f_source,
-            'f_profile'                 =>$filters->f_profile,
-            'f_count_products_on_page'  =>$filters->f_count_products_on_page,
-            'f_asin'                    =>$filters->f_asin,
-            'f_title'                   =>$filters->f_title,
-            'f_status'                  =>$filters->f_status,
-            'f_username'                =>$filters->f_username,
-            'f_comparison_status'       =>$filters->f_comparison_status,
-            'f_sort'                    =>$filters->f_sort,
-            'f_detail_view'             =>$filters->f_detail_view,
-            'f_categories_root'         =>$filters->f_categories_root,
-            
-            'list_source'               =>$this->indexPresenter->getListSource(),
-            'list_profiles'             =>$this->indexPresenter->getListProfiles(),
-            'list_count_products_on_page'=>$this->indexPresenter->getListCountProductsOnPage(),
-            'list_categories_root'      =>$this->indexPresenter->getListCategoriesRoot(),
-            'list_username'             =>$this->indexPresenter->getListUser(),
-            'list_comparison_statuses'  =>$this->indexPresenter->getListComparisonStatuses(),
 
-            'list'                      => $list,
-            'count_products_all'        => $count_products_all,
-            'count_products_right'      => $this->indexPresenter->getCountProductsOnPageRight($list),
-            'is_admin'                  => $is_admin,
-            'default_price_name'        => Settings__fields_extend_price::get_default_price($source->id)->name?: 'Price Amazon',
-            'count_pages'               => $count_pages,
-            'source'                    => $source,
-            'last_update'               => Stats_import_export::getLastLocalImport()
+        return $this->render('index', [
+                    'f_source' => $filters->f_source,
+                    'f_profile' => $filters->f_profile,
+                    'f_count_products_on_page' => $filters->f_count_products_on_page,
+                    'f_asin' => $filters->f_asin,
+                    'f_title' => $filters->f_title,
+                    'f_status' => $filters->f_status,
+                    'f_username' => $filters->f_username,
+                    'f_comparison_status' => $filters->f_comparison_status,
+                    'f_sort' => $filters->f_sort,
+                    'f_detail_view' => $filters->f_detail_view,
+                    'f_categories_root' => $filters->f_categories_root,
+                    'list_source' => $this->indexPresenter->getListSource(),
+                    'list_profiles' => $this->indexPresenter->getListProfiles(),
+                    'list_count_products_on_page' => $this->indexPresenter->getListCountProductsOnPage(),
+                    'list_categories_root' => $this->indexPresenter->getListCategoriesRoot(),
+                    'list_username' => $this->indexPresenter->getListUser(),
+                    'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses(),
+                    'list' => $list,
+                    'count_products_all' => $count_products_all,
+                    'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
+                    'is_admin' => $is_admin,
+                    'default_price_name' => Settings__fields_extend_price::get_default_price($source->id)->name ?: 'Price Amazon',
+                    'count_pages' => $count_pages,
+                    'source' => $source,
+                    'last_update' => Stats_import_export::getLastLocalImport()
         ]);
     }
-    
+
     /*
      * Временная экспериментальная функция для замены node на id_product (Не используется)
      */
@@ -235,62 +231,62 @@ class ProductController extends Controller {
         }
 
         $count_rebased = 0;
-        foreach ($products as $i => $product) {                     
+        foreach ($products as $i => $product) {
             $items = $product->addInfo;
-            foreach ($items as $index => $item) {               
+            foreach ($items as $index => $item) {
                 $item->source = $source;
                 print_r($item->id);
-                exit;                    
+                exit;
             }
         }
         echo "count rebased = " . $count_rebased;
         return 0;
     }
-    
+
     /**
      * Изменение фильтра и отображение нового списка продуктов
      * @return type
      */
-    public function actionChangeFilter(){
+    public function actionChangeFilter() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $request = \Yii::$app->request->post();
-        if ( isset($request) ){
+        if (isset($request)) {
             $name = $request['name'];
             $value = $request['value'];
         }
-        if(!isset($name)){
+        if (!isset($name)) {
             return [
                 'status' => 'error',
-                'message'=> 'Не удаось получить изменяемый фильтр',
+                'message' => 'Не удаось получить изменяемый фильтр',
             ];
         }
-        
+
         $filters = new Filters();
         $filters->loadFromSession();
-        if (!$filters->isExistsDefaultParams()){
+        if (!$filters->isExistsDefaultParams()) {
             throw new \InvalidArgumentException('В сессии не хватает данных');
         }
-        
-        if (!property_exists($filters, $name)){
+
+        if (!property_exists($filters, $name)) {
             return [
                 'status' => 'error',
-                'message'=> 'Не верный изменяемый ключ'
+                'message' => 'Не верный изменяемый ключ'
             ];
         }
         $a = $name;
-        if ($filters->$name == $value){
+        if ($filters->$name == $value) {
             return [
                 'status' => 'info',
-                'message'=> 'Новое значение фильтра совпадает с предыдущим'
-            ];            
+                'message' => 'Новое значение фильтра совпадает с предыдущим'
+            ];
         }
-        
+
         $filters->setVsSession($name, $value);
-        
+
         $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
-        
+
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
 
@@ -298,26 +294,26 @@ class ProductController extends Controller {
      *  Сюда приходит после нажатия на снопку сбросить для левого товара
      *  Требуется перерисовка списка продуктов
      */
-    public function actionResetCompare(){
+    public function actionResetCompare() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        if (\Yii::$app->request->isGet){
+        if (\Yii::$app->request->isGet) {
             $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost){
+        } elseif (\Yii::$app->request->isPost) {
             $params = \Yii::$app->request->post();
         }
-        
-        $id_product = (int)$params['id_product'];
-        $id_source  = (int)$params['id_source'];
-        
-        if (!$id_product || !$id_source){
+
+        $id_product = (int) $params['id_product'];
+        $id_source = (int) $params['id_source'];
+
+        if (!$id_product || !$id_source) {
             return [
                 'status' => 'error',
                 'message' => 'Не хватает исходных данных',
             ];
         }
-        
-        try{
+
+        try {
             $this->indexPresenter->ResetCompareProduct($id_source, $id_product);
         } catch (\Exception $ex) {
             return [
@@ -325,20 +321,20 @@ class ProductController extends Controller {
                 'message' => $ex->getMessage()
             ];
         }
-        
+
         $filters = new Filters();
         $filters->loadFromSession();
-        if (!$filters->isExistsDefaultParams()){
+        if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
                 'message' => 'В сесии не хватает данных'
             ];
         }
-        
+
         $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
-        
+
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
 
@@ -348,27 +344,27 @@ class ProductController extends Controller {
     public function actionCompare() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        if (\Yii::$app->request->isGet){
+        if (\Yii::$app->request->isGet) {
             $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost){
+        } elseif (\Yii::$app->request->isPost) {
             $params = \Yii::$app->request->post();
         }
-                
-        $status     = (string) $params['status'];
-        $id_product = (int)$params['id_product'];
-        $id_item    = (int)$params['id_item'];
-        $id_source  = (int)$params['id_source'];
-        $message    = (string)$params['message'];
-        $is_last    = (bool) $params['is_last'];
-        
-        if (!$status || !$id_product || !$id_item || !$id_source){
+
+        $status = (string) $params['status'];
+        $id_product = (int) $params['id_product'];
+        $id_item = (int) $params['id_item'];
+        $id_source = (int) $params['id_source'];
+        $message = (string) $params['message'];
+        $is_last = (bool) $params['is_last'];
+
+        if (!$status || !$id_product || !$id_item || !$id_source) {
             return [
                 'status' => 'error',
                 'message' => 'Не хватает исходных данных'
             ];
         }
-        
-        try{
+
+        try {
             $this->indexPresenter->changeStatusProductRight($status, $id_source, $id_product, $id_item, $message, $is_last);
         } catch (\Exception $ex) {
             return [
@@ -376,23 +372,23 @@ class ProductController extends Controller {
                 'message' => $ex->getMessage()
             ];
         }
-                
+
         $filters = new Filters();
         $filters->loadFromSession();
-        if (!$filters->isExistsDefaultParams()){
+        if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
                 'message' => 'В сесии не хватает данных'
             ];
         }
-        
+
         $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
-        
+
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
-    
+
     /**
      * Сюда приходит, если пользователь нажал крестик на левом товаре
      * Запрос get/post
@@ -401,42 +397,42 @@ class ProductController extends Controller {
     public function actionMissall() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        if (\Yii::$app->request->isGet){
+        if (\Yii::$app->request->isGet) {
             $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost){
+        } elseif (\Yii::$app->request->isPost) {
             $params = \Yii::$app->request->post();
         }
-  
-        if (!$params['id_product'] || !$params['id_source'] || !$params['url']){
+
+        if (!$params['id_product'] || !$params['id_source'] || !$params['url']) {
             //throw new InvalidArgumentException();
             return [
-                'status'    => 'error',
-                'message'   => 'Не верные входящие переменные'
+                'status' => 'error',
+                'message' => 'Не верные входящие переменные'
             ];
         }
-        
-        $url        = $params['url'];
-        $id_product = (int)$params['id_product'];
-        $id_source  = (int)$params['id_source'];
-        $confirm_to_action = (bool)$params['confirm'];
-        
-        try{
-            if ( !$this->indexPresenter->missmatchToAll($url, $id_product, $id_source, $confirm_to_action) ){
+
+        $url = $params['url'];
+        $id_product = (int) $params['id_product'];
+        $id_source = (int) $params['id_source'];
+        $confirm_to_action = (bool) $params['confirm'];
+
+        try {
+            if (!$this->indexPresenter->missmatchToAll($url, $id_product, $id_source, $confirm_to_action)) {
                 return [
-                    'status'    => 'have_match',
-                    'message'   => 'У даннного продукта имеются товары со статутом Match/Prematch которые будут изменены на Missmatch. Продолжить?'
+                    'status' => 'have_match',
+                    'message' => 'У даннного продукта имеются товары со статутом Match/Prematch которые будут изменены на Missmatch. Продолжить?'
                 ];
             }
         } catch (\Exception $ex) {
             return [
-                'status'    => 'error',
-                'message'   => $ex->getMessage()
-            ];            
+                'status' => 'error',
+                'message' => $ex->getMessage()
+            ];
         }
-        
+
         $filters = new Filters();
         $filters->loadFromSession();
-        if (!$filters->isExistsDefaultParams()){
+        if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
                 'message' => 'В сесии не хватает данных'
@@ -445,23 +441,23 @@ class ProductController extends Controller {
         $source = Source::getById($id_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
-        
+
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
-    
-    public function actionDeleteProduct(){
+
+    public function actionDeleteProduct() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        if (\Yii::$app->request->isGet){
+        if (\Yii::$app->request->isGet) {
             $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost){
+        } elseif (\Yii::$app->request->isPost) {
             $params = \Yii::$app->request->post();
         }
-                
-        $id_source  = (int)$params['id_source'];
-        $id_product = (int)$params['id_product'];
-        
-        try{
+
+        $id_source = (int) $params['id_source'];
+        $id_product = (int) $params['id_product'];
+
+        try {
             $this->indexPresenter->deleteProduct($id_source, $id_product);
         } catch (\Exception $ex) {
             return [
@@ -469,24 +465,24 @@ class ProductController extends Controller {
                 'message' => $ex->message
             ];
         }
-        
+
         $filters = new Filters();
         $filters->loadFromSession();
-        if (!$filters->isExistsDefaultParams()){
+        if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
                 'message' => 'В сесии не хватает данных'
             ];
         }
-        
+
         $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
-        
+
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
-    
-        /**
+
+    /**
      * Get next or prev product
      * @param $currentId int id product
      * @param bool $prev bool prev or next pfroduct
@@ -543,38 +539,38 @@ class ProductController extends Controller {
             // статистика в $this->getView()->params['local_import_stat']
         }
     }
-    
+
     //http://localhost/product/view?id=8012&source_id=1&comparisons=&filter-items__profile=%7B%7Ball%7D%7D
-    public function actionView(){
+    public function actionView() {
         $this->layout = 'product';
-        
-        if (\Yii::$app->request->isGet){
+
+        if (\Yii::$app->request->isGet) {
             $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost){
+        } elseif (\Yii::$app->request->isPost) {
             $params = \Yii::$app->request->post();
         }
-        
-        $id_product = (int)$params['id'];
-        $id_source  = (int)$params['source_id'];
-        
-        if (!$id_product || !$id_source){
+
+        $id_product = (int) $params['id'];
+        $id_source = (int) $params['source_id'];
+
+        if (!$id_product || !$id_source) {
             return $this->redirect('/product/index');
         }
-        
+
         $filters = new Filters();
         $filters->loadFromSession();
         $source = Source::getById($id_source);
-        
+
         $model = Product::getProduct($source, $filters);
 
         $prev = null;
         $next = null;
-        
+
         //$compare_item = $this->productPresenter->getItemCompare($product->addInfo);
         $node = 1; //$this->productPresenter->number_node;
         $compare_item = AppHelper::get_item_by_number_key($model->addInfo, $node);
         $identity = \Yii::$app->user->identity;
-        
+
         //Передаем параметры в шаблон
         $this->getView()->params = [
             'comparison_statuses_statistic' => $this->productPresenter->getListComparisonStatusesStatistic(),
@@ -582,19 +578,18 @@ class ProductController extends Controller {
             'product' => $model,
             'source' => $source
         ];
-        
+
         return $this->render('view', [
-            'model' => $model,
-            'compare_item' => $compare_item,
-            'compare_items' => $model->addInfo,
-            'source' => $source,
-            'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
-            'filter-items__profile' => $this->productPresenter->filters->f_profile,
-            'number_node' => $node,
-            'is_admin' => $identity && $identity->isAdmin(),
-            
-            'active_comparison_status' => $active_comparison_status,
-            'list_comparison_statuses' => Comparison::getStatuses()
+                    'model' => $model,
+                    'compare_item' => $compare_item,
+                    'compare_items' => $model->addInfo,
+                    'source' => $source,
+                    'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
+                    'filter-items__profile' => $this->productPresenter->filters->f_profile,
+                    'number_node' => $node,
+                    'is_admin' => $identity && $identity->isAdmin(),
+                    'active_comparison_status' => $active_comparison_status,
+                    'list_comparison_statuses' => Comparison::getStatuses()
         ]);
     }
 
@@ -748,8 +743,24 @@ class ProductController extends Controller {
             ];
         }
     }
-
+    
     public function actionGet_products_by_params() {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
+        $post = $this->request->post();
+        $p_id = $this->request->post('p_id');
+        $comparison = $this->request->post('comparison');
+        $source_id = $this->request->post('source_id');
+        $profile = $this->request->post('profile');
+        $node_id = 1;
+        
+        return [
+            'res' => 'ok',
+            'link' => '/product/view?id=' . $p_id . '&source_id=' . (int) $source_id . '&comparisons=' . $comparison,
+        ];
+    }
+
+    public function actionGet_products_by_params1() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         /*
@@ -758,28 +769,34 @@ class ProductController extends Controller {
           [source_id] => 2
           [direction] => next
          */
+
         $post = $this->request->post();
         $p_id = $this->request->post('p_id');
         $comparison = $this->request->post('comparison');
         $source_id = $this->request->post('source_id');
         $profile = $this->request->post('profile');
+        $node_id = 1;
 //    $direction = $this->request->post('direction','next');
 
         if (!$p_id || !$comparison || !$source_id)
             return ['res' => 'fuck'];
 
+        $source = Source::getById($source_id);
+
         /* start */
-        $q = $this->prepare_record_1($comparison, $profile);
+        $q = $this->prepare_record_1($source, $comparison, $profile);
 
-//    if ($direction === 'prev' || $direction === 'next'){  }
+    if ($direction === 'prev' || $direction === 'next'){  }
 
-        $prev = $this->prepare_2(clone $q, ['<', $this->source_table_name . '.id', $p_id], 'DESC', $comparison, 'prev_items', 5);
-        $next = $this->prepare_2(clone $q, ['>', $this->source_table_name . '.id', $p_id], 'ASC', $comparison, 'next_items', 5);
-        $this_item = $this->prepare_2($this->prepare_get_joined($this->source_class), [$this->source_table_name . '.id' => $p_id], 'ASC', $comparison, 'this_item', 1);
+        $prepare_joned = $this->prepare_get_joined($source->class_1, $source->table_1);
+        
+        $prev = $this->prepare_2($source, clone $q, ['<', $source->table_1 . '.id', $p_id], 'DESC', $comparison, 'prev_items', 5);
+        $next = $this->prepare_2($source, clone $q, ['>', $source->table_1 . '.id', $p_id], 'ASC', $comparison, 'next_items', 5);
+        $this_item = $this->prepare_2($source, $prepare_joned, [$source->table_1 . '.id' => $p_id], 'ASC', $comparison, 'this_item', 1);
 
         /* RIGHT ITEMS */
-        $q_this_item = $this->prepare_get_joined($this->source_class);
-        $q_this_item->andWhere([$this->source_table_name . '.id' => $p_id]);
+        $q_this_item = $this->prepare_get_joined($source->class_1, $source->table_1);
+        $q_this_item->andWhere([$source->table_1 . '.id' => $p_id]);
         $res = $q_this_item->one();
 
         $ignore = [];
@@ -822,13 +839,12 @@ class ProductController extends Controller {
         /* .RIGHT ITEMS */
 
         $out = array_merge_recursive($this_item, $prev, $next);
-        $out['comparison_cnt'] = $this->cnt_filter_statuses($profile);
-        ;
+        $out['comparison_cnt'] = $this->cnt_filter_statuses($source, $profile);
 
         return $out;
 
         if ($all) {
-
+            
         } else
             return ['res' => 'fuck',];
 
@@ -838,14 +854,14 @@ class ProductController extends Controller {
                 'link' => '/product/view?id=' . $model->id . '&source_id=' . (int) $this->source_id . '&comparisons=' . $comparison,
             ];
         } else
-            return ['res' => 'fuck',];
+            return ['res' => 'fuck'];
     }
 
-    private function prepare_2($q, $where, $order, $comparison, $direction, $limit = false) {
+    private function prepare_2($source, $q, $where, $order, $comparison, $direction, $limit = false) {
         if ($where)
             $q->andWhere($where);
         if ($order)
-            $q->orderBy($this->source_table_name . '.id ' . $order);
+            $q->orderBy($source->table_1 . '.id ' . $order);
 
         if ($limit)
             $q->limit($limit);
@@ -864,7 +880,7 @@ class ProductController extends Controller {
         };
 
         foreach ($all as $k => $item) {
-            $next_items[] = $fill_item($item, $this->source_id, $comparison);
+            $next_items[] = $fill_item($item, $source->id, $comparison);
         }
 
         $items[$direction] = $next_items ?? [];
@@ -972,8 +988,6 @@ class ProductController extends Controller {
 
         return $pager;
     }
-    
-
 
     public function actionDel_item() {
         $p_id = $this->request->get('id');
@@ -1000,19 +1014,22 @@ class ProductController extends Controller {
         ];
     }
 
-    private function getRequestWithUpdateList(Source $source, Filters $filters, bool $is_admin){
-        $list = Product::getListProducts($source, $filters, $is_admin);
-        
+    private function getRequestWithUpdateList(Source $source, Filters $filters, bool $is_admin, $is_update_list = true) {
+        if ($is_update_list){
+            $list = Product::getListProducts($source, $filters, $is_admin);
+        } else {
+            $list = null;
+        }
         $f_count_products_on_page = $filters->f_count_products_on_page;
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
         $count_products_right = $this->indexPresenter->getCountProductsOnPageRight($list);
         $source_name = $source->name;
-        $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}')?$filters->f_profile: 'Все';
-        
+        $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}') ? $filters->f_profile : 'Все';
+
         return [
             'status' => 'ok',
             'message' => '',
-            'html_index_table' => $this->renderPartial('index_table', [
+            'html_index_table' => ($list)?$this->renderPartial('index_table', [
                 'list' => $list,
                 'local_import_stat' => null,
                 'is_admin' => $is_admin,
@@ -1021,11 +1038,115 @@ class ProductController extends Controller {
                 'f_no_compare' => $filters->f_no_compare,
                 'f_is_detail_view' => $filters->f_detail_view,
                 'source' => $source,
-            ]),
+            ]):null,
             'other' => [
                 'id_block_count' => "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path"
             ]
         ];
     }
+
+    /**
+     * @param $comparison
+     * @return \yii\db\ActiveQuery
+     */
+    private function prepare_record_1($source, $comparison, $profile) {
+        /* @var $source_class yii\db\ActiveRecord */
+        $source_class = $source->class_1;
+        $source_table = $source->table_1;
+        $source_table_2 = $source->table_2;
+        $source_id = $source->id;
+
+        $q = $this->prepare_get_joined($source_class, $source_table);
+
+        //->where(['<=>','hidden_items.source_id', $this->source_id])
+        //->where('comparisons_aggregated.source_id = '.(int)$this->source_id );
+
+
+        if (0 && $source_table === 'parser_trademarkia_com') {
+            $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
+            $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
+        } else {
+            $q->innerJoin($source_table_2, $source_table_2 . '.`asin` = ' . $source_table . '.asin');
+        }
+
+        $q->addGroupBy('`' . $source_table . '`.`id`');
+
+        $where_0 = [];
+        if (0 && $source_table === 'parser_trademarkia_com') {
+            $where_0 = ['like', 'info', 'add_info'];
+        }
+
+        $where_2 = [];
+        $where_3 = ['and',
+            ['hidden_items.p_id' => null],
+            ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $source_id]],
+        ];  // $item_1__ignore_red = 1
+
+
+        if ($comparison === 'ALL') {
             
+        } elseif ($comparison === 'ALL_WITH_NOT_FOUND') {
+
+            $where_3 = [];
+        } elseif ($comparison === 'YES_NO_OTHER') {
+            /*
+              $where_2 =
+              [ 'OR' ,
+              ['`comparisons`.`status`' => 'MATCH'],
+              ['`comparisons`.`status`' => 'MISMATCH'],
+              ['`comparisons`.`status`' => 'OTHER'],
+              ['`comparisons`.`status`' => 'PRE_MATCH'],
+              ];
+             */
+            $where_2 = ['and', "`comparisons`.`status` IS NOT NULL AND comparisons.`status` <> 'MISMATCH'"];
+        } elseif ($comparison === 'NOCOMPARE') {
+            $where_2 = ['and', ['p_all_compare.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $source_id]]];
+        } else {
+            $where_2 = ['`comparisons`.`status`' => $comparison];
+        }
+
+        $where = ['and', $where_0, $where_2, $where_3];
+
+        if ($profile && $profile !== '{{all}}' && $profile !== 'Все') {
+            $q->andWhere(['like', $source_table . '.`profile`', $profile]);
+        }
+
+        $q->andWhere($where);
+
+//    echo '<pre>'.PHP_EOL;
+//    print_r($q->createCommand()->getRawSql());
+//    echo PHP_EOL;
+//    exit;
+
+        return $q;
+    }
+
+    private function prepare_get_joined($source_class, $source_name) {
+        return $q = $source_class::find()
+                //->select('*')
+                //->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
+                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_name . '.id ')
+                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_name . '.id ')
+                ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_name . '.id ');
+    }
+
+    private function cnt_filter_statuses($source, $profile) {
+        /*
+          $out['YES_NO_OTHER'] = [
+          'hex_color' => '',
+          'name' => 'Result',
+          'name_2' => 'Все отмеченные',
+          ];
+         */
+        $statuses = Comparison::get_filter_statuses();
+
+        foreach ($statuses as $name => $data) {
+            $q_cnt = $this->prepare_record_1($source, $name, $profile);
+            $res_cnt = $q_cnt->count();
+            $statuses[$name]['cnt'] = $res_cnt;
+        }
+
+        return $statuses;
+    }
+
 }

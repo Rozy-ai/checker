@@ -86,7 +86,7 @@ $(function(){
    
     if (!$('.slider__slider-item:not(.-hide)').length) $('._sliderTop').hide();
   
-    lib.set_filter_comparison(comparison);
+    //lib.set_filter_comparison(comparison);
    
     //console.log(comparison);
     update_url_in_items();
@@ -773,7 +773,7 @@ $(function(){
   lib.get_dynamic_elements = function(data,cb){
     let dataToSend = $.extend({
       p_id: false,
-      comparison: false,
+      comparison: 'NOCOMPARE',
       source_id: false,
       profile: $('#product_page__filter-profile').val(),
     }, data || {} );

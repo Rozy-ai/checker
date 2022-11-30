@@ -51,6 +51,9 @@ class IndexPresenter {
     }
     
     public function getCountProductsOnPageRight($list){
+        if (!$list) {
+            return 0;
+        }
         $cnt_all_right = 0;
         foreach ($list as $product) {
             $items = $product->addInfo;

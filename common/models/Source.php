@@ -15,6 +15,8 @@ use backend\models\Settings__source_fields;
  * Класс для работы с таблицей Source
  * @property int $id
  * @property string $name
+ * @property string $class_1
+ * @property string $class_2
  * @property string $table_1
  * @property string $table_2
  * @property string $import_local__max_product_name
