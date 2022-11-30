@@ -125,13 +125,9 @@ class TopSlider extends Widget {
         $this->is_admin = $this->is_admin;
         $source = $this->product->source;
 
-        //$this->_options['srcKey'] = $srcKey = Settings__source_fields::name_for_source('srcKey', $source->id);
-        //$this->_options['urlKey'] = Settings__source_fields::name_for_source('urlKey', $source->id);
-        //$this->_options['class'] = '_sliderTop';
-        //$this->_options['gradeKey'] = Settings__source_fields::name_for_source('gradeKey', $source->id);
-        //$this->_options['price'] = Settings__source_fields::name_for_source('price', $source->id);
-        //$this->_options['salesKey'] = Settings__source_fields::name_for_source('salesKey', $source->id);
-        
+        $this->_options['class'] = '_sliderTop';
+        $this->_options['salesKey'] = $this->source->getDataFields('salesKey')['settings__source_fields_name'];
+
         $items = $this->product->addInfo;
 
         return $this->render(($this->is_detail_view) ? 'slider-v-2' : 'slider-v-1', [
@@ -139,7 +135,6 @@ class TopSlider extends Widget {
             'number_page_current'   => $this->number_page_current,
             'option_class_slider'   => $this->_options['class'],
             'option_sales_key'      => $this->_options['salesKey'],
-            'option_del_btn'        => $this->_options['option_del_btn'],
             'product'               => $this->product,
             'f_comparison_status'   => $this->f_comparison_status,
             'f_profile'             => $this->f_profile,

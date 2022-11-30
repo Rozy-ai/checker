@@ -9,7 +9,6 @@
  * @var int    $number_page_current
  * @var $option_class_slider
  * @var $option_sales_key
- * @var $option_del_btn
  * @var $number_node Позиция активного товара начиная от 0
  * @var Product $product
  * @var $number_node
@@ -38,13 +37,11 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 
 <!-- Если администратор, то показываем в виде ссылки -->
 
-<?php if ($identity && ($identity->is_detail_view_for_items() || $identity->isAdmin())): ?>
-    <div class="main-item-title ">
-        <? if ($is_admin): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
-            <?= $variables_left['description_left'] ?>
-        <? if ($is_admin): ?></a><? endif; ?>
-    </div>
-<?php endif; ?>
+<div class="main-item-title ">
+    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
+        <?= $variables_left['description_left'] ?>
+    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
+</div>
  
 <!-- VIEW 1 -->
 <div class='slider__view-1 <?= $option_class_slider ?> [ SLIDER ] product-view__slider'>
@@ -126,7 +123,7 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
                 <span class="__blue-title">Sold:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?>
             </span>
             <? endif; ?>
-            
+
             <? elseif ($source->name === 'CHINA'): ?>
             <div class="slider-item__cnt-1">
                 <span class="cnt-1__stock-title __blue-title">ROI:</span>

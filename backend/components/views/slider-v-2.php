@@ -8,7 +8,6 @@
  /** @var int    $number_page_current                       */
  /** @var $option_class_slider                              */
  /** @var $option_sales_key                                 */
- /** @var $option_del_btn                                   */
  /** @var Product $product                                  */
  /** @var array $items                                      */
 
