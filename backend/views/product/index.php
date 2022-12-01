@@ -235,6 +235,13 @@ $local_import_stat = null;
                     </div>
 
                     <? endif; ?>
+                    
+                    <? if (1): ?>
+                        <div class="custom-control custom-switch">
+                          <input type="checkbox" class="custom-control-input" id="id_f_batch_mode" name="f_batch_mode">
+                          <label class="custom-control-label" for="id_f_batch_mode">Пакетный режим</label>
+                        </div>
+                    <? endif; ?>
 
                     <? if (0): ?>
                     <div class="custom-control custom-switch">

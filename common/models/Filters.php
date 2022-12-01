@@ -58,9 +58,10 @@ class Filters {
     //                                      (where_8) Выносим в User
     
     // Другие фильтры:   
-    public $f_source;
-    public $f_sort;
-    public $f_detail_view;
+    public $f_source;                       // id используемого источника
+    public $f_sort;                         // Понядок сортитовки товаров в списке продуктов
+    public $f_detail_view;                  // Отображение списка кратко/подробно
+    public $f_batch_mode;                   // Режим пакетной выборки (Включен/выключен)
     
     /** @const array Значения по умолчанию для некоторых фильтров*/  
     const defaults = [
@@ -78,7 +79,7 @@ class Filters {
         $attr = get_class_vars($this);
         foreach ($attr as $key => $val){
             $this->$key = (isset($params[$key]) && $params[$key])? $params[$key]: null;
-        }       
+        }
         /*
         $this->f_source                  = $params['f_source'];
         $this->f_sort                    = $params['f_sort'];

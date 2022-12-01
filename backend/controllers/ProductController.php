@@ -481,6 +481,41 @@ class ProductController extends Controller {
 
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
+    
+    private function getRequestWithUpdateList(Source $source, Filters $filters, bool $is_admin, $is_update_list = true) {
+        if ($is_update_list){
+            $list = Product::getListProducts($source, $filters, $is_admin);
+        } else {
+            $list = null;
+        }
+        $f_count_products_on_page = $filters->f_count_products_on_page;
+        $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
+        $count_products_right = $this->indexPresenter->getCountProductsOnPageRight($list);
+        $source_name = $source->name;
+        $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}') ? $filters->f_profile : 'Все';
+
+        return [
+            'status' => 'ok',
+            'message' => '',
+            'html_index_table' => ($list)?$this->renderPartial('index_table', [
+                'list' => $list,
+                'local_import_stat' => null,
+                'is_admin' => $is_admin,
+                'f_comparison_status' => $filters->f_comparison_status,
+                'f_profile' => $filters->f_profile,
+                'f_no_compare' => $filters->f_no_compare,
+                'f_is_detail_view' => $filters->f_detail_view,
+                'source' => $source,
+            ]):null,
+            'other' => [
+                'id_block_count' => "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path"
+            ]
+        ];
+    }
+    
+    /*************************************************************************
+     *** Старый шлак для страницы сравнения продуктов
+     *************************************************************************/
 
     /**
      * Get next or prev product
@@ -1011,37 +1046,6 @@ class ProductController extends Controller {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         return [
             'res' => 'ok',
-        ];
-    }
-
-    private function getRequestWithUpdateList(Source $source, Filters $filters, bool $is_admin, $is_update_list = true) {
-        if ($is_update_list){
-            $list = Product::getListProducts($source, $filters, $is_admin);
-        } else {
-            $list = null;
-        }
-        $f_count_products_on_page = $filters->f_count_products_on_page;
-        $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
-        $count_products_right = $this->indexPresenter->getCountProductsOnPageRight($list);
-        $source_name = $source->name;
-        $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}') ? $filters->f_profile : 'Все';
-
-        return [
-            'status' => 'ok',
-            'message' => '',
-            'html_index_table' => ($list)?$this->renderPartial('index_table', [
-                'list' => $list,
-                'local_import_stat' => null,
-                'is_admin' => $is_admin,
-                'f_comparison_status' => $filters->f_comparison_status,
-                'f_profile' => $filters->f_profile,
-                'f_no_compare' => $filters->f_no_compare,
-                'f_is_detail_view' => $filters->f_detail_view,
-                'source' => $source,
-            ]):null,
-            'other' => [
-                'id_block_count' => "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path"
-            ]
         ];
     }
 
