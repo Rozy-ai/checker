@@ -2,7 +2,6 @@
 
 use backend\components\TableView;
 use backend\components\TopSlider;
-
 use common\models\Comparison;
 use common\models\HiddenItems;
 use yii\helpers\Html;
@@ -20,6 +19,7 @@ use yii\helpers\Url;
  * @var string $f_sort
  * @var string $f_detail_view
  * @var string $f_categories_root
+ * $var string $f_batch_mode
  * 
  * @var array  $list_source
  * @var array  $list_profiles
@@ -51,210 +51,224 @@ $local_import_stat = null;
     <div class="position-1">
         <div class="[ FILTER-ITEMS ] products__filter-items">
             <!--<form method="get" action="change-filters" id="id_products__filter-form">-->
-                <div class="form-row js-title-and-source_selector">
-                    <div class="form-group _col-sm-2" style="width: 128px">
-                        <div class="titleName" style="margin-top: 5px;"><?= Html::encode(Yii::t('site', 'Products')) ?></div>
-                    </div>
+            <div class="form-row js-title-and-source_selector">
+                <div class="form-group _col-sm-2" style="width: 128px">
+                    <div class="titleName" style="margin-top: 5px;"><?= Html::encode(Yii::t('site', 'Products')) ?></div>
+                </div>
 
-                    <div class="form-group _col-sm-2" style="width: 128px">
-                        <select name="f_source" id="id_f_source" class="form-control">
+                <div class="form-group _col-sm-2" style="width: 128px">
+                    <select name="f_source" id="id_f_source" class="form-control">
+                        <?php
+                        if ($list_source) {
+                            foreach ($list_source as $item) {
+                                $selected = ($item->id === $f_source) ? 'selected' : '';
+                                echo "<option value=$item->id $selected>$item->name</option>";
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+
+                <?php if ($is_admin) : ?>
+                    <div class="form-group _col-sm-2" >
+                        <select name="f_profile" id="id_f_profile" class="form-control ">
                             <?php
-                                if ($list_source){
-                                    foreach ($list_source as $item){
-                                        $selected = ($item->id===$f_source)?'selected':'';
-                                        echo "<option value=$item->id $selected>$item->name</option>";
-                                    }
+                            if ($list_profiles) {
+                                foreach ($list_profiles as $k_profile => $profile) {
+                                    $selected = ($k_profile === $f_profile) ? 'selected' : '';
+                                    echo "<option value=$k_profile $selected>$profile</option>";
                                 }
+                            }
                             ?>
                         </select>
                     </div>
+                <?php endif; ?>
 
-                    <?php if ($is_admin) :?>
-                        <div class="form-group _col-sm-2" >
-                            <select name="f_profile" id="id_f_profile" class="form-control ">
-                                <?php
-                                    if ($list_profiles){
-                                        foreach ($list_profiles as $k_profile => $profile){
-                                            $selected = ($k_profile===$f_profile)?'selected':'';
-                                            echo "<option value=$k_profile $selected>$profile</option>";
-                                        }
-                                    }
-                                ?>
-                            </select>
-                        </div>
-                    <?php endif; ?>
-
-                    <div class="form-group _col-sm-2 filter-items__last-update" >
-                        last update:<br>
-                        <?=$last_update->created??'Нет данных' ?>
-                    </div>
-
+                <div class="form-group _col-sm-2 filter-items__last-update" >
+                    last update:<br>
+                    <?= $last_update->created ?? 'Нет данных' ?>
                 </div>
 
-                <div class="form-row form-inline" style="width: 100%;">
-                    <?php
-                        $profile_path = $f_profile ?? 'Все';
-                        if ($profile_path === '{{all}}') $profile_path = 'Все';
-                    ?>
-                    <div class="cnt-items col-sm-6" id="id_block_count">Показаны записи <?= min($f_count_products_on_page, $count_products_all) ?> из <?= $count_products_all; ?> (<?= $count_products_right ?>) Источник <?= $source->name ?> / <?= $profile_path ?></div>
+            </div>
 
-                    <div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">
-                        <span>Показывать по:&nbsp;&nbsp;</span>
-                        <select name="f_count_products_on_page" id="id_f_count_products_on_page" class="form-control ">
-                            <? foreach ($list_count_products_on_page as $pnl):?>
-                            <option value="<?= $pnl ?>" <?= ((int) $f_count_products_on_page === $pnl) ? 'selected' : '' ?>><?= $pnl ?></option>
-                            <? endforeach;?>
-                            <option value="ALL" <?= ($f_count_products_on_page === 'ALL') ? 'selected' : '' ?> >ВСЕ</option>
-                        </select>
-                    </div>
+            <div class="form-row form-inline" style="width: 100%;">
+                <?php
+                $profile_path = $f_profile ?? 'Все';
+                if ($profile_path === '{{all}}')
+                    $profile_path = 'Все';
+                ?>
+                <div class="cnt-items col-sm-6" id="id_block_count">Показаны записи <?= min($f_count_products_on_page, $count_products_all) ?> из <?= $count_products_all; ?> (<?= $count_products_right ?>) Источник <?= $source->name ?> / <?= $profile_path ?></div>
+
+                <div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">
+                    <span>Показывать по:&nbsp;&nbsp;</span>
+                    <select name="f_count_products_on_page" id="id_f_count_products_on_page" class="form-control ">
+                        <? foreach ($list_count_products_on_page as $pnl):?>
+                        <option value="<?= $pnl ?>" <?= ((int) $f_count_products_on_page === $pnl) ? 'selected' : '' ?>><?= $pnl ?></option>
+                        <? endforeach;?>
+                        <option value="ALL" <?= ($f_count_products_on_page === 'ALL') ? 'selected' : '' ?> >ВСЕ</option>
+                    </select>
                 </div>
+            </div>
 
-                <div class="form-row">
-                    <div class="form-group _col-sm-2" style="width: 128px">
-                        <input
-                            value="<?= $f_asin ?>"
-                            type="text" class="form-control"
-                            placeholder="ASIN" 
-                            id="id_f_asin"
-                            name="f_asin"
+            <div class="form-row">
+                <div class="form-group _col-sm-2" style="width: 128px">
+                    <input
+                        value="<?= $f_asin ?>"
+                        type="text" class="form-control"
+                        placeholder="ASIN" 
+                        id="id_f_asin"
+                        name="f_asin"
                         >
-                    </div>
+                </div>
 
 
-                    <div class="form-group _col-sm-3" style="width: 200px">
-                        <select name="f_categories_root" id="id_f_categories_root" class="form-control">
-                            <option value="">Categories:Root</option>
-                            <? foreach ($list_categories_root as $where_3_item => $cnt):?>
-                            <option
-                                value="<?= $where_3_item ?>"
-                                <?= ($f_categories_root == $where_3_item) ? 'selected' : '' ?>
+                <div class="form-group _col-sm-3" style="width: 200px">
+                    <select name="f_categories_root" id="id_f_categories_root" class="form-control">
+                        <option value="">Categories:Root</option>
+                        <? foreach ($list_categories_root as $where_3_item => $cnt):?>
+                        <option
+                            value="<?= $where_3_item ?>"
+                            <?= ($f_categories_root == $where_3_item) ? 'selected' : '' ?>
                             ><?= $where_3_item ?> (<?= $cnt ?>)</option>
-                            <? endforeach;?>
-                        </select>
-                    </div>
+                        <? endforeach;?>
+                    </select>
+                </div>
 
-                    <div class="form-group _col-sm-2">
-                        <input
-                            value="<?=$f_title?>"
-                            type="text" class="form-control" placeholder="Title"  id="id_f_title" name="f_title">
-                    </div>
+                <div class="form-group _col-sm-2">
+                    <input
+                        value="<?= $f_title ?>"
+                        type="text" class="form-control" placeholder="Title"  id="id_f_title" name="f_title">
+                </div>
 
-                    <div class="form-group _col-sm-2">
-                        <select name="f_status" id="id_f_status" class="form-control">
-                            <option value="">Status</option>        
-                            <option 
-                                value="<?= HiddenItems::STATUS_NOT_FOUND ?>"
-                                <?=($f_status == HiddenItems::STATUS_NOT_FOUND)?'selected':''; ?>
+                <div class="form-group _col-sm-2">
+                    <select name="f_status" id="id_f_status" class="form-control">
+                        <option value="">Status</option>        
+                        <option 
+                            value="<?= HiddenItems::STATUS_NOT_FOUND ?>"
+                            <?= ($f_status == HiddenItems::STATUS_NOT_FOUND) ? 'selected' : ''; ?>
                             ><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_NOT_FOUND) ?>
-                            </option>                                                   
-                            <option 
-                                value="<?=HiddenItems::STATUS_CHECK ?>"
-                                <?=($f_status == HiddenItems::STATUS_CHECK)?'selected':''; ?>
+                        </option>                                                   
+                        <option 
+                            value="<?= HiddenItems::STATUS_CHECK ?>"
+                            <?= ($f_status == HiddenItems::STATUS_CHECK) ? 'selected' : ''; ?>
                             ><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_CHECK) ?>
-                            </option>                           
-                            <option 
-                                value="<?=HiddenItems::STATUS_ACCEPT ?>"
-                                <?=($f_status == HiddenItems::STATUS_ACCEPT)?'selected':''; ?>
+                        </option>                           
+                        <option 
+                            value="<?= HiddenItems::STATUS_ACCEPT ?>"
+                            <?= ($f_status == HiddenItems::STATUS_ACCEPT) ? 'selected' : ''; ?>
                             ><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_ACCEPT) ?>
-                            </option>
-                            <option 
-                                value="<?=HiddenItems::STATUS_NO_ACCEPT ?>"
-                                <?=($f_status == HiddenItems::STATUS_NO_ACCEPT)?'selected':''; ?>
+                        </option>
+                        <option 
+                            value="<?= HiddenItems::STATUS_NO_ACCEPT ?>"
+                            <?= ($f_status == HiddenItems::STATUS_NO_ACCEPT) ? 'selected' : ''; ?>
                             ><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_NO_ACCEPT) ?>
-                            </option>
-                        </select>
-                    </div>
+                        </option>
+                    </select>
+                </div>
 
-                    <? if ($is_admin): ?>
-                    <div class="form-group _col-sm-3">
-                        <select name="f_username" id="id_f_username" class="form-control">
-                            <option value="">User</option>
-                            <?php
-                                foreach ($list_username as $key => $data){
-                                    $name = $data['name'];
-                                    $count = $data['count'];
-                                    $is_active = ($key == $f_username)?'selected':'';
-                                    $st = "<option value=$key $is_active>$name ($count)</option>";
-                                    echo $st;                                    
-                                }
-                            ?>
-                        </select>
-                    </div>
-                    <? endif;?>
+                <? if ($is_admin): ?>
+                <div class="form-group _col-sm-3">
+                    <select name="f_username" id="id_f_username" class="form-control">
+                        <option value="">User</option>
+                        <?php
+                        foreach ($list_username as $key => $data) {
+                            $name = $data['name'];
+                            $count = $data['count'];
+                            $is_active = ($key == $f_username) ? 'selected' : '';
+                            $st = "<option value=$key $is_active>$name ($count)</option>";
+                            echo $st;
+                        }
+                        ?>
+                    </select>
+                </div>
+                <? endif;?>
 
 
-                    <div class="form-group _col-sm-3">
-                        <select name="f_comparison_status" id="id_f_comparison_status" class="form-control">
-                            <option value="">All</option>
-                            <?php 
-                                foreach ( $list_comparison_statuses as $key => $data){
-                                    $name = $data['name'];
-                                    $count = $data['count'];
-                                    $is_active = ($key == $f_comparison_status)?'selected':'';
-                                    $st = "<option value=$key $is_active>$name ($count)</option>";
-                                    echo $st;
-                                }
-                            ?>
+                <div class="form-group _col-sm-3">
+                    <select name="f_comparison_status" id="id_f_comparison_status" class="form-control">
+                        <option value="">All</option>
+                        <?php
+                        foreach ($list_comparison_statuses as $key => $data) {
+                            $name = $data['name'];
+                            $count = $data['count'];
+                            $is_active = ($key == $f_comparison_status) ? 'selected' : '';
+                            $st = "<option value=$key $is_active>$name ($count)</option>";
+                            echo $st;
+                        }
+                        ?>
 
+                        <? if (0):?>
+                        <option value="YES_NO_OTHER" <?= ($f_comparison_status === 'YES_NO_OTHER') ? 'selected' : '' ?>>Result</option>
+                        <? foreach ($list_comparison_statuses as $k_6 => $where_6_item):?> 
+                        <option value="<?= $k_6 ?>" <?= ($f_comparison_status === $k_6) ? 'selected' : '' ?>>
+                            <?= ($k_6 === 'MISMATCH') ? 'Mismatch (No)' : '' ?>
+                            <?= ($k_6 === 'PRE_MATCH') ? 'Pre_match (Yes?)' : '' ?>
+                            <?= ($k_6 === 'MATCH') ? 'Match (Yes)' : '' ?>
+                            <?= ($k_6 === 'OTHER') ? 'Other' : '' ?>
+                            <?= ($k_6 === 'NOCOMPARE') ? 'Nocompare' : '' ?>
                             <? if (0):?>
-                                <option value="YES_NO_OTHER" <?= ($f_comparison_status === 'YES_NO_OTHER') ? 'selected' : '' ?>>Result</option>
-                                <? foreach ($list_comparison_statuses as $k_6 => $where_6_item):?> 
-                                    <option value="<?= $k_6 ?>" <?= ($f_comparison_status === $k_6) ? 'selected' : '' ?>>
-                                        <?= ($k_6 === 'MISMATCH') ? 'Mismatch (No)' : '' ?>
-                                        <?= ($k_6 === 'PRE_MATCH') ? 'Pre_match (Yes?)' : '' ?>
-                                        <?= ($k_6 === 'MATCH') ? 'Match (Yes)' : '' ?>
-                                        <?= ($k_6 === 'OTHER') ? 'Other' : '' ?>
-                                        <?= ($k_6 === 'NOCOMPARE') ? 'Nocompare' : '' ?>
-                                        <? if (0):?>
-                                        [<?= $k_6 ?>] (<?= $where_6_item ?>)
-                                        <? endif;?>
-                                    </option>
-                                <? endforeach; ?>
-                                <option value="ALL" <?= ($f_comparison_status === 'ALL') ? 'selected' : '' ?>>All</option>
+                            [<?= $k_6 ?>] (<?= $where_6_item ?>)
                             <? endif;?>
+                        </option>
+                        <? endforeach; ?>
+                        <option value="ALL" <?= ($f_comparison_status === 'ALL') ? 'selected' : '' ?>>All</option>
+                        <? endif;?>
 
-                        </select>
+                    </select>
+                </div>
+
+                <div class="form-group _col-sm-3">
+                    <select name="f_sort" id="id_f_sort" class="form-control">
+                        <option value="">Сортировать по</option>
+                        <option value="created_ASC" <?= ($f_sort === 'created_ASC') ? 'selected' : '' ?> >дате добавления ↓</option>
+                        <option value="created_DESC" <?= ($f_sort === 'created_DESC') ? 'selected' : '' ?> >дате добавления ↑</option>
+                        <option value="updated_ASC" <?= ($f_sort === 'updated_ASC') ? 'selected' : '' ?> >дате обновления ↓</option>
+                        <option value="updated_DESC" <?= ($f_sort === 'updated_DESC') ? 'selected' : '' ?> >дате обновления ↑</option>
+                    </select>
+                </div>
+
+                <? if ($f_detail_view || $is_admin): ?>
+                <div class="form-group _col-sm-3" >
+                    <select name="f_detail_view" id="id_f_detail_view" class="form-control ">
+                        <option value="0" <?= ($f_detail_view) ? '' : 'selected' ?>>Кратко</option>
+                        <option value="1" <?= ($f_detail_view) ? 'selected' : '' ?>>Подробно</option>
+                    </select>
+                </div>
+
+                <? endif; ?>
+
+                <? if (1): ?>
+                <div class="custom-control custom-switch">
+                    <input 
+                        type="checkbox" 
+                        class="custom-control-input" 
+                        id="id_f_batch_mode" 
+                        name="f_batch_mode"
+                        <?= $f_batch_mode ? 'checked' : '' ?>
+                    >
+
+                    <label 
+                        class="custom-control-label"  
+                        for="id_f_batch_mode"
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title="Для сохранения значений статусов правых товаров необходимо сменить любой фильтр">Пакетный режим
+                    </label>
+                </div>
+                <? endif; ?>
+
+                <? if (0): ?>
+                <div class="custom-control custom-switch">
+                    <div style="margin: 12px 10px 12px 0">
+                        <input
+                        <?= $f_no_compare ? 'checked' : '' ?>
+                            name="f_no_compare" type="checkbox" class="custom-control-input" id="id_f_no_compare">
+                        <label class="custom-control-label" for="f_no_compare" style="margin-left: 7px; position: relative;">
+                            <span style="top: 5px; position: relative;">No compare</span>
+                        </label>
                     </div>
-
-                    <div class="form-group _col-sm-3">
-                        <select name="f_sort" id="id_f_sort" class="form-control">
-                            <option value="">Сортировать по</option>
-                            <option value="created_ASC" <?= ($f_sort === 'created_ASC') ? 'selected' : '' ?> >дате добавления ↓</option>
-                            <option value="created_DESC" <?= ($f_sort === 'created_DESC') ? 'selected' : '' ?> >дате добавления ↑</option>
-                            <option value="updated_ASC" <?= ($f_sort === 'updated_ASC') ? 'selected' : '' ?> >дате обновления ↓</option>
-                            <option value="updated_DESC" <?= ($f_sort === 'updated_DESC') ? 'selected' : '' ?> >дате обновления ↑</option>
-                        </select>
-                    </div>
-
-                    <? if ($f_detail_view || $is_admin): ?>
-                    <div class="form-group _col-sm-3" >
-                        <select name="f_detail_view" id="id_f_detail_view" class="form-control ">
-                            <option value="0" <?= ($f_detail_view)?'':'selected' ?>>Кратко</option>
-                            <option value="1" <?= ($f_detail_view)?'selected':'' ?>>Подробно</option>
-                        </select>
-                    </div>
-
-                    <? endif; ?>
-                    
-                    <? if (1): ?>
-                        <div class="custom-control custom-switch">
-                          <input type="checkbox" class="custom-control-input" id="id_f_batch_mode" name="f_batch_mode">
-                          <label class="custom-control-label" for="id_f_batch_mode">Пакетный режим</label>
-                        </div>
-                    <? endif; ?>
-
-                    <? if (0): ?>
-                    <div class="custom-control custom-switch">
-                        <div style="margin: 12px 10px 12px 0">
-                            <input
-                                <?= $f_no_compare? 'checked' : '' ?>
-                                name="f_no_compare" type="checkbox" class="custom-control-input" id="id_f_no_compare">
-                            <label class="custom-control-label" for="f_no_compare" style="margin-left: 7px; position: relative;">
-                                <span style="top: 5px; position: relative;">No compare</span>
-                            </label>
-                        </div>
-                    </div>
-                    <? endif; ?>
+                </div>
+                <? endif; ?>
                 <!--
                     <div class="form-group _col-sm-3">
                         <button type="submit" class="btn btn-primary products__filter-submit">Фильтровать</button>
@@ -267,16 +281,17 @@ $local_import_stat = null;
                     <div class="form-group _col-sm-3">
                       <button id="show-all" class="btn btn-secondary">Показать все</button>
                     </div>-->
-                </div>
+            </div>
             <!--</form>-->
 
 
         </div>
 
     </div>
-    
+
     <div class="table-responsive__" id = "id_table_container">
-        <?= $this->render('index_table', [
+        <?=
+        $this->render('index_table', [
             'list' => $list,
             'local_import_stat' => $local_import_stat,
             'is_admin' => $is_admin,
@@ -285,16 +300,16 @@ $local_import_stat = null;
             'f_no_compare' => $f_no_compare,
             'f_is_detail_view' => $f_detail_view,
             'source' => $source,
-        ]); 
+        ]);
         ?>
     </div><!-- table-responsive -->
-    
+
     <div class="row">
         <div class="col">
             <div class="featured-items">Показаны записи <?= min($f_count_products_on_page, $count_products_all) ?> из <?= $count_products_all ?>.</div>
 
             <?php
-            $e_comparison = isset($f_comparison_status) && $f_comparison_status ?  strtolower($f_comparison_status) : 'match';
+            $e_comparison = isset($f_comparison_status) && $f_comparison_status ? strtolower($f_comparison_status) : 'match';
             $e_profile = isset($f_profile) && $f_profile && $f_profile !== 'Все' ? $f_profile : '{{all}} ';
             ?>
             <a href="<?= '/exports/step_4?source_id=' . $source_id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4" >

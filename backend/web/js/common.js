@@ -104,14 +104,15 @@ var lib = {};
     /*
      * Вспомогатеьная функция отправки AJAX
      * 
-     * @param {array} data Обязательно доджен содержать data['url']
+     * @param {type} url
+     * @param {array} data
      * @param {function} onSuсcess
      * @returns {}
      * 
      */
-    lib.sendAjaxFromButton = function(data, onSuccess) {
+    lib.sendAjax = function(url, data, onSuccess) {
         $.ajax({
-            url: data['url'],
+            url: url,
             type: "POST",
             data: data,
             dataType: "json",
@@ -136,6 +137,18 @@ var lib = {};
                 }
             }
         });
+    }
+
+    /*
+     * Вспомогатеьная функция отправки AJAX с кнопки
+     * 
+     * @param {array} data Обязательно доджен содержать data['url']
+     * @param {function} onSuсcess
+     * @returns {}
+     * 
+     */
+    lib.sendAjaxFromButton = function(data, onSuccess) {
+        lib.sendAjax(data['url'], data, onSuccess);
     }
 
 lib.url = class {

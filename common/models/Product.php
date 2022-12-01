@@ -111,6 +111,19 @@ class Product extends \yii\db\ActiveRecord{
             $this->_addInfo[] = $pr;
         }
     }
+    
+    public function getCountRightItems(){
+        $asin = $this->asin;
+        $source = $this->source;
+        $class_2 = $source->class_2; // Parser_trademarkia_com_result
+        
+        return $class_2::find()->where(['asin' => $asin])->count();       
+    }
+    
+    public function getCountComparisons(){
+        return Comparison::find()->where(['product_id' => $this->id, 'source_id' => $this->source->id])->count();
+        
+    }
 
     // Добавляет ключи и зачения которые хранятся в поле addInfo
     private function get_all_elements_in_array_to_first_level($array, $separator = '_', $level_prefix = '') {

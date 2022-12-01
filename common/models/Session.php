@@ -29,7 +29,8 @@ class Session extends \yii\web\Session{
             'f_no_compare'              => $this->get('f_no_compare'),
             'f_source'                  => $this->get('f_source'),
             'f_sort'                    => $this->get('f_sort'),
-            'f_detail_view'             => $this->get('f_detail_view')
+            'f_detail_view'             => $this->get('f_detail_view'),
+            'f_batch_mode'              => $this->get('f_batch_mode')
         ];
     }
 }

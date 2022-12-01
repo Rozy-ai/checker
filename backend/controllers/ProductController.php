@@ -175,31 +175,32 @@ class ProductController extends Controller {
         $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
 
         return $this->render('index', [
-                    'f_source' => $filters->f_source,
-                    'f_profile' => $filters->f_profile,
-                    'f_count_products_on_page' => $filters->f_count_products_on_page,
-                    'f_asin' => $filters->f_asin,
-                    'f_title' => $filters->f_title,
-                    'f_status' => $filters->f_status,
-                    'f_username' => $filters->f_username,
-                    'f_comparison_status' => $filters->f_comparison_status,
-                    'f_sort' => $filters->f_sort,
-                    'f_detail_view' => $filters->f_detail_view,
-                    'f_categories_root' => $filters->f_categories_root,
-                    'list_source' => $this->indexPresenter->getListSource(),
-                    'list_profiles' => $this->indexPresenter->getListProfiles(),
-                    'list_count_products_on_page' => $this->indexPresenter->getListCountProductsOnPage(),
-                    'list_categories_root' => $this->indexPresenter->getListCategoriesRoot(),
-                    'list_username' => $this->indexPresenter->getListUser(),
-                    'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses(),
-                    'list' => $list,
-                    'count_products_all' => $count_products_all,
-                    'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
-                    'is_admin' => $is_admin,
-                    'default_price_name' => Settings__fields_extend_price::get_default_price($source->id)->name ?: 'Price Amazon',
-                    'count_pages' => $count_pages,
-                    'source' => $source,
-                    'last_update' => Stats_import_export::getLastLocalImport()
+            'f_source' => $filters->f_source,
+            'f_profile' => $filters->f_profile,
+            'f_count_products_on_page' => $filters->f_count_products_on_page,
+            'f_asin' => $filters->f_asin,
+            'f_title' => $filters->f_title,
+            'f_status' => $filters->f_status,
+            'f_username' => $filters->f_username,
+            'f_comparison_status' => $filters->f_comparison_status,
+            'f_sort' => $filters->f_sort,
+            'f_detail_view' => $filters->f_detail_view,
+            'f_categories_root' => $filters->f_categories_root,
+            'f_batch_mode' => $filters->f_batch_mode,
+            'list_source' => $this->indexPresenter->getListSource(),
+            'list_profiles' => $this->indexPresenter->getListProfiles(),
+            'list_count_products_on_page' => $this->indexPresenter->getListCountProductsOnPage(),
+            'list_categories_root' => $this->indexPresenter->getListCategoriesRoot(),
+            'list_username' => $this->indexPresenter->getListUser(),
+            'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses(),
+            'list' => $list,
+            'count_products_all' => $count_products_all,
+            'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
+            'is_admin' => $is_admin,
+            'default_price_name' => Settings__fields_extend_price::get_default_price($source->id)->name ?: 'Price Amazon',
+            'count_pages' => $count_pages,
+            'source' => $source,
+            'last_update' => Stats_import_export::getLastLocalImport()
         ]);
     }
 
@@ -388,6 +389,35 @@ class ProductController extends Controller {
 
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
+    
+    public function actionCompareBatch(){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (\Yii::$app->request->isGet) {
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost) {
+            $params = \Yii::$app->request->post();
+        }
+        
+        $list_pruduct_right = $params['list_products_right'];
+        if (!is_array($list_pruduct_right)){
+            return [
+                'status' => 'info',
+                'message' => 'нет элементов для сравнения'
+            ];            
+        }
+        
+        try{
+            $this->indexPresenter->changeStatusProductsRight($list_pruduct_right);
+        } catch (\Exception $ex) {
+            return [
+                'status' => 'error',
+                'message' => $ex->getMessage()
+            ];
+        }
+        
+        return $this->getRequestWithUpdateList();
+    }
 
     /**
      * Сюда приходит, если пользователь нажал крестик на левом товаре
@@ -482,12 +512,33 @@ class ProductController extends Controller {
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
     
-    private function getRequestWithUpdateList(Source $source, Filters $filters, bool $is_admin, $is_update_list = true) {
+    private function getRequestWithUpdateList(Source $source = null, Filters $filters = null, bool $is_admin = null, $is_update_list = true) {
+        if (!$filters){
+            $filters = new Filters();
+            $filters->loadFromSession();
+            if (!$filters->isExistsDefaultParams()) {
+                return [
+                    'status' => 'error',
+                    'message' => 'В сесии не хватает данных'
+                ];
+            }
+        }
+        
+        if (!$source){
+            $source = Source::getById($filters->f_source);
+        }
+
+        if (!isset($is_admin)){
+            $user = \Yii::$app->user->identity;
+            $is_admin = $user && $user->isAdmin();
+        }
+        
         if ($is_update_list){
             $list = Product::getListProducts($source, $filters, $is_admin);
         } else {
             $list = null;
         }
+        
         $f_count_products_on_page = $filters->f_count_products_on_page;
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
         $count_products_right = $this->indexPresenter->getCountProductsOnPageRight($list);
