@@ -33,6 +33,7 @@ use yii\helpers\Url;
  * @var bool   $is_admin
  * @var string $default_price_name
  * @var int    $count_pages
+ * $var int    $number_page_current
  * @var Source $source
  * @var array  $local_import_stat
  * @var        $last_update
@@ -42,6 +43,7 @@ $this->title = $source->name . " | " . Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 
 $local_import_stat = null;
+$number_page_current = 1;
 
 \backend\assets\IconsAsset::register($this);
 \backend\assets\ProductIndexAsset::register($this);
@@ -246,13 +248,14 @@ $local_import_stat = null;
                         name="f_batch_mode"
                         <?= $f_batch_mode ? 'checked' : '' ?>
                     >
-
+                    
                     <label 
                         class="custom-control-label"  
                         for="id_f_batch_mode"
                         data-toggle="tooltip"
                         data-placement="top"
-                        title="Для сохранения значений статусов правых товаров необходимо сменить любой фильтр">Пакетный режим
+                        title="При включении выбранные элементы скрываются визуально">Скрывать выбраные
+                        <!--title="Для сохранения значений статусов правых товаров необходимо сменить любой фильтр">Пакетный режим -->
                     </label>
                 </div>
                 <? endif; ?>
@@ -280,7 +283,7 @@ $local_import_stat = null;
                     
                     <div class="form-group _col-sm-3">
                       <button id="show-all" class="btn btn-secondary">Показать все</button>
-                    </div>-->
+                    </div>
             </div>
             <!--</form>-->
 
@@ -335,28 +338,29 @@ $local_import_stat = null;
         </div>
     </div>
 
-    <? if ($f_count_products_on_page !== 'ALL'):?>
+    <?php if ($f_count_products_on_page !== 'ALL'):?>
     <div class="products__pager">
-
         <nav aria-label="Page navigation example ">
-            <ul class="pagination justify-content-center pagination-striped ">
-
-
-                <? for ($i = $pager['from']; $i <= $pager['to']; $i++):?>
-                <? $url_construct['page'] = $i; ?>
-                <li class="page-item <?= (int) $i === (int) $page_n ? 'active' : '' ?>"><a class="page-link" href="<?= Url::toRoute($url_construct) ?>"><?= $i ?></a></li>
-                <? endfor; ?>
-
-                <?
-                $url_construct['filter-items__show_n_on_page'] = 'ALL';
-                $url_construct['page'] = 1;
+            <ul class="pagination justify-content-center">
+                <?php
+                $count_pages_visible = 10;
+                for ($i = 1; $i<=$count_pages_visible; $i++){
+                    $is_active = ($i === $number_page_current)?'active':'';
+                    echo "<li class=\"page-item $is_active\"><a class=\"page-link\" href=\"/product/index?page=$i\">$i</a></li>";
+                }
+                //Если страниц 11, то показывать двоеточие не следует
+                if ($count_pages === $i){
+                    echo "<li class=\"page-item\"><a class=\"page-link\" href=\"/product/index?page=$i\">$i</a></li>";
+                }
+                if ($count_pages > $i){
+                    echo "<li class=\"page-item\"><a class=\"page-link\" href=\"/product/index?page=$i\">...</a></li>";
+                    echo "<li class=\"page-item\"><a class=\"page-link\" href=\"/product/index?page=$count_pages\">$count_pages</a></li>";
+                }
                 ?>
-                <li class="page-item "><a class="page-link" href="<?= Url::toRoute($url_construct) ?>">Показать все</a></li>
-
             </ul>
         </nav>
     </div>
-    <? endif;?>
+    <?php endif;?>
 
 </div>
 

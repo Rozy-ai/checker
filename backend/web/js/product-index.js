@@ -99,17 +99,9 @@ $(document).ready(function () {
         let $data = $this.data();
         
         if (is_batch_mode()){
-            remember_product_right_data($data);
-            
             let $item = $this.parents('.slider__slider-item');
-            $item.find('.color-marker')
-                .removeClass('nocompare')
-                .removeClass('pre_match')
-                .removeClass('other')
-                .removeClass('match')
-                .addClass('mismatch')
-            $item.find('.slider__yellow_button').removeClass('-hover');
-            $item.find('.slider__red_button').addClass('-hover');
+            remember_product_right_data($data); // Добавить товар в список для отправки
+            change_visual_item_right($item);    // Изменить визуальное отображение
         } else {
             $this.hide();
             
@@ -139,18 +131,9 @@ $(document).ready(function () {
         let $this = $(this);
         let $data = $this.data();
         if (is_batch_mode()){
-            remember_product_right_data($data);
-            
             let $item = $this.parents('.slider__slider-item');
-            $item.find('.color-marker')
-                 .removeClass('nocompare')
-                 .removeClass('pre_match')
-                 .removeClass('match')
-                 .removeClass('other')
-                 .removeClass('mismatch')
-                 .addClass('pre_match');
-            $item.find('.slider__yellow_button').addClass('-hover');
-            $item.find('.slider__red_button').removeClass('-hover');
+            remember_product_right_data($data); // Добавить товар в список для отправки
+            change_visual_item_right($item);    // Изменить визуальное отображение
         } else {       
             $this.hide();
             
@@ -169,6 +152,13 @@ $(document).ready(function () {
                 $this.show();
             });
         };
+    });
+    
+    $('.slider_close').on('click', function (e) {
+        e.stopPropagation();
+        let $this = $(this);
+        let $product_block = $this.parents('.product-list__product-list-item');
+        $product_block.remove();
     });
     
     /*
@@ -210,7 +200,7 @@ $(document).ready(function () {
         let filter = $('#'+id_filter);
         filter.on('change', function (e) {
             e.stopPropagation();
-            send_product_right_data();
+            send_product_right_data(); // Отослать данные на сервер
             
             let value = $(filter).val();
             $.ajax({
@@ -251,16 +241,41 @@ $(document).ready(function () {
     
     /**
      * Включен ли режим пакетной выборки элементов
+     * (Пока решили что этот режим всегда включен)
      * 
      * @returns {Boolean}
      */
     is_batch_mode = function(){
-        let $mode = $('#id_f_batch_mode');
-        return $mode.is(':checked');
+        return true;
+        // let $mode = $('#id_f_batch_mode');
+        // return $mode.is(':checked');
     };
     
     /**
-     * Запомнить выбор от правых товаров
+     * Включен ли режим скрытия правых товаров после выбора
+     * (Пока берем копию кнопки от пакетной выборки)
+     * 
+     * @returns {Boolean}
+     */
+    is_hide_items_on_check = function(){
+        let $mode = $('#id_f_batch_mode');
+        return $mode.is(':checked');
+    }
+    
+    /**
+     * Узнать количество видимых правых товаров в данном блоке
+     * 
+     * @param {object} $product - левый продукт, для которого нужно узнать количество видимых правых
+     * @returns {integer}
+     */
+    get_count_products_right = function($product){
+        let block_products  = $product.parent('.product-list__product-list-item');
+        let count_items = block_products.find('._sliderTop').count();
+        return count_items;
+    }
+    
+    /**
+     * Запомнить выбор от правых товаров (Элементов)
      * 
      * @param {object} item_data
      * @returns {undefined}
@@ -275,7 +290,7 @@ $(document).ready(function () {
                 }
         }
         
-        // Запоминаем в массив элемент
+        // Если эмемента в массиве нет то запоминаем в массив элемент
         datas_products_right.push(item_data);    
     };
     
@@ -302,5 +317,32 @@ $(document).ready(function () {
                 alert(response.message);
             }
         });
+    }
+    
+    /**
+     * Сменить визуальное отображение правого товара
+     * 
+     * @param {type} $item
+     * @returns {undefined}
+     */
+    change_visual_item_right = function($item){
+        if (is_hide_items_on_check()){
+            let items_block  = $item.parents('.product-list__product-list-item');
+            $item.remove();
+            // Если в блоке не осталось выделеных элементов то обновляем список
+            let count_products_block = items_block.find('.slider__slider-item').length;
+            if (count_products_block <= 0){
+                send_product_right_data();
+            }
+        } else {
+            $item.find('.color-marker')
+                .removeClass('nocompare')
+                .removeClass('pre_match')
+                .removeClass('other')
+                .removeClass('match')
+                .addClass('mismatch')
+            $item.find('.slider__yellow_button').removeClass('-hover');
+            $item.find('.slider__red_button').addClass('-hover');
+        }
     }
 });
