@@ -146,13 +146,26 @@ class ProductController extends Controller {
     }
 
     public function actionIndex() {
+        $params = $params = \Yii::$app->request->get();
+        
         $filters = new Filters();
-        $filters->loadFromSession();
+        $filters->loadFromSession();  
         $source = null;
         // Если страница загружвется в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
             $source = Source::getById($filters->f_source);
+            
+            //  Если в запросе указан номер страницы, то установим его:
+            if (isset($params['page'])){
+                $number_page_current = (int)$params['page'];
+                if ($number_page_current <= 0 ){
+                    throw new InvalidArgumentException('Указан не верный номер страницы');
+                }
+                $filters->setVsSession('f_number_page_current', $number_page_current);
+                $this->redirect('/product/index');
+            }
         } else {
+            // Если страница загружается в первый раз то номер страницы нафиг не нужен, ибо по умолчанию установится в 1
             $id_user = \Yii::$app->user->id;
             $source = Source::getForUser($id_user);
 
@@ -178,6 +191,7 @@ class ProductController extends Controller {
             'f_source' => $filters->f_source,
             'f_profile' => $filters->f_profile,
             'f_count_products_on_page' => $filters->f_count_products_on_page,
+            'f_number_page_current' => $filters->f_number_page_current,
             'f_asin' => $filters->f_asin,
             'f_title' => $filters->f_title,
             'f_status' => $filters->f_status,
@@ -187,6 +201,7 @@ class ProductController extends Controller {
             'f_detail_view' => $filters->f_detail_view,
             'f_categories_root' => $filters->f_categories_root,
             'f_batch_mode' => $filters->f_batch_mode,
+            
             'list_source' => $this->indexPresenter->getListSource(),
             'list_profiles' => $this->indexPresenter->getListProfiles(),
             'list_count_products_on_page' => $this->indexPresenter->getListCountProductsOnPage(),
@@ -194,11 +209,13 @@ class ProductController extends Controller {
             'list_username' => $this->indexPresenter->getListUser(),
             'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses(),
             'list' => $list,
+            
             'count_products_all' => $count_products_all,
             'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
+            'count_pages' => $count_pages,
             'is_admin' => $is_admin,
             'default_price_name' => Settings__fields_extend_price::get_default_price($source->id)->name ?: 'Price Amazon',
-            'count_pages' => $count_pages,
+            
             'source' => $source,
             'last_update' => Stats_import_export::getLastLocalImport()
         ]);
@@ -542,8 +559,15 @@ class ProductController extends Controller {
         $f_count_products_on_page = $filters->f_count_products_on_page;
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
         $count_products_right = $this->indexPresenter->getCountProductsOnPageRight($list);
+        $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
+        if ($filters->f_number_page_current > $count_pages){
+            $filters->setVsSession('f_number_page_current', 1);
+        }
         $source_name = $source->name;
         $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}') ? $filters->f_profile : 'Все';
+        
+        $html_block_count = "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path";
+        $html_paginator = $this->indexPresenter->getHTMLPaginator($filters->f_number_page_current, $count_pages);
 
         return [
             'status' => 'ok',
@@ -556,10 +580,13 @@ class ProductController extends Controller {
                 'f_profile' => $filters->f_profile,
                 'f_no_compare' => $filters->f_no_compare,
                 'f_is_detail_view' => $filters->f_detail_view,
+                'f_number_page_current' => $filters->f_number_page_current,
+                'count_pages' => $count_pages,
                 'source' => $source,
             ]):null,
             'other' => [
-                'id_block_count' => "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path"
+                'id_block_count' => $html_block_count,
+                'id_paginator' => $html_paginator,
             ]
         ];
     }

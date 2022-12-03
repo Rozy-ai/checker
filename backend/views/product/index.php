@@ -11,6 +11,7 @@ use yii\helpers\Url;
  * @var string $f_source
  * @var string $f_profile
  * @var string $f_count_products_on_page
+ * $var int    $f_number_page_current
  * @var string $f_asin
  * @var string $f_title
  * @val string $f_status
@@ -26,14 +27,13 @@ use yii\helpers\Url;
  * @var array  $list_categories_root
  * @var array  $list_username
  * @var array  $list_comparison_statuses
- * 
  * @var array  $list
+ * 
  * @var int    $count_products_all
  * @var int    $count_products_right
  * @var bool   $is_admin
  * @var string $default_price_name
  * @var int    $count_pages
- * $var int    $number_page_current
  * @var Source $source
  * @var array  $local_import_stat
  * @var        $last_update
@@ -43,7 +43,6 @@ $this->title = $source->name . " | " . Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 
 $local_import_stat = null;
-$number_page_current = 1;
 
 \backend\assets\IconsAsset::register($this);
 \backend\assets\ProductIndexAsset::register($this);
@@ -341,21 +340,9 @@ $number_page_current = 1;
     <?php if ($f_count_products_on_page !== 'ALL'):?>
     <div class="products__pager">
         <nav aria-label="Page navigation example ">
-            <ul class="pagination justify-content-center">
+            <ul id="id_paginator" class="pagination justify-content-center">
                 <?php
-                $count_pages_visible = 10;
-                for ($i = 1; $i<=$count_pages_visible; $i++){
-                    $is_active = ($i === $number_page_current)?'active':'';
-                    echo "<li class=\"page-item $is_active\"><a class=\"page-link\" href=\"/product/index?page=$i\">$i</a></li>";
-                }
-                //Если страниц 11, то показывать двоеточие не следует
-                if ($count_pages === $i){
-                    echo "<li class=\"page-item\"><a class=\"page-link\" href=\"/product/index?page=$i\">$i</a></li>";
-                }
-                if ($count_pages > $i){
-                    echo "<li class=\"page-item\"><a class=\"page-link\" href=\"/product/index?page=$i\">...</a></li>";
-                    echo "<li class=\"page-item\"><a class=\"page-link\" href=\"/product/index?page=$count_pages\">$count_pages</a></li>";
-                }
+                echo $this->context->indexPresenter->getHTMLPaginator($f_number_page_current, $count_pages);    
                 ?>
             </ul>
         </nav>
