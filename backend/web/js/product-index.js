@@ -95,16 +95,22 @@ $(document).ready(function () {
     $('body').on('click', '.slider__red_button', function (e) {
         e.stopPropagation();
         let $this = $(this);
-        let $data = $this.data();
+        let data = $this.data();
 
         if (is_batch_mode()) {
             let $item = $this.parents('.slider__slider-item');
-            remember_product_right_data($data); // Добавить товар в список для отправки
+            
+            // Добавить товар в список для отправки
+            if( remember_product_right_data(data) ) {
+                // Если товар оказался новым то нужно обновить статистику
+                let $block_product = $this.parents('.product-list__product-list-item');
+                addUnitToStatistic($block_product, 'mismatch');
+            }
             change_visual_item_right($item, 'mismatch');    // Изменить визуальное отображение
         } else {
             $this.hide();
 
-            lib.sendAjaxFromButton($data, (response) => {
+            lib.sendAjaxFromButton(data, (response) => {
                 if (response.status === 'ok') {
                     let html = response.html_index_table;
                     if (typeof (html) !== "undefined" && html !== null) {
@@ -129,15 +135,20 @@ $(document).ready(function () {
     $('body').on('click', '.slider__yellow_button', function (e) {
         e.stopPropagation();
         let $this = $(this);
-        let $data = $this.data();
+        let data = $this.data();
         if (is_batch_mode()) {
             let $item = $this.parents('.slider__slider-item');
-            remember_product_right_data($data); // Добавить товар в список для отправки
-            change_visual_item_right($item, 'pre_match');    // Изменить визуальное отображение
+            // Добавить товар в список для отправки
+            if( remember_product_right_data(data) ) {
+                // Если товар оказался новым то нужно обновить статистику
+                let $block_product = $this.parents('.product-list__product-list-item');
+                addUnitToStatistic($block_product, 'pre_match');
+            }
+            change_visual_item_right($item, 'pre_match');      // Изменить визуальное отображение
         } else {
             $this.hide();
 
-            lib.sendAjaxFromButton($data, (response) => {
+            lib.sendAjaxFromButton(data, (response) => {
                 if (response.status === 'ok') {
                     let html = response.html_index_table;
                     if (typeof (html) !== "undefined" && html !== null) {
@@ -304,25 +315,26 @@ $(document).ready(function () {
         let count_items = block_products.find('._sliderTop').count();
         return count_items;
     };
-
+    
     /**
      * Запомнить выбор от правых товаров (Элементов)
      * 
-     * @param {object} item_data
-     * @returns {undefined}
+     * @param {object} data_item
+     * @returns {boolean} Является ли товар новым
      */
-    remember_product_right_data = function (item_data) {
+    remember_product_right_data = function (data_item) {
         // Сморим, есть ли уже этот элемент в массиве правых товаров, ожидающем отправку
         for (let data of datas_products_right) {
-            if (data.id_item === item_data.id_item &&
-                    data.id_source === item_data.id_source) {
-                data = item_data;
-                return;
+            if (data.id_item === data_item.id_item &&
+                    data.id_source === data_item.id_source) {
+                data = data_item;
+                return false;
             }
         }
 
         // Если эмемента в массиве нет то запоминаем в массив элемент
-        datas_products_right.push(item_data);
+        datas_products_right.push(data_item);
+        return true;
     };
 
     /**
@@ -405,5 +417,28 @@ $(document).ready(function () {
                 $item.hide();
             }
         });
+    };
+    
+    /**
+     * Увеличить значение в статистике
+     * @param {string} name_status_compare
+     * @returns {undefined}
+     */
+    addUnitToStatistic = function ($block_product, status_compare){
+        // Увеличивам количество в целевом квадратике
+        let $class = 'span.js-'+status_compare;
+        let $block = $block_product.find($class);
+        $block.text(Number($block.text())+1);
+        
+        // Уменьшаем количество в белом квадратике
+        $block = $block_product.find('.js-nocompare');
+        $block.text(Number($block.text())-1);
+        
+        // Меняем запись общее
+        $block = $block_product.find('.product-list-item__processed');
+        let val = $block.text().split('/');
+        if (val.length !== 2) return;
+        let v1 = Number(val[0])+1;
+        $block.text(v1+'/'+val[1]);
     };
 });
