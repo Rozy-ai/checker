@@ -31,13 +31,11 @@ $identity = \Yii::$app->user->identity;
 $is_last = ((count($items)-count($comparisons)) <= 1);
 ?>
 
-<?php if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?>
-    <div class="main-item-title ">
-        <? if ($is_admin): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
-            <?= $variables_left['description_left'] ?>
-        <? if ($is_admin): ?></a><? endif; ?>
-    </div>
-<?php endif; ?>
+<div class="main-item-title ">
+    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
+        <?= $variables_left['description_left'] ?>
+    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
+</div>
         
 <!-- VIEW 2 -->
 <div class='slider__view-2 [ SLIDER ] product-view__slider'  >

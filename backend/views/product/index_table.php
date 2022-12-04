@@ -259,22 +259,20 @@ use common\models\Comparison;
 
 
             <div class="actions_for_right-visible-items">
-                <? if (!(int)$f_is_detail_view && $f_comparison_status === 'NOCOMPARE'):?>
-
-
-                <div
-                    title="Только видимые"
-                    class="[ button-x-2 ] product-list-item__btn-red -change-2"
-                    href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
+                <?php if (!(int)$f_is_detail_view && $f_comparison_status === 'NOCOMPARE'):?>
+                    <div
+                        title="Только видимые"
+                        class="[ button-x-2 ] product-list-item__btn-red -change-2"
+                        href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
                     ></div>
 
-                <? if (0): ?>
-                <div
-                    class="slider__left-item__btn-yellow yellow_button_v1 -change-1"
-                    href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
-                    ></div>
-                <? endif; ?>
-                <? endif;?>
+                    <? if (0): ?>
+                    <div
+                        class="slider__left-item__btn-yellow yellow_button_v1 -change-1"
+                        href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
+                        ></div>
+                    <? endif; ?>
+                <?php endif;?>
             </div>
 
         </td>

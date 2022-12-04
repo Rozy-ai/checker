@@ -18,6 +18,7 @@ namespace backend\presenters;
 use common\models\Source;
 use common\models\User;
 use common\models\Comparison;
+use common\models\FiltersQuery;
 
 /**
  * Description of TraitListOfFilters
@@ -142,32 +143,46 @@ trait TraitListFilters {
      * @param type $source_id - id источника товара (sourse->id)
      * @return attay
      *    [
-     *       NOCOMPARE => int,
-     *       MISMATCH  => int,
-     *       PRE_MATCH => int,
-     *       MATCH     => int,
-     *       OTHER     => int
+     *       NOCOMPARE => [
+     *          'name' => 'abcdf',
+     *          'count'=> '12345'
+     *       ],
+     *       MISMATCH  => [...]
+     *       PRE_MATCH => [...]
+     *       MATCH     => [...]
+     *       OTHER     => [...]
      *    ]
      * @throws \yii\base\InvalidArgumentException
      */
-    public function getListComparisonStatuses(){
+    public function getListComparisonStatuses(bool $is_admin, $f_profile){
         //return Comparison::getFilterStatuses();
         
-        if (!$this->source_table_class || !$this->source_table_name) {
+        if (!$this->source_table_class || !$this->source_table_name || !$this->source_table2_name) {
             throw new \yii\base\InvalidParamException();
         }
+        
+        $q = new FiltersQuery($this->source_table_class);
+        
+        $q->select(['COUNT(*) as count_statuses', 'comparisons.status'])
+          ->andWhere($q->getSqlProfile($is_admin, $this->source_table_name, $f_profile))
+          ->groupBy('comparisons.status')
+          ->asArray();
+        
+        $q->addTable('comparisons');
+        $q->addJoins($this->source_table_name);
+        
+        //$q = $this->source_table_class::find()
+        //->select(['comparisons.status', 'COUNT(*) as count_statuses'])
+        //->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
+        //->asArray()
+        //->groupBy('comparisons.status');
 
-        $q = $this->source_table_class::find()
-            ->select(['comparisons.status', 'COUNT(*) as count_statuses'])
-            ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
-            ->asArray()
-            ->groupBy('comparisons.status');
+        $data = $q->all();        
 
-        $data = $q->all();
-
+        // Приведем к нужному формату:
         $list_comparisons = Comparison::getFilterStatuses();
         $out = [];
-        foreach ($data as $k => $val){
+        foreach ($data as $val){
             if ($val['status'] == null){
                 $val['status'] = 'NOCOMPARE';
             }

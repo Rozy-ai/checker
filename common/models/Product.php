@@ -308,7 +308,7 @@ class Product extends \yii\db\ActiveRecord{
     public function addition_info_for_price() {
         $source_id = $this->source->id;
 
-        $keys = Settings__fields_extend_price::find()->where(['source_id' => $source->id])
+        $keys = Settings__fields_extend_price::find()->where(['source_id' => $this->source->id])
                         ->orderBy(['default' => SORT_DESC])->all();
 
         $b = $this->baseInfo;

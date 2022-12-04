@@ -37,7 +37,7 @@ class FiltersQuery extends \yii\db\ActiveQuery{
      * @param string $source_table_name
      * @param string $source_table2_name
      */
-    public function addJoins(string $source_table_name, string $source_table2_name){
+    public function addJoins(string $source_table_name, string $source_table2_name = ''){
         foreach ($this->tables as $table){
             switch ($table) {
                 case 'hidden_items':
@@ -60,7 +60,9 @@ class FiltersQuery extends \yii\db\ActiveQuery{
                     break;
             }
         }
-        $this->innerJoin($source_table2_name, $source_table2_name.'.asin = '.$source_table_name.'.asin');
+        if ($source_table2_name){
+            $this->innerJoin($source_table2_name, $source_table2_name.'.asin = '.$source_table_name.'.asin');
+        }
     }
     
     public function addTable(string $table_name){
