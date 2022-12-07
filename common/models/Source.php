@@ -27,7 +27,7 @@ use backend\models\Settings__source_fields;
 class Source extends \yii\db\ActiveRecord {
 
     const ids_source_free = [1, 2];
-    
+
     private $dataFields;
 
     public function rules() {
@@ -189,11 +189,40 @@ class Source extends \yii\db\ActiveRecord {
 
         return $out;
     }
-    
-    function getDataFields($name){
-        if (!$this->dataFields){
+
+    function getDataFields($name) {
+        if (!$this->dataFields) {
             $this->dataFields = Settings__source_fields::data_for_source_all($this->id);
         }
         return $this->dataFields[$name];
     }
+
+    public static function get_sources_for_form() {
+        $out = [];
+        $s = self::get_sources();
+        if ($s) {
+            foreach ($s as $item) {
+                $out[$item->id] = $item->name;
+            }
+        }
+        return $out;
+    }
+
+    public static function get_sources() {
+        $user_id = \Yii::$app->getUser()->id;
+
+        $u = User::find()->where(['id' => $user_id])->limit(1)->one();
+        $res = $u->user__source_access;
+
+        if (!$res){
+            return Source::find()->all();
+        }
+        else {
+            return Source::find()
+                            ->leftJoin('user__source_access', 'user__source_access.source_id = source.id')
+                            ->where(['user__source_access.user_id' => $user_id])
+                            ->all();
+        }
+    }
+
 }
