@@ -1,6 +1,20 @@
 $(document).ready(function () {
     let $body = $('body');
-    let datas_products_right = [];
+    let datas_product_right = [];
+    //let datas_product_left = [];
+    
+    /**
+     * Получить DOM всего плока для данного элемента
+     * @param {object} dom_object
+     * @returns {unresolved}
+     */
+    getBlockProduct = function(dom_object){
+        return dom_object.parents('.product-list__product-list-item');
+    };
+    
+    //getProductsRight = function (dom_object){
+    //    dom_object.find('.slider__slider-item');
+    //};
 
     /**
      * Присваивание левому товару статуса STATUS_NOT_FOUND (левый крестик )
@@ -8,9 +22,31 @@ $(document).ready(function () {
     $body.on('click', '.product-list__item-mismatch-all', function (e) {
         e.stopPropagation();
         let $this = $(this);
-        $this.hide();
-        let $data = $this.data();
-
+        
+        let data = $this.data();
+        if (is_hide_mode()){
+            let $block_product = getBlockProduct($this);
+            // Добавляем в список все правые видимые товары в этом блоке
+            let items = $block_product.find(
+                    '.color-marker.pre_match',
+                    '.color-marker.other',
+                    '.color-marker.match',
+                )
+            if (items.length > 0){
+                let q = confirm('Некоторые правые товары именют статус отличный от missmatch и будет перезаписан. Продолжить?');
+                if (!q) {
+                    $this.show();
+                    return;
+                }
+            }
+            // Добавить товар в список для отправки
+            remember_product_left_data(data);
+            change_visual_block_product($block_product);      // Изменить визуальное отображение (Пока скрыть)
+        } else {
+            $this.hide();
+            lib.sendAjaxFromButton(data, onResponce);
+        }
+        
         function onResponce(response) {
             switch (response.status) {
                 case 'have_match':
@@ -37,8 +73,6 @@ $(document).ready(function () {
                     alert('Не удалось получить ожидаемый ответ от сервера');
             }
         }
-
-        lib.sendAjaxFromButton($data, onResponce);
     });
 
     /**
@@ -106,7 +140,7 @@ $(document).ready(function () {
                 let $block_product = $this.parents('.product-list__product-list-item');
                 addUnitToStatistic($block_product, 'mismatch');
             }
-            change_visual_item_right($item, 'mismatch');    // Изменить визуальное отображение
+            change_visual_product_right($item, 'mismatch');    // Изменить визуальное отображение
         } else {
             $this.hide();
 
@@ -144,7 +178,7 @@ $(document).ready(function () {
                 let $block_product = $this.parents('.product-list__product-list-item');
                 addUnitToStatistic($block_product, 'pre_match');
             }
-            change_visual_item_right($item, 'pre_match');      // Изменить визуальное отображение
+            change_visual_product_right($item, 'pre_match');      // Изменить визуальное отображение
         } else {
             $this.hide();
 
@@ -299,7 +333,7 @@ $(document).ready(function () {
      * 
      * @returns {Boolean}
      */
-    is_hide_items_on_check = function () {
+    is_hide_mode = function () {
         let $mode = $('#id_f_batch_mode');
         return $mode.is(':checked');
     };
@@ -324,18 +358,31 @@ $(document).ready(function () {
      */
     remember_product_right_data = function (data_item) {
         // Сморим, есть ли уже этот элемент в массиве правых товаров, ожидающем отправку
-        for (let data of datas_products_right) {
-            if (data.id_item === data_item.id_item &&
-                    data.id_source === data_item.id_source) {
-                data = data_item;
+        for (let data of datas_product_right) {
+            if (data.id_item === data_item.id_item && data.id_source === data_item.id_source) {
+                data = data_item; //Перезаписать
                 return false;
             }
         }
 
         // Если эмемента в массиве нет то запоминаем в массив элемент
-        datas_products_right.push(data_item);
+        datas_product_right.push(data_item);
         return true;
     };
+    
+    remember_product_left_data = function (data_product){
+        // Сморим, есть ли уже этот элемент в массиве левых товаров, ожидающем отправку
+        for (let data of datas_product_left){
+            if (data.id_product === data_product.id_product && data.id_source === data_product.id_source) {
+                data = data_product; //Перезаписать
+                return false;
+            }
+        }
+        
+        // Если эмемента в массиве нет то запоминаем в массив элемент
+        datas_product_left.push(data_product);
+        return true;
+    }
 
     /**
      * Отправить выбранные элементы на серсер
@@ -344,11 +391,11 @@ $(document).ready(function () {
      */
     send_product_right_data = function () {
         let data = {
-            list_products_right: datas_products_right
+            list_products_right: datas_product_right
         };
         lib.sendAjax('/product/compare-batch', data, (response) => {
             if (response.status === 'ok') {
-                datas_products_right = [];
+                datas_product_right = [];
                 let html = response.html_index_table;
                 if (typeof (html) !== "undefined" && html !== null) {
                     var container = $("#id_table_container");
@@ -361,6 +408,34 @@ $(document).ready(function () {
             }
         });
     };
+    
+    /**
+     * Отправить данные отметок на сервер
+     * 
+     * @returns {undefined}
+     */    
+    send_datas_product = function () {
+        let data = {
+            list_product_right: datas_product_right,
+            list_product_left:  datas_product_left
+        };
+        lib.sendAjax('/product/compare-products-batch', data, (response) => {
+            if (response.status === 'ok') {
+                datas_product_right = [];
+                datas_product_left  = [];
+                
+                let html = response.html_index_table;
+                if (typeof (html) !== "undefined" && html !== null) {
+                    var container = $("#id_table_container");
+                    container.html(html);
+                    lib.slider_init();
+                }
+            }
+            if (response.status === 'error') {
+                alert(response.message);
+            }
+        });        
+    };
 
     /**
      * Сменить визуальное отображение правого товара
@@ -368,8 +443,8 @@ $(document).ready(function () {
      * @param {type} $item
      * @returns {undefined}
      */
-    change_visual_item_right = function ($item, $class) {
-        if (is_hide_items_on_check()) {
+    change_visual_product_right = function ($item, $class) {
+        if (is_hide_mode()) {
             let items_block = $item.parents('.product-list__product-list-item');
             $item.remove();
             // Если в блоке не осталось выделеных элементов то обновляем список
@@ -396,6 +471,16 @@ $(document).ready(function () {
                 $item.find('.slider__yellow_button').addClass('-hover');
             }
         }
+    };
+    
+    /**
+     * Сменить визуальное отображение всего блока товаров
+     * 
+     * @param {object} $block_product
+     * @returns {undefined}
+     */
+    change_visual_block_product = function($block_product){
+        $block_product.hide();
     };
 
     /**

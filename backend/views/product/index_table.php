@@ -51,9 +51,13 @@ use common\models\Comparison;
         -$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]
         -$list_comparison_statuses[Comparison::STATUS_MATCH]
         -$list_comparison_statuses[Comparison::STATUS_MISMATCH]
-        -$list_comparison_statuses[Comparison::STATUS_OTHER]
-            
+        -$list_comparison_statuses[Comparison::STATUS_OTHER];
+    
+    $counted = $item->aggregated ? $item->aggregated->counted : 0;
+    $processed = "{$counted}/" . count($item->getAddInfo());           
     ?>
+    
+
     <!-- ITEM -->
     <tr
         class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item"
@@ -62,26 +66,29 @@ use common\models\Comparison;
 
         >
         <td class="products-list__td1">
-            <div class="product-list-item__data"><span>BSR:</span><br><?= number_format($item->baseInfo["Sales Rank: Current"], 0, '', ' '); ?></div>
-            <div class="product-list-item__data"><span>Sales30:</span><br><?= $item->baseInfo["Sales Rank: Drops last 30 days"] ?></div>
+            <div class="product-list-item__data"><span>BSR:</span><br><span id="id_td1_bsr"><?= number_format($item->baseInfo["Sales Rank: Current"], 0, '', ' '); ?></span></div>
+            <div class="product-list-item__data"><span>Sales30:</span><br><span id="id_td1_sales30"><?= $item->baseInfo["Sales Rank: Drops last 30 days"] ?></span></div>
             <div
                 class="product-list-item__data js-addition-info-for-price"
                 data-addition_info_for_price='<?= $item->addition_info_for_price(); ?>'
                 >
                 <span>Price:</span><br>
-                <?= ($item->baseInfo[$default_price_name]) ?: '-' ?>
+                <span id="id_td1_price"><?= ($item->baseInfo[$default_price_name]) ?: '-' ?></span>
             </div>
 
             <div class="product-list-item__data"><span>Brand:</span><br><?= $item->baseInfo["Brand_R"] ?></div>
-            <div class="product-list-item__data"><span>FBA/FBM:</span><br><?= $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"] ?></div>
+            <div class="product-list-item__data"><span>FBA/FBM:</span><br><span id="id_td1_fba"><?= $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"] ?></span></div>
             <? if ($is_admin):?> 
             <div class="product-list-item__data"><span>Profile:</span><br><?= $item->profile ?></div>
             <? endif;?>
 
         </td>
         <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
-            <div><?= (!$is_admin && strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin ?></div>
-            <div class="products-list__img-wrapper">
+            <div id='id_td2_asin'><?= (!$is_admin && strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin ?></div>
+            <div class="products-list__img-wrapper"
+                data-id_source="<?=$source_id?>"
+                data-id_product="<?=$item->id?>"
+            >
                 <?php
                 $title = '';
                 $brand = $item->baseInfo['Brand'];
@@ -113,7 +120,7 @@ use common\models\Comparison;
 
                         <div class="slider__left-item__fade -top">
                             <? if ($is_admin):?>
-                            <div class="slider__left-item-img-top-text"><?= Html::encode($item->baseInfo['Categories: Root']) ?></div>
+                            <div id="id_td2_toptext" class="slider__left-item-img-top-text"><?= Html::encode($item->baseInfo['Categories: Root']) ?></div>
                             <? endif;?>
                         </div>
 
@@ -166,7 +173,6 @@ use common\models\Comparison;
 
             <div class="products-list__slider-wrapper <?= (int) $f_is_detail_view === 1 ? '-v-2' : '' ?> js-slider-root">
                 <?php
-                
                 echo TopSlider::widget([
                     'is_detail_view' => $f_is_detail_view,
                     'number_page_current' => $number_page_current,
@@ -185,7 +191,16 @@ use common\models\Comparison;
 
             <div class="slider_close -in-list"><div class="-line -line-1"></div><div class="-line -line-2"></div></div>
 
-            <div class="product-list-item__data -first-margin">
+            <!--Дублирование значений сделано специально. data атрибуты используются для восстановления данных после визуальных манипуляций со значениями-->
+            <div 
+                class="product-list-item__data -first-margin block_statistic"
+                data-<?=Comparison::STATUS_PRE_MATCH?>="<?=$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]?>"
+                data-<?=Comparison::STATUS_MATCH?>="<?=$list_comparison_statuses[Comparison::STATUS_MATCH]?>"
+                data-<?=Comparison::STATUS_MISMATCH?>="<?=$list_comparison_statuses[Comparison::STATUS_MISMATCH]?>"
+                data-<?=Comparison::STATUS_OTHER?>="<?=$list_comparison_statuses[Comparison::STATUS_OTHER]?>"
+                data-<?=Comparison::STATUS_NOCOMPARE?>="<?=$list_comparison_statuses[Comparison::STATUS_NOCOMPARE]?>"
+                data-processed="<?=$processed?>"
+            >
                 <?php
                 echo $ret = Html::tag('div',
                         "<span class='js-pre_match pre_match'>{$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]}</span>
@@ -197,17 +212,8 @@ use common\models\Comparison;
                 );
                 ?>
 
-                <span class="-title">Обработано:</span>
-                <?php
-                    $counted = $item->aggregated ? $item->aggregated->counted : 0;
-                    $ret = Html::tag('div',"{$counted}/" . count($item->getAddInfo()),
-                    ['class' => 'name product-list-item__processed']);
-                    //$ret .= '<br/>';
-                    echo $ret;
-                ?>
+                <span class="-title">Обработано:</span> <?=Html::tag('div', $processed, ['class' => 'name product-list-item__processed']);?>
             </div>
-
-
 
             <? if ($is_admin):?>
             <div class="product-list-item__data"><span>Пользователь:</span><br>

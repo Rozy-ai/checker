@@ -45,4 +45,14 @@ class User extends UserEntity {
       return false;
       }
      */
+
+    /**
+     * Gets query for [[User__source_access]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser__source_access() {
+        return $this->hasMany(User__source_access::class, ['user_id' => 'id']);
+    }
+
 }

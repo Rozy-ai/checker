@@ -304,8 +304,8 @@ class IndexPresenter {
             throw $ex;
         }
     }
-
-    /**
+    
+        /**
      * Выставить статусы для всех правых товаров из списка по data-атрибутам
      * @param array $list_data_product_right - data атрибуты правых товаров
      */
@@ -363,6 +363,74 @@ class IndexPresenter {
         } catch (\Exception $ex) {
             $transaction->rollback();
             throw $ex;
+        }
+    }
+
+
+    public function changeStatusProducts($list_data_product_right, $list_data_product_left = null) {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $ids_product_and_source = [];
+            foreach ($list_data_product_right as $data) {
+                $status = $data['status'];
+                $id_source = $data['id_source'];
+                $id_product = $data['id_product'];
+                $id_item = $data['id_item'];
+                $message = $data['message'];
+                if (!Comparison::setStatus($status, $id_source, $id_product, $id_item, $message)) {
+                    throw new \Exception('Не удалось статус ддя правого товара c id = ' . $id_item);
+                }
+                $ids_product_and_source[$id_product] = $id_source;
+            }
+
+            // Если у левого товара не осталось, не отмеченных правых, то левый заносим в hidden_items
+            $source = null;
+            foreach ($ids_product_and_source as $id_p => $id_s) {
+                delete_if_exists($list_data_product_left, $id_s, $id_p);
+                
+                if ($source === null || $source->id !== $id_s) {
+                    $source = Source::getById($id_s);
+                    if (!$source) {
+                        throw new \Exception('Не удалосб найти источник для продукта с id = ' . $id_p);
+                    }
+                    $product = $source->class_1::findOne(['id' => $id_p]);
+                    if (!$product) {
+                        throw new \Exception('Не удалосб найти продукт с id = ' . $id_p);
+                    }
+                    $product->source = $source;
+
+                    $comparisons = $product->comparisons; //$product->countComparisons
+                    $right_items = $product->addInfo;     //$product->countRightItems
+                    if ((count($right_items) - count($comparisons)) <= 0) {
+                        $find = HiddenItems::find()->where(['p_id' => $id_p, 'source_id' => $id_s])->one();
+                        if (!$find) {
+                            $h = new HiddenItems([
+                                'p_id' => $id_product,
+                                'source_id' => $id_source,
+                                'status' => HiddenItems::STATUS_NOT_FOUND
+                            ]);
+                            if (!$h->save()) {
+                                throw new \Exception('Не удалось занест левый товар в базу данных');
+                            }
+                        } else {
+                            throw new \Exception('Запись товара уже существует в таблице hidden_items');
+                        }
+                    }
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $ex) {
+            $transaction->rollback();
+            throw $ex;
+        }
+        
+        function delete_if_exists(&$data, $id_source, $id_product){
+            if (empty($data[0])) return;
+            foreach ($data as $i=>$d){
+                if ($d['id_source'] !== $id_source || $d['id_product'] !== $id_product) return;
+            }
+            unset($data[$i]);
         }
     }
 

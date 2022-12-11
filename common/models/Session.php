@@ -30,7 +30,8 @@ class Session extends \yii\web\Session{
             'f_source'                  => $this->get('f_source'),
             'f_sort'                    => $this->get('f_sort'),
             'f_detail_view'             => $this->get('f_detail_view'),
-            'f_batch_mode'              => $this->get('f_batch_mode')
+            'f_batch_mode'              => $this->get('f_batch_mode'),
+            'f_hide_mode'               => $this->get('f_hide_mode')
         ];
     }
 }

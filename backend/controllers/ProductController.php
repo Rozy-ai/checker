@@ -201,6 +201,7 @@ class ProductController extends Controller {
             'f_detail_view' => $filters->f_detail_view,
             'f_categories_root' => $filters->f_categories_root,
             'f_batch_mode' => $filters->f_batch_mode,
+            'f_hide_mode' => $filters->f_hide_mode,
             
             'list_source' => $this->indexPresenter->getListSource(),
             'list_profiles' => $this->indexPresenter->getListProfiles(),
@@ -271,12 +272,17 @@ class ProductController extends Controller {
         if (isset($request)) {
             $name = $request['name'];
             $value = $request['value'];
+            $data_comparisons = $request['data_comparisons'];
         }
         if (!isset($name)) {
             return [
                 'status' => 'error',
                 'message' => 'Не удаось получить изменяемый фильтр',
             ];
+        }
+        
+        // Если с запросом прищли данные сравнений, 
+        if ($data_comparisons){
         }
 
         $filters = new Filters();
@@ -416,8 +422,8 @@ class ProductController extends Controller {
             $params = \Yii::$app->request->post();
         }
         
-        $list_pruduct_right = $params['list_products_right'];
-        if (!is_array($list_pruduct_right)){
+        $list_product_right = $params['list_products_right'];
+        if (!is_array($list_product_right)){
             return [
                 'status' => 'info',
                 'message' => 'нет элементов для сравнения'
@@ -425,7 +431,7 @@ class ProductController extends Controller {
         }
         
         try{
-            $this->indexPresenter->changeStatusProductsRight($list_pruduct_right);
+            $this->indexPresenter->changeStatusProductsRight($list_product_right);
         } catch (\Exception $ex) {
             return [
                 'status' => 'error',

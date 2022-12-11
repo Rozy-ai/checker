@@ -11,7 +11,6 @@
  * @var $option_sales_key
  * @var $number_node Позиция активного товара начиная от 0
  * @var Product $product
- * @var $number_node
  * @var $items
  */
 
@@ -37,7 +36,7 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 
 <!-- Если администратор, то показываем в виде ссылки -->
 
-<div class="main-item-title ">
+<div id="id_td3_title" class="main-item-title">
     <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
         <?= $variables_left['description_left'] ?>
     <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
@@ -85,6 +84,10 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
     ?>
 
     <div
+        data-id_source="<?=$source_id?>"
+        data-id_product="<?=$product->id?>"
+        data-id_item="<?=$item->id?>"
+        data-status="<?=$comparison->status?>"
         data-node_id="<?= $index + 1 ?>"
         class="[ SLIDER-ITEM ] slider__slider-item <?= $number_page_current === $index ? '-current' : '' ?> item<?= (int) $number_node === $index ? " slick-current" : '' ?>"
     >
@@ -98,9 +101,10 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
             data-img_right          = "<?= htmlspecialchars($variables_right['img_right'])?>"
             data-footer_left        = "<?= htmlspecialchars($variables_left ['footer_left'])?>"
             data-footer_right       = "<?= htmlspecialchars($variables_right['footer_right'])?>"
-            data-count_images_right = "<?= htmlspecialchars($variables_right['count_images_right'])?>"             
+            data-count_images_right = "<?= htmlspecialchars($variables_right['count_images_right'])?>"
+            data-comparison_status  =  <?=$comparison->status?>
         >
-            <div class="[ color-marker ] horizontal <?= isset($comparisons[$item->id]) ? ($comparisons[$item->id]->status === 'MATCH' ? ' match' : ($comparisons[$item->id]->status === 'MISMATCH' ? ' mismatch' : ($comparisons[$item->id]->status === 'PRE_MATCH' ? ' pre_match' : ' other'))) : ' nocompare' ?>"></div>
+            <div class="[ color-marker ] horizontal <?= isset($comparison) ? ($comparison->status === 'MATCH' ? ' match' : ($comparison->status === 'MISMATCH' ? ' mismatch' : ($comparison->status === 'PRE_MATCH' ? ' pre_match' : ' other'))) : ' nocompare' ?>"></div>
 
             <?=
             Html::a(

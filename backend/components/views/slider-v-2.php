@@ -31,7 +31,7 @@ $identity = \Yii::$app->user->identity;
 $is_last = ((count($items)-count($comparisons)) <= 1);
 ?>
 
-<div class="main-item-title ">
+<div id="id_td3_title" class="main-item-title ">
     <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
         <?= $variables_left['description_left'] ?>
     <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
@@ -77,6 +77,10 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
         ?>
 
         <div
+            data-id_source="<?=$source_id?>"
+            data-id_product="<?=$product->id?>"
+            data-id_item="<?=$item->id?>"
+            data-status="<?=$comparison->status?>"
             data-node_id="<?= $node_id ?>"
             class="tbl [ SLIDER-ITEM ] slider__slider-item -v-2 <?= $number_page_current === $index ? '-current' : '' ?> item<?= (int)$node === $index ? " slick-current" : '' ?>"
         >

@@ -21,6 +21,7 @@ use yii\helpers\Url;
  * @var string $f_detail_view
  * @var string $f_categories_root
  * $var string $f_batch_mode
+ * $var string $f_hide_mode
  * 
  * @var array  $list_source
  * @var array  $list_profiles
@@ -238,7 +239,7 @@ $local_import_stat = null;
 
                 <? endif; ?>
 
-                <? if (1): ?>
+                <?php if (0): ?>
                 <div class="custom-control custom-switch">
                     <input 
                         type="checkbox" 
@@ -253,12 +254,33 @@ $local_import_stat = null;
                         for="id_f_batch_mode"
                         data-toggle="tooltip"
                         data-placement="top"
-                        title="При включении выбранные элементы скрываются визуально">Скрывать выбраные
-                        <!--title="Для сохранения значений статусов правых товаров необходимо сменить любой фильтр">Пакетный режим -->
+                        title="Для сохранения значений статусов правых товаров необходимо сменить любой фильтр"
+                    >Пакетный режим
                     </label>
                 </div>
-                <? endif; ?>
-
+                <?php endif; ?>    
+                <?php 
+                if (1): 
+                ?>
+                <div class="custom-control custom-switch">
+                    <input 
+                        type="checkbox" 
+                        class="custom-control-input" 
+                        id="id_f_hide_mode" 
+                        name="f_hide_mode"
+                        <?= $f_hide_mode?'checked' : '' ?>
+                    >
+                    
+                    <label 
+                        class="custom-control-label"  
+                        for="id_f_hide_mode"
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title="При включении выбранные элементы скрываются визуально"
+                    >Скрывать выбраные
+                    </label>
+                </div>                
+                <?php endif; ?>
                 <? if (0): ?>
                 <div class="custom-control custom-switch">
                     <div style="margin: 12px 10px 12px 0">
