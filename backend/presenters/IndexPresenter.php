@@ -131,10 +131,10 @@ class IndexPresenter {
      * Функция для присвоения статуса STATUS_MISMATCH всем правым товарам 
      * и присвоения левому товару статуса STATUS_NOT_FOUND
      *  
-     * @param type $url
+     * @param string $url значение поля url. Пока не известно зачем нужно
      * @param int $id_product
      * @param int $id_source
-     * @param bool $confirmToAction
+     * @param bool $confirmToAction Если подтверждение на переприсвоение правым товарам статусов missmatch
      * @return boolean
      *     false Выставление статусов прервано по причине того что товар имеет сравнения. Нужно подтверждение
      *     true  Выставление статусов прошло успешно
@@ -147,11 +147,12 @@ class IndexPresenter {
             throw new \InvalidArgumentException('Не удалось найти источник');
         }
 
-        $product = $source->class_1::getById($id_product);
+        $product = $source->class_1::getById($source->class_1, $id_product);
         if (!$product) {
             throw new \InvalidArgumentException('Не удалось найти продукт');
         }
 
+        // Если нет подтверждения и товар имеет левые товары со статусами отличными от misssmatch
         if (!$confirmToAction && $product->isExistsItemsWithMatch()) {
             return false;
         }
@@ -365,73 +366,80 @@ class IndexPresenter {
             throw $ex;
         }
     }
-
-
-    public function changeStatusProducts($list_data_product_right, $list_data_product_left = null) {
-        $transaction = \Yii::$app->db->beginTransaction();
-        try {
-            $ids_product_and_source = [];
-            foreach ($list_data_product_right as $data) {
-                $status = $data['status'];
-                $id_source = $data['id_source'];
-                $id_product = $data['id_product'];
-                $id_item = $data['id_item'];
-                $message = $data['message'];
-                if (!Comparison::setStatus($status, $id_source, $id_product, $id_item, $message)) {
-                    throw new \Exception('Не удалось статус ддя правого товара c id = ' . $id_item);
-                }
-                $ids_product_and_source[$id_product] = $id_source;
+    
+    /**
+     * Если сравнение левого товара, это значит что все правые товары нужно сравнить так как левый и левый пометить как отмеченый всеми
+     * 
+     * @param type $list_data_product_left Масив data даных левых товаров
+     * @param type $list_data_product_right Масив data даных правых товаров
+     * @return boolean
+     * @throws \Exception
+     */
+    public function changeStatusProducts($list_data_product_left, $list_data_product_right) {
+        $is_change_all = true;
+        $ids_product_and_source = [];
+        $list_data_product_left = is_array($list_data_product_left)?$list_data_product_left:[];
+        $list_data_product_right = is_array($list_data_product_right)?$list_data_product_right:[];
+        
+        // Сохраним статусы всех правых товаров
+        foreach($list_data_product_right as $data){
+            $id_source  = $data['id_source'];
+            $id_product = $data['id_product'];
+            $id_item    = $data['id_item'];
+            $status     = $data['status'];
+            $message    = $data['message'];
+            try{
+                $this->changeStatusProductRight($status, $id_source, $id_product, $id_item, $message, false);
+                $ids_product_and_source[$id_product] = $id_source; // Надеюсь что тут не будет одинаковых id c разными источниками
+            } catch(\Exception $ex) {
+                $is_change_all = false;
             }
-
-            // Если у левого товара не осталось, не отмеченных правых, то левый заносим в hidden_items
-            $source = null;
-            foreach ($ids_product_and_source as $id_p => $id_s) {
-                delete_if_exists($list_data_product_left, $id_s, $id_p);
-                
-                if ($source === null || $source->id !== $id_s) {
-                    $source = Source::getById($id_s);
-                    if (!$source) {
-                        throw new \Exception('Не удалосб найти источник для продукта с id = ' . $id_p);
-                    }
-                    $product = $source->class_1::findOne(['id' => $id_p]);
-                    if (!$product) {
-                        throw new \Exception('Не удалосб найти продукт с id = ' . $id_p);
-                    }
-                    $product->source = $source;
-
-                    $comparisons = $product->comparisons; //$product->countComparisons
-                    $right_items = $product->addInfo;     //$product->countRightItems
-                    if ((count($right_items) - count($comparisons)) <= 0) {
-                        $find = HiddenItems::find()->where(['p_id' => $id_p, 'source_id' => $id_s])->one();
-                        if (!$find) {
-                            $h = new HiddenItems([
-                                'p_id' => $id_product,
-                                'source_id' => $id_source,
-                                'status' => HiddenItems::STATUS_NOT_FOUND
-                            ]);
-                            if (!$h->save()) {
-                                throw new \Exception('Не удалось занест левый товар в базу данных');
-                            }
-                        } else {
-                            throw new \Exception('Запись товара уже существует в таблице hidden_items');
-                        }
-                    }
-                }
-            }
-
-            $transaction->commit();
-        } catch (\Exception $ex) {
-            $transaction->rollback();
-            throw $ex;
         }
         
-        function delete_if_exists(&$data, $id_source, $id_product){
-            if (empty($data[0])) return;
-            foreach ($data as $i=>$d){
-                if ($d['id_source'] !== $id_source || $d['id_product'] !== $id_product) return;
+        // Если есть левые товары, записывам в них статусы вместе со всеми правыми
+        foreach ($list_data_product_left as $data) {
+            $id_source = $data['id_source'];
+            $id_product = $data['id_product'];
+            try {
+                $this->missmatchToAll('', $id_product, $id_source, true);
+            } catch (\Exception $ex) {
+                $is_change_all = false;
             }
-            unset($data[$i]);
         }
+        
+        // Теперь проходимся по левым товарам и смотрим, не остались ли товары, не именющие правых без сравнений
+        foreach ($ids_product_and_source as $id_product => $id_source){
+            try{
+                $source = Source::getById($id_source);
+                if (!$source) {
+                    throw new \Exception("Не удалось найти источник для продукта с id = $id_product");
+                }
+                $product = Product::getById($source->class_1, $id_product);
+                if (!$product) {
+                    throw new \Exception('Не удалось найти продукт с id = ' . $id_product);
+                }
+                $count_items = $product->countRightItems;
+                $count_comparisons = $product->countComparisons;
+                if (($count_items -$count_comparisons) <= 0){
+                    $is_exists = HiddenItems::find()->where(['p_id' => $id_product, 'source_id' => $id_source])->exists();
+                    if (!$is_exists) {
+                        $h = new HiddenItems([
+                            'p_id' => $id_product,
+                            'source_id' => $id_source,
+                            'status' => HiddenItems::STATUS_NOT_FOUND
+                        ]);
+                        if (!$h->save()) {
+                            throw new \Exception('Не удалось занест левый товар в базу данных');
+                        }
+                    } else {
+                        throw new \Exception('Запись товара уже существует в таблице hidden_items');
+                    }                    
+                }
+            } catch (\Exception $ex) {
+                $is_change_all = false;
+            }
+        }
+        return $is_change_all;
     }
 
     /**

@@ -282,7 +282,8 @@ class ProductController extends Controller {
         }
         
         // Если с запросом прищли данные сравнений, 
-        if ($data_comparisons){
+        if ($data_comparisons['datas_products_left'] || $data_comparisons['datas_products_right']){
+            $is_comare_all = $this->indexPresenter->changeStatusProducts($data_comparisons['datas_products_left'], $data_comparisons['datas_products_right']);
         }
 
         $filters = new Filters();
@@ -311,7 +312,7 @@ class ProductController extends Controller {
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
-        return $this->getRequestWithUpdateList($source, $filters, $is_admin);
+        return $this->getRequestWithUpdateList($source, $filters, $is_admin, true, $is_comare_all);
     }
 
     /**
@@ -535,7 +536,7 @@ class ProductController extends Controller {
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
     
-    private function getRequestWithUpdateList(Source $source = null, Filters $filters = null, bool $is_admin = null, $is_update_list = true) {
+    private function getRequestWithUpdateList(Source $source = null, Filters $filters = null, bool $is_admin = null, $is_update_list = true, $is_compare_all=false) {
         if (!$filters){
             $filters = new Filters();
             $filters->loadFromSession();
@@ -593,6 +594,7 @@ class ProductController extends Controller {
             'other' => [
                 'id_block_count' => $html_block_count,
                 'id_paginator' => $html_paginator,
+                'is_compare_all' => $is_compare_all
             ]
         ];
     }
