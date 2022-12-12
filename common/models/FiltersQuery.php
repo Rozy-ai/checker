@@ -60,9 +60,12 @@ class FiltersQuery extends \yii\db\ActiveQuery{
                     break;
             }
         }
-        if ($source_table2_name){
-            $this->innerJoin($source_table2_name, $source_table2_name.'.asin = '.$source_table_name.'.asin');
-        }
+        //Условие на существование ASIN в таблице $source_table2_name
+        //Изначально было. Но потом исправили косяк при импорте и оно больше не нужно
+        //
+        //if ($source_table2_name){
+        //    $this->andWhere("`$source_table_name`.`asin` in (select `$source_table2_name`.`asin` from `$source_table2_name`)");
+        //}
     }
     
     public function addTable(string $table_name){

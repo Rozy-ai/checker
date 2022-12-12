@@ -223,7 +223,6 @@ class Product extends \yii\db\ActiveRecord {
 
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where(['and',
-            //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
             $q->getSqlAsin($source_table_name, $filters->f_asin),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
@@ -269,10 +268,9 @@ class Product extends \yii\db\ActiveRecord {
             $q->offset($offset);
         }
 
-        $q->addGroupBy($source_table_name . '.id'); // Это для того чтобы отсечь дубли
-
         $list = $q->all();
-
+    //print_r($q->createCommand()->getRawSql());
+    //exit;
         foreach ($list as $k => $product) {
             $product->source = $source;
             $product->baseInfo = $product->info;
@@ -313,8 +311,6 @@ class Product extends \yii\db\ActiveRecord {
 
         // Получим все необходимые join
         $q->addJoins($source_table_name, $source_table2_name);
-
-        $q->addGroupBy($source_table_name . '.id');
 
         return $q->count();
     }

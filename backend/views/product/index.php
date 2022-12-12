@@ -231,8 +231,10 @@ $local_import_stat = null;
                 <? if ($f_detail_view || $is_admin): ?>
                 <div class="form-group _col-sm-3" >
                     <select name="f_detail_view" id="id_f_detail_view" class="form-control ">
-                        <option value="0" <?= ($f_detail_view) ? '' : 'selected' ?>>Кратко</option>
-                        <option value="1" <?= ($f_detail_view) ? 'selected' : '' ?>>Подробно</option>
+                        <option value="0" <?= ($f_detail_view === 0)? 'selected':'' ?>>Кратко</option>
+                        <option value="1" <?= ($f_detail_view === 1)? 'selected':'' ?>>Подробно</option>
+                        <option value="2" <?= ($f_detail_view === 2)? 'selected':'' ?>>Кратко со списком</option>
+                        <option value="3" <?= ($f_detail_view === 3)? 'selected':'' ?>>Подробно со списком</option> 
                     </select>
                 </div>
 
@@ -259,7 +261,7 @@ $local_import_stat = null;
                 </div>
                 <?php endif; ?>    
                 <?php 
-                if (1): 
+                if (0): 
                 ?>
                 <div class="custom-control custom-switch">
                     <input 
@@ -269,7 +271,7 @@ $local_import_stat = null;
                         name="f_hide_mode"
                         <?= $f_hide_mode?'checked' : '' ?>
                     >
-                    
+
                     <label 
                         class="custom-control-label"  
                         for="id_f_hide_mode"
@@ -354,7 +356,7 @@ $local_import_stat = null;
         <div class="col" style="text-align: right;max-width: 200px;">
             <div class="product-list-item__del -del-all js-del-all-visible-items">удалить все</div>
             <div class="product-list-item__reset-compare -compare-all js-reset-compare-all-visible-items">отменить все</div>
-
+            <div class="product-list-item__reset-compare -compare-all js-show_products_all">показать все</div>
         </div>
     </div>
 
