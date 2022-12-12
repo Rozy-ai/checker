@@ -223,7 +223,8 @@ class Product extends \yii\db\ActiveRecord {
 
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where(['and',
-            $q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
+            //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
+            $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
             $q->getSqlAsin($source_table_name, $filters->f_asin),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
             $q->getSqlTille($source_table_name, $filters->f_title),
@@ -295,7 +296,8 @@ class Product extends \yii\db\ActiveRecord {
 
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where(['and',
-            $q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
+            //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
+            $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
             $q->getSqlAsin($source_table_name, $filters->f_asin),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
             $q->getSqlTille($source_table_name, $filters->f_title),

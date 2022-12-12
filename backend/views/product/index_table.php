@@ -76,7 +76,7 @@ use common\models\Comparison;
                 <span id="id_td1_price"><?= ($item->baseInfo[$default_price_name]) ?: '-' ?></span>
             </div>
 
-            <div class="product-list-item__data"><span>Brand:</span><br><?= $item->baseInfo["Brand_R"] ?></div>
+            <div class="product-list-item__data"><span>Brand:</span><br><?= $item->baseInfo["Brand_R"]?:$item->baseInfo['Manufacturer']; ?></div>
             <div class="product-list-item__data"><span>FBA/FBM:</span><br><span id="id_td1_fba"><?= $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"] ?></span></div>
             <? if ($is_admin):?> 
             <div class="product-list-item__data"><span>Profile:</span><br><?= $item->profile ?></div>

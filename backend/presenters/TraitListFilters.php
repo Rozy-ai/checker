@@ -170,17 +170,29 @@ trait TraitListFilters {
         
         $q->addTable('comparisons');
         $q->addJoins($this->source_table_name);
-        
+        $q->indexBy('status');
         //$q = $this->source_table_class::find()
         //->select(['comparisons.status', 'COUNT(*) as count_statuses'])
         //->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
         //->asArray()
         //->groupBy('comparisons.status');
-
-        $data = $q->all();
         
-        // Приведем к нужному формату:
+        $data = $q->all();
+        $data['NOCOMPARE']=$data[null];
+        
+        // Приведем к нужному формату(Важен порядок):
         $list_comparisons = Comparison::getFilterStatuses();
+        $out = [];
+        foreach ($list_comparisons as $key => $val){
+            
+            if ($data[$key]){
+                $out[$key] = [
+                        'name' => $val['name'],
+                        'count' => $data[$key]['count_statuses']
+                    ];
+            }
+        }
+        /*
         $out = [];
         foreach ($data as $val){
             if ($val['status'] == null){
@@ -191,7 +203,7 @@ trait TraitListFilters {
                 'count' => $val['count_statuses']
             ];
         }
-
+        */
         return $out;
     }
 

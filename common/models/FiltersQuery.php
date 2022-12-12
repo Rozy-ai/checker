@@ -89,6 +89,26 @@ class FiltersQuery extends \yii\db\ActiveQuery{
         }
     }
     
+
+    /**
+     * Фильтр проверки на отсутствие товара в таблице hidden_items
+     * !!! Фильтр по правым товарам
+     * 
+     * @param type $id_source
+     * @param type $f_comparison_status
+     * @return type
+     */
+    public function getSqlIsMissingHiddenItems($id_source, $f_comparison_status){
+        if ($id_source && (!$f_comparison_status || $f_comparison_status === 'NOCOMPARE')){
+            $this->addTable('hidden_items');
+            return ['or', 
+                ['IS','hidden_items.p_id', null],
+                ['<>','hidden_items.source_id', $f_source]];            
+        } else {
+            return [];
+        }
+    }
+    
     /**
      * Фильтр поиска по id
      * 
