@@ -10,6 +10,7 @@ import {
 } from './classes/Filters.js'
 
 import {
+    CLASS_BLOCK_PRODUCT_MIN,
     CLASS_BLOCK_BUTTON_CLOSE,
     CLASS_BLOCK_PRODUCT,
     ProductBlock
@@ -49,13 +50,11 @@ function main(){
     let listDataForServer = new ListDataForServer();
     let $body = $('body');
     
-    let f_detail_view = Filters.getFilterDetailView();
-    if (f_detail_view === '2' || f_detail_view === '3'){
-        $(CLASS_BLOCK_PRODUCT).each(function(index){
-            let product_block = new ProductBlock($(this));
-            //product_block.minimize();
-        });
-    }
+    $body.on('click', CLASS_BLOCK_PRODUCT_MIN, function (e) {
+        e.stopPropagation();
+        let blockProductRight = new ProductBlock($(this));
+        blockProductRight.maximize();
+    });
     
     /**
      * Присваивание левому товару статуса STATUS_NOT_FOUND (левый крестик )
@@ -65,12 +64,10 @@ function main(){
         let $this = $(this);
         let data_button = $this.data();
         let filters = new Filters();
-        let is_mode_hide = filters.getModeHide();
-         
+        let is_mode_hide = filters.getModeHide();         
 
         if (filters.getModeBatch() === true ){
             let productBlock = ProductBlock.getFromChild($this);
-            productBlock.minimize();
             let productLeft = productBlock.getProductLeft();
             
             if (productBlock.isHaveStatusProductsRight()){
@@ -293,7 +290,12 @@ function main(){
         e.stopPropagation();
         let $this = $(this);
         let blockProduct = ProductBlock.getFromChild($this);
-        blockProduct.dom.hide();
+        
+        if (Filters.getModeMinimize()){
+            blockProduct.minimize();
+        }else {
+            blockProduct.dom.hide();
+        }
     });
     
     /**

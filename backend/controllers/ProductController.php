@@ -586,7 +586,7 @@ class ProductController extends Controller {
                 'f_comparison_status' => $filters->f_comparison_status,
                 'f_profile' => $filters->f_profile,
                 'f_no_compare' => $filters->f_no_compare,
-                'f_is_detail_view' => $filters->f_detail_view,
+                'f_detail_view' => $filters->f_detail_view,
                 'f_number_page_current' => $filters->f_number_page_current,
                 'count_pages' => $count_pages,
                 'source' => $source,

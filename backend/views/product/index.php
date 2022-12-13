@@ -231,10 +231,10 @@ $local_import_stat = null;
                 <? if ($f_detail_view || $is_admin): ?>
                 <div class="form-group _col-sm-3" >
                     <select name="f_detail_view" id="id_f_detail_view" class="form-control ">
-                        <option value="0" <?= ($f_detail_view === 0)? 'selected':'' ?>>Кратко</option>
-                        <option value="1" <?= ($f_detail_view === 1)? 'selected':'' ?>>Подробно</option>
-                        <option value="2" <?= ($f_detail_view === 2)? 'selected':'' ?>>Кратко со списком</option>
-                        <option value="3" <?= ($f_detail_view === 3)? 'selected':'' ?>>Подробно со списком</option> 
+                        <option value="0" <?= ($f_detail_view === '0')? 'selected':'' ?>>Кратко</option>
+                        <option value="1" <?= ($f_detail_view === '1')? 'selected':'' ?>>Подробно</option>
+                        <option value="2" <?= ($f_detail_view === '2')? 'selected':'' ?>>Кратко со списком</option>
+                        <option value="3" <?= ($f_detail_view === '3')? 'selected':'' ?>>Подробно со списком</option> 
                     </select>
                 </div>
 
@@ -323,7 +323,7 @@ $local_import_stat = null;
             'f_comparison_status' => $f_comparison_status,
             'f_profile' => $f_profile,
             'f_no_compare' => $f_no_compare,
-            'f_is_detail_view' => $f_detail_view,
+            'f_detail_view' => $f_detail_view,
             'source' => $source,
         ]);
         ?>

@@ -19,7 +19,7 @@ use yii\base\Widget;
 class TopSlider extends Widget {
     private $_options = [];
     private $is_admin;
-    public $is_detail_view;
+    public $detail_view;
     public $is_hide_red = false;
     public $number_page_current;
     public $product;
@@ -130,7 +130,7 @@ class TopSlider extends Widget {
 
         $items = $this->product->addInfo;
 
-        return $this->render(($this->is_detail_view) ? 'slider-v-2' : 'slider-v-1', [
+        return $this->render(($this->detail_view == 1 || $this->detail_view == 3) ? 'slider-v-2' : 'slider-v-1', [
             'is_admin'              => $this->is_admin,
             'number_page_current'   => $this->number_page_current,
             'option_class_slider'   => $this->_options['class'],

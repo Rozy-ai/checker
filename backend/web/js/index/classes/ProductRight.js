@@ -42,7 +42,7 @@ export class ProductRight extends DomWithData{
         switch (status){
             case 'mismatch':
                 this.dom.find(CLASS_BUTTON_YELLOY).removeClass('-hover');
-                this.dom.find(CLASS_BUTTON_RED).addClass('-hover');                
+                this.dom.find(CLASS_BUTTON_RED).addClass('-hover');
                 break;
             case 'pre_match':
                 this.dom.find(CLASS_BUTTON_RED).removeClass('-hover');

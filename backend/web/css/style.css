@@ -2122,6 +2122,22 @@ table.tableInfo th {
   width: 163px;
 
 }
+.block_minimize{
+}
+
+.products-list__td1_minimize{
+    width: calc(20% + 50px);
+    min-width: 250px;
+    text-align: left;
+}
+
+.products-list__td3_minimize{
+    width: 100%;
+}
+
+.products-list__td4_minimize{
+    width: 163px;
+}
 
 .products-list__slider {
   width: 100%;

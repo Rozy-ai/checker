@@ -14,9 +14,6 @@ export class Filters {
      */
     getModeHide(){
         return !$(CLASS_BUTTON_SHOW_PRODUCTS_ALL).hasClass(CLASS_BUTTON_SHOW_PRODUCTS_ALL_ACTIVE);
-        //return true;
-        //let $mode = $(FILTER_HIDE_MODE);
-        //return $mode.is(':checked');
     }
   
     /**
@@ -37,6 +34,16 @@ export class Filters {
     }
     
     /**
+     * Аткивно ли отображение списком
+     * 
+     * @returns {boolean}
+     */
+    static getModeMinimize(){
+        let val = $(ID_FILTER_DETAIL_VIEW).val();
+        return (val == 2 || val == 3);
+    }
+    
+    /**
      * Включен ли режим скрытия правых товаров после выбора
      * 
      * @returns {Boolean}
@@ -45,10 +52,5 @@ export class Filters {
         return true;
         //let $mode = $(FILTER_BATCH_MODE);
         //return $mode.is(':checked');
-    }
-    
-    static getFilterDetailView(){
-        
-        return $(ID_FILTER_DETAIL_VIEW).val();
     }
 }

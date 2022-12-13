@@ -6,7 +6,7 @@
  * @var string $f_comparison_status
  * @var string $f_profile
  * @var string $f_no_compare
- * @var atring $f_is_detail_view
+ * @var atring $f_detail_view
  * @var atring $f_profile
  * 
  */
@@ -54,37 +54,50 @@ use common\models\Comparison;
         -$list_comparison_statuses[Comparison::STATUS_OTHER];
     
     $counted = $item->aggregated ? $item->aggregated->counted : 0;
-    $processed = "{$counted}/" . count($item->getAddInfo());           
+    $processed = "{$counted}/" . count($item->getAddInfo());
+    
+    
+    $bsr = number_format($item->baseInfo["Sales Rank: Current"], 0, '', ' ');
+    $sales30 = $item->baseInfo["Sales Rank: Drops last 30 days"];
+    $price = ($item->baseInfo[$default_price_name]) ?: '-';
+    $fba = $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"];
+    
+    $td2_asin = (!$is_admin && strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin;
+    $td2_toptext = Html::encode($item->baseInfo['Categories: Root']);
+    $td3_title = $item->baseInfo['Title'];
+    
+    $is_minimize = ($f_detail_view == 2 || $f_detail_view == 3);
     ?>
     
 
-    <!-- ITEM -->
+    <!-- ITEM полное отображение-->
     <tr
-        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item"
+        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_maximize <?=$is_minimize?'d-none':''?>"
         data-pid="<?= $item->id ?>"
         data-source_id="<?= $source_id ?>"
-
-        >
+    >
+        <?php
+        ?>
         <td class="products-list__td1">
-            <div class="product-list-item__data"><span>BSR:</span><br><span id="id_td1_bsr"><?= number_format($item->baseInfo["Sales Rank: Current"], 0, '', ' '); ?></span></div>
-            <div class="product-list-item__data"><span>Sales30:</span><br><span id="id_td1_sales30"><?= $item->baseInfo["Sales Rank: Drops last 30 days"] ?></span></div>
+            <div class="product-list-item__data"><span>BSR:</span><br><span id="id_td1_bsr"><?=$bsr?></span></div>
+            <div class="product-list-item__data"><span>Sales30:</span><br><span id="id_td1_sales30"><?=$sales30?></span></div>
             <div
                 class="product-list-item__data js-addition-info-for-price"
                 data-addition_info_for_price='<?= $item->addition_info_for_price(); ?>'
                 >
                 <span>Price:</span><br>
-                <span id="id_td1_price"><?= ($item->baseInfo[$default_price_name]) ?: '-' ?></span>
+                <span id="id_td1_price"><?=$price?></span>
             </div>
 
             <div class="product-list-item__data"><span>Brand:</span><br><?= $item->baseInfo["Brand_R"]?:$item->baseInfo['Manufacturer']; ?></div>
-            <div class="product-list-item__data"><span>FBA/FBM:</span><br><span id="id_td1_fba"><?= $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"] ?></span></div>
+            <div class="product-list-item__data"><span>FBA/FBM:</span><br><span id="id_td1_fba"><?=$fba?></span></div>
             <? if ($is_admin):?> 
             <div class="product-list-item__data"><span>Profile:</span><br><?= $item->profile ?></div>
             <? endif;?>
 
         </td>
         <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
-            <div id='id_td2_asin'><?= (!$is_admin && strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin ?></div>
+            <div id='id_td2_asin'><?= $td2_asin ?></div>
             <div class="products-list__img-wrapper"
                 data-id_source="<?=$source_id?>"
                 data-id_product="<?=$item->id?>"
@@ -120,7 +133,7 @@ use common\models\Comparison;
 
                         <div class="slider__left-item__fade -top">
                             <? if ($is_admin):?>
-                            <div id="id_td2_toptext" class="slider__left-item-img-top-text"><?= Html::encode($item->baseInfo['Categories: Root']) ?></div>
+                            <div id="id_td2_toptext" class="slider__left-item-img-top-text"><?=$td2_toptext?></div>
                             <? endif;?>
                         </div>
 
@@ -167,14 +180,12 @@ use common\models\Comparison;
 
             </div>
 
-
         </td>
         <td class="products-list__td3">
-
-            <div class="products-list__slider-wrapper <?= (int) $f_is_detail_view === 1 ? '-v-2' : '' ?> js-slider-root">
+            <div class="products-list__slider-wrapper <?=($f_detail_view == 1 || $f_detail_view == 3)?'-v-2':''?> js-slider-root"
                 <?php
                 echo TopSlider::widget([
-                    'is_detail_view' => $f_is_detail_view,
+                    'detail_view' => $f_detail_view,
                     'number_page_current' => $number_page_current,
                     'product' => $item,
                     'f_comparison_status' => $f_comparison_status,
@@ -265,7 +276,7 @@ use common\models\Comparison;
 
 
             <div class="actions_for_right-visible-items">
-                <?php if (!(int)$f_is_detail_view && $f_comparison_status === 'NOCOMPARE'):?>
+                <?php if (($f_detail_view == 0 || $f_detail_view == 2) && $f_comparison_status === 'NOCOMPARE'):?>
                     <div
                         title="Только видимые"
                         class="[ button-x-2 ] product-list-item__btn-red -change-2"
@@ -284,5 +295,39 @@ use common\models\Comparison;
         </td>
     </tr>
     <!-- / ITEM -->
+    
+    <!-- ITEM свернутое отображение-->
+    <tr 
+        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_minimize <?=$is_minimize?'':'d-none'?>"
+        data-pid="<?= $item->id ?>"
+    >
+        <td colspan="2" class="products-list__td1_minimize text-nowrap">
+            <div class="d-inline-block" style="text-align: center">
+                <div class="block_minimize_data d-inline-block"><span>BSR</span><br><?=$bsr?></div>
+                <div class="block_minimize_data d-inline-block"><span>Sales30</span><br><?=$sales30?></div>
+                <div class="block_minimize_data d-inline-block"><span>Price</span><br><?=$price?></div>
+                <div class="block_minimize_data d-inline-block"><span>FBA/FBM</span><br><?=$fba?></div>
+            </div>
+        </td>
+        <td class="products-list__td3_minimize">
+            <div class="block_minimize_wrapper">
+                <p class="minimize_row"><span class=minimize_row_asin><?=$td2_asin?></span>  <span><?=$td2_toptext?></span></p>
+                <p class="minimize_wrapper_title"><?=$td3_title?></p>               
+            </div>
+        </td>
+        <td class="products-list__td4 text-nowrap">
+            <div class="product-list-item__data -first-margin block_statistic">
+                <div class="product-list-item__compare-statistics">
+                    <span class="js-pre_match pre_match"><?=$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]?></span>
+                    <span class="js-match match"><?=$list_comparison_statuses[Comparison::STATUS_MATCH]?></span>
+                    <span class="js-mismatch mismatch"><?=$list_comparison_statuses[Comparison::STATUS_MISMATCH]?></span>
+                    <span class="js-other other"><?=$list_comparison_statuses[Comparison::STATUS_OTHER]?></span>
+                    <span class="js-nocompare nocompare"><?=$list_comparison_statuses[Comparison::STATUS_NOCOMPARE]?></span>
+                </div>
+            </div>
+        </td>        
+    </tr>
+    <!-- /ITEM свернутое отображение-->
+    
     <? endforeach;?>
 </table>
