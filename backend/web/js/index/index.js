@@ -286,20 +286,15 @@ function main(){
     /**
      * Нажатие на крестик в правом верхнем углу блока товара
      */
-    $(CLASS_BLOCK_BUTTON_CLOSE).on('click', function (e) {
+    $(document).on('click', CLASS_BLOCK_BUTTON_CLOSE, function(e){
+    //$(CLASS_BLOCK_BUTTON_CLOSE).on('click', function (e) {
         e.stopPropagation();
-        let $this = $(this);
-        let blockProduct = ProductBlock.getFromChild($this);
-        
-        if (Filters.getModeMinimize()){
-            blockProduct.minimize();
-        }else {
-            blockProduct.dom.hide();
-        }
+        let blockProduct = ProductBlock.getFromChild($(this));
+        blockProduct.minimize();
     });
     
     /**
-     * Переключатель режима отображения
+     * Копка показать все которая внизу (она работает как переключаетель режима скрытия после выбора товара)
      */
     $(CLASS_BUTTON_SHOW_PRODUCTS_ALL).on('click', function (e) {
         e.stopPropagation();
@@ -322,59 +317,38 @@ function main(){
     
     $(CLASS_ITEM_PRE_MATCH).on('click', function (e) {
         e.stopPropagation();
-        let $parent = $(this).parents('.product-list__product-list-item');
-        showProductsRight($parent ,'pre_match');
+        let blockProducts = ProductBlock.getFromChild($(this));
+        blockProducts.showProductsRight('pre_match');
     });
     
     $(CLASS_ITEM_MATCH).on('click', function (e) {
         e.stopPropagation();
-        let $parent = $(this).parents('.product-list__product-list-item');
-        showProductsRight($parent, 'match');
+        let blockProducts = ProductBlock.getFromChild($(this));
+        blockProducts.showProductsRight('match');
     });
     
     $(CLASS_ITEM_MISMATCH).on('click', function (e) {
         e.stopPropagation();
-        let $parent = $(this).parents('.product-list__product-list-item');
-        showProductsRight($parent, 'mismatch');
+        let blockProducts = ProductBlock.getFromChild($(this));
+        blockProducts.showProductsRight('mismatch');
     });
     
     $(CLASS_ITEM_OTHER).on('click', function (e) {
         e.stopPropagation();
-        let $parent = $(this).parents('.product-list__product-list-item');
-        showProductsRight($parent, 'other');
+        let blockProducts = ProductBlock.getFromChild($(this));
+        blockProducts.showProductsRight('other');        
     });
 
     $(CLASS_ITEM_NOCOMPARE).on('click', function (e) {
         e.stopPropagation();
-        let $parent = $(this).parents('.product-list__product-list-item');
-        showProductsRight($parent, 'nocompare');
+        let blockProducts = ProductBlock.getFromChild($(this));
+        blockProducts.showProductsRight('nocompare');
     });
     
     /**************************************************************************
      *** Вспомогательные функции
      **************************************************************************/
-    
-    /**
-     * Оставить правые товары видимыми в блоке только отмеченные данным классом
-     * @param {object}    $block_items
-     * @param {string} class_marker
-     * @returns {undefined}
-     */
-    function showProductsRight ($block_items, class_marker) {
-        let $items = $block_items.find('.slider__slider-item');
-        
-        $items.each(function(index, item){
-            let $item = $(item);
-            let $marker = $item.find('.color-marker');
-            
-            if ($marker.hasClass(class_marker)) {
-                $item.show();
-            } else {
-                $item.hide();
-            }
-        });
-    };
-    
+      
     /**
      * Отправка на сервер нового значения фильтра
      * При успешном ответе происходит обновление списка и инициализация слайдера на котором отображены правые товары
@@ -386,6 +360,7 @@ function main(){
     function addActionChangeFilter(id_filter, name_filter) {
         let filter = $('#' + id_filter);
         filter.on('change', function (e) {
+        //$(document).on('change', '#'+id_filter, function(e){
             e.stopPropagation();
             let value;
             switch (id_filter){
@@ -409,6 +384,8 @@ function main(){
                             let html = response.html_index_table;
                             var container = $("#id_table_container");
                             container.html(html);
+                            //lib.slider_init();
+                            location.reload(); //Без этого подпупливает js и css
                         }
                         if (response.is_compare_all === false){
                             alert('Не все сравнения удалось сохранить');

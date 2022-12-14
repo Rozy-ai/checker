@@ -64,7 +64,10 @@ use common\models\Comparison;
     
     $td2_asin = (!$is_admin && strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin;
     $td2_toptext = Html::encode($item->baseInfo['Categories: Root']);
+    $td2_brand = $item->baseInfo['Brand'] ?: $item->baseInfo['Manufacturer'];
+            
     $td3_title = $item->baseInfo['Title'];
+    
     
     $is_minimize = ($f_detail_view == 2 || $f_detail_view == 3);
     ?>
@@ -89,7 +92,7 @@ use common\models\Comparison;
                 <span id="id_td1_price"><?=$price?></span>
             </div>
 
-            <div class="product-list-item__data"><span>Brand:</span><br><?= $item->baseInfo["Brand_R"]?:$item->baseInfo['Manufacturer']; ?></div>
+            <div class="product-list-item__data"><span>Brand_R:</span><br><?= $item->baseInfo["Brand_R"]?:"-"; ?></div>
             <div class="product-list-item__data"><span>FBA/FBM:</span><br><span id="id_td1_fba"><?=$fba?></span></div>
             <? if ($is_admin):?> 
             <div class="product-list-item__data"><span>Profile:</span><br><?= $item->profile ?></div>
@@ -103,15 +106,13 @@ use common\models\Comparison;
                 data-id_product="<?=$item->id?>"
             >
                 <?php
-                $title = '';
                 $brand = $item->baseInfo['Brand'];
                 $manufacturer = $item->baseInfo['Manufacturer'];
                 $categoriesTree = $item->baseInfo["Categories: Tree"];
-
-                if (empty($manufacturer)) {
-                    $title .= 'Brand: ' . Html::encode($brand);
+                if (!empty($brand)) {
+                    $title = 'Brand: ' . Html::encode($td2_brand);
                 } else {
-                    $title .= 'Manufacturer: ' . Html::encode($manufacturer);
+                    $title = $manufacturer?'Manufacturer: ' . Html::encode($manufacturer):'';
                 }
                 ?>
                 <div
@@ -140,7 +141,6 @@ use common\models\Comparison;
 
                         <div class="slider__left-item__fade -bottom">
                             <div class="slider__left-item__text">
-                                <?//= $base['Sales Rank: Current'] .'/'. $base['Sales Rank: Drops last 30 days'] ?>
                                 <?= Html::encode($item->baseInfo['Brand']) ?>
 
                                 <div
@@ -297,12 +297,16 @@ use common\models\Comparison;
     <!-- / ITEM -->
     
     <!-- ITEM свернутое отображение-->
+    
     <tr 
         class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_minimize <?=$is_minimize?'':'d-none'?>"
         data-pid="<?= $item->id ?>"
     >
         <td colspan="2" class="products-list__td1_minimize text-nowrap">
             <div class="d-inline-block" style="text-align: center">
+                <? if ((count($images_left) > 0)):?>
+                <div class="slider__left-item-other-img_minimize d-inline-block" style="background-image: url('<?= $images_left[0] ?>')"></div>
+                <? endif;?>
                 <div class="block_minimize_data d-inline-block"><span>BSR</span><br><?=$bsr?></div>
                 <div class="block_minimize_data d-inline-block"><span>Sales30</span><br><?=$sales30?></div>
                 <div class="block_minimize_data d-inline-block"><span>Price</span><br><?=$price?></div>
@@ -311,7 +315,7 @@ use common\models\Comparison;
         </td>
         <td class="products-list__td3_minimize">
             <div class="block_minimize_wrapper">
-                <p class="minimize_row"><span class=minimize_row_asin><?=$td2_asin?></span>  <span><?=$td2_toptext?></span></p>
+                <p class="minimize_row"><span class=minimize_row_asin><?=$td2_asin?></span>  <span><?=$td2_toptext?></span> <span><?=$brand?"/ $brand":($manufacturer?"/ $manufacturer":'') ?></span></p>
                 <p class="minimize_wrapper_title"><?=$td3_title?></p>               
             </div>
         </td>

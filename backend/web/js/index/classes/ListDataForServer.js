@@ -7,7 +7,7 @@ import {
 export class ListDataForServer{
     datas_products_left  = [];
     datas_products_right = [];
-    //datas_products_to_delete = [];
+    datas_products_left_delete = [];
     
     /**
      * Запомнить выбор от правых товаров (Элементов)
@@ -37,7 +37,7 @@ export class ListDataForServer{
      * @returns {boolean} Является ли товар новым
      */
     addLeft(data_product){
-        // Сморим, есть ли уже этот элемент в массиве правых товаров, ожидающем отправку
+        // Сморим, есть ли уже этот элемент в массиве левых товаров, ожидающем отправку
         for (let i = this.datas_products_left.length - 1; i >= 0; --i) {
             let data = this.datas_products_left[i];
             if (data.id_product === data_product.id_product && data.id_source === data_product.id_source) {
@@ -48,6 +48,27 @@ export class ListDataForServer{
 
         // Если эмемента в массиве нет то запоминаем в массив элемент
         this.datas_products_left.push(data_product);
+        return true;
+    }
+    
+    /**
+     * Запомнить выбор левых на удаление
+     * 
+     * @param {type} data_product data данные левых товаров на удаление
+     * @returns {Boolean} Если запись в массив была новая, то true
+     */
+    addLeftDelete(data_product){
+        // Сморим, есть ли уже этот элемент в массиве левых товаров на удадение, ожидающем отправку
+        for (let i = this.datas_products_left_delete.length - 1; i >= 0; --i) {
+            let data = this.datas_products_left_delete[i];
+            if (data.id_product === data_product.id_product && data.id_source === data_product.id_source) {
+                this.datas_products_left_delete[i] = data_product; //Перезаписать
+                return false;
+            }
+        }
+        
+        // Если эмемента в массиве на удаление нет то запоминаем в массив элемент
+        this.datas_products_left_delete.push(data_product);
         return true;
     }
     

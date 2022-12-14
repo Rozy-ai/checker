@@ -2230,26 +2230,26 @@ table.tableInfo th {
   line-height: 1.0;
 }
 .product-list-item__compare-statistics span.pre_match{
-  color: white;
-  background-color: #D7C000;
+  color: #D7C000;
+  background-color: white;
   border: 1px solid #D7C000;
   position: relative;
 }
 .product-list-item__compare-statistics span.match{
-  color: white;
-  background-color: #34B71E;
+  color: #34B71E;
+  background-color: white;
   border: 1px solid #34B71E;
   position: relative;
 }
 .product-list-item__compare-statistics span.mismatch{
-  color: white;
-  background-color: #c13737;
+  color: #c13737;
+  background-color: white;
   border: 1px solid #c13737;
   position: relative;
 }
 .product-list-item__compare-statistics span.other{
-  color: white;
-  background-color: #377ccd;
+  color: #377ccd;
+  background-color: white;
   border: 1px solid #377ccd;
   position: relative;
 }
@@ -2578,6 +2578,15 @@ table.tableInfo th {
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
+}
+
+.slider__left-item-other-img_minimize {
+  width: 38px;
+  height: 38px;
+  border: 1px solid red;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .slider__right-item-other-imgs {

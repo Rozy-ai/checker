@@ -31,7 +31,7 @@ export const CLASS_BLOCK_PRODUCT = '.product-list__product-list-item';
 const CLASS_HIDE = 'd-none';
 const CLASS_BLOCK_PRODUCT_MAX = '.block_maximize';
 export const CLASS_BLOCK_PRODUCT_MIN = '.block_minimize';
-  
+export const CLASS_BLOCK_BUTTON_DELETE = 'js-del-item';
     
 export class ProductBlock extends DomWithData{
     
@@ -130,5 +130,22 @@ export class ProductBlock extends DomWithData{
         
         let pid = this.dom.data('pid');
         $(CLASS_BLOCK_PRODUCT_MAX+`[data-pid=${pid}]`).removeClass(CLASS_HIDE);
+    }
+    
+    /**
+     * Зделать правые товары видимыми в блоке только отмеченные маркером с данным классом
+     * 
+     * @param {string} class_marker класс маркера цвета, который нужно оставить 
+     * @returns {undefined}
+     */
+    showProductsRight (class_marker) {
+        let items = this.getProductsRight();
+        for (let item of items){
+            if (item.dom.find('.color-marker').hasClass(class_marker)){
+                item.dom.show();
+            } else {
+                item.dom.hide();
+            }
+        };
     }
 };
