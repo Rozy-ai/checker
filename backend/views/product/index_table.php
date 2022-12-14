@@ -303,14 +303,17 @@ use common\models\Comparison;
         data-pid="<?= $item->id ?>"
     >
         <td colspan="2" class="products-list__td1_minimize text-nowrap">
-            <div class="d-inline-block" style="text-align: center">
+            <div style="text-align: center">
                 <? if ((count($images_left) > 0)):?>
-                <div class="slider__left-item-other-img_minimize d-inline-block" style="background-image: url('<?= $images_left[0] ?>')"></div>
+                <div class="block_minimize_data_img d-inline-block">
+                    <div class="slider__left-item-other-img_minimize" style="background-image: url('<?= $images_left[0] ?>')"></div>
+                </div>
                 <? endif;?>
                 <div class="block_minimize_data d-inline-block"><span>BSR</span><br><?=$bsr?></div>
                 <div class="block_minimize_data d-inline-block"><span>Sales30</span><br><?=$sales30?></div>
                 <div class="block_minimize_data d-inline-block"><span>Price</span><br><?=$price?></div>
                 <div class="block_minimize_data d-inline-block"><span>FBA/FBM</span><br><?=$fba?></div>
+
             </div>
         </td>
         <td class="products-list__td3_minimize">

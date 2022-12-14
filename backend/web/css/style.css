@@ -3681,6 +3681,16 @@ a.a-black {
   color: #007bff;
 }
 
+.block_minimize_data{
+    width: 62px;
+    vertical-align: middle;
+}
+
+.block_minimize_data_img{
+    width: 35px;
+    vertical-align: middle;
+}
+
 .block_minimize_data span{
   color: #377CCD;
   padding-right: 5px;
