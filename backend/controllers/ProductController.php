@@ -145,7 +145,7 @@ class ProductController extends Controller {
         $this->productPresenter = $productPresenter;
     }
 
-    public function actionIndex() {
+    public function actionIndex($src = null) {
         $params = $params = \Yii::$app->request->get();
         
         $filters = new Filters();
@@ -153,7 +153,7 @@ class ProductController extends Controller {
         $source = null;
         // Если страница загружвется в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
-            $source = Source::getById($filters->f_source);
+            $source = Source::getById($src/*$filters->f_source*/);
             
             //  Если в запросе указан номер страницы, то установим его:
             if (isset($params['page'])){
@@ -167,7 +167,7 @@ class ProductController extends Controller {
         } else {
             // Если страница загружается в первый раз то номер страницы нафиг не нужен, ибо по умолчанию установится в 1
             $id_user = \Yii::$app->user->id;
-            $source = Source::getForUser($id_user);
+            $source = Source::getForUser($id_user, $src);
 
             if (!$source) {
                 throw new \yii\web\ForbiddenHttpException('Не удалось найти доступный источник');
@@ -188,7 +188,7 @@ class ProductController extends Controller {
         $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
 
         return $this->render('index', [
-            'f_source' => $filters->f_source,
+            'f_source' => $src ? $src : $filters->f_source,
             'f_profile' => $filters->f_profile,
             'f_count_products_on_page' => $filters->f_count_products_on_page,
             'f_number_page_current' => $filters->f_number_page_current,

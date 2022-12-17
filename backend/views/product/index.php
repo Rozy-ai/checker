@@ -42,6 +42,7 @@ use yii\helpers\Url;
 
 $this->title = $source->name . " | " . Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
+$this->params['breadcrumbs'][] = $source->name;
 
 $local_import_stat = null;
 
@@ -54,11 +55,11 @@ $local_import_stat = null;
         <div class="[ FILTER-ITEMS ] products__filter-items">
             <!--<form method="get" action="change-filters" id="id_products__filter-form">-->
             <div class="form-row js-title-and-source_selector">
-                <div class="form-group _col-sm-2" style="width: 128px">
+                <!--div class="form-group _col-sm-2" style="width: 128px">
                     <div class="titleName" style="margin-top: 5px;"><?= Html::encode(Yii::t('site', 'Products')) ?></div>
-                </div>
+                </div-->
 
-                <div class="form-group _col-sm-2" style="width: 128px">
+                <!--div class="form-group _col-sm-2" style="width: 128px">
                     <select name="f_source" id="id_f_source" class="form-control">
                         <?php
                         if ($list_source) {
@@ -69,7 +70,7 @@ $local_import_stat = null;
                         }
                         ?>
                     </select>
-                </div>
+                </div-->
 
                 <?php if ($is_admin) : ?>
                     <div class="form-group _col-sm-2" >

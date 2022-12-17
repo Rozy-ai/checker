@@ -22,6 +22,7 @@ echo Nav::widget([
         [
             'label' => 'Products',
             'url' => ['/product/index'],
+            'items' => $sourceItems,
             'visible' => !Yii::$app->getUser()->getIsGuest()
         ],
         [

@@ -90,6 +90,24 @@ class Source extends \yii\db\ActiveRecord {
 
         return self::getById(self::ids_source_free[0]);
     }
+    
+    /**
+     * Явдяется ли источник доступным для пользователя
+     * 
+     * @param type $user_id - id пользователя (если не указано, текуший)
+     * @return bool
+     */
+    public function checkAccess($user_id = 0) {
+        if (in_array($this->id, self::ids_source_free)) {
+            return true;
+        }
+        
+        $user_id = $user_id ? $user_id : \Yii::$app->user->id;
+        if(User__source_access::findByIdUser($user_id)) {
+            return true;
+        }
+        return false;
+    }        
 
     /**
      * Явдяется ли источник с данным id бесплатным
