@@ -10,6 +10,15 @@ p{
   margin: 0;
   padding: 0;
 }
+nav.hover-drop .dropdown .dropdown-menu {
+  margin-top: 0;
+}
+nav.hover-drop .dropdown:hover>.dropdown-menu {
+  display: block;
+}
+nav.hover-drop .dropdown>.dropdown-toggle:active {
+  pointer-events: none;
+}
 /*********************************************************************************************/
 .titleName {
   float: left;
