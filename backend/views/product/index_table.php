@@ -58,7 +58,12 @@ use common\models\Comparison;
     
     
     $bsr = number_format($item->baseInfo["Sales Rank: Current"], 0, '', ' ');
-    $sales30 = $item->baseInfo["Sales Rank: Drops last 30 days"];
+    $dropsValue = $item->baseInfo["Sales Rank: Drops last 30 days"];
+    $dropsTitle = 'Drops(30)';
+    if(isset($item->baseInfo["Sales Rank: Drops last 90 days"])) {
+        $dropsValue .= '/'. $item->baseInfo["Sales Rank: Drops last 90 days"];
+        $dropsTitle = 'Drops(30/90)';
+    }
     $price = ($item->baseInfo[$default_price_name]) ?: '-';
     $fba = $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"];
     
@@ -83,7 +88,7 @@ use common\models\Comparison;
         ?>
         <td class="products-list__td1">
             <div class="product-list-item__data"><span>BSR:</span><br><span id="id_td1_bsr"><?=$bsr?></span></div>
-            <div class="product-list-item__data"><span>Sales30:</span><br><span id="id_td1_sales30"><?=$sales30?></span></div>
+            <div class="product-list-item__data"><span><?= $dropsTitle ?>:</span><br><span id="id_td1_sales30"><?= $dropsValue ?></span></div>
             <div
                 class="product-list-item__data js-addition-info-for-price"
                 data-addition_info_for_price='<?= $item->addition_info_for_price(); ?>'
@@ -310,7 +315,7 @@ use common\models\Comparison;
                 </div>
                 <? endif;?>
                 <div class="block_minimize_data d-inline-block"><span>BSR</span><br><?=$bsr?></div>
-                <div class="block_minimize_data d-inline-block"><span>Sales30</span><br><?=$sales30?></div>
+                <div class="block_minimize_data d-inline-block"><span><?= $dropsTitle ?></span><br><?= $dropsValue ?></div>
                 <div class="block_minimize_data d-inline-block"><span>Price</span><br><?=$price?></div>
                 <div class="block_minimize_data d-inline-block"><span>FBA/FBM</span><br><?=$fba?></div>
 
