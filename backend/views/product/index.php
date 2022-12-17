@@ -43,6 +43,16 @@ use yii\helpers\Url;
 $this->title = $source->name . " | " . Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = $source->name;
+if ($is_admin) {
+    $this->params['breadcrumbs'][] = [
+        'label' => Html::dropDownList('f_profile', $f_profile, $list_profiles, ['id' => 'id_f_profile', 'class' => 'form-control form-control-sm']),
+        'encode' => false
+    ];
+}
+
+$this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показаны записи '
+    . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all . ' (' . $count_products_right .')</div> по: '
+    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, array_merge($list_count_products_on_page, ['ALL' => 'ВСЕ']), ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block', 'style' => 'width:auto']);
 
 $local_import_stat = null;
 
@@ -73,7 +83,7 @@ $local_import_stat = null;
                 </div-->
 
                 <?php if ($is_admin) : ?>
-                    <div class="form-group _col-sm-2" >
+                    <!--div class="form-group _col-sm-2" >
                         <select name="f_profile" id="id_f_profile" class="form-control ">
                             <?php
                             if ($list_profiles) {
@@ -84,11 +94,11 @@ $local_import_stat = null;
                             }
                             ?>
                         </select>
-                    </div>
+                    </div-->
                 <?php endif; ?>
 
                 <div class="form-group _col-sm-2 filter-items__last-update" >
-                    last update:<br>
+                    last update:
                     <?= $last_update->created ?? 'Нет данных' ?>
                 </div>
 
@@ -100,9 +110,9 @@ $local_import_stat = null;
                 if ($profile_path === '{{all}}')
                     $profile_path = 'Все';
                 ?>
-                <div class="cnt-items col-sm-6" id="id_block_count">Показаны записи <?= min($f_count_products_on_page, $count_products_all) ?> из <?= $count_products_all; ?> (<?= $count_products_right ?>) Источник <?= $source->name ?> / <?= $profile_path ?></div>
+                <!--div class="cnt-items col-sm-6" id="id_block_count">Показаны записи <?= min($f_count_products_on_page, $count_products_all) ?> из <?= $count_products_all; ?> (<?= $count_products_right ?>) Источник <?= $source->name ?> / <?= $profile_path ?></div-->
 
-                <div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">
+                <!--div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">
                     <span>Показывать по:&nbsp;&nbsp;</span>
                     <select name="f_count_products_on_page" id="id_f_count_products_on_page" class="form-control ">
                         <? foreach ($list_count_products_on_page as $pnl):?>
@@ -110,7 +120,7 @@ $local_import_stat = null;
                         <? endforeach;?>
                         <option value="ALL" <?= ($f_count_products_on_page === 'ALL') ? 'selected' : '' ?> >ВСЕ</option>
                     </select>
-                </div>
+                </div-->
             </div>
 
             <div class="form-row">

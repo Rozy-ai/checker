@@ -79,6 +79,8 @@ ProductsAsset::register($this);
 
     <section class="home">
       <div class="_container" style="padding: 0 17px;">
+      <div class="row">
+      <div class="col-sm">
         <div class="navigation">
 
           <?= Breadcrumbs::widget([
@@ -96,6 +98,11 @@ ProductsAsset::register($this);
               </ul>
             <? endif; ?>
 
+        </div>
+        </div>
+        <? if ($this->params['breadtail']) : ?>
+        <div class="col-sm text-right"><?= $this->params['breadtail'] ?></div>
+        <? endif ?>
         </div>
 
         <?= Alert::widget() ?>
