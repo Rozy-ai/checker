@@ -89,11 +89,11 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
         data-id_item="<?=$item->id?>"
         data-status="<?=$comparison->status?>"
         data-node_id="<?= $index + 1 ?>"
-        class="[ SLIDER-ITEM ] slider__slider-item <?= $number_page_current === $index ? '-current' : '' ?> item<?= (int) $number_node === $index ? " slick-current" : '' ?>"
+        class="[ SLIDER-ITEM ] slider__slider-item item"
     >
         <!--slider_images несодержит стилей. Добавлен для отображения TopSlider-->
         <div
-            class="slider-item__border slider_images <?= $number_page_current === $index ? '-current' : '' ?>"
+            class="slider-item__border slider_images"
   
             data-description_left   = "<?= htmlspecialchars($variables_left['description_left'])?>"
             data-description_right  = "<?= htmlspecialchars($variables_right['description_right'])?>"
@@ -166,10 +166,6 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
             </div>
 
         </div>
-
-        <a href="/product/view?id=<?= $product->id ?>&source_id=<?= $source_id ?>&node=<?= $index + 1 ?>&comparisons=<?= $f_comparison_status ?>&filter-items__profile=<?= $f_profile ?>"
-           class="[ PAGE-N ]  slider__page-n <?= $number_page_current === $index ? '-current' : '' ?>"><?= $index + 1 ?><?//=$cnt?></a>
-
     </div>
     <?php $cnt++; endforeach; ?>
 </div>
