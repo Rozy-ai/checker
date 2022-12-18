@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * @var string $list
  * @var string $local_import_stat
  * @var string $is_admin
@@ -41,8 +41,8 @@ use common\models\Comparison;
     <?php
     $images_left = preg_split("/[; ]/", $item->baseInfo["Image"]);
 
-    $images_left[0];
-    $images_left["Title"];
+    /*$images_left[0];
+    $images_left["Title"];*/
     $source_id = $item->source->id;
     
     $list_comparison_statuses = Comparison::getListStatusForStatictic($item->id);
@@ -186,7 +186,7 @@ use common\models\Comparison;
                 <?php
                 echo TopSlider::widget([
                     'detail_view' => $f_detail_view,
-                    'number_page_current' => $number_page_current,
+                    'number_page_current' => $number_page_current ?? 1,
                     'product' => $item,
                     'f_comparison_status' => $f_comparison_status,
                     'f_profile' => $f_profile,

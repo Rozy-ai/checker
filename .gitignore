@@ -39,3 +39,5 @@ phpunit.phar
 /backend/tmp/
 checker.sql
 composer.lock
+
+/backend/web/assets
