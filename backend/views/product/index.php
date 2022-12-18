@@ -4,24 +4,24 @@ use backend\components\TableView;
 use backend\components\TopSlider;
 use common\models\Comparison;
 use common\models\HiddenItems;
-use common\models\Source;use yii\helpers\Html;
+use yii\helpers\Html;
 use yii\helpers\Url;
 
-/**
+/*
  * @var string $f_source
  * @var string $f_profile
  * @var string $f_count_products_on_page
- * @var int    $f_number_page_current
+ * $var int    $f_number_page_current
  * @var string $f_asin
  * @var string $f_title
- * @var string $f_status
+ * @val string $f_status
  * @var string $f_username
  * @var string $f_comparison_status
  * @var string $f_sort
  * @var string $f_detail_view
  * @var string $f_categories_root
- * @var string $f_batch_mode
- * @var string $f_hide_mode
+ * $var string $f_batch_mode
+ * $var string $f_hide_mode
  * 
  * @var array  $list_source
  * @var array  $list_profiles
@@ -337,7 +337,6 @@ $local_import_stat = null;
             'f_no_compare' => $f_no_compare,
             'f_detail_view' => $f_detail_view,
             'source' => $source,
-            'default_price_name' => $default_price_name,
         ]);
         ?>
     </div><!-- table-responsive -->
@@ -350,14 +349,14 @@ $local_import_stat = null;
             $e_comparison = isset($f_comparison_status) && $f_comparison_status ? strtolower($f_comparison_status) : 'match';
             $e_profile = isset($f_profile) && $f_profile && $f_profile !== 'Все' ? $f_profile : '{{all}} ';
             ?>
-            <a href="<?= '/exports/step_4?source_id=' . $source->id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4" >
+            <a href="<?= '/exports/step_4?source_id=' . $source_id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4" >
                 экспортировать
             </a>
             <? if ($is_admin): ?>
             <a
-                href="/import/step_1?source_id=<?= $source->id ?>"
+                href="/import/step_1?source_id=<?= $source_id ?>"
                 target="_blank"
-                data-source_id="<?= $source->id ?>"
+                data-source_id="<?= $source_id ?>"
                 class="product-list-item__import-from-sql js-import-from-sql"
                 >
                 загрузить SQL
