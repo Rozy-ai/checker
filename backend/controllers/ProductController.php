@@ -202,7 +202,8 @@ class ProductController extends Controller {
             'f_categories_root' => $filters->f_categories_root,
             'f_batch_mode' => $filters->f_batch_mode,
             'f_hide_mode' => $filters->f_hide_mode,
-            
+            'f_no_compare' => true,
+
             'list_source' => $this->indexPresenter->getListSource(),
             'list_profiles' => $this->indexPresenter->getListProfiles(),
             'list_count_products_on_page' => $this->indexPresenter->getListCountProductsOnPage(),

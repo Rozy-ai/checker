@@ -278,6 +278,76 @@ class Product extends \yii\db\ActiveRecord {
         return $list;
     }
 
+    public static function getListProductsFront(Source $source, Filters $filters): array {
+        $source_table_name = $source->table_1;
+        $source_table2_name = $source->table_2;
+
+        if ($filters->f_status === null) {
+            $stasusF = [HiddenItems::STATUS_NOT_FOUND, HiddenItems::STATUS_CHECK, HiddenItems::STATUS_ACCEPT, HiddenItems::STATUS_NO_ACCEPT];
+        } else {
+            $stasusF = [$filters->f_status];
+        }
+
+        $q = new FiltersQuery($source->class_1);
+
+        // !!! Если менять тут то нужно менять getCountProducts
+        $q->where(['and',
+            $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
+            $q->getSqlAsin($source_table_name, $filters->f_asin),
+            $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
+            $q->getSqlTille($source_table_name, $filters->f_title),
+            $q->getSqlStatus($stasusF),
+            $q->getSqlUsername($source_table_name, $filters->f_username),
+            $q->getSqlComparisonStatus($filters->f_comparison_status),
+            $q->getSqlProfileFront($source_table_name, $filters->f_profile, $filters->f_profile_type)
+            //$q->getSqlAddInfoExists($source_table_name),
+            //$q->getSqlNoInComparisons(),
+            //$q->getSqlSettingsMessage(),
+        ]);
+
+        // Добавим сортировку:
+        switch ($filters->f_sort) {
+            case 'created_ASC':
+                $q->orderBy($source_table_name . '.date_add ASC');
+                break;
+            case 'created_DESC':
+                $q->orderBy($source_table_name . '.date_add DESC');
+                break;
+            case 'updated_ASC' :
+                $q->addTable('p_updated');
+                $q->orderBy('p_updated.date ASC');
+                break;
+            case 'updated_DESC' :
+                $q->addTable('p_updated');
+                $q->orderBy('p_updated.date DESC');
+                break;
+            default:
+                $q->orderBy($source_table_name . '.id');
+        }
+
+        // Получим все необходимые join
+        $q->addJoins($source_table_name, $source_table2_name);
+
+        $count = $q->count();
+
+        // Отсечем не нужные записи
+        if ($filters->f_count_products_on_page !== 'ALL') {
+            $count_products_on_page = (int) $filters->f_count_products_on_page;
+
+            $offset = ($filters->f_number_page_current - 1) * $count_products_on_page;
+            $q->limit($count_products_on_page);
+            $q->offset($offset * 0);
+        }
+
+        $list = $q->all();
+
+        foreach ($list as $k => $product) {
+            $product->source = $source;
+            $product->baseInfo = $product->info;
+        }
+        return [$list, (int)$count];
+    }
+
     /**
      * Узнать количество всех левых продуктов
      * 
@@ -471,9 +541,8 @@ class Product extends \yii\db\ActiveRecord {
         $out = [];
         foreach ($keys as $item) {
             if ($item->title)
-                $k = $item->title;
-            else
                 $k = $item->name;
+            else
             $out[$k] = $b[$k];
         }
 

@@ -42,6 +42,10 @@ AppAsset::register($this);
                 'url' => ['/site/index']
             ],
             [
+                'label' => 'Products',
+                'url' => ['/products']
+            ],
+            [
                 'label' => 'About',
                 'url' => ['/site/about']
             ],
