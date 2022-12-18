@@ -53,6 +53,8 @@ class Filters {
     
     /** @var string f_items__no_compare     (where_1) Убрать товары из таблицы hidden_itesm */
     public $f_no_compare;
+
+    public $f_profile_type;
     
     //                                      (where_7) Не используется
     //                                      (where_8) Выносим в User

@@ -1,0 +1,65 @@
+'use strict';
+
+import {
+    DomWithData
+} from './DomWithData.js'
+
+export const CLASS_STATISTIC= 'div.block_statistic';
+const CLASS_PROCESSED       = '.product-list-item__processed'; // Блок статистики, показывающий сколько товаров отработано
+const CLASS_ITEM_STATISTIC  = 'span.js-';
+
+export const CLASS_ITEM_PRE_MATCH  = '.js-pre_match';
+export const CLASS_ITEM_MATCH      = '.js-match';
+export const CLASS_ITEM_MISMATCH   = '.js-mismatch';
+export const CLASS_ITEM_OTHER      = '.js-other';
+export const CLASS_ITEM_NOCOMPARE  = '.js-nocompare';
+
+
+export class Statistic extends DomWithData{
+
+    static getFromChild($child_object, data) {
+        return super.getFromChild(CLASS_STATISTIC, $child_object, data);
+    }
+    
+    static getFirstFromParent($dom){
+        return super.getFirstFromParent(CLASS_STATISTIC, $dom);
+    }
+    
+    /**
+     * Увеличить значение в статистике
+     * 
+     * @param {string} status_compare каким статусом отмечать правый товар
+     * @returns {undefined}
+     */
+    addUnit(status_compare){
+        // Увеличивам количество в целевом квадратике
+        let $class = CLASS_ITEM_STATISTIC+status_compare;
+        let $block = this.dom.find($class);
+        $block.text(Number($block.text())+1);
+        
+        // Уменьшаем количество в белом квадратике
+        $block = this.dom.find(CLASS_ITEM_NOCOMPARE);
+        $block.text(Number($block.text())-1);
+        
+        // Меняем запись общее
+        $block = this.dom.find(CLASS_PROCESSED);
+        let val = $block.text().split('/');
+        if (val.length !== 2) return;
+        let v1 = Number(val[0])+1;
+        $block.text(v1+'/'+val[1]);
+    };
+    
+    /**
+     * Сбросить все квадратики в первоначальное состояние. Та цифра что указана в dsta атрибуте
+     * @returns {undefined}
+     */
+    reset(){
+        this.dom.find(CLASS_ITEM_STATISTIC+'pre_match').text(this.data.pre_match);
+        this.dom.find(CLASS_ITEM_STATISTIC+'match').text(this.data.match);
+        this.dom.find(CLASS_ITEM_STATISTIC+'mismatch').text(this.data.mismatch);
+        this.dom.find(CLASS_ITEM_STATISTIC+'other').text(this.data.other);
+        this.dom.find(CLASS_ITEM_STATISTIC+'nocompare').text(this.data.nocompare);
+        
+        this.dom.find(CLASS_PROCESSED).text(this.data.processed);
+    };
+};

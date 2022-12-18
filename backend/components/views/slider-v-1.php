@@ -37,9 +37,9 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 <!-- Если администратор, то показываем в виде ссылки -->
 
 <div id="id_td3_title" class="main-item-title">
-    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
+    <? if ($identity && method_exists($identity, 'is_detail_view_for_items') && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
         <?= $variables_left['description_left'] ?>
-    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
+    <? if ($identity && method_exists($identity, 'is_detail_view_for_items') && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
 </div>
  
 <!-- VIEW 1 -->
@@ -49,8 +49,8 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
     ?>
 
     <?php
-        $comparison = $comparisons[$item->id]; 
-        
+        $comparison = $comparisons[$item->id];
+
         switch ($f_comparison_status){
             case 'NOCOMPARE':
                 if ($comparison) {

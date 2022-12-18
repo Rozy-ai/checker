@@ -7,13 +7,16 @@ use backend\models\Settings__fields_extend_price;
 use backend\models\Settings__list;
 use backend\models\Settings__source_fields;
 use backend\models\Settings__table_rows;
+use common\models\ProfileTypeSetting;
 use common\models\Source;
 use common\models\Product;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Json;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 
 class SettingsController extends Controller{
 
@@ -540,5 +543,103 @@ class SettingsController extends Controller{
     return $items;
   }
 
+    /************** Profile Types*/
+    public function actionProfile_types()
+    {
+        if (!Yii::$app->user->can('admin')) exit;
 
+        $sources = Source::getAllWithIdKey();
+        $profileTypeSettings = ProfileTypeSetting::allWithUniqKeys();
+
+        if (count($profileTypeSettings) !== count($sources) * count(ProfileTypeSetting::TYPES)) {
+            foreach ($sources as $source) {
+                foreach (ProfileTypeSetting::TYPES as $type) {
+                    $key = $source->id . '_' . $type;
+                    if (!isset($profileTypeSettings[$key])) {
+                        $profileTypeSettings[$key] = ProfileTypeSetting::initWithDefaultValues($type, $source->id);
+                    }
+                }
+            }
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => ProfileTypeSetting::find(),
+        ]);
+
+        return $this->render('profile_types', [
+            'profileTypeSettings' => $profileTypeSettings,
+            'types' => ProfileTypeSetting::TYPE_WITH_LABELS,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionProfile_types_edit()
+    {
+        if (!Yii::$app->user->can('admin')) exit;
+
+        if ($this->request->getIsGet()){
+            $sourceId = $this->request->get('source_id',false);
+            $profileType = $this->request->get('profile_type',false);
+
+            if ($sourceId === false && $profileType === false) {
+                throw new NotFoundHttpException();
+            }
+
+            $profile = ProfileTypeSetting::findOne([
+                'source_id' => $sourceId,
+                'profile_type' => $profileType,
+            ]);
+
+            if ($profile === null) {
+                throw new NotFoundHttpException();
+            }
+        }
+
+        if ($this->request->getIsPost()) {
+            $data = $this->request->post('ProfileTypeSetting', []);
+
+            $sourceId = $data['source_id'] ?? false;
+            $profileType = $data['profile_type'] ?? false;
+
+            if ($sourceId === false && $profileType === false) {
+                throw new NotFoundHttpException();
+            }
+
+            $profile = ProfileTypeSetting::findOne([
+                'source_id' => $sourceId,
+                'profile_type' => $profileType,
+            ]);
+
+            if ($profile === null) {
+                throw new NotFoundHttpException();
+            }
+
+            if (isset($data['price1']) && is_numeric($data['price1'])) {
+                $profile->price1 = (float)$data['price1'];
+            }
+
+            if (isset($data['price2']) && is_numeric($data['price2'])) {
+                $profile->price2 = (float)$data['price2'];
+            }
+
+            if (isset($data['max_views_count']) && is_numeric($data['max_views_count'])) {
+                $profile->max_views_count = (int)$data['max_views_count'];
+            }
+
+            if (isset($data['cancel_show_count']) && is_numeric($data['cancel_show_count'])) {
+                $profile->cancel_show_count = (int)$data['cancel_show_count'];
+            }
+
+            if (isset($data['inner_page']) && is_numeric($data['inner_page'])) {
+                $profile->inner_page = (bool)$data['inner_page'];
+            }
+
+
+            $profile->save();
+        }
+
+        return $this->render('profile_types_edit', [
+            'item' => $profile,
+        ]);
+    }
 }
