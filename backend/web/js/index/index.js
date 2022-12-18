@@ -11,8 +11,13 @@ import {
 
 import {
     CLASS_BLOCK_PRODUCT_MIN,
+    CLASS_BLOCK_BUTTON_DELETE,
     CLASS_BLOCK_BUTTON_CLOSE,
     CLASS_BLOCK_PRODUCT,
+    STATUS_DELETED,
+    STATUS_MISMATCH_ALL,
+    STATUS_NOT_FOUND,
+    STATUS_DEFAULT,
     ProductBlock
 } from './classes/ProductBlock.js'
 
@@ -39,21 +44,111 @@ import {
 } from './classes/ProductRight.js'
 
 import {
+    EVENT_CHANGE_DATA_LEFT,
+    EVENT_CHANGE_DATA_RIGHT,
+    EVENT_CHANGE_DATA_DELETE,   
+    ACTION_DATA_CREATE,
+    ACTION_DATA_CHANGE,
+    ACTION_DATA_DELETE,
     ListDataForServer
 } from './classes/ListDataForServer.js';
 
 const CLASS_BUTTON_MISSMATCH_ALL        = '.product-list__item-mismatch-all'; // Левый крестик
-const CLASS_BUTTON_DELETE_PRODUCT_RIGTH = '.js-del-item';
 
 function main(){
-    //let filters = new Filters();
     let listDataForServer = new ListDataForServer();
     let $body = $('body');
     
+    /*
+     * Событие смены статуса правого товара (Сработает только в пакетном режиме)
+     */
+    document.addEventListener(EVENT_CHANGE_DATA_RIGHT, function(event) {
+        let productRight = ProductRight.getBy(event.detail.data.id_source, event.detail.data.id_item);
+        let blockProduct = ProductBlock.getFromChild(productRight.dom);
+        let statistic    = Statistic.getFirstFromParent(blockProduct.dom);        
+        
+        if (event.detail.action === ACTION_DATA_DELETE){
+            statistic.deleteUnit(event.detail.data.status);
+            productRight.changeVisual(productRight.data.status, Filters.getModeHide()); //Тут первоначальный статус
+            blockProduct.changeVisual(STATUS_DEFAULT, false);
+        }
+        
+        if (event.detail.action === ACTION_DATA_CREATE){
+            statistic.addUnit(event.detail.data.status);
+            productRight.changeVisual(event.detail.data.status, Filters.getModeHide());
+            // Eсли у всех правых товаров получился статус missmatch то левый должен автоматически стать mismatch
+            if (blockProduct.isHasStatusNotMismatch() === false){
+                let productLeft = blockProduct.getProductLeft();
+                let data = Object.assign({}, productLeft.data);
+                listDataForServer.addLeft(data);
+            } else if (!blockProduct.isHasProductRightWithoutColormarker()){
+                blockProduct.changeVisual(STATUS_NOT_FOUND, Filters.getModeHide());
+            }
+        }
+        
+        if (event.detail.action === ACTION_DATA_CHANGE){
+            statistic.changeUnit(event.detail.statuslast, event.detail.data.status);
+            productRight.changeVisual(event.detail.data.status, Filters.getModeHide());
+            
+        }
+    });
+    
+    /*
+     * Событие смены статуса левого товара (Левый крестик. Сработает только в пакетном режиме)
+     */
+    document.addEventListener(EVENT_CHANGE_DATA_LEFT, function(event) {
+        let productLeft  = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
+        let blockProduct = ProductBlock.getFromChild(productLeft.dom);
+        let is_mode_hide = Filters.getModeHide();
+        
+        if (event.detail.action === ACTION_DATA_CREATE){
+            // Тут нужно чтобы все правые товары стали тоже missmatch
+            let productsRight = blockProduct.getProductsRight();
+            for (let item of productsRight){
+                let data = Object.assign({}, item.data);
+                data.status = 'MISMATCH';
+                listDataForServer.addRight(data);
+            }
+            
+            blockProduct.changeVisual(STATUS_MISMATCH_ALL, is_mode_hide, Filters.getModeMinimize());
+            productLeft.changeVisual(true, is_mode_hide);
+        } else if (event.detail.action === ACTION_DATA_DELETE){
+            blockProduct.changeVisual(STATUS_DEFAULT, is_mode_hide, Filters.getModeMinimize());
+            productLeft.changeVisual(false, is_mode_hide);            
+        }
+    });
+    
+    document.addEventListener(EVENT_CHANGE_DATA_DELETE, function(event) {
+        let productLeft  = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
+        let blockProduct = ProductBlock.getFromChild(productLeft.dom);
+        let is_mode_hide = Filters.getModeHide();
+        
+        if (event.detail.action === ACTION_DATA_CREATE){
+            blockProduct.changeVisual(STATUS_DELETED, is_mode_hide, false);
+            productLeft.changeVisual(false, is_mode_hide);
+        } else if (event.detail.action === ACTION_DATA_DELETE){
+            blockProduct.changeVisual(STATUS_DEFAULT, is_mode_hide, Filters.getModeMinimize());
+        }
+    });
+    
+    /**
+     * Нажатие на свернутом блоке товаров
+     */
     $body.on('click', CLASS_BLOCK_PRODUCT_MIN, function (e) {
         e.stopPropagation();
-        let blockProductRight = new ProductBlock($(this));
-        blockProductRight.maximize();
+        let pid = $(this).data('pid');
+        let blockProduct = ProductBlock.getByPid(pid);
+        blockProduct.changeVisual('', false, false); // Статус не меняем. Просто не свернутый
+    });
+    
+    /**
+     * Нажатие на крестик в правом верхнем углу блока товара
+     */
+    $(document).on('click', CLASS_BLOCK_BUTTON_CLOSE, function(e){
+    //$(CLASS_BLOCK_BUTTON_CLOSE).on('click', function (e) {
+        e.stopPropagation();
+        let blockProduct = ProductBlock.getFromChild($(this));
+        blockProduct.changeVisual('', false, true); // Статус не меняем. Просто сворачиваем
     });
     
     /**
@@ -62,15 +157,13 @@ function main(){
     $body.on('click', CLASS_BUTTON_MISSMATCH_ALL, function (e) {
         e.stopPropagation();
         let $this = $(this);
-        let data_button = $this.data();
-        let filters = new Filters();
-        let is_mode_hide = filters.getModeHide();         
+        let data_button = $this.data();         
 
-        if (filters.getModeBatch() === true ){
-            let productBlock = ProductBlock.getFromChild($this);
-            let productLeft = productBlock.getProductLeft();
+        if (Filters.getModeBatch() === true ){
+            let blockProduct = ProductBlock.getFromChild($this);
+            let productLeft = blockProduct.getProductLeft();
             
-            if (productBlock.isHaveStatusProductsRight()){
+            if (blockProduct.isHasStatusNotMismatch()){
                 let q = confirm('Некоторые правые товары именют статус отличный от missmatch и будет перезаписан. Продолжить?');
                 if (!q) {
                     $this.show();
@@ -79,8 +172,6 @@ function main(){
             }
             
             listDataForServer.addLeft(productLeft.data);
-            productBlock.changeVisual(true, is_mode_hide);
-            productLeft.changeVisual(true, is_mode_hide);
         } else {
             $this.hide();
             Ajax.sendFromButton(data_button, onResponce);
@@ -120,20 +211,13 @@ function main(){
      */
     $('body').on('click', CLASS_BUTTON_RED, function (e) {
         e.stopPropagation();
-        let filters = new Filters();
         let $this = $(this);
         let data  = $this.data();
+        data.status = 'MISMATCH';
         
-        if ( filters.getModeBatch() === true) {
-            let $productRigth = ProductRight.getFromChild($this, data);
+        if ( Filters.getModeBatch() === true) {
             // Добавить товар в список для отправки
-            if (listDataForServer.addRight($productRigth.data)){
-                // Если товар оказался новым то нужно обновить статистику
-                let $productBlock = ProductBlock.getFromChild($productRigth.dom);
-                let $statistic = Statistic.getFirstFromParent($productBlock.dom);
-                $statistic.addUnit('mismatch');
-            } 
-            $productRigth.changeVisual('mismatch', filters.getModeHide());
+           listDataForServer.addRight(data);
         } else {
             $this.hide();
             Ajax.sendFromButton(data, (response) => {
@@ -155,24 +239,18 @@ function main(){
     });
     
     /**
-     * YELLOW
+     * YELLOW BTN
      */
     $('body').on('click', CLASS_BUTTON_YELLOY, function (e) {
         e.stopPropagation();
-        let filters = new Filters();
         let $this = $(this);
-        let data  = $this.data();
+        let productRigth = ProductRight.getFromChild($this);
+        let data  = Object.assign({}, productRigth.data);
+        data.status = 'PRE_MATCH';
         
-        if ( filters.getModeBatch() === true) {
-            let $productRigth = ProductRight.getFromChild($this, data);
+        if ( Filters.getModeBatch() === true) {
             // Добавить товар в список для отправки
-            if (listDataForServer.addRight($productRigth.data)){
-                // Если товар оказался новым то нужно обновить статистику
-                let $productBlock = ProductBlock.getFromChild($productRigth.dom);
-                let $statistic = Statistic.getFirstFromParent($productBlock.dom);
-                $statistic.addUnit('pre_match');
-            }
-            $productRigth.changeVisual('pre_match', filters.getModeHide());
+            listDataForServer.addRight(data);
         } else {
             $this.hide();
             Ajax.sendFromButton(data, (response) => {
@@ -194,53 +272,36 @@ function main(){
     });
     
     /**
-     * Кнопка отменить выбор на всех правых товарах, сообветствующих одному левому
+     * Кнопка отменить выбор на всех правых товарах, соответствующих одному левому
      */
     $body.on('click', '.js-reset-compare', function (e) {
         e.stopPropagation();
-
-        let filters = new Filters();
-        let is_mode_hide        = filters.getModeHide();
         
-        let productBlock        = ProductBlock.getFromChild($(this));
-        let list_product_right  = productBlock.getProductsRight();      //Масив всех правых продуктов (без статусов)
-        let product_left        = productBlock.getProductLeft();
-        let id_product          = product_left.data.id_product;
-        let statistic           = productBlock.getStatistic();
+        let blockProduct        = ProductBlock.getFromChild($(this));
         
-        //Убираем все сравнения что есть с данным id левого товара
-        //Идем от масива к визуалу, т.к. отсутствие выбора в массиве важнее
-        listDataForServer.datas_products_right = listDataForServer.datas_products_right.reduce(function(previousValue, currentItem){
-            
-            if (currentItem.id_product !== id_product){
-                previousValue.push(currentItem);
+        for (let i = listDataForServer.datas_products_right.length - 1; i >= 0; --i) {
+            let data = listDataForServer.datas_products_right[i];
+            if (data.id_source  === blockProduct.data.source_id  &&
+                data.id_product === blockProduct.data.pid) {
+                listDataForServer.deleteRightByIndex(i);
+            }               
+        }
+        
+        for (let i = listDataForServer.datas_products_left.length - 1; i >= 0; --i) {
+            let data = listDataForServer.datas_products_left[i];
+            if (data.id_source  === blockProduct.data.source_id  &&
+                data.id_product === blockProduct.data.pid) {
+                listDataForServer.deleteLeftByIndex(i);
             }
-            // Отмечаем соответственный правый товар визуально
-            list_product_right.find(productRight => {
-                let data = productRight.data;
-                if (data.id_source  === currentItem.id_source  &&
-                    data.id_product === currentItem.id_product &&
-                    data.id_item    === currentItem.id_item)
-                {
-                    productRight.changeVisual('', is_mode_hide);
-                }
-            });
-
-            return previousValue;
-        }, []);
+        }
         
-        //Формируем новый массив выбранных левых товаров из всех кромне того что имеет id = id_product
-        listDataForServer.datas_products_left = listDataForServer.datas_products_left.reduce(function(previousValue, currentItem){
-            if (currentItem.id_product === id_product){
-                product_left.changeVisual(false, is_mode_hide);
-            } else {
-                previousValue.push(currentItem);
+        for (let i = listDataForServer.datas_products_left_delete.length - 1; i >= 0; --i) {
+            let data = listDataForServer.datas_products_left_delete[i];
+            if (data.id_source  === blockProduct.data.source_id  &&
+                data.id_product === blockProduct.data.pid) {
+                listDataForServer.deleteDeleteByIndex(i);
             }
-            return previousValue;
-        }, []);
-        
-        // Сброс статистики
-        statistic.reset();
+        }
     });
     
     /**
@@ -249,48 +310,28 @@ function main(){
      */
     $body.on('click', '.js-reset-compare-all-visible-items', function (e) {
         e.stopPropagation();
-        let filters = new Filters();
-        let is_mode_hide        = filters.getModeHide();
         
-        // Сначала обработаем все блоки товаров
-        $(CLASS_BLOCK_PRODUCT).each(function(index){
-            let product_block = new ProductBlock($(this));
-            product_block.changeVisual(false, is_mode_hide);
-        });
+        for (let i = listDataForServer.datas_products_right.length - 1; i >= 0; --i) {
+            listDataForServer.deleteRightByIndex(i);
+        }
         
-        // Теперь обработаеи все левые товары
-        $(CLASS_PRODUCT_LEFT).each(function(index){
-            let product_left = new ProductLeft($(this));
-            product_left.changeVisual(false, is_mode_hide);
-        });
+        for (let i = listDataForServer.datas_products_left.length - 1; i >= 0; --i) {
+            listDataForServer.deleteLeftByIndex(i);
+        }
         
-        // Изменим визуальный статус правых товаров к изначальному виду
-        $(CLASS_PRODUCT_RIGHT).each(function(index){
-            let productRight = new ProductRight($(this));
-            let status = productRight.data.status;
-            productRight.changeVisual(status, is_mode_hide);
-        });
-        
-        //Сбрасываем все блоки статистики
-        $(CLASS_STATISTIC).each(function(index){
-            let statistic = new Statistic($(this));
-            statistic.reset();
-        });
-        
-        
-        // Очистить массивов выбора
-        listDataForServer.datas_products_right.length = 0;
-        listDataForServer.datas_products_left.length = 0;
+        for (let i = listDataForServer.datas_products_left_delete.length - 1; i >= 0; --i) {
+            listDataForServer.deleteDeleteByIndex(i);
+        }
     });
     
     /**
-     * Нажатие на крестик в правом верхнем углу блока товара
+     * Кнопка удалить товар
      */
-    $(document).on('click', CLASS_BLOCK_BUTTON_CLOSE, function(e){
-    //$(CLASS_BLOCK_BUTTON_CLOSE).on('click', function (e) {
+    $body.on('click', CLASS_BLOCK_BUTTON_DELETE, function (e) {
         e.stopPropagation();
         let blockProduct = ProductBlock.getFromChild($(this));
-        blockProduct.minimize();
+        let productLeft = blockProduct.getProductLeft();
+        listDataForServer.addDelete(productLeft.data);
     });
     
     /**
@@ -385,7 +426,7 @@ function main(){
                             var container = $("#id_table_container");
                             container.html(html);
                             //lib.slider_init();
-                            location.reload(); //Без этого подпупливает js и css
+                            location.reload(); //Без этого подпупливает js и css в часности крестик выбора товара
                         }
                         if (response.is_compare_all === false){
                             alert('Не все сравнения удалось сохранить');
@@ -416,24 +457,30 @@ function main(){
      * @returns {undefined}
      */
     function changeModeHide(is_mode_hide){
-        // Покажем на экране все блоки
-        //$(CLASS_BLOCK_PRODUCT).each(function(index){
-        //    let product_block = new ProductBlock($(this));
-        //    product_block.changeVisual(true, is_hide_mode());
-        //});
+        let is_minimize = Filters.getModeMinimize();
+        
+        if (is_mode_hide === false){
+            $(CLASS_BLOCK_PRODUCT).show();
+        }
+
+        // Пробегаемся по списку удаленных товаров и отображаем их "по-другому"
+        for(let data of listDataForServer.datas_products_left_delete){
+            let product_block = ProductBlock.getByPid(data.id_product);
+            product_block.changeVisual(STATUS_DELETED, is_mode_hide, is_minimize);
+        };
         
         // Пробегаемся по списку выбранных левых товаров и отображаем их "по-другому"
         for(let data of listDataForServer.datas_products_left){
             let product_left = ProductLeft.getBy(data.id_source, data.id_product);
             let product_block = ProductBlock.getFromChild(product_left.dom);
-            product_block.changeVisual(true, is_mode_hide); //true - значит показать
+            product_block.changeVisual('', is_mode_hide, is_minimize);
             product_left.changeVisual(true, is_mode_hide);
         };
         
         // Пробегаемся по списку выбранных правых товаров и отображаем их "по-другому"
         for (let data of listDataForServer.datas_products_right){
             let product_right = ProductRight.getBy(data.id_source, data.id_item);
-            product_right.changeVisual(data.status.toLowerCase(), is_mode_hide);
+            product_right.changeVisual(data.status, is_mode_hide);
         };
     }
 }

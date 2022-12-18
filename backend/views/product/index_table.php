@@ -75,7 +75,7 @@ use common\models\Comparison;
 
     <!-- ITEM полное отображение-->
     <tr
-        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_maximize <?=$is_minimize?'d-none':''?>"
+        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_maximize <?=$is_minimize?'-hidden':''?>"
         data-pid="<?= $item->id ?>"
         data-source_id="<?= $source_id ?>"
     >
@@ -298,8 +298,8 @@ use common\models\Comparison;
     
     <!-- ITEM свернутое отображение-->
     
-    <tr 
-        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_minimize <?=$is_minimize?'':'d-none'?>"
+    <tr
+        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_minimize <?=$is_minimize?'':'-hidden'?>"
         data-pid="<?= $item->id ?>"
     >
         <td colspan="2" class="products-list__td1_minimize text-nowrap">
