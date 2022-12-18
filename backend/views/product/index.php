@@ -45,14 +45,15 @@ $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = $source->name;
 if ($is_admin) {
     $this->params['breadcrumbs'][] = [
-        'label' => Html::dropDownList('f_profile', $f_profile, $list_profiles, ['id' => 'id_f_profile', 'class' => 'form-control form-control-sm']),
+        'label' => Html::dropDownList('f_profile', $f_profile, $list_profiles, ['id' => 'id_f_profile', 'class' => 'form-control form-control-sm w-auto']),
+        'template' => '<li>{link}</li>',
         'encode' => false
     ];
 }
 
-$this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показаны записи '
+$this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
     . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all . ' (' . $count_products_right .')</div> по: '
-    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, array_merge($list_count_products_on_page, ['ALL' => 'ВСЕ']), ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block', 'style' => 'width:auto']);
+    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, array_merge($list_count_products_on_page, ['ALL' => 'ВСЕ']), ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
 
 $local_import_stat = null;
 
@@ -62,7 +63,7 @@ $local_import_stat = null;
 
 <div class="[ PRODUCTS ]">
     <div class="position-1">
-        <div class="[ FILTER-ITEMS ] products__filter-items">
+        <div class="[ FILTER-ITEMS ] products__filter-items mt-0">
             <!--<form method="get" action="change-filters" id="id_products__filter-form">-->
             <div class="form-row js-title-and-source_selector">
                 <!--div class="form-group _col-sm-2" style="width: 128px">

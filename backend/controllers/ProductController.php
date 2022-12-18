@@ -153,7 +153,7 @@ class ProductController extends Controller {
         $source = null;
         // Если страница загружвется в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
-            $source = Source::getById($src/*$filters->f_source*/);
+            $source = Source::getById($src ? $src : $filters->f_source);
             
             //  Если в запросе указан номер страницы, то установим его:
             if (isset($params['page'])){
