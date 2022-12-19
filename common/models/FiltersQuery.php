@@ -336,7 +336,26 @@ class FiltersQuery extends \yii\db\ActiveQuery
 
     public function getSqlTille(string $source_table_name, $f_title): array
     {
-        return ($f_title)?
-            ['like', 'info', $f_title]:[];
-    }
-}
+        ///
+        /// надо поле у источника добавить, где прописать максимальное кол-во
+        /// открытых просмотров для бесплатных товаров
+        ///
+        /// individual:
+        /// юзер test - подходят с профилями
+        ///
+        /// любой зареганый видит продукт с профилем начинающимся на General
+        ///
+        /// free - доступен даже без авторизации, но ограниченное число
+        ///
+        //return [];
+        if ($fProfile) {
+            if ($profileType !== null) {
+                return ['or',
+                    ['like', $sourceTableName . '.profile', 'Free'],
+                    ['like', $sourceTableName . '.profile', $fProfile],
+                    ['like', $sourceTableName . '.profile', 'Prepod'],
+                ];
+            } else {
+
+            }
+        }
