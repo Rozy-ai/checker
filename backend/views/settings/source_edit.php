@@ -28,6 +28,11 @@ $this->title = Yii::t('site', 'Источники');
   <?=$form->field($item, 'import_local__db_import_name')->input('text',['value' => $item_res->import_local__db_import_name ])
     ->label('Имя базы данных в парсере');?>
 
+    <?= $form->field($item, 'max_free_show_count')
+        ->input('number', ['value' => $item_res->max_free_show_count])
+        ->label('Ограничение кол-ва отображаемых товаров с открытыми данными для тарифа Free')
+    ?>
+
   <?=$form->field($item, 'import__default_q_1')->dropDownList([
       'REPLACE' => 'заменить',
       'IGNORE' => 'игнорировать',

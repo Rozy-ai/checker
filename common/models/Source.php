@@ -21,6 +21,7 @@ use backend\models\Settings__source_fields;
  * @property string $import_local__db_import_name
  * @property string $import__default_q_1
  * @property string $import__sql_file_path
+ * @property integer $max_free_show_count
  */
 class Source extends \yii\db\ActiveRecord {
 
@@ -31,6 +32,7 @@ class Source extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['id', 'name', 'table_1', 'table_2', 'import_local__max_product_date', 'import_local__db_import_name', 'import__default_q_1', 'import__sql_file_path'], 'trim'],
+            [['max_free_show_count'], 'integer'],
             [['name', 'table_1'], 'required'],
         ];
     }
@@ -88,6 +90,24 @@ class Source extends \yii\db\ActiveRecord {
 
         return self::getById(self::ids_source_free[0]);
     }
+    
+    /**
+     * Явдяется ли источник доступным для пользователя
+     * 
+     * @param type $user_id - id пользователя (если не указано, текуший)
+     * @return bool
+     */
+    public function checkAccess($user_id = 0) {
+        if (in_array($this->id, self::ids_source_free)) {
+            return true;
+        }
+        
+        $user_id = $user_id ? $user_id : \Yii::$app->user->id;
+        if(User__source_access::findByIdUser($user_id)) {
+            return true;
+        }
+        return false;
+    }        
 
     /**
      * Явдяется ли источник с данным id бесплатным
@@ -223,4 +243,20 @@ class Source extends \yii\db\ActiveRecord {
         }
     }
 
+    /**
+     * @return self[]
+     */
+    public static function getAllWithIdKey(): array
+    {
+        $result = [];
+
+        /**
+         * @var self $source
+         */
+        foreach (self::find()->all() as $source) {
+            $result[$source->id] = $source;
+        }
+
+        return $result;
+    }
 }

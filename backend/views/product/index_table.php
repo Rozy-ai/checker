@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * @var string $list
  * @var string $local_import_stat
  * @var string $is_admin
@@ -58,8 +58,13 @@ use common\models\Comparison;
     
     
     $bsr = number_format($item->baseInfo["Sales Rank: Current"], 0, '', ' ');
-    $sales30 = $item->baseInfo["Sales Rank: Drops last 30 days"];
-    $price = /*($item->baseInfo[$default_price_name]) ?:*/ '-';
+    $dropsValue = $item->baseInfo["Sales Rank: Drops last 30 days"];
+    $dropsTitle = 'Drops(30)';
+    if(isset($item->baseInfo["Sales Rank: Drops last 90 days"])) {
+        $dropsValue .= '/'. $item->baseInfo["Sales Rank: Drops last 90 days"];
+        $dropsTitle = 'Drops(30/90)';
+    }
+    $price = ($item->baseInfo[$default_price_name]) ?: '-';
     $fba = $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"];
     
     $td2_asin = (!$is_admin && strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin;
@@ -75,7 +80,7 @@ use common\models\Comparison;
 
     <!-- ITEM полное отображение-->
     <tr
-        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_maximize <?=$is_minimize?'d-none':''?>"
+        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_maximize <?=$is_minimize?'-hidden':''?>"
         data-pid="<?= $item->id ?>"
         data-source_id="<?= $source_id ?>"
     >
@@ -83,7 +88,7 @@ use common\models\Comparison;
         ?>
         <td class="products-list__td1">
             <div class="product-list-item__data"><span>BSR:</span><br><span id="id_td1_bsr"><?=$bsr?></span></div>
-            <div class="product-list-item__data"><span>Sales30:</span><br><span id="id_td1_sales30"><?=$sales30?></span></div>
+            <div class="product-list-item__data"><span><?= $dropsTitle ?>:</span><br><span id="id_td1_sales30"><?= $dropsValue ?></span></div>
             <div
                 class="product-list-item__data js-addition-info-for-price"
                 data-addition_info_for_price='<?= $item->addition_info_for_price(); ?>'
@@ -94,7 +99,7 @@ use common\models\Comparison;
 
             <div class="product-list-item__data"><span>Brand_R:</span><br><?= $item->baseInfo["Brand_R"]?:"-"; ?></div>
             <div class="product-list-item__data"><span>FBA/FBM:</span><br><span id="id_td1_fba"><?=$fba?></span></div>
-            <?php if ($is_admin):?> 
+            <?php if ($is_admin):?>
             <div class="product-list-item__data"><span>Profile:</span><br><?= $item->profile ?></div>
             <?php endif;?>
 
@@ -186,7 +191,7 @@ use common\models\Comparison;
                 <?php
                 echo TopSlider::widget([
                     'detail_view' => $f_detail_view,
-                    'number_page_current' => $number_page_current??0,
+                    'number_page_current' => $number_page_current ?? 1,
                     'product' => $item,
                     'f_comparison_status' => $f_comparison_status??false,
                     'f_profile' => $f_profile??false,
@@ -242,7 +247,7 @@ use common\models\Comparison;
                 <?php if ($item->updated): ?>
                 <div class="product-list-item__date-title" style="margin-top: 5px">Обновлено:</div>
                 <div><?= date('d.m.Y H:i', strtotime($item->updated->date)); ?></div>
-                <?php endif;?>
+                <? endif;?>
             </div>
 
             <?php if ($is_admin):?>
@@ -298,8 +303,8 @@ use common\models\Comparison;
     
     <!-- ITEM свернутое отображение-->
     
-    <tr 
-        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_minimize <?=$is_minimize?'':'d-none'?>"
+    <tr
+        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_minimize <?=$is_minimize?'':'-hidden'?>"
         data-pid="<?= $item->id ?>"
     >
         <td colspan="2" class="products-list__td1_minimize text-nowrap">
@@ -310,7 +315,7 @@ use common\models\Comparison;
                 </div>
                 <?php endif;?>
                 <div class="block_minimize_data d-inline-block"><span>BSR</span><br><?=$bsr?></div>
-                <div class="block_minimize_data d-inline-block"><span>Sales30</span><br><?=$sales30?></div>
+                <div class="block_minimize_data d-inline-block"><span><?= $dropsTitle ?></span><br><?= $dropsValue ?></div>
                 <div class="block_minimize_data d-inline-block"><span>Price</span><br><?=$price?></div>
                 <div class="block_minimize_data d-inline-block"><span>FBA/FBM</span><br><?=$fba?></div>
 

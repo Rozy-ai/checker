@@ -8,7 +8,8 @@ export const CLASS_PRODUCT_RIGHT               = '.slider__slider-item';
 export const CLASS_BUTTON_RED                  = '.slider__red_button';
 export const CLASS_BUTTON_YELLOY               = '.slider__yellow_button';
 
-export class ProductRight extends DomWithData{   
+export class ProductRight extends DomWithData{
+    
     static getFromChild($child_object, data) {
         return super.getFromChild(CLASS_PRODUCT_RIGHT, $child_object, data);
     }
@@ -29,7 +30,6 @@ export class ProductRight extends DomWithData{
      * @returns {undefined}
      */
     changeVisual(status, is_mode_hide = false){
-        status = status.toLowerCase();
         // Меняем классы
         this.dom.find('.color-marker')
                 .removeClass('nocompare')
@@ -62,19 +62,5 @@ export class ProductRight extends DomWithData{
         } else {
             this.dom.show();
         }
-    }
-    
-    /**
-     * Какой статус установлен у данного товара
-     * @returns {String}
-     */
-    getStatatusColorMarker(){
-        let colorMarker = this.dom.find('.color-marker');
-        if (colorMarker.hasClass('nocompare')) return 'nocompare';
-        if (colorMarker.hasClass('pre_match')) return 'pre_match';
-        if (colorMarker.hasClass('other'))     return 'other';
-        if (colorMarker.hasClass('match'))     return 'match';
-        if (colorMarker.hasClass('mismatch'))  return 'mismatch';
-        return '';
     }
 };

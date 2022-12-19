@@ -12,7 +12,7 @@ export class Filters {
      * 
      * @returns {Boolean}
      */
-    static getModeHide(){
+    getModeHide(){
         return !$(CLASS_BUTTON_SHOW_PRODUCTS_ALL).hasClass(CLASS_BUTTON_SHOW_PRODUCTS_ALL_ACTIVE);
     }
   
@@ -48,7 +48,7 @@ export class Filters {
      * 
      * @returns {Boolean}
      */    
-    static getModeBatch(){
+    getModeBatch(){
         return true;
         //let $mode = $(FILTER_BATCH_MODE);
         //return $mode.is(':checked');

@@ -31,8 +31,14 @@ class TopSlider extends Widget {
 
     function getVariablesLeft($product) {
         $p_key = Settings__fields_extend_price::get_default_price($this->source->id)->name ?: 'Price Amazon';
+        $dropsValue = $product->baseInfo["Sales Rank: Drops last 30 days"];
+        $dropsTitle = 'Drops(30)';
+        if(isset($product->baseInfo["Sales Rank: Drops last 90 days"])) {
+            $dropsValue .= '/'. $product->baseInfo["Sales Rank: Drops last 90 days"];
+            $dropsTitle = 'Drops(30/90)';
+        }
         $footer_left = '<span><span class="__blue-title">BSR:</span>' . number_format($product->baseInfo["Sales Rank: Current"], 0, '', ' ') . ' </span>' .
-                '<span><span class="__blue-title">Sales30:</span>' . $product->baseInfo["Sales Rank: Drops last 30 days"] . ' </span>' .
+                '<span><span class="__blue-title">'.$dropsTitle.':</span>' . $dropsValue . ' </span>' .
                 '<span><span class="__blue-title">Price:</span>' . $product->baseInfo[$p_key] ?: '-' . ' </span>' .
                 '<span><span class="__blue-title">Status:</span>' . $product->baseInfo["Brand_R"] . ' </span>';
         //'<span><span class="__blue-title">ASIN:</span>'.$product->baseInfo["ASIN"].' </span>'.
@@ -57,7 +63,7 @@ class TopSlider extends Widget {
     private function getSales($item) {
         if ($sales_key = $item->salesKey) {
             $sales_key_preg = preg_replace('|\D|', '', $sales_key);
-            return '<span class="_slider__sales sales"><span class="__blue-title">Sales:</span>' . $sales_key_preg . ' </span>';
+            return '<span class="_slider__sales sales"><span class="__blue-title">Sold:</span>' . $sales_key_preg . ' </span>';
         } else {
             return '';
         }

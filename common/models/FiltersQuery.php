@@ -9,7 +9,7 @@ namespace common\models;
 
 /**
  * @author kosten
- * 
+ *
  * @function resetTables()
  * @function addTable(string $table_name)
  * $function addJoins(&$q, string $source_table_name, string $source_table2_name)
@@ -25,35 +25,38 @@ namespace common\models;
  * @function getSqlSettingsMessage()
  * @function getSqlProfile()
  */
-class FiltersQuery extends \yii\db\ActiveQuery{
+class FiltersQuery extends \yii\db\ActiveQuery
+{
     private $tables = [];
-    
-    public function resetTables(){
+
+    public function resetTables()
+    {
         $this->tables = [];
     }
-    
+
     /**
-     * 
+     *
      * @param string $source_table_name
      * @param string $source_table2_name
      */
-    public function addJoins(string $source_table_name, string $source_table2_name = ''){
-        foreach ($this->tables as $table){
+    public function addJoins(string $source_table_name, string $source_table2_name = '')
+    {
+        foreach ($this->tables as $table) {
             switch ($table) {
                 case 'hidden_items':
-                    $this->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name.'.id ');
+                    $this->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ');
                     break;
                 case 'comparisons_aggregated':
-                    $this->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id='.$source_table_name.'.id');
+                    $this->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id=' . $source_table_name . '.id');
                     break;
                 case 'p_all_compare':
-                    $this->leftJoin('p_all_compare', 'p_all_compare.p_id='.$source_table_name.'.id ');
+                    $this->leftJoin('p_all_compare', 'p_all_compare.p_id=' . $source_table_name . '.id ');
                     break;
                 case 'p_updated':
-                    $this->leftJoin('p_updated', 'p_updated.p_id = ' .$source_table_name. '.id ');
+                    $this->leftJoin('p_updated', 'p_updated.p_id = ' . $source_table_name . '.id ');
                     break;
                 case 'comparisons':
-                    $this->leftJoin('comparisons', 'comparisons.product_id = ' .$source_table_name. '.id ');
+                    $this->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ');
                     break;
                 case 'messages':
                     $this->leftJoin('messages', 'messages.id = comparisons.messages_id');
@@ -67,13 +70,14 @@ class FiltersQuery extends \yii\db\ActiveQuery{
         //    $this->andWhere("`$source_table_name`.`asin` in (select `$source_table2_name`.`asin` from `$source_table2_name`)");
         //}
     }
-    
-    public function addTable(string $table_name){
-        if (!in_array($table_name, $this->tables)){
+
+    public function addTable(string $table_name)
+    {
+        if (!in_array($table_name, $this->tables)) {
             $this->tables[] = $table_name;
         }
     }
-    
+
     /**
      * Фильтр проверки на отсутствие товара в таблице hidden_items
      * !!! Фильтр по правым товарам
@@ -81,91 +85,98 @@ class FiltersQuery extends \yii\db\ActiveQuery{
      * @param type $f_source id источника
      * @return array
      */
-    public function getSqlNoCompareItems($f_no_compare, int $f_source):array {
-        if ($f_no_compare && $f_source){
-                $this->addTable('hidden_items');
-                return ['or', 
-                    ['IS','hidden_items.p_id', null],
-                    ['<>','hidden_items.source_id', $f_source]];
+    public function getSqlNoCompareItems($f_no_compare, int $f_source): array
+    {
+        if ($f_no_compare && $f_source) {
+            $this->addTable('hidden_items');
+            return ['or',
+                ['IS', 'hidden_items.p_id', null],
+                ['<>', 'hidden_items.source_id', $f_source]];
         } else {
             return [];
         }
     }
-    
+
 
     /**
      * Фильтр проверки на отсутствие товара в таблице hidden_items
      * !!! Фильтр по правым товарам
-     * 
+     *
      * @param type $id_source
      * @param type $f_comparison_status
      * @return type
      */
-    public function getSqlIsMissingHiddenItems($id_source, $f_comparison_status){
-        if ($id_source && (!$f_comparison_status || $f_comparison_status === 'NOCOMPARE')){
+    public function getSqlIsMissingHiddenItems($id_source, $f_comparison_status)
+    {
+        if ($id_source && (!$f_comparison_status || $f_comparison_status === 'NOCOMPARE')) {
             $this->addTable('hidden_items');
-            return ['or', 
-                ['IS','hidden_items.p_id', null],
-                ['<>','hidden_items.source_id', $f_source??'*']];
+            return ['or',
+                ['IS', 'hidden_items.p_id', null],
+                ['<>', 'hidden_items.source_id', $id_source]];
         } else {
             return [];
         }
     }
-    
+
     /**
      * Фильтр поиска по id
-     * 
-     * @param string            $source_table_name
-     * @param int|string|null   $f_id
+     *
+     * @param string $source_table_name
+     * @param int|string|null $f_id
      * @return array
      */
-    public function getSqlId(string $source_table_name, $f_id):array {
-        return ($f_id)?[$source_table_name.'.id' => $f_id] : [];
+    public function getSqlId(string $source_table_name, $f_id): array
+    {
+        return ($f_id) ? [$source_table_name . '.id' => $f_id] : [];
     }
-    
+
     /**
      * Фильтр поиска по asin
-     * 
-     * @param string        $source_table_name
-     * @param string|null   $f_asin
+     *
+     * @param string $source_table_name
+     * @param string|null $f_asin
      * @return array
      */
-    public function getSqlAsin(string $source_table_name, $f_asin):array {
-        return ($f_asin)?
-            ['like', $source_table_name.'.ASIN', "$f_asin%", false] : [];
+    public function getSqlAsin(string $source_table_name, $f_asin): array
+    {
+        return ($f_asin) ?
+            ['like', $source_table_name . '.ASIN', "$f_asin%", false] : [];
     }
-    
+
     /**
-     * 
+     *
      * @param string $source_table_name
      * @param string|null $f_id
      * @return array
      */
-    public function getSqlIdGreater(string $source_table_name, $f_id):array {
-        return ($f_id)? [ '>' , $source_table_name.'.id', $f_id] : [];
+    public function getSqlIdGreater(string $source_table_name, $f_id): array
+    {
+        return ($f_id) ? ['>', $source_table_name . '.id', $f_id] : [];
     }
-    
+
     /**
      * Фильтр поиска товара по Categories: Root
-     * 
+     *
      * @param string $source_table_name
      * @param string|array $f_categories_root
      * @return array
      */
-    public function getSqlCategoriesRoot(string $source_table_name, $f_categories_root):array {
-        return ($f_categories_root)?
-            ['like', $source_table_name.'.info', '"Categories: Root": "'.$f_categories_root.'"'] : [];
+    public function getSqlCategoriesRoot(string $source_table_name, $f_categories_root): array
+    {
+        return ($f_categories_root) ?
+            ['like', $source_table_name . '.info', '"Categories: Root": "' . $f_categories_root . '"'] : [];
     }
-    
+
     /**
      * Фильтр username пользователя. В поле появляются имена пользователей, которые делали выбор на правых товарах.
-     * 
+     *
      * @param string $source_table_name
      * @param string|null $f_username
      * @return array
      */
-    public function getSqlUsername(string $source_table_name, $f_username):array {
-        if ($f_username){
+    public function getSqlUsername(string $source_table_name, $f_username): array
+    {
+        if ($f_username) {
             $this->addTable('comparisons');
             return ['comparisons.user_id' => $f_username];
         } else {
@@ -174,71 +185,81 @@ class FiltersQuery extends \yii\db\ActiveQuery{
         //return ($f_username)?['and', ]
         //return ($f_username)?['like', $source_table_name.'.users', $f_username]:[];
     }
-    
-    public function getSqlStatus($f_status):array {
-        if ($f_status){
+
+    public function getSqlStatus($f_status): array
+    {
+        if ($f_status) {
             $this->addTable('hidden_items');
             return ['hidden_items.status' => $f_status];
         }
         return [];
     }
-    
+
     /**
      * Фильтр отмеченных сравнений левого товара
      * Список статусов находится в common/models/Comparisons и является константой
-     * 
+     *
      * @param string|null $f_comparison_status
-     * @return 
+     * @return
      */
-    public function getSqlComparisonStatus($f_comparison_status):array {
-        switch ($f_comparison_status){
-            case 'MATCH': {
+    public function getSqlComparisonStatus($f_comparison_status): array
+    {
+        switch ($f_comparison_status) {
+            case 'MATCH':
+            {
                 $this->addTable('comparisons');
                 return ['like', 'comparisons.status', 'MATCH', false];
             }
-            case 'MISMATCH': {
+            case 'MISMATCH':
+            {
                 $this->addTable('comparisons');
                 return ['like', 'comparisons.status', 'MISMATCH'];
             }
-            case 'PRE_MATCH': {
+            case 'PRE_MATCH':
+            {
                 $this->addTable('comparisons');
                 return ['like', 'comparisons.status', 'PRE_MATCH'];
             }
-            case 'OTHER': {
+            case 'OTHER':
+            {
                 $this->addTable('comparisons');
                 return ['like', 'comparisons.status', 'OTHER'];
             }
-            case 'YES_NO_OTHER': {
+            case 'YES_NO_OTHER':
+            {
                 $this->addTable('comparisons');
-                return ['and', ['IS NOT', 'comparisons.status', null],['<>', 'comparisons.status', 'MISMATCH']];
+                return ['and', ['IS NOT', 'comparisons.status', null], ['<>', 'comparisons.status', 'MISMATCH']];
             }
             //case 'ALL_WITH_NOT_FOUND':  return [];
-            default:                    return [];
+            default:
+                return [];
         }
     }
-    
+
     /**
      * Если исходная таблица из EBay (parser_trademarkia_com)
      * Проверка источника на наличие поля add_info
-     *         
+     *
      * @param string $source_table_name
      * @return array
      */
-    public function getSqlAddInfoExists(string $source_table_name):array {
+    public function getSqlAddInfoExists(string $source_table_name): array
+    {
 
-        return ($source_table_name === 'parser_trademarkia_com')?
+        return ($source_table_name === 'parser_trademarkia_com') ?
             ['and',
-                ['like', $source_table_name.'.info', 'add_info'],
+                ['like', $source_table_name . '.info', 'add_info'],
                 "info NOT LIKE '%\"add_info\":\"[]\"%'",
                 "info NOT LIKE '%\"add_info\": \"[]\"%'"] : [];
     }
-    
+
     /**
      * Если пользователь не Admin то включить записи правленые этим пользователем или никем
-     * 
+     *
      * @return array
      */
-    public function getSqlNoInComparisons():array {
+    public function getSqlNoInComparisons(): array
+    {
         $user = \Yii::$app->user->identity;
         $is_admin = ($user && $user->isAdmin());
 
@@ -250,18 +271,19 @@ class FiltersQuery extends \yii\db\ActiveQuery{
             return [];
         }
     }
-    
+
     /**
      * Включить в выборку только товары, с пометкой "Не удалось установить точное соответствие"
      * ...но это не точно
-     * 
+     *
      * @return array
      */
-    public function getSqlSettingsMessage():array {
+    public function getSqlSettingsMessage(): array
+    {
         $this->addTable('messages');
         return ['messages.settings__visible_all' => '1'];
     }
-    
+
     /**
      * Фильтр профиля. Отображается только для администратора, значит и работает только для администратора
      * Отображается список профилей товара (Prepod, General, ...)
@@ -274,15 +296,44 @@ class FiltersQuery extends \yii\db\ActiveQuery{
     public function getSqlProfile(bool $is_admin, string $source_table_name, $f_profile): array
     {
         if ($is_admin && $f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все') {
-            return ['like', $source_table_name.'.profile', $f_profile];
+            return ['like', $source_table_name . '.profile', $f_profile];
         } else {
             return [];
         }
     }
-    
-    public function getSqlTille(string $source_table_name, $f_title): array 
+
+    public function getSqlProfileFront(string $sourceTableName, ?string $fProfile, ?string $profileType): array
     {
-        return ($f_title)?
-            ['like', 'info', $f_title]:[];
+        ///
+        /// надо поле у источника добавить, где прописать максимальное кол-во
+        /// открытых просмотров для бесплатных товаров
+        ///
+        /// individual:
+        /// юзер test - подходят с профилями
+        ///
+        /// любой зареганый видит продукт с профилем начинающимся на General
+        ///
+        /// free - доступен даже без авторизации, но ограниченное число
+        ///
+        //return [];
+        if ($fProfile) {
+            if ($profileType !== null) {
+                return ['or',
+                    ['like', $sourceTableName . '.profile', 'Free'],
+                    ['like', $sourceTableName . '.profile', $fProfile],
+                    ['like', $sourceTableName . '.profile', 'Prepod'],
+                ];
+            } else {
+
+            }
+        }
+
+        return ['like', $sourceTableName . '.profile', 'Free'];
+    }
+
+    public function getSqlTille(string $source_table_name, $f_title): array
+    {
+        return ($f_title) ?
+            ['like', 'info', $f_title] : [];
     }
 }

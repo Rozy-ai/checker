@@ -10,15 +10,6 @@ p{
   margin: 0;
   padding: 0;
 }
-nav.hover-drop .dropdown .dropdown-menu {
-  margin-top: 0;
-}
-nav.hover-drop .dropdown:hover>.dropdown-menu {
-  display: block;
-}
-nav.hover-drop .dropdown>.dropdown-toggle:active {
-  pointer-events: none;
-}
 /*********************************************************************************************/
 .titleName {
   float: left;
@@ -526,13 +517,6 @@ nav.hover-drop .dropdown>.dropdown-toggle:active {
 .navigation .pageLink li .next:before {
   right: 0;
   background: url(img/linkPage-next.png) no-repeat center center;
-}
-.navigation .breadcrumb {
-    align-items: center;
-}
-.navigation .breadcrumb li {
-    font-size: 1rem;
-    line-height: 16px;
 }
 .pageLink{
   /*border: 1px solid red;*/
@@ -2127,7 +2111,7 @@ table.tableInfo th {
 }
 .products-list__td2{
   width: 20%;
-  min-width: 225px;
+  min-width: 200px;
   text-align: center;
 
 }
@@ -2153,14 +2137,6 @@ table.tableInfo th {
 
 .products-list__td4_minimize{
     width: 163px;
-}
-
-.product-list__deleted{
-    background-color: rgba(200, 0, 0, 0.1)!important;
-}
-
-.product-list__completed{
-    background-color: rgba(0, 200, 0, 0.1)!important;
 }
 
 .products-list__slider {
@@ -2254,26 +2230,26 @@ table.tableInfo th {
   line-height: 1.0;
 }
 .product-list-item__compare-statistics span.pre_match{
-  color: #D7C000;
-  background-color: white;
+  color: white;
+  background-color: #D7C000;
   border: 1px solid #D7C000;
   position: relative;
 }
 .product-list-item__compare-statistics span.match{
-  color: #34B71E;
-  background-color: white;
+  color: white;
+  background-color: #34B71E;
   border: 1px solid #34B71E;
   position: relative;
 }
 .product-list-item__compare-statistics span.mismatch{
-  color: #c13737;
-  background-color: white;
+  color: white;
+  background-color: #c13737;
   border: 1px solid #c13737;
   position: relative;
 }
 .product-list-item__compare-statistics span.other{
-  color: #377ccd;
-  background-color: white;
+  color: white;
+  background-color: #377ccd;
   border: 1px solid #377ccd;
   position: relative;
 }
@@ -2602,15 +2578,6 @@ table.tableInfo th {
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
-}
-
-.slider__left-item-other-img_minimize {
-  width: 38px;
-  height: 38px;
-  border: 1px solid red;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
 }
 
 .slider__right-item-other-imgs {
@@ -3703,16 +3670,6 @@ a.a-black {
 .navbar-nav .nav-link.logout-link {
   font-weight: 400;
   color: #007bff;
-}
-
-.block_minimize_data{
-    width: 62px;
-    vertical-align: middle;
-}
-
-.block_minimize_data_img{
-    width: 35px;
-    vertical-align: middle;
 }
 
 .block_minimize_data span{

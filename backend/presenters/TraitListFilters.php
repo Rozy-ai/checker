@@ -53,15 +53,15 @@ trait TraitListFilters {
         if (!$this->source_table_name) {
             throw new \yii\base\InvalidParamException();
         }
-        /*$list = \Yii::$app->db->createCommand(
-            'SELECT info->\'$."Categories: Root"\' as cat, count(*) as count FROM '.$this->source_table_name.' GROUP BY cat')->queryAll(); */
+        $list = \Yii::$app->db->createCommand(
+            'SELECT info->\'$."Categories: Root"\' as cat, count(*) as count FROM '.$this->source_table_name.' GROUP BY cat')->queryAll(); 
 
         $new_list = [];
-        /*if (is_array($list)){
+        if (is_array($list)){
             foreach ($list as $data){
                 $new_list[preg_replace('~^"?(.*?)"?$~', '$1', $data['cat'])] = $data['count'];
             }
-        }*/
+        }
         return $new_list;
     }
 
@@ -185,7 +185,7 @@ trait TraitListFilters {
         $out = [];
         foreach ($list_comparisons as $key => $val){
             
-            if (!empty($data[$key])){
+            if (isset($data[$key])){
                 $out[$key] = [
                         'name' => $val['name']??0,
                         'count' => $data[$key]['count_statuses']??0
