@@ -14,7 +14,7 @@ $this->title = Yii::t('site', 'Редактирование сопоставле
 ?>
 <div class="[ SETTINGS-MAIN ] settings-main">
   <h1><?= Html::encode($this->title) ?></h1>
-  <? $form = ActiveForm::begin(['id' => 'settings__source_fields']); ?>
+  <?php $form = ActiveForm::begin(['id' => 'settings__source_fields']); ?>
 
 
 
@@ -52,7 +52,7 @@ $this->title = Yii::t('site', 'Редактирование сопоставле
 
 
 
-  <? if ($item_res->id): ?>
+  <?php if ($item_res->id): ?>
   <div class="form-row">
 
     <div class="col-sm-6 mb-3">
@@ -64,11 +64,11 @@ $this->title = Yii::t('site', 'Редактирование сопоставле
     </div>
 
   </div>
-  <? else: ?>
+  <?php else: ?>
     <?= Html::submitButton("Сохранить", ['class' => 'btn btn-primary btn-block'])?>
-  <? endif;?>
+  <?php endif;?>
 
-  <? ActiveForm::end(); ?>
+  <?php ActiveForm::end(); ?>
 
   <div>
     <strong>ключ:</strong> <br/>

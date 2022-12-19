@@ -14,7 +14,7 @@ $this->title = Yii::t('site', 'Источники');
 ?>
 <div class="[ SETTINGS-MAIN ] settings-main">
   <h1><?= Html::encode($this->title) ?></h1>
-  <? $form = ActiveForm::begin(['id' => 'source_edit']); ?>
+  <?php $form = ActiveForm::begin(['id' => 'source_edit']); ?>
 
   <div style="display: none">
   <?=$form->field($item, 'id')->input('text',['value' => $item_res->id])?>
@@ -46,7 +46,7 @@ $this->title = Yii::t('site', 'Источники');
     ->label('Путь к sql фаилу для импорта из фаила (без загрузки)');?>
 
 
-  <? if ($item_res->id): ?>
+  <?php if ($item_res->id): ?>
   <div class="form-row">
 
     <div class="col-sm-6 mb-3">
@@ -58,10 +58,10 @@ $this->title = Yii::t('site', 'Источники');
     </div>
 
   </div>
-  <? else: ?>
+  <?php else: ?>
     <?= Html::submitButton("Сохранить", ['class' => 'btn btn-primary btn-block'])?>
-  <? endif;?>
+  <?php endif;?>
 
-  <? ActiveForm::end(); ?>
+  <?php ActiveForm::end(); ?>
 </div>
 

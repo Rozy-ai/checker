@@ -8,7 +8,6 @@
 namespace common\models;
 
 use common\models\User__source_access;
-use common\models\Source;
 use backend\models\Settings__source_fields;
 
 /**
@@ -19,7 +18,6 @@ use backend\models\Settings__source_fields;
  * @property string $class_2
  * @property string $table_1
  * @property string $table_2
- * @property string $import_local__max_product_name
  * @property string $import_local__db_import_name
  * @property string $import__default_q_1
  * @property string $import__sql_file_path
@@ -194,7 +192,7 @@ class Source extends \yii\db\ActiveRecord {
         if (!$this->dataFields) {
             $this->dataFields = Settings__source_fields::data_for_source_all($this->id);
         }
-        return $this->dataFields[$name];
+        return $this->dataFields[$name]??null;
     }
 
     public static function get_sources_for_form() {

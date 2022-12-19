@@ -10,7 +10,7 @@ $model->addRule(['test'], 'trim');
 <div>
   <h2>Выгрузка: Step 1</h2>
 
-  <? $form = ActiveForm::begin(['action' => '/exports/step_2',]); ?>
+  <?php $form = ActiveForm::begin(['action' => '/exports/step_2',]); ?>
     <?= $form->field($model, 'source_id')->dropDownList(
       \common\models\Source::get_sources_for_form()
     )->label('Выберите источник:'); ?>
@@ -25,7 +25,7 @@ $model->addRule(['test'], 'trim');
     </div>
 
   </div>
-  <? ActiveForm::end() ?>
+  <?php ActiveForm::end() ?>
 
 </div>
 

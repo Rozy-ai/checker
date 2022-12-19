@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="stats-index">
 
-  <? if (0): ?>
+  <?php if (0): ?>
   <p style="margin: 10px 0">
     <?php if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) !== null): ?>
       <?php if (! $searchModel->total): ?>
@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
       <?php endif ?>
     <?php endif ?>
   </p>
-  <? endif;?>
+  <?php endif;?>
 
   <div style="margin: 25px 0 0 0"></div>
   <h4><?= Html::encode($this->title) ?></h4>

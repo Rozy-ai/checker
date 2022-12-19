@@ -37,9 +37,9 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 <!-- Если администратор, то показываем в виде ссылки -->
 
 <div id="id_td3_title" class="main-item-title">
-    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
+    <?php if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><?php endif; ?>
         <?= $variables_left['description_left'] ?>
-    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
+    <?php if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><?php endif; ?>
 </div>
  
 <!-- VIEW 1 -->
@@ -116,19 +116,19 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 
 
             <!-- FORK -->
-            <? if ($source->name === 'EBAY'): ?>
+            <?php if ($source->name === 'EBAY'): ?>
             <div class="slider-item__cnt-1">
                 <span class="cnt-1__stock-title __blue-title">Stock:</span>
                 <span class="grade cnt-1__stock-n"><?= $item->gradeKey; ?></span>
             </div>
 
-            <? if (!empty($option_sales_key)): ?>
+            <?php if (!empty($option_sales_key)): ?>
             <span class="slider__sales sales">
                 <span class="__blue-title">Sold:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?>
             </span>
-            <? endif; ?>
+            <?php endif; ?>
 
-            <? elseif ($source->name === 'CHINA'): ?>
+            <?php elseif ($source->name === 'CHINA'): ?>
             <div class="slider-item__cnt-1">
                 <span class="cnt-1__stock-title __blue-title">ROI:</span>
                 <span class="grade cnt-1__stock-n"><?= $item->ROI_Ali; ?></span>
@@ -136,7 +136,7 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
             <div class="slider__sales sales" style="margin: 0">
                 <!--<span class="__blue-title">R:</span>--><?= $item->rating; ?>
             </div>
-            <? endif; ?>
+            <?php endif; ?>
             <span class="slider__sales sales">
                 <span class="cnt-1__stock-title __blue-title">Price:</span><span class="grade cnt-1__stock-n"><?= $item->price ?></span>
             </span>

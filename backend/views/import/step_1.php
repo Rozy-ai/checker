@@ -28,7 +28,7 @@ $model->addRule(['load_file'], 'file',['skipOnEmpty' => false, 'extensions' => '
 <div>
   <h2>Import: Step 1 (<?=Source::get_source($source_id)['source_name']?>)</h2>
 
-  <? $form = ActiveForm::begin(['action' => '/import/step_2',]); ?>
+  <?php $form = ActiveForm::begin(['action' => '/import/step_2',]); ?>
 
   <?= $form->field($model,'source_id')->hiddenInput(['value' => $source_id])->label(false); ?>
 
@@ -64,6 +64,6 @@ $model->addRule(['load_file'], 'file',['skipOnEmpty' => false, 'extensions' => '
 
   </div>
 
-  <? ActiveForm::end() ?>
+  <?php ActiveForm::end() ?>
 
 </div>

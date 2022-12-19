@@ -20,14 +20,14 @@ echo \yii\helpers\VarDumper::dumpAsString(Yii::$app->getUser()->can('admin'));
 
       <div class="row">
 
-        <? foreach ($items as $item):?>
+        <?php foreach ($items as $item):?>
           <div class="col-lg-4" style="margin-top: 10px">
-            <h2><?=$item->title?></h2>
+            <h2><?=$item->title??''?></h2>
             <p>
-              <?=$item->html;?>
+              <?=$item->html??'';?>
             </p>
           </div>
-        <? endforeach;?>
+        <?php endforeach;?>
 
 
 

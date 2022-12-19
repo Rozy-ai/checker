@@ -474,7 +474,7 @@ class Product extends \yii\db\ActiveRecord {
                 $k = $item->title;
             else
                 $k = $item->name;
-            $out[$k] = $b[$k];
+            $out[$k] = $b[$k]??'';
         }
 
         return json_encode($out);

@@ -53,7 +53,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
         if ($source->name === 'EBAY') $url = $left['Ebay_search'];
         if ($source->name === 'CHINA') $url = $right['Url_Search_Ali'];
         ?>
-        <? if ($url):?>
+        <?php if ($url):?>
           <a href="<?=$url?>" target="_blank" class="compare__left-item-title-l-1 ">
             <svg
               style="height: 100%; width: 100%; top: -1px; position: relative; color: black;"
@@ -61,7 +61,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
               <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
             </svg>
           </a>
-        <? endif;?>
+        <?php endif;?>
         <!--
         <a href="<?=$left['Ebay_search']?>" target="_blank" class="compare__left-item-title-l-2 bi bi-arrow-up-right-circle">
 
@@ -90,11 +90,11 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
         </span>
       </p>
 
-      <? if (0): ?>
+      <?php if (0): ?>
         <p class="text">
           <?= $right->r_Title ?>
         </p>
-      <? endif; ?>
+      <?php endif; ?>
 
 
 
@@ -106,7 +106,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
             class=""
             aria-labelledby="jobLabel"
           >
-            <? foreach ($compare_items as $k => $r_item):?>
+            <?php foreach ($compare_items as $k => $r_item):?>
               <?
               $class = 'nocompare';
               switch ($model->comparisons [$k]->status):
@@ -124,7 +124,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
                   break;
               endswitch;
               ?>
-              <? $index = (int)$k+1 ?>
+              <?php $index = (int)$k+1 ?>
               <option
                 class="<?=$class?>"
                 data-pid="<?=$product_id?>"
@@ -135,20 +135,20 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
               >#<?=$index?> | <?=$r_item->r_Title?></option>
 
 
-            <? endforeach; ?>
+            <?php endforeach; ?>
 
           </select>
         </div>
 
 
 
-      <? if (0): ?>
+      <?php if (0): ?>
       <p class="title">
         <a target="_blank" href="<?= $right->urlKey ?>">
           <?= $right->Categories_tree ?>
         </a>
       </p>
-      <? endif; ?>
+      <?php endif; ?>
       <!-- / right title -->
     </div>
 
@@ -163,7 +163,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
       <div class="-wrapper">
         <div class="-wrapper_2 js__p-a-arrows-wrapper">
 
-          <? if (0): ?>
+          <?php if (0): ?>
             <a
               data-direction="prev"
               class="-hidden prev js__arrow prev-arr navigation-image-arr arrow left-img"
@@ -199,7 +199,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
               </svg>
             </button>
             -->
-          <? endif;?>
+          <?php endif;?>
 
           <div class="sm-view__two-items-title">
             <p class="compare__left-item-path-url " >
@@ -232,9 +232,9 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
             <div class="left-item__img_wrapper-2">
 
               <a class="left-item__img _slider-for js__item-img"
-                 <? if (0):?>
+                 <?php if (0):?>
                  style="background-image: url('<?= $images_left[0] ?>')"
-                 <? endif;?>
+                 <?php endif;?>
                  data-link="<?=$left['URL: Amazon']?>"
                  href="<?=$left['URL: Amazon']?>"
                  target="_blank"
@@ -282,12 +282,12 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
         </div>
       </div>
 
-      <? if ($canCompare): ?>
+      <?php if ($canCompare): ?>
         <div class="control">
           <span
-            <? if (0):?>
+            <?php if (0):?>
             href="/product/missall?id=<?=$product_id?>&source_id=<?=$source->id?>&return=1&"
-            <? endif;?>
+            <?php endif;?>
             data-url = "/product/missall"
             data-id = "<?=$product_id?>"
             data-url_next = ""
@@ -297,7 +297,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
 
           <?//= Html::a("", ['missall', 'id' => $product_id], ['class' => 'btn del']); ?>
         </div>
-      <? endif; ?>
+      <?php endif; ?>
 
     </div>
     <!-- /LEFT ITEM -->
@@ -307,9 +307,9 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
     <div class="js__root tbl_cell col col2 [ RIGHT-ITEM ] compare__right-item ">
       <div class="-wrapper">
         <div class="-wrapper_2 js__p-r-arrows-wrapper">
-          <? if ($compare_items): ?>
+          <?php if ($compare_items): ?>
 
-            <? if (0): ?>
+            <?php if (0): ?>
               <button
                 data-direction="prev"
                 data-arrow_ignore_checked="<?//=$arrows['right']['ignore_checked']?>"
@@ -332,7 +332,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
                   <path d="M1.5622222 0L0 1.5622222 8.3853333 10 0 18.3857778 1.5622222 20l10-10" fill-rule="evenodd" fill="#545658"></path>
                 </svg>
               </button>
-            <? endif; ?>
+            <?php endif; ?>
 
 
           <div class="sm-view__two-items-title">
@@ -359,7 +359,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
 
 
 
-                <? foreach ($compare_items as $k => $r_item):?>
+                <?php foreach ($compare_items as $k => $r_item):?>
 
 
                   <?
@@ -379,7 +379,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
                       break;
                   endswitch;
                   ?>
-                  <? $index = (int)$k+1 ?>
+                  <?php $index = (int)$k+1 ?>
                   <option
                     class="<?=$class?>"
                     data-pid="<?=$product_id?>"
@@ -390,7 +390,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
                   >#<?=$index?> | <?=$r_item->r_Title?></option>
 
 
-                <? endforeach; ?>
+                <?php endforeach; ?>
 
               </select>
             </div>
@@ -411,9 +411,9 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
                 >
                   <img
                     id="zoom_02"
-                    <? if (0):?>
+                    <?php if (0):?>
                     data-zoom-image="<?= AppHelper::ebay_big($images_right[0]) ?>"
-                    <? endif;?>
+                    <?php endif;?>
                     class="right-item__img-tag"
                     src="<?= $images_right[0] ?>"
                     alt="">
@@ -445,9 +445,9 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
 
 
 
-          <? else:?>
+          <?php else:?>
             нет информации для сравнения
-          <? endif;?>
+          <?php endif;?>
 
         </div>
       </div>
@@ -455,7 +455,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
       <div class="compare-btn-wrapper tbl" style="width: 100%;">
 
         <div class="td" style="vertical-align: bottom; padding-right: 10px">
-          <? if ($comparison->message && (int)$comparison->messages->settings__table_rows_id === -1): ?>
+          <?php if ($comparison->message && (int)$comparison->messages->settings__table_rows_id === -1): ?>
             <div class="[ MESSAGE ] right-item__message td">
               <?= ($comparison->status === 'OTHER')? $comparison->message : ''?>
               <div class="message__info_btn"> !
@@ -464,7 +464,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
                 </div>
               </div>
             </div>
-          <? endif; ?>
+          <?php endif; ?>
         </div>
 
         <div class="td" style="width: 208px; vertical-align: top;">
@@ -505,7 +505,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
 
 <!-- FOREACH PRODUCT TABLE -->
 
-    <? if ($table_rows) foreach ($table_rows as $t_row): ?>
+    <?php if ($table_rows) foreach ($table_rows as $t_row): ?>
 
       <?php
 
@@ -545,25 +545,25 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
       ?>
 
 
-      <? if ((int)$t_row->visible):?>
-        <? if ($p_item->user_visible || $t_row->visible_for_user || \Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) !== null):?>
+      <?php if ((int)$t_row->visible):?>
+        <?php if ($p_item->user_visible || $t_row->visible_for_user || \Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) !== null):?>
           <?= ProductStringWidget::widget($options) ?>
-        <? endif;?>
-      <? endif;?>
+        <?php endif;?>
+      <?php endif;?>
 
-    <? endforeach;?>
+    <?php endforeach;?>
 <!-- / FOREACH -->
 
   </tbody>
 </table>
 
-  <? if ($is_admin):?>
+  <?php if ($is_admin):?>
   <div
     data-pid="<?=$product_id?>"
     class="btn btn-primary [ USER-VISIBLE-FIELDS ] compare__user-visible-fields" style="margin-bottom: 10px;">
     <?= (!$p_item->user_visible)? 'Показать поля (*) пользователю' : 'Скрыть поля (*) для пользователя'?>
   </div>
-  <? endif; ?>
+  <?php endif; ?>
 
 </div>
 

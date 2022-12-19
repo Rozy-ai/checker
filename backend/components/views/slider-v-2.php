@@ -32,9 +32,9 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 ?>
 
 <div id="id_td3_title" class="main-item-title ">
-    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
+    <?php if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><?php endif; ?>
         <?= $variables_left['description_left'] ?>
-    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
+    <?php if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><?php endif; ?>
 </div>
         
 <!-- VIEW 2 -->
@@ -121,9 +121,9 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
                                 <!-- FORK ( Содержимое слайдера ) -->
                                     <div> <?= $variables_right['footer_right'] ?> </div>
                                 <!-- / FORK -->
-                                <? if ((count($variables_right['images_right']) > 1)): ?>
+                                <?php if ((count($variables_right['images_right']) > 1)): ?>
                                         <div class="slider__right-item-other-imgs">
-                                            <? foreach ($variables_right['images_right'] as $image_right): ?>
+                                            <?php foreach ($variables_right['images_right'] as $image_right): ?>
                                                 <div class="slider__right-item-other-img slider_images" style="background-image: url(<?=$image_right?>)"
                                                     data-description_left   = "<?= htmlspecialchars($variables_left['description_left'])?>"
                                                     data-description_right  = "<?= htmlspecialchars($variables_right['description_right'])?>"
@@ -133,9 +133,9 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
                                                     data-footer_right       = "<?= htmlspecialchars($variables_right['footer_right'])?>"
                                                     data-count_images_right = "<?= htmlspecialchars($variables_right['count_images_right'])?>"                                                                                                            
                                                 ></div>
-                                            <? endforeach; ?>
+                                            <?php endforeach; ?>
                                         </div>
-                                <? endif;?>
+                                <?php endif;?>
                             </td>
 
                             <td style="text-align: right;">
