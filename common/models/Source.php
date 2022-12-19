@@ -212,7 +212,7 @@ class Source extends \yii\db\ActiveRecord {
         if (!$this->dataFields) {
             $this->dataFields = Settings__source_fields::data_for_source_all($this->id);
         }
-        return $this->dataFields[$name]??null;
+        return $this->dataFields[$name];
     }
 
     public static function get_sources_for_form() {

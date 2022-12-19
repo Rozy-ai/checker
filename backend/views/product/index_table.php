@@ -247,7 +247,7 @@ use common\models\Comparison;
                 <?php if ($item->updated): ?>
                 <div class="product-list-item__date-title" style="margin-top: 5px">Обновлено:</div>
                 <div><?= date('d.m.Y H:i', strtotime($item->updated->date)); ?></div>
-                <? endif;?>
+                <?php endif;?>
             </div>
 
             <?php if ($is_admin):?>

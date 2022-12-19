@@ -302,20 +302,23 @@ class FiltersQuery extends \yii\db\ActiveQuery
         }
     }
 
+    /**
+     * надо поле у источника добавить, где прописать максимальное кол-во
+     * открытых просмотров для бесплатных товаров
+     * 
+     * individual:
+     *    юзер test - подходят с профилями
+     *
+     *    любой зареганый видит продукт с профилем начинающимся на General
+     * 
+     *    free - доступен даже без авторизации, но ограниченное число
+     * @param string $sourceTableName
+     * @param string|null $fProfile
+     * @param string|null $profileType
+     * @return array
+     */
     public function getSqlProfileFront(string $sourceTableName, ?string $fProfile, ?string $profileType): array
     {
-        ///
-        /// надо поле у источника добавить, где прописать максимальное кол-во
-        /// открытых просмотров для бесплатных товаров
-        ///
-        /// individual:
-        /// юзер test - подходят с профилями
-        ///
-        /// любой зареганый видит продукт с профилем начинающимся на General
-        ///
-        /// free - доступен даже без авторизации, но ограниченное число
-        ///
-        //return [];
         if ($fProfile) {
             if ($profileType !== null) {
                 return ['or',
@@ -333,7 +336,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
 
     public function getSqlTille(string $source_table_name, $f_title): array
     {
-        return ($f_title) ?
-            ['like', 'info', $f_title] : [];
+        return ($f_title)?
+            ['like', 'info', $f_title]:[];
     }
 }

@@ -332,10 +332,10 @@ $local_import_stat = null;
             'list' => $list,
             'local_import_stat' => $local_import_stat,
             'is_admin' => $is_admin,
-            'f_comparison_status' => $f_comparison_status??false,
-            'f_profile' => $f_profile??false,
-            'f_no_compare' => $f_no_compare??false,
-            'f_detail_view' => $f_detail_view??false,
+            'f_comparison_status' => $f_comparison_status,
+            'f_profile' => $f_profile,
+            'f_no_compare' => $f_no_compare,
+            'f_detail_view' => $f_detail_view,
             'source' => $source,
         ]);
         ?>

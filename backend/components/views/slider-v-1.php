@@ -37,9 +37,9 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 <!-- Если администратор, то показываем в виде ссылки -->
 
 <div id="id_td3_title" class="main-item-title">
-    <?php if ($identity && method_exists($identity, 'is_detail_view_for_items') && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
+    <?php if ($identity && method_exists($identity, 'is_detail_view_for_items') && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><?php endif; ?>
         <?= $variables_left['description_left'] ?>
-    <?php if ($identity && method_exists($identity, 'is_detail_view_for_items') && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
+    <?php if ($identity && method_exists($identity, 'is_detail_view_for_items') && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><?php endif; ?>
 </div>
  
 <!-- VIEW 1 -->

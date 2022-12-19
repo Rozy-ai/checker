@@ -185,10 +185,10 @@ trait TraitListFilters {
         $out = [];
         foreach ($list_comparisons as $key => $val){
             
-            if (isset($data[$key])){
+            if ($data[$key]){
                 $out[$key] = [
-                        'name' => $val['name']??0,
-                        'count' => $data[$key]['count_statuses']??0
+                        'name' => $val['name'],
+                        'count' => $data[$key]['count_statuses']
                     ];
             }
         }
