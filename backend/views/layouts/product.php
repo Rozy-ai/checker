@@ -144,7 +144,7 @@ $product = $this->params['product'];
                           </select>
                         </div>
 
-                        <? if (0): ?>
+                        <?php if (0): ?>
                         <div class="view-settings__amazon">
                           <input type="checkbox" id="view-settings__amazon"
                                  <?= ($this->params['item_1__ignore_red'])? 'checked' : '' ?>
@@ -154,7 +154,7 @@ $product = $this->params['product'];
                             пропускать ненайденные (Х)
                           </label>
                         </div>
-                        <? endif; ?>
+                        <?php endif; ?>
 
                       </li>
                     </ul>
@@ -163,7 +163,7 @@ $product = $this->params['product'];
 
                 <div class="td [ VIEW-SETTINGS ] id-layout__view-settings">
 
-                  <? if (0): ?>
+                  <?php if (0): ?>
                   <div class="view-settings__on-of-right-items">
                     <input
                       <?//= ($this->params['item_2__show_all'])? 'checked' : '' ?>
@@ -173,7 +173,7 @@ $product = $this->params['product'];
                       показать все
                     </label>
                   </div>
-                  <? endif; ?>
+                  <?php endif; ?>
 
                 </div>
 

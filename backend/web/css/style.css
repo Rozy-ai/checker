@@ -10,6 +10,15 @@ p{
   margin: 0;
   padding: 0;
 }
+nav.hover-drop .dropdown .dropdown-menu {
+  margin-top: 0;
+}
+nav.hover-drop .dropdown:hover>.dropdown-menu {
+  display: block;
+}
+nav.hover-drop .dropdown>.dropdown-toggle:active {
+  pointer-events: none;
+}
 /*********************************************************************************************/
 .titleName {
   float: left;
@@ -517,6 +526,13 @@ p{
 .navigation .pageLink li .next:before {
   right: 0;
   background: url(img/linkPage-next.png) no-repeat center center;
+}
+.navigation .breadcrumb {
+    align-items: center;
+}
+.navigation .breadcrumb li {
+    font-size: 1rem;
+    line-height: 16px;
 }
 .pageLink{
   /*border: 1px solid red;*/
@@ -2111,7 +2127,7 @@ table.tableInfo th {
 }
 .products-list__td2{
   width: 20%;
-  min-width: 200px;
+  min-width: 225px;
   text-align: center;
 
 }
@@ -2137,6 +2153,14 @@ table.tableInfo th {
 
 .products-list__td4_minimize{
     width: 163px;
+}
+
+.product-list__deleted{
+    background-color: rgba(200, 0, 0, 0.1)!important;
+}
+
+.product-list__completed{
+    background-color: rgba(0, 200, 0, 0.1)!important;
 }
 
 .products-list__slider {

@@ -153,22 +153,22 @@ $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[
 <?= $base[$p_key] ?: '-' ?>
                         </div>
                         <div class="slider__left-item__data"><span>Status:</span><br><?= $base["Brand_R"] ?></div>
-                        <? if (0):?>
+                        <?php if (0):?>
                         <div class="slider__left-item__data"><span>ASIN:</span><br><div class="slider__left-item__data-asin" ><?= $base["ASIN"] ?></div></div>
-                        <? endif; ?>
-                        <? if ($is_admin):?>
+                        <?php endif; ?>
+                        <?php if ($is_admin):?>
                         <div class="slider__left-item__data"><span>Profile:</span><br><?= $model->profile ?></div>
-                        <? endif;?>
+                        <?php endif;?>
                     </div>
 
-                    <? if ((count($images_left) > 1)):?>
+                    <?php if ((count($images_left) > 1)):?>
                     <div class="slider__left-item-other-imgs">
 
-                        <? foreach ($images_left as $slider__left_img): ?>
+                        <?php foreach ($images_left as $slider__left_img): ?>
                         <div class="slider__left-item-other-img" style="background-image: url('<?= $slider__left_img ?>')"></div>
-                        <? endforeach; ?>
+                        <?php endforeach; ?>
                     </div>
-                    <? endif;?>
+                    <?php endif;?>
 
 
                     <div
@@ -180,9 +180,9 @@ $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[
                         <div class="slider__left-item-img" style="background-image: url('<?= $images_left[0] ?>')">
 
                             <div class="slider__left-item__fade -top">
-                                <? if (1 && $is_admin):?>
+                                <?php if (1 && $is_admin):?>
                                 <div class="slider__left-item-img-top-text"><?= $base["Brand"] ?></div>
-                                <? endif;?>
+                                <?php endif;?>
                             </div>
 
                             <div class="slider__left-item__fade -bottom">
@@ -191,7 +191,7 @@ $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[
 
 <?= Html::encode($base['Categories: Root']) ?>
 
-                                    <? if (0): ?>
+                                    <?php if (0): ?>
                                     <div
                                         class="slider__left-item__btn-red [ button-x-2 ]"
                                         data-link="/product/missall?id=<?= $item->id ?>&source_id=<?= $source->id ?>&return=1"
@@ -201,7 +201,7 @@ $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[
                                         class="slider__left-item__btn-green green_button_v1 -change-1"
                                         href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source->id ?>&return=1"
                                         ></div>
-                                    <? endif; ?>
+                                    <?php endif; ?>
 
                                 </div>
                             </div>

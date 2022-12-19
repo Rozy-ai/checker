@@ -85,7 +85,7 @@ $model->addRule(['profile'], 'string');
         </thead>
         <tbody class="export_items">
 
-          <? foreach ($table_items as $k => $item) :?>
+          <?php foreach ($table_items as $k => $item) :?>
           <tr class="[ item ]"
               data-item_id="<?=$item['id']?>"
               data-name="<?=$item['name']?>"
@@ -94,7 +94,7 @@ $model->addRule(['profile'], 'string');
             <td class="td_1 <?= $item['type']?>">
               <input
                 type="checkbox"
-                <? if ((int)$item['selected'] === 1): ?>checked="checked"<? endif;?>
+                <?php if ((int)$item['selected'] === 1): ?>checked="checked"<?php endif;?>
                 class="item_checkbox"
               />
             </td>
@@ -102,7 +102,7 @@ $model->addRule(['profile'], 'string');
             <td class="td_3"><?= $item['type']?></td>
             <td class="td_4 -position"><?= $item['position']?></td>
           </tr>
-          <? endforeach;?>
+          <?php endforeach;?>
 
         </tbody>
       </table>
@@ -123,6 +123,6 @@ $model->addRule(['profile'], 'string');
 
 </div>
 
-<? if ((int)$ignore_step_3 === 1): ?>
+<?php if ((int)$ignore_step_3 === 1): ?>
 <script src="/js/exports_step_3.js" async defer></script>
-<? endif;?>
+<?php endif;?>

@@ -24,7 +24,7 @@ $model->addRule(['ignore_step_3'], 'string');
 
 <div>
   <h2 class="export_step_2_title" data-source_id="<?=Source::get_source($source_id)['source_id']?>">Выгрузка: Step 2 (<?=Source::get_source($source_id)['source_name']?>)</h2>
-  <? $form = ActiveForm::begin(['action' => '/exports/step_3',]); ?>
+  <?php $form = ActiveForm::begin(['action' => '/exports/step_3',]); ?>
 
     <?= $form->field($model,'source_id')->hiddenInput(['value' => $source_id])->label(false); ?>
 
@@ -77,7 +77,7 @@ $model->addRule(['ignore_step_3'], 'string');
 
   </div>
 
-  <? ActiveForm::end() ?>
+  <?php ActiveForm::end() ?>
 
 </div>
 <script src="/js/exports_step_2.js" defer></script>

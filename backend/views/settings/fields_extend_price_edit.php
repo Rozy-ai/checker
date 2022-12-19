@@ -18,7 +18,7 @@ $this->title = Yii::t('site', 'Редактирование полей для pr
 ?>
 <div class="[ SETTINGS-MAIN ] settings-main">
   <h1><?= Html::encode($this->title) ?></h1>
-  <? $form = ActiveForm::begin(['id' => 'settings__fields_extend_price']); ?>
+  <?php $form = ActiveForm::begin(['id' => 'settings__fields_extend_price']); ?>
 
   <div style="display: none">
     <?=$form->field($item, 'id')->input('text',['value' => $item_res->id])?>
@@ -39,7 +39,7 @@ $this->title = Yii::t('site', 'Редактирование полей для pr
   ])->label(false);?>
 
 
-  <? if ($item_res->id): ?>
+  <?php if ($item_res->id): ?>
     <div class="form-row">
 
       <div class="col-sm-6 mb-3">
@@ -51,17 +51,17 @@ $this->title = Yii::t('site', 'Редактирование полей для pr
       </div>
 
     </div>
-  <? else: ?>
+  <?php else: ?>
     <?= Html::submitButton("Сохранить", ['class' => 'btn btn-primary btn-block'])?>
-  <? endif;?>
+  <?php endif;?>
 
-  <? ActiveForm::end(); ?>
+  <?php ActiveForm::end(); ?>
 
   <div>
 
 Перечень: (находится в корне под именем 'price_keys.txt')
 <pre>
-<? $price_keys_path =  __DIR__ . '/../../../'.'price_keys.txt'; ?>
+<?php $price_keys_path =  __DIR__ . '/../../../'.'price_keys.txt'; ?>
 <?= (file_exists($price_keys_path)) ? file_get_contents($price_keys_path) : 'фаил не найден'?>
 </pre>
   </div>

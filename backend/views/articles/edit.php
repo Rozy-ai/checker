@@ -9,7 +9,7 @@ use yii\bootstrap4\ActiveForm;
 ?>
 
 <div class="[ ARTICLE-EDIT ] article-edit">
-<? $form = ActiveForm::begin(['id' => 'articles__edit-item','class' => 'form-control']); ?>
+<?php $form = ActiveForm::begin(['id' => 'articles__edit-item','class' => 'form-control']); ?>
 
 <?= Html::activeHiddenInput($item,'id'); ?>
 <?= $form->field($item, 'title')->input('text') ?>
@@ -24,7 +24,7 @@ use yii\bootstrap4\ActiveForm;
 
 <?= Html::submitButton("Сохранить", ['class' => 'btn btn-primary btn-block'])?>
 
-<? ActiveForm::end() ?>
+<?php ActiveForm::end() ?>
 </div>
 <?= Html::a("Удалить",'/articles/del?id='.$item->id ,['class' => 'btn btn-secondary btn-block','style' => 'margin-top: 5px'])?>
 

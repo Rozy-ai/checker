@@ -79,6 +79,8 @@ ProductsAsset::register($this);
 
     <section class="home">
       <div class="_container" style="padding: 0 17px;">
+      <div class="row">
+      <div class="col">
         <div class="navigation">
 
           <?= Breadcrumbs::widget([
@@ -88,14 +90,19 @@ ProductsAsset::register($this);
             'options' => ['class' => 'link'],
           ]) ?>
 
-            <? if (!empty($this->params['prev']) || !empty($this->params['next'])): ?>
+            <?php if (!empty($this->params['prev']) || !empty($this->params['next'])): ?>
               <ul class="pageLink">
                 <li><?= Html::a('', $this->params['prev'] ? ['product/view', 'id' => $this->params['prev']->id] : '#', ['class' => $this->params['prev'] ? 'prev' : '']) ?></li>
                 <li class="num"><?= Html::encode($this->title) ?></li>
                 <li><?= Html::a('', $this->params['next'] ? ['product/view', 'id' => $this->params['next']->id] : '#', ['class' => $this->params['next'] ? 'next' : '']) ?></a></li>
               </ul>
-            <? endif; ?>
+            <?php endif; ?>
 
+        </div>
+        </div>
+        <? if ($this->params['breadtail']) : ?>
+        <div class="col-auto"><?= $this->params['breadtail'] ?></div>
+        <? endif ?>
         </div>
 
         <?= Alert::widget() ?>

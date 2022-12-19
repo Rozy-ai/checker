@@ -165,7 +165,7 @@ class UserController extends Controller{
       $post = $this->request->post();
       if (\Yii::$app->authManager->getAssignment('admin', $model->id) !== null) {
         $data = $post [$form->formName()];
-        if ($data['status'] != CommonUser::STATUS_ACTIVE) {
+        if ($data['status'] != User::STATUS_ACTIVE) {
           $allowSave = false;
           $session = Yii::$app->session;
           $session->setFlash('danger', "Admin cannot be deleted and inactivated.");
@@ -226,7 +226,7 @@ class UserController extends Controller{
         $model = $this->findModel($id);
         if (\Yii::$app->authManager->getAssignment('admin', $model->id) === null)
         {
-            $model->status = CommonUser::STATUS_DELETED;
+            $model->status = User::STATUS_DELETED;
             $model->save();
         }
         else {
@@ -256,9 +256,9 @@ class UserController extends Controller{
      */
     protected function findModel($id)
     {
-        $query = CommonUser::find();
+        $query = User::find();
         $query->where(['id' => $id])
-              ->andWhere(['<>', 'status', CommonUser::STATUS_DELETED]);
+              ->andWhere(['<>', 'status', User::STATUS_DELETED]);
         if (($model = $query->one()) !== null) {
             return $model;
         }
@@ -310,7 +310,7 @@ class UserController extends Controller{
 
       if (!User::isAdmin()) return false;
 
-      $user_to_login = CommonUser::findOne($id);
+      $user_to_login = User::findOne($id);
       if($user_to_login)
       if(Yii::$app->user->login($user_to_login, true ? 3600 * 24 * 30 : 0)){
         $this->redirect('/product/index?page=1');

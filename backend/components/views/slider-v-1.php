@@ -37,9 +37,9 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 <!-- Если администратор, то показываем в виде ссылки -->
 
 <div id="id_td3_title" class="main-item-title">
-    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
+    <?php if ($identity && method_exists($identity, 'is_detail_view_for_items') && ($identity->is_detail_view_for_items() || $is_admin)): ?><a target="_blank" href="<?=$product->baseInfo['URL: Amazon']?>"><? endif; ?>
         <?= $variables_left['description_left'] ?>
-    <? if ($identity && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
+    <?php if ($identity && method_exists($identity, 'is_detail_view_for_items') && ($identity->is_detail_view_for_items() || $is_admin)): ?></a><? endif; ?>
 </div>
  
 <!-- VIEW 1 -->
@@ -49,8 +49,8 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
     ?>
 
     <?php
-        $comparison = $comparisons[$item->id]; 
-        
+        $comparison = $comparisons[$item->id];
+
         switch ($f_comparison_status){
             case 'NOCOMPARE':
                 if ($comparison) {
@@ -89,11 +89,11 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
         data-id_item="<?=$item->id?>"
         data-status="<?=$comparison->status?>"
         data-node_id="<?= $index + 1 ?>"
-        class="[ SLIDER-ITEM ] slider__slider-item <?= $number_page_current === $index ? '-current' : '' ?> item<?= (int) $number_node === $index ? " slick-current" : '' ?>"
+        class="[ SLIDER-ITEM ] slider__slider-item item"
     >
         <!--slider_images несодержит стилей. Добавлен для отображения TopSlider-->
         <div
-            class="slider-item__border slider_images <?= $number_page_current === $index ? '-current' : '' ?>"
+            class="slider-item__border slider_images"
   
             data-description_left   = "<?= htmlspecialchars($variables_left['description_left'])?>"
             data-description_right  = "<?= htmlspecialchars($variables_right['description_right'])?>"
@@ -116,19 +116,19 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 
 
             <!-- FORK -->
-            <? if ($source->name === 'EBAY'): ?>
+            <?php if ($source->name === 'EBAY'): ?>
             <div class="slider-item__cnt-1">
                 <span class="cnt-1__stock-title __blue-title">Stock:</span>
                 <span class="grade cnt-1__stock-n"><?= $item->gradeKey; ?></span>
             </div>
 
-            <? if (!empty($option_sales_key)): ?>
+            <?php if (!empty($option_sales_key)): ?>
             <span class="slider__sales sales">
                 <span class="__blue-title">Sold:</span><?= preg_replace('|\D|', '', $item->salesKey) ?: 0 ?>
             </span>
-            <? endif; ?>
+            <?php endif; ?>
 
-            <? elseif ($source->name === 'CHINA'): ?>
+            <?php elseif ($source->name === 'CHINA'): ?>
             <div class="slider-item__cnt-1">
                 <span class="cnt-1__stock-title __blue-title">ROI:</span>
                 <span class="grade cnt-1__stock-n"><?= $item->ROI_Ali; ?></span>
@@ -136,7 +136,7 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
             <div class="slider__sales sales" style="margin: 0">
                 <!--<span class="__blue-title">R:</span>--><?= $item->rating; ?>
             </div>
-            <? endif; ?>
+            <?php endif; ?>
             <span class="slider__sales sales">
                 <span class="cnt-1__stock-title __blue-title">Price:</span><span class="grade cnt-1__stock-n"><?= $item->price ?></span>
             </span>
@@ -166,10 +166,6 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
             </div>
 
         </div>
-
-        <a href="/product/view?id=<?= $product->id ?>&source_id=<?= $source_id ?>&node=<?= $index + 1 ?>&comparisons=<?= $f_comparison_status ?>&filter-items__profile=<?= $f_profile ?>"
-           class="[ PAGE-N ]  slider__page-n <?= $number_page_current === $index ? '-current' : '' ?>"><?= $index + 1 ?><?//=$cnt?></a>
-
     </div>
     <?php $cnt++; endforeach; ?>
 </div>

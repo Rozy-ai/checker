@@ -11,8 +11,8 @@ use yii\helpers\Html;
 
 
 ?>
-<? if (0 && $model->canCompare): ?>
-    <? if ($model->comparison): ?>
+<?php if (0 && $model->canCompare): ?>
+    <?php if ($model->comparison): ?>
         <?php if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) !== null): ?>
             <?php if ($model->comparison->status == Comparison::STATUS_MATCH): ?>
                 <?= Html::a($model->comparison->url, null, ['class' => 'btn btn-link text-success text-nowrap']) ?>
@@ -21,12 +21,12 @@ use yii\helpers\Html;
                 <?= Html::label($model->comparison->message, null, ['class' => 'font-weight-bold text-danger text-nowrap']) ?>
             <?php endif ?>
         <?php endif ?>
-    <? endif; ?>
-<? endif; ?>
+    <?php endif; ?>
+<?php endif; ?>
 
 <div class="control dropup">
-    <? if ($model->canCompare): ?>
-        <? if (0 && $model->comparison): ?>
+    <?php if ($model->canCompare): ?>
+        <?php if (0 && $model->comparison): ?>
             <button id="btnGroupDrop1" type="button" class="btn faq" data-toggle="dropdown"
                     aria-expanded="false"></button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop2">
@@ -39,7 +39,7 @@ use yii\helpers\Html;
                 <?php endforeach; ?>
             </div>
 
-        <? else: ?>
+        <?php else: ?>
         <?
         $_hover_other = '';
         $_hover_match = '';
@@ -60,9 +60,9 @@ use yii\helpers\Html;
                 <?php endforeach; ?>
             </div>
 
-        <? endif ?>
+        <?php endif ?>
 
-    <? else: ?>
+    <?php else: ?>
 
         <?php if ($model->comparison): ?>
             <button type="button" class="btn btn-dark" disabled>
@@ -70,7 +70,7 @@ use yii\helpers\Html;
             </button>
         <?php endif ?>
 
-    <? endif ?>
+    <?php endif ?>
 
   <div class="clearfix"></div>
 </div>

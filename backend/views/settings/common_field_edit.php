@@ -15,7 +15,7 @@ $this->title = Yii::t('site', 'Редактирование общих ключ�
 ?>
 <div class="[ SETTINGS-MAIN ] settings-main">
   <h1><?= Html::encode($this->title) ?></h1>
-  <? $form = ActiveForm::begin(['id' => 'settings__common_field_edit']); ?>
+  <?php $form = ActiveForm::begin(['id' => 'settings__common_field_edit']); ?>
 
 
 
@@ -29,7 +29,7 @@ $this->title = Yii::t('site', 'Редактирование общих ключ�
   <?=$form->field($item, 'description')->input('text',['value' => $item_res->description, 'placeholder' => 'Описание'])->label(false);?>
 
 
-  <? if ($item_res->id): ?>
+  <?php if ($item_res->id): ?>
     <div class="form-row">
 
       <div class="col-sm-6 mb-3">
@@ -41,9 +41,9 @@ $this->title = Yii::t('site', 'Редактирование общих ключ�
       </div>
 
     </div>
-  <? else: ?>
+  <?php else: ?>
     <?= Html::submitButton("Сохранить", ['class' => 'btn btn-primary btn-block'])?>
-  <? endif;?>
+  <?php endif;?>
 
-  <? ActiveForm::end(); ?>
+  <?php ActiveForm::end(); ?>
 </div>

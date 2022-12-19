@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * @var string $list
  * @var string $local_import_stat
  * @var string $is_admin
@@ -11,6 +11,7 @@
  * 
  */
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use backend\components\TopSlider;
@@ -18,7 +19,7 @@ use common\models\Comparison;
 ?>
 
 <table class="table table-striped [ PRODUCT-LIST ] products__products-list">
-    <? if ($local_import_stat): ?>
+    <?php if ($local_import_stat): ?>
     <tr>
         <td colspan="4">
             <div class="[ local-import-stat ] __local-import-stat">
@@ -28,21 +29,20 @@ use common\models\Comparison;
                 <div>Заменено: <strong><?= $local_import_stat['replaced'] ?></strong></div>
                 <div>Проигнорировано: <strong><?= $local_import_stat['ignored'] ?></strong></div>
                 <div>Добавлено новых: <strong><?= $local_import_stat['added'] ?></strong></div>
-                <? if ($source_id > 1):?>
+                <?php if ($source_id > 1):?>
                 <div>C правыми товарами было: <strong><?= $local_import_stat['p_with_right_p'] ?></strong></div>
-                <? endif; ?>
+                <?php endif; ?>
             </div>
         </td>
     </tr>
-    <? endif;?>
+    <?php endif;?>
 
-    <? foreach ($list as $k => $item):   ?>
+    <?php foreach ($list as $k => $item):   ?>
 
     <?php
-    $images_left = preg_split("/[; ]/", $item->baseInfo["Image"]);
+        $item->baseInfo = json_decode($item->baseInfo,true);
+    $images_left = preg_split("/[; ]/", ArrayHelper::getValue($item->baseInfo,"Image"));
 
-    $images_left[0];
-    $images_left["Title"];
     $source_id = $item->source->id;
     
     $list_comparison_statuses = Comparison::getListStatusForStatictic($item->id);
@@ -58,7 +58,12 @@ use common\models\Comparison;
     
     
     $bsr = number_format($item->baseInfo["Sales Rank: Current"], 0, '', ' ');
-    $sales30 = $item->baseInfo["Sales Rank: Drops last 30 days"];
+    $dropsValue = $item->baseInfo["Sales Rank: Drops last 30 days"];
+    $dropsTitle = 'Drops(30)';
+    if(isset($item->baseInfo["Sales Rank: Drops last 90 days"])) {
+        $dropsValue .= '/'. $item->baseInfo["Sales Rank: Drops last 90 days"];
+        $dropsTitle = 'Drops(30/90)';
+    }
     $price = ($item->baseInfo[$default_price_name]) ?: '-';
     $fba = $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"];
     
@@ -75,7 +80,7 @@ use common\models\Comparison;
 
     <!-- ITEM полное отображение-->
     <tr
-        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_maximize <?=$is_minimize?'d-none':''?>"
+        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_maximize <?=$is_minimize?'-hidden':''?>"
         data-pid="<?= $item->id ?>"
         data-source_id="<?= $source_id ?>"
     >
@@ -83,7 +88,7 @@ use common\models\Comparison;
         ?>
         <td class="products-list__td1">
             <div class="product-list-item__data"><span>BSR:</span><br><span id="id_td1_bsr"><?=$bsr?></span></div>
-            <div class="product-list-item__data"><span>Sales30:</span><br><span id="id_td1_sales30"><?=$sales30?></span></div>
+            <div class="product-list-item__data"><span><?= $dropsTitle ?>:</span><br><span id="id_td1_sales30"><?= $dropsValue ?></span></div>
             <div
                 class="product-list-item__data js-addition-info-for-price"
                 data-addition_info_for_price='<?= $item->addition_info_for_price(); ?>'
@@ -94,9 +99,9 @@ use common\models\Comparison;
 
             <div class="product-list-item__data"><span>Brand_R:</span><br><?= $item->baseInfo["Brand_R"]?:"-"; ?></div>
             <div class="product-list-item__data"><span>FBA/FBM:</span><br><span id="id_td1_fba"><?=$fba?></span></div>
-            <? if ($is_admin):?> 
+            <?php if ($is_admin):?>
             <div class="product-list-item__data"><span>Profile:</span><br><?= $item->profile ?></div>
-            <? endif;?>
+            <?php endif;?>
 
         </td>
         <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
@@ -133,9 +138,9 @@ use common\models\Comparison;
                     <div class="products-list__img" style="background-image: url('<?= explode(';', $item->baseInfo['Image'])[0] ?>')">
 
                         <div class="slider__left-item__fade -top">
-                            <? if ($is_admin):?>
+                            <?php if ($is_admin):?>
                             <div id="id_td2_toptext" class="slider__left-item-img-top-text"><?=$td2_toptext?></div>
-                            <? endif;?>
+                            <?php endif;?>
                         </div>
 
 
@@ -156,7 +161,7 @@ use common\models\Comparison;
 
                     </div>
 
-                    <? if (0):?>
+                    <?php if (0):?>
                     <!-- message -->
                     <div class="products-list__img-message">
                         <div class="products-list__img-message-text">
@@ -165,18 +170,18 @@ use common\models\Comparison;
                         </div>
                         <div class="products-list__img-message-arrow"></div>
                     </div>
-                    <? endif;?>
+                    <?php endif;?>
 
 
                 </div>
-                <? if ((count($images_left) > 1)):?>
+                <?php if ((count($images_left) > 1)):?>
                 <div class="slider__left-item-other-imgs">
 
-                    <? foreach ($images_left as $slider__left_img): ?>
+                    <?php foreach ($images_left as $slider__left_img): ?>
                     <div class="slider__left-item-other-img" style="background-image: url('<?= $slider__left_img ?>')"></div>
-                    <? endforeach; ?>
+                    <?php endforeach; ?>
                 </div>
-                <? endif;?>
+                <?php endif;?>
 
             </div>
 
@@ -186,10 +191,10 @@ use common\models\Comparison;
                 <?php
                 echo TopSlider::widget([
                     'detail_view' => $f_detail_view,
-                    'number_page_current' => $number_page_current,
+                    'number_page_current' => $number_page_current ?? 1,
                     'product' => $item,
-                    'f_comparison_status' => $f_comparison_status,
-                    'f_profile' => $f_profile,
+                    'f_comparison_status' => $f_comparison_status??false,
+                    'f_profile' => $f_profile??false,
                     'f_no_compare' => false,
                     'source' => $source
                 ])
@@ -226,26 +231,26 @@ use common\models\Comparison;
                 <span class="-title">Обработано:</span> <?=Html::tag('div', $processed, ['class' => 'name product-list-item__processed']);?>
             </div>
 
-            <? if ($is_admin):?>
+            <?php if ($is_admin):?>
             <div class="product-list-item__data"><span>Пользователь:</span><br>
                 <?=empty($item->aggregated->users) ? "не&nbsp;задано" : $item->aggregated->users;?>
             </div>
             <div class="product-list-item__data"><span>Profile:</span><br>
                 <?= $item->profile ?>
             </div>  
-            <? endif;?>
+            <?php endif;?>
 
             <div class="product-list-item__date " style="margin-bottom: 10px">
                 <div class="product-list-item__date-title">Добавлено:</div>
                 <div><?= date('d.m.Y H:i', strtotime($item->date_add)); ?></div>
 
-                <? if ($item->updated): ?>
+                <?php if ($item->updated): ?>
                 <div class="product-list-item__date-title" style="margin-top: 5px">Обновлено:</div>
                 <div><?= date('d.m.Y H:i', strtotime($item->updated->date)); ?></div>
                 <? endif;?>
             </div>
 
-            <? if ($is_admin):?>
+            <?php if ($is_admin):?>
             <div class="tbl" style="width: 100%;">
                 <div class="td">
 
@@ -272,7 +277,7 @@ use common\models\Comparison;
 
             </div>
 
-            <? endif; ?>
+            <?php endif; ?>
 
 
             <div class="actions_for_right-visible-items">
@@ -283,12 +288,12 @@ use common\models\Comparison;
                         href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
                     ></div>
 
-                    <? if (0): ?>
+                    <?php if (0): ?>
                     <div
                         class="slider__left-item__btn-yellow yellow_button_v1 -change-1"
                         href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
                         ></div>
-                    <? endif; ?>
+                    <?php endif; ?>
                 <?php endif;?>
             </div>
 
@@ -298,19 +303,19 @@ use common\models\Comparison;
     
     <!-- ITEM свернутое отображение-->
     
-    <tr 
-        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_minimize <?=$is_minimize?'':'d-none'?>"
+    <tr
+        class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_minimize <?=$is_minimize?'':'-hidden'?>"
         data-pid="<?= $item->id ?>"
     >
         <td colspan="2" class="products-list__td1_minimize text-nowrap">
             <div style="text-align: center">
-                <? if ((count($images_left) > 0)):?>
+                <?php if ((count($images_left) > 0)):?>
                 <div class="block_minimize_data_img d-inline-block">
                     <div class="slider__left-item-other-img_minimize" style="background-image: url('<?= $images_left[0] ?>')"></div>
                 </div>
-                <? endif;?>
+                <?php endif;?>
                 <div class="block_minimize_data d-inline-block"><span>BSR</span><br><?=$bsr?></div>
-                <div class="block_minimize_data d-inline-block"><span>Sales30</span><br><?=$sales30?></div>
+                <div class="block_minimize_data d-inline-block"><span><?= $dropsTitle ?></span><br><?= $dropsValue ?></div>
                 <div class="block_minimize_data d-inline-block"><span>Price</span><br><?=$price?></div>
                 <div class="block_minimize_data d-inline-block"><span>FBA/FBM</span><br><?=$fba?></div>
 
@@ -336,5 +341,5 @@ use common\models\Comparison;
     </tr>
     <!-- /ITEM свернутое отображение-->
     
-    <? endforeach;?>
+    <?php endforeach;?>
 </table>

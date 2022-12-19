@@ -32,18 +32,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <select name="username" id="" class="form-control">
           <option value="">выбрать пользователя</option>
-          <? foreach ($user_list as $user):?>
+          <?php foreach ($user_list as $user):?>
             <option value="<?=$user->username?>"><?=$user->username?></option>
-          <? endforeach;?>
+          <?php endforeach;?>
         </select>
 
-        <? if (0): ?>
+        <?php if (0): ?>
         <?= AutoComplete::widget(['name' => 'username', 'clientOptions' => ['source' => new JsExpression("function(request, response) {
                                                 $.getJSON('" . Url::to(['user/ajax']) . "', {
                                                     search: request.term
                                                 }, response);
                                             }"),], 'options' => ['class' => 'form-control', 'placeholder' => Yii::t('site', 'Username')]]); ?>
-        <? endif;?>
+        <?php endif;?>
 
       </div>
       <div class="input-group-append">

@@ -42,6 +42,18 @@ use yii\helpers\Url;
 
 $this->title = $source->name . " | " . Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
+$this->params['breadcrumbs'][] = $source->name;
+if ($is_admin) {
+    $this->params['breadcrumbs'][] = [
+        'label' => Html::dropDownList('f_profile', $f_profile, $list_profiles, ['id' => 'id_f_profile', 'class' => 'form-control form-control-sm w-auto']),
+        'template' => '<li>{link}</li>',
+        'encode' => false
+    ];
+}
+
+$this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
+    . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all . ' (' . $count_products_right .')</div> по: '
+    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, array_merge($list_count_products_on_page, ['ALL' => 'ВСЕ']), ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
 
 $local_import_stat = null;
 
@@ -51,14 +63,14 @@ $local_import_stat = null;
 
 <div class="[ PRODUCTS ]">
     <div class="position-1">
-        <div class="[ FILTER-ITEMS ] products__filter-items">
+        <div class="[ FILTER-ITEMS ] products__filter-items mt-0">
             <!--<form method="get" action="change-filters" id="id_products__filter-form">-->
             <div class="form-row js-title-and-source_selector">
-                <div class="form-group _col-sm-2" style="width: 128px">
+                <!--div class="form-group _col-sm-2" style="width: 128px">
                     <div class="titleName" style="margin-top: 5px;"><?= Html::encode(Yii::t('site', 'Products')) ?></div>
-                </div>
+                </div-->
 
-                <div class="form-group _col-sm-2" style="width: 128px">
+                <!--div class="form-group _col-sm-2" style="width: 128px">
                     <select name="f_source" id="id_f_source" class="form-control">
                         <?php
                         if ($list_source) {
@@ -69,10 +81,10 @@ $local_import_stat = null;
                         }
                         ?>
                     </select>
-                </div>
+                </div-->
 
                 <?php if ($is_admin) : ?>
-                    <div class="form-group _col-sm-2" >
+                    <!--div class="form-group _col-sm-2" >
                         <select name="f_profile" id="id_f_profile" class="form-control ">
                             <?php
                             if ($list_profiles) {
@@ -83,11 +95,11 @@ $local_import_stat = null;
                             }
                             ?>
                         </select>
-                    </div>
+                    </div-->
                 <?php endif; ?>
 
                 <div class="form-group _col-sm-2 filter-items__last-update" >
-                    last update:<br>
+                    last update:
                     <?= $last_update->created ?? 'Нет данных' ?>
                 </div>
 
@@ -99,17 +111,17 @@ $local_import_stat = null;
                 if ($profile_path === '{{all}}')
                     $profile_path = 'Все';
                 ?>
-                <div class="cnt-items col-sm-6" id="id_block_count">Показаны записи <?= min($f_count_products_on_page, $count_products_all) ?> из <?= $count_products_all; ?> (<?= $count_products_right ?>) Источник <?= $source->name ?> / <?= $profile_path ?></div>
+                <!--div class="cnt-items col-sm-6" id="id_block_count">Показаны записи <?= min($f_count_products_on_page, $count_products_all) ?> из <?= $count_products_all; ?> (<?= $count_products_right ?>) Источник <?= $source->name ?> / <?= $profile_path ?></div-->
 
-                <div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">
+                <!--div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">
                     <span>Показывать по:&nbsp;&nbsp;</span>
                     <select name="f_count_products_on_page" id="id_f_count_products_on_page" class="form-control ">
-                        <? foreach ($list_count_products_on_page as $pnl):?>
+                        <?php foreach ($list_count_products_on_page as $pnl):?>
                         <option value="<?= $pnl ?>" <?= ((int) $f_count_products_on_page === $pnl) ? 'selected' : '' ?>><?= $pnl ?></option>
-                        <? endforeach;?>
+                        <?php endforeach;?>
                         <option value="ALL" <?= ($f_count_products_on_page === 'ALL') ? 'selected' : '' ?> >ВСЕ</option>
                     </select>
-                </div>
+                </div-->
             </div>
 
             <div class="form-row">
@@ -127,12 +139,12 @@ $local_import_stat = null;
                 <div class="form-group _col-sm-3" style="width: 200px">
                     <select name="f_categories_root" id="id_f_categories_root" class="form-control">
                         <option value="">Categories:Root</option>
-                        <? foreach ($list_categories_root as $where_3_item => $cnt):?>
+                        <?php foreach ($list_categories_root as $where_3_item => $cnt):?>
                         <option
                             value="<?= $where_3_item ?>"
                             <?= ($f_categories_root == $where_3_item) ? 'selected' : '' ?>
                             ><?= $where_3_item ?> (<?= $cnt ?>)</option>
-                        <? endforeach;?>
+                        <?php endforeach;?>
                     </select>
                 </div>
 
@@ -168,7 +180,7 @@ $local_import_stat = null;
                     </select>
                 </div>
 
-                <? if ($is_admin): ?>
+                <?php if ($is_admin): ?>
                 <div class="form-group _col-sm-3">
                     <select name="f_username" id="id_f_username" class="form-control">
                         <option value="">User</option>
@@ -183,7 +195,7 @@ $local_import_stat = null;
                         ?>
                     </select>
                 </div>
-                <? endif;?>
+                <?php endif;?>
 
 
                 <div class="form-group _col-sm-3">
@@ -198,22 +210,22 @@ $local_import_stat = null;
                         }
                         ?>
                         <option value="">All</option>
-                        <? if (0):?>
+                        <?php if (0):?>
                         <option value="YES_NO_OTHER" <?= ($f_comparison_status === 'YES_NO_OTHER') ? 'selected' : '' ?>>Result</option>
-                        <? foreach ($list_comparison_statuses as $k_6 => $where_6_item):?> 
+                        <?php foreach ($list_comparison_statuses as $k_6 => $where_6_item):?> 
                         <option value="<?= $k_6 ?>" <?= ($f_comparison_status === $k_6) ? 'selected' : '' ?>>
                             <?= ($k_6 === 'MISMATCH') ? 'Mismatch (No)' : '' ?>
                             <?= ($k_6 === 'PRE_MATCH') ? 'Pre_match (Yes?)' : '' ?>
                             <?= ($k_6 === 'MATCH') ? 'Match (Yes)' : '' ?>
                             <?= ($k_6 === 'OTHER') ? 'Other' : '' ?>
                             <?= ($k_6 === 'NOCOMPARE') ? 'Nocompare' : '' ?>
-                            <? if (0):?>
+                            <?php if (0):?>
                             [<?= $k_6 ?>] (<?= $where_6_item ?>)
-                            <? endif;?>
+                            <?php endif;?>
                         </option>
-                        <? endforeach; ?>
+                        <?php endforeach; ?>
                         <option value="ALL" <?= ($f_comparison_status === 'ALL') ? 'selected' : '' ?>>All</option>
-                        <? endif;?>
+                        <?php endif;?>
 
                     </select>
                 </div>
@@ -228,7 +240,7 @@ $local_import_stat = null;
                     </select>
                 </div>
 
-                <? if ($f_detail_view || $is_admin): ?>
+                <?php if ($f_detail_view || $is_admin): ?>
                 <div class="form-group _col-sm-3" >
                     <select name="f_detail_view" id="id_f_detail_view" class="form-control ">
                         <option value="0" <?= ($f_detail_view === '0')? 'selected':'' ?>>Кратко</option>
@@ -238,7 +250,7 @@ $local_import_stat = null;
                     </select>
                 </div>
 
-                <? endif; ?>
+                <?php endif; ?>
 
                 <?php if (0): ?>
                 <div class="custom-control custom-switch">
@@ -282,18 +294,18 @@ $local_import_stat = null;
                     </label>
                 </div>                
                 <?php endif; ?>
-                <? if (0): ?>
+                <?php if (0): ?>
                 <div class="custom-control custom-switch">
                     <div style="margin: 12px 10px 12px 0">
                         <input
-                        <?= $f_no_compare ? 'checked' : '' ?>
+                        <?= !empty($f_no_compare) ? 'checked' : '' ?>
                             name="f_no_compare" type="checkbox" class="custom-control-input" id="id_f_no_compare">
                         <label class="custom-control-label" for="f_no_compare" style="margin-left: 7px; position: relative;">
                             <span style="top: 5px; position: relative;">No compare</span>
                         </label>
                     </div>
                 </div>
-                <? endif; ?>
+                <?php endif; ?>
                 <!--
                     <div class="form-group _col-sm-3">
                         <button type="submit" class="btn btn-primary products__filter-submit">Фильтровать</button>
@@ -320,10 +332,10 @@ $local_import_stat = null;
             'list' => $list,
             'local_import_stat' => $local_import_stat,
             'is_admin' => $is_admin,
-            'f_comparison_status' => $f_comparison_status,
-            'f_profile' => $f_profile,
-            'f_no_compare' => $f_no_compare,
-            'f_detail_view' => $f_detail_view,
+            'f_comparison_status' => $f_comparison_status??false,
+            'f_profile' => $f_profile??false,
+            'f_no_compare' => $f_no_compare??false,
+            'f_detail_view' => $f_detail_view??false,
             'source' => $source,
         ]);
         ?>
@@ -340,7 +352,7 @@ $local_import_stat = null;
             <a href="<?= '/exports/step_4?source_id=' . $source_id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4" >
                 экспортировать
             </a>
-            <? if ($is_admin): ?>
+            <?php if ($is_admin): ?>
             <a
                 href="/import/step_1?source_id=<?= $source_id ?>"
                 target="_blank"
@@ -349,7 +361,7 @@ $local_import_stat = null;
                 >
                 загрузить SQL
             </a>
-            <? endif; ?>
+            <?php endif; ?>
 
 
         </div>
@@ -379,7 +391,7 @@ $local_import_stat = null;
 <br>
 <br>
 <br>
-<? if (0): ?>
+<?php if (0): ?>
 <br>
 <br>
 <br>
@@ -490,4 +502,4 @@ TableView::widget([
 ]);
 ?>
 
-<? endif;?>
+<?php endif;?>
