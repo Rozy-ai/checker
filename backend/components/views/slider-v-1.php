@@ -5,6 +5,7 @@
  * 
  * @var string $f_comparison_status
  * @var string $f_profile
+ * @var bool   $f_hide_mode
  * @var bool   $is_admin
  * @var int    $number_page_current
  * @var $option_class_slider
@@ -55,41 +56,49 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
             case 'NOCOMPARE':
                 if ($comparison) {
                     continue 2;
-                }; break;
+                } break;
             case 'PRE_MATCH':
                 if (!$comparison || $comparison->status != 'PRE_MATCH') {
                     continue 2;
-                }; break;
+                } break;
             case 'MATCH':
                 if (!$comparison || $comparison->status != 'MATCH') {
                     continue 2;
-                }; break;
+                } break;
             case 'OTHER':
                 if (!$comparison || $comparison->status != 'OTHER') {
                     continue 2;
-                }; break;                    
+                } break;                    
             case 'YES_NO_OTHER':
                 if (!$comparison || !in_array($comparison->status,['PRE_MATCH', 'MATCH', 'OTHER'])) {
                     continue 2;
-                }; break;
+                } break;
             case 'MISMATCH':
                 if (!$comparison || $comparison->status != 'MISMATCH') {
                     continue 2;
-                }; break;
+                } break;
         }
         
         //Иниацияализация переменных
         $variables_right = $this->context->getVariablesRight($source, $item, true);
-        $current = ($number_page_current === $index) ? '&load_next=1' : '&load_next=0'
+        $current = ($number_page_current === $index) ? '&load_next=1' : '&load_next=0';
+        
+        $is_hide = $f_hide_mode && (
+            $comparison->status === Comparison::STATUS_PRE_MATCH ||
+            $comparison->status === Comparison::STATUS_MATCH ||
+            $comparison->status === Comparison::STATUS_MISMATCH ||
+            $comparison->status === Comparison::STATUS_OTHER
+        );
     ?>
 
     <div
+        class="[ SLIDER-ITEM ] slider__slider-item item"
+        <?=$is_hide? "style=\"display: none\"":''?>
         data-id_source="<?=$source_id?>"
         data-id_product="<?=$product->id?>"
         data-id_item="<?=$item->id?>"
         data-status="<?=$comparison->status?>"
-        data-node_id="<?= $index + 1 ?>"
-        class="[ SLIDER-ITEM ] slider__slider-item item"
+        data-node_id="<?= $index + 1 ?>" 
     >
         <!--slider_images несодержит стилей. Добавлен для отображения TopSlider-->
         <div

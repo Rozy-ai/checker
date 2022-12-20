@@ -336,6 +336,7 @@ $local_import_stat = null;
             'f_profile' => $f_profile,
             'f_no_compare' => $f_no_compare,
             'f_detail_view' => $f_detail_view,
+            'f_hide_mode' => $f_hide_mode,
             'source' => $source,
         ]);
         ?>

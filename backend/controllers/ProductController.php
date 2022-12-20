@@ -203,6 +203,7 @@ class ProductController extends Controller {
             'f_batch_mode' => $filters->f_batch_mode,
             'f_hide_mode' => $filters->f_hide_mode,
             'f_no_compare' => true,
+            'f_hide_mode' => true,
 
             'list_source' => $this->indexPresenter->getListSource(),
             'list_profiles' => $this->indexPresenter->getListProfiles(),
@@ -417,6 +418,38 @@ class ProductController extends Controller {
     
     public function actionCompareBatch(){
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
+        if (\Yii::$app->request->isGet) {
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost) {
+            $params = \Yii::$app->request->post();
+        }
+        
+        $data = $params['listDataForServer'];
+        if (empty($data['datas_products_left']) && 
+            empty($data['datas_products_right']) && 
+            empty($data['datas_products_left_delete']))
+        {
+            return [
+                'status' => 'info',
+                'message' => 'Нет данных для сохранения'
+            ];
+        }
+
+        try{
+            $this->indexPresenter->changeStatusProducts($data['datas_products_left'], $data['datas_products_right'], $data['datas_products_left_delete']);
+        } catch (\Exception $ex) {
+            Yii::error($ex->getLine().':'.$ex->getMessage());
+            return ['status' => 'error', 'message' => 'Сохранение пакета выбраных статусов совершилось с ошибкой'];
+        }
+
+        return [
+            'status'=>'ok'
+        ];
+    }
+    
+    public function actionCompareBatch1(){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if (\Yii::$app->request->isGet) {
             $params = \Yii::$app->request->get();
@@ -601,7 +634,7 @@ class ProductController extends Controller {
     }
     
     /*************************************************************************
-     *** Старый шлак для страницы сравнения продуктов
+     *** Старый шлак для страницы сравнения продуктов. Все что ниже
      *************************************************************************/
 
     /**

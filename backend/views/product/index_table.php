@@ -6,8 +6,9 @@
  * @var string $f_comparison_status
  * @var string $f_profile
  * @var string $f_no_compare
- * @var atring $f_detail_view
- * @var atring $f_profile
+ * @var string $f_detail_view
+ * @var string $f_hide_mode
+ * @var string $f_profile
  * 
  */
 
@@ -190,12 +191,13 @@ use common\models\Comparison;
             <div class="products-list__slider-wrapper <?=($f_detail_view == 1 || $f_detail_view == 3)?'-v-2':''?> js-slider-root"
                 <?php
                 echo TopSlider::widget([
-                    'detail_view' => $f_detail_view,
+                    'f_detail_view' => $f_detail_view,
                     'number_page_current' => $number_page_current ?? 1,
                     'product' => $item,
                     'f_comparison_status' => $f_comparison_status??false,
                     'f_profile' => $f_profile??false,
-                    'f_no_compare' => false,
+                    'f_no_compare' => $f_no_compare,
+                    'f_hide_mode' => $f_hide_mode,
                     'source' => $source
                 ])
                 ?>

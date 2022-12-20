@@ -244,7 +244,7 @@ class IndexPresenter {
             throw new \Exception('Не удаось найти источник по данному id');
         }
 
-        $product = $source->class_1::getById($id_product);
+        $product = Product::getById($source->class_1, $id_product);
         $product->source = $source;
         if (!($product instanceof Product)) {
             throw new \Exception('Не удалось найти товар по данному id');
@@ -376,8 +376,8 @@ class IndexPresenter {
      * @throws \Exception
      */
     public function changeStatusProducts($list_data_product_left = [], $list_data_product_right = [], $list_data_product_left_delete = []) {
-        if (!is_array($list_data_product_left) ||
-            !is_array($list_data_product_right) ||
+        if (!is_array($list_data_product_left) &&
+            !is_array($list_data_product_right) &&
             !is_array($list_data_product_left_delete)){
                 return false;
         }
@@ -401,7 +401,7 @@ class IndexPresenter {
             try{
                 $this->deleteProduct($id_source, $id_product);
             } catch (\Exception $ex) {
-
+                $is_change_all = false;
             }
         }
         
@@ -442,6 +442,7 @@ class IndexPresenter {
                 if (!$product) {
                     throw new \Exception('Не удалось найти продукт с id = ' . $id_product);
                 }
+                $product->source = $source;
                 $count_items = $product->countRightItems;
                 $count_comparisons = $product->countComparisons;
                 if (($count_items -$count_comparisons) <= 0){

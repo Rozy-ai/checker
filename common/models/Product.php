@@ -166,13 +166,15 @@ class Product extends \yii\db\ActiveRecord {
      * Сколько всего правых товаров имеется у данного левого
      * @return integer
      */
-    public function getCountRightItems() {
-        return count($this->_addInfo);
-        //$asin = $this->asin;
-        //$source = $this->source;
-        //$class_2 = $source->class_2; // Parser_trademarkia_com_result
+    public function getCountRightItems() {       
+        if ( $this->_addInfo ){
+            return count($this->_addInfo);
+        }
+        if (!$this->source){
+            throw new InvalidArgumentException('Установите id источника продукта');
+        }
 
-        //return $class_2::find()->where(['asin' => $asin])->count();
+        return $this->source->class_2::find()->where(['asin' => $this->asin])->count();
     }
 
     /**

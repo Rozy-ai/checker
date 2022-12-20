@@ -19,13 +19,14 @@ use yii\base\Widget;
 class TopSlider extends Widget {
     private $_options = [];
     private $is_admin;
-    public $detail_view;
-    public $is_hide_red = false;
+    public $f_detail_view;
+    //public $is_hide_red = false;
     public $number_page_current;
     public $product;
     public $f_comparison_status;
     public $f_profile;
     public $f_no_compare;
+    public $f_hide_mode;
     public $compare_item;
     public $source;
 
@@ -69,7 +70,7 @@ class TopSlider extends Widget {
         }
     }
 
-    private function getROIAli($item) {
+    public  function getROIAli($item) {
         return '<span class="slider-item__cnt-1">
                         <span class="cnt-1__stock-title __blue-title">ROI:</span>
                         <span class="grade cnt-1__stock-n">' . $item->ROI_Ali . '</span>
@@ -91,7 +92,7 @@ class TopSlider extends Widget {
                 $footer_right .= $this->getSales($item);
                 $footer_right .= $this->getStock($item);
             } elseif ($source->name === 'CHINA') {
-                $footer_right .= getROIAli($item);
+                $footer_right .= $this->getROIAli($item);
             }
             $footer_right .= '<span><span class=" __blue-title">Price:</span>' . $item->price . ' </span>';
         } else {
@@ -108,8 +109,8 @@ class TopSlider extends Widget {
                         '<span><span class=" __blue-title">Price:</span>' . $item->price . ' </span>' .
                         '<span><span class=" __blue-title">ROI:</span>' . $item->ROI_Ali . ' </span>' .
                         '<span><span class=" __blue-title">Rating:</span>' . $item->rating . ' </span>';
-            };
-        };
+            }
+        }
 
         $images_right = preg_split("/[; |,|\|]/", $item->srcKey);
 
@@ -136,7 +137,7 @@ class TopSlider extends Widget {
 
         $items = $this->product->addInfo;
 
-        return $this->render(($this->detail_view == 1 || $this->detail_view == 3) ? 'slider-v-2' : 'slider-v-1', [
+        return $this->render(($this->f_detail_view == 1 || $this->f_detail_view == 3) ? 'slider-v-2' : 'slider-v-1', [
             'is_admin'              => $this->is_admin,
             'number_page_current'   => $this->number_page_current,
             'option_class_slider'   => $this->_options['class'],
@@ -146,6 +147,7 @@ class TopSlider extends Widget {
             'f_profile'             => $this->f_profile,
             'items'                 => $items,
             'no_compare'            => $this->f_no_compare,
+            'f_hide_mode'           => $this->f_hide_mode,
             'compare_item'          => $this->compare_item,
             'source'                => $this->source
         ]);
