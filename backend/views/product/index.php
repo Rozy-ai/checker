@@ -209,7 +209,7 @@ $local_import_stat = null;
                             echo $st;
                         }
                         ?>
-                        <option value="">All</option>
+                        <option value="" <?=$f_comparison_status?'':'selected'?>>All</option>
                         <?php if (0):?>
                         <option value="YES_NO_OTHER" <?= ($f_comparison_status === 'YES_NO_OTHER') ? 'selected' : '' ?>>Result</option>
                         <?php foreach ($list_comparison_statuses as $k_6 => $where_6_item):?> 
@@ -317,7 +317,7 @@ $local_import_stat = null;
                     
                     <div class="form-group _col-sm-3">
                       <button id="show-all" class="btn btn-secondary">Показать все</button>
-                    </div>
+                    </div> -->
             </div>
             <!--</form>-->
 

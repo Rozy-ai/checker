@@ -284,7 +284,7 @@ class ProductController extends Controller {
         
         // Если с запросом прищли данные сравнений, 
         if ($data_comparisons['datas_products_left'] || $data_comparisons['datas_products_right']){
-            $is_comare_all = $this->indexPresenter->changeStatusProducts($data_comparisons['datas_products_left'], $data_comparisons['datas_products_right']);
+            $is_comare_all = $this->indexPresenter->changeStatusProducts($data_comparisons['datas_products_left'], $data_comparisons['datas_products_right'], $data_comparisons['datas_products_left_delete']);
         }
 
         $filters = new Filters();
@@ -692,7 +692,6 @@ class ProductController extends Controller {
         $node = 1; //$this->productPresenter->number_node;
         $compare_item = AppHelper::get_item_by_number_key($model->addInfo, $node);
         $identity = \Yii::$app->user->identity;
-
         //Передаем параметры в шаблон
         $this->getView()->params = [
             'comparison_statuses_statistic' => $this->productPresenter->getListComparisonStatusesStatistic(),

@@ -375,11 +375,35 @@ class IndexPresenter {
      * @return boolean
      * @throws \Exception
      */
-    public function changeStatusProducts($list_data_product_left, $list_data_product_right) {
+    public function changeStatusProducts($list_data_product_left = [], $list_data_product_right = [], $list_data_product_left_delete = []) {
+        if (!is_array($list_data_product_left) ||
+            !is_array($list_data_product_right) ||
+            !is_array($list_data_product_left_delete)){
+                return false;
+        }
         $is_change_all = true;
         $ids_product_and_source = [];
-        $list_data_product_left = is_array($list_data_product_left)?$list_data_product_left:[];
-        $list_data_product_right = is_array($list_data_product_right)?$list_data_product_right:[];
+        
+        // Нужно удалить левые товары вместе со всеми правыми ели они есть
+        foreach ($list_data_product_left_delete as $data){
+            $id_source = $data['id_source'];
+            $id_product = $data['id_product'];
+            
+            // Если в массиве левых товаров на missmatch есть этот товар то убираем его
+            $list_data_product_left = array_filter($list_data_product_left, function($el) use ($id_source, $id_product){
+                return ($el['id_product'] !== $id_product || !$el['id_source'] !== $id_source);
+            });
+            // Если в массива правых товаров на изменение  есть этот товар - убираем его
+            $list_data_product_right = array_filter($list_data_product_right, function($el) use ($id_source, $id_product){
+                return ($el['id_product'] !== $id_product || !$el['id_source'] !== $id_source);
+            });
+            
+            try{
+                $this->deleteProduct($id_source, $id_product);
+            } catch (\Exception $ex) {
+
+            }
+        }
         
         // Сохраним статусы всех правых товаров
         foreach($list_data_product_right as $data){
