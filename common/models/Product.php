@@ -72,8 +72,8 @@ class Product extends \yii\db\ActiveRecord {
             'item_url' => Yii::t('site', 'Item Url'),
             'date_add' => Yii::t('site', 'Date Add'),
         ];
-    }    
-    
+    }
+
     /**
      * Получить модель Product по заданному id
      * 
@@ -166,7 +166,7 @@ class Product extends \yii\db\ActiveRecord {
      * Сколько всего правых товаров имеется у данного левого
      * @return integer
      */
-    public function getCountRightItems() {       
+    public function getCountRightItems() {
         if ( $this->_addInfo ){
             return count($this->_addInfo);
         }
@@ -271,8 +271,8 @@ class Product extends \yii\db\ActiveRecord {
         }
 
         $list = $q->all();
-    //print_r($q->createCommand()->getRawSql());
-    //exit;
+        //print_r($q->createCommand()->getRawSql());
+        //exit;
         foreach ($list as $k => $product) {
             $product->source = $source;
             $product->baseInfo = $product->info;
@@ -302,9 +302,9 @@ class Product extends \yii\db\ActiveRecord {
             $q->getSqlUsername($source_table_name, $filters->f_username),
             $q->getSqlComparisonStatus($filters->f_comparison_status),
             $q->getSqlProfileFront($source_table_name, $filters->f_profile, $filters->f_profile_type)
-            //$q->getSqlAddInfoExists($source_table_name),
-            //$q->getSqlNoInComparisons(),
-            //$q->getSqlSettingsMessage(),
+                //$q->getSqlAddInfoExists($source_table_name),
+                //$q->getSqlNoInComparisons(),
+                //$q->getSqlSettingsMessage(),
         ]);
 
         // Добавим сортировку:
@@ -535,17 +535,19 @@ class Product extends \yii\db\ActiveRecord {
     public function addition_info_for_price() {
         $source_id = $this->source->id;
 
-        $keys = Settings__fields_extend_price::find()->where(['source_id' => $this->source->id])
+        $keys = Settings__fields_extend_price::find()->where(['source_id' => $source_id])
                         ->orderBy(['default' => SORT_DESC])->all();
 
-        $b = $this->baseInfo;
+        $b = $this->getBaseInfo();
 
         $out = [];
         foreach ($keys as $item) {
-            if ($item->title)
+            if ($item->title) {
+                $k = $item->title;
+            } else {
                 $k = $item->name;
-            else
-            $out[$k] = $b[$k]??'';
+            }
+            $out[$k] = $b[$k];
         }
 
         return json_encode($out);
@@ -574,7 +576,7 @@ class Product extends \yii\db\ActiveRecord {
 
         return $profile_list;
     }
-    
+
     /**
      * Gets query for [[Aggregated]].
      *
@@ -592,7 +594,7 @@ class Product extends \yii\db\ActiveRecord {
         return $this->hasOne(P_user_visible::class, ['p_id' => 'id']);
     }
 
-        // Добавляет ключи и зачения которые хранятся в поле addInfo
+    // Добавляет ключи и зачения которые хранятся в поле addInfo
     private function get_all_elements_in_array_to_first_level($array, $separator = '_', $level_prefix = '') {
         $_tmp = [];
         $from_deep = [];

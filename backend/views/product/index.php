@@ -350,14 +350,14 @@ $local_import_stat = null;
             $e_comparison = isset($f_comparison_status) && $f_comparison_status ? strtolower($f_comparison_status) : 'match';
             $e_profile = isset($f_profile) && $f_profile && $f_profile !== 'Все' ? $f_profile : '{{all}} ';
             ?>
-            <a href="<?= '/exports/step_4?source_id=' . $source_id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4" >
+            <a href="<?= '/exports/step_4?source_id=' . $source->id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4" >
                 экспортировать
             </a>
             <?php if ($is_admin): ?>
             <a
-                href="/import/step_1?source_id=<?= $source_id ?>"
+                href="/import/step_1?source_id=<?= $source->id ?>"
                 target="_blank"
-                data-source_id="<?= $source_id ?>"
+                data-source_id="<?= $source->id ?>"
                 class="product-list-item__import-from-sql js-import-from-sql"
                 >
                 загрузить SQL
