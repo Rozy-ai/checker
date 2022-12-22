@@ -2,12 +2,12 @@
 
 import {
 Ajax
-} from './classes/Ajax.js'
+        } from './classes/Ajax.js'
 
 import {
 CLASS_BUTTON_SHOW_PRODUCTS_ALL,
         Filters
-} from './classes/Filters.js'
+        } from './classes/Filters.js'
 
 import {
 CLASS_BLOCK_PRODUCT_MIN,
@@ -19,12 +19,12 @@ CLASS_BLOCK_PRODUCT_MIN,
         STATUS_NOT_FOUND,
         STATUS_DEFAULT,
         ProductBlock
-} from './classes/ProductBlock.js'
+        } from './classes/ProductBlock.js'
 
 import {
 CLASS_PRODUCT_LEFT,
         ProductLeft,
-} from './classes/ProductLeft.js'
+        } from './classes/ProductLeft.js'
 
 import {
 CLASS_STATISTIC,
@@ -34,14 +34,14 @@ CLASS_STATISTIC,
         CLASS_ITEM_OTHER,
         CLASS_ITEM_NOCOMPARE,
         Statistic
-} from './classes/Statistic.js'
+        } from './classes/Statistic.js'
 
 import {
 CLASS_PRODUCT_RIGHT,
         CLASS_BUTTON_RED,
         CLASS_BUTTON_YELLOY,
         ProductRight
-} from './classes/ProductRight.js'
+        } from './classes/ProductRight.js'
 
 import {
 EVENT_CHANGE_DATA_LEFT,
@@ -51,7 +51,7 @@ EVENT_CHANGE_DATA_LEFT,
         ACTION_DATA_CHANGE,
         ACTION_DATA_DELETE,
         ListDataForServer
-} from './classes/ListDataForServer.js';
+        } from './classes/ListDataForServer.js';
 
 const CLASS_BUTTON_MISSMATCH_ALL = '.product-list__item-mismatch-all'; // Левый крестик
 
@@ -60,7 +60,7 @@ function main() {
     let $body = $('body');
 
     /*
-     * Событие смены статуса правого товара (Сработает только в пакетном режиме)
+     * Обработка события на добавление или удаление data данных правого товара в массив
      */
     document.addEventListener(EVENT_CHANGE_DATA_RIGHT, function (event) {
         let productRight = ProductRight.getBy(event.detail.data.id_source, event.detail.data.id_item);
@@ -84,6 +84,9 @@ function main() {
             } else if (!blockProduct.isHasProductRightWithoutColormarker()) {
                 blockProduct.changeVisual(STATUS_NOT_FOUND, Filters.getModeHide());
             }
+            
+            //Если правые все правые продукты имеют статусы то нужна отправка на сервер с перезагрузкой
+            checkAndSendAllStatuses(Filters.getModeHide());
         }
 
         if (event.detail.action === ACTION_DATA_CHANGE) {
@@ -94,7 +97,7 @@ function main() {
     });
 
     /*
-     * Событие смены статуса левого товара (Левый крестик. Сработает только в пакетном режиме)
+     * Обработка события на добавление или удаление data данных левого товара в массив на missmatchAll
      */
     document.addEventListener(EVENT_CHANGE_DATA_LEFT, function (event) {
         let productLeft = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
@@ -118,6 +121,9 @@ function main() {
         }
     });
 
+    /**
+     * Обработка события на добавление или удаление data данных блока товаров в массив на удадение
+     */
     document.addEventListener(EVENT_CHANGE_DATA_DELETE, function (event) {
         let productLeft = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
         let blockProduct = ProductBlock.getFromChild(productLeft.dom);
@@ -126,6 +132,9 @@ function main() {
         if (event.detail.action === ACTION_DATA_CREATE) {
             blockProduct.changeVisual(STATUS_DELETED, is_mode_hide, false);
             productLeft.changeVisual(false, is_mode_hide);
+            
+            //Если правые все правые продукты имеют статусы то нужна отправка на сервер с перезагрузкой
+            checkAndSendAllStatuses(Filters.getModeHide());
         } else if (event.detail.action === ACTION_DATA_DELETE) {
             blockProduct.changeVisual(STATUS_DEFAULT, is_mode_hide, Filters.getModeMinimize());
         }
@@ -164,9 +173,7 @@ function main() {
             let productLeft = blockProduct.getProductLeft();
 
             if (blockProduct.isHasStatusNotMismatch()) {
-                let q = confirm('Некоторые правые товары именют статус отличный от missmatch и будет перезаписан. Продолжить?');
-                if (!q) {
-                    $this.show();
+                if (!confirm('Некоторые правые товары именют статус отличный от missmatch и будет перезаписан. Продолжить?')){
                     return;
                 }
             }
@@ -309,6 +316,7 @@ function main() {
     /**
      * Кнопка отменить выбор на всех правых товарах, на всей странице
      * Тут все просто. Чистим список выбора. И отмечаем товар визуально как был (тоесть свойство item.status)
+     * Визуал меняется на событиях
      */
     $body.on('click', '.js-reset-compare-all-visible-items', function (e) {
         e.stopPropagation();
@@ -387,30 +395,32 @@ function main() {
         let blockProducts = ProductBlock.getFromChild($(this));
         blockProducts.showProductsRight('nocompare');
     });
-
-    $('#id_paginator a').click(function (e) {
+   
+    /**
+     * Обработка нажатия на пагинатор
+     * Если есть данные выбора, то предварительно отправляем на сервер
+     */
+    $('#id_paginator a').click(async function (e) {
         e.preventDefault();
-        let href = $(this).attr('href');
-    
-        Ajax.send("/product/compare-batch", {listDataForServer: listDataForServer}, (response) => {
-            switch (response.status) {
-                case 'ok':
-                    location.href = href;
-                    break;
-                case 'info':
-                    location.href = href;
-                    break;
-                case 'error':
-                    if (confirm(response.message+'. Продолжить?')) {
-                        location.href = href;
-                    } else {
-                        return;
-                    }
-                    break;
-            }
-        });
+        if (await sendListDatasAsync()){
+            // Нужно сбросить выборы, ибо как потом выполнится еще и window.onbeforeunload
+            listDataForServer.reset();
+            location.href = $(this).attr('href');
+        }
     });
-        
+   
+    /**
+     * На этот момент в массивах данных быть не должно. Данные будут если предыдущие отправки завершились не удачно
+     * Отправку данных выполнить тут очень не надежно и не всегда работает на разных браузерах.
+     * 
+     * Если в массиве остальсь данные то выводим предупреждение
+     * @returns {undefined}
+     */
+    window.onbeforeunload = function () {
+        if (listDataForServer.isHasData()){
+            return false;
+        }
+    };
 
     /**************************************************************************
      *** Вспомогательные функции
@@ -489,7 +499,7 @@ function main() {
         if (is_mode_hide === false) {
             $(CLASS_BLOCK_PRODUCT).show();
             $(CLASS_PRODUCT_RIGHT).show();
-        }        
+        }
 
         // Пробегаемся по списку удаленных товаров и отображаем их "по-другому"
         for (let data of listDataForServer.datas_products_left_delete) {
@@ -513,6 +523,101 @@ function main() {
             product_right.changeVisual(data.status, is_mode_hide);
         }
         ;
+    }
+
+    /**
+     * Отсылаем данные пакетного сравнения товаров на сервер
+     * Если сервер вернул ошибку или предупреждение то появится окно в выбором продолжить или отменить
+     * 
+     * @param {function(is_confirm)} callback
+     *      is_confirm = true  - пользователь хочет продолжить дальнейшее действие
+     *      is_confirm = false - пользователь передумал выполнять действие
+     * @returns {undefined}
+     */
+    function sendListDatas(callback) {
+        Ajax.send("/product/compare-batch", {listDataForServer: listDataForServer}, (response) => {
+            switch (response.status) {
+                case 'ok':
+                    callback(true);
+                    break;
+                case 'info':
+                    if (confirm(response.message + '. Продолжить?')) {
+                        callback(true);
+                    } else {
+                        callback(false);
+                    }
+                    break;
+                case 'error':
+                    if (confirm(response.message + '. Продолжить?')) {
+                        callback(true);
+                    } else {
+                        callback(false);
+                    }
+                    break;
+            }
+        });
+    }
+    
+    /**
+     * Асинхроммо отсылаем данные пакетного сравнения товаров на сервер. Вызывается перед переходом на другую страницу
+     * В случае ошибки или предупреджение со стороны сервера будет выведено предупреждение.
+     * 
+     * @returns {boolean}
+     *    true - подтверждено дадьшейшее действие
+     *    false - отмена дальнейшкнр лействия
+     */
+    async function sendListDatasAsync() {
+        //Если данных нет то и отсылать не нужно
+        if (!listDataForServer.datas_products_left.length &&
+            !listDataForServer.datas_products_right.length &&
+            !listDataForServer.datas_products_left_delete.length) return true;
+            
+        let response = await Ajax.sendAsync('/product/compare-batch', {listDataForServer: listDataForServer});
+        switch (response.status) {
+            case 'ok':
+                return true;
+            case 'info':
+                confirm(response.message + '. Продолжить?');
+            case 'error':
+                return confirm(response.message + '. Продолжить?');
+            default:
+                // Случай ошибки ajax
+                return confirm(response + '. Продолжить?');
+        }
+    }
+    
+    function checkAndSendAllStatuses(is_mode_hide){
+        // Если режим скрытия выключен то обновлять список не нужно
+        if (!is_mode_hide) return;
+        
+        let doms = $(CLASS_PRODUCT_RIGHT);
+        
+        // Если на странице есть товары без статуса то обновлять список не нужно
+        for (let i = doms.length-1; i>=0; --i){
+            let productRight = new ProductRight($(doms[i]));
+            
+            if (!listDataForServer.isExistsDataDeleteBy(productRight.data.id_source, productRight.data.id_product) &&
+                !productRight.data.status && 
+                !listDataForServer.isExistsDataRightBy(productRight.data.id_source, productRight.data.id_item))
+            {
+                return;
+            }
+        }
+        
+        if (confirm('Товары без статусов закончились. Даные сохранятся и страница будет перезагружена')) {
+            // Если все условия выполнены то отправляем данные товаров на сервер
+            sendListDatasAsync().then(function(is_confirm){
+                if (!is_confirm){
+                    return;
+                }
+                listDataForServer.reset();
+                location.reload();
+            });
+        } else {
+            if (Filters.getModeHide()){
+                changeModeHide(Filters.toggleModeHide());
+            }
+        }
     }
 }
 document.addEventListener("DOMContentLoaded", main);

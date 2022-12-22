@@ -17,6 +17,14 @@ export class ListDataForServer{
     datas_products_right = [];
     datas_products_left_delete = [];
     
+    isExistsDataRightBy(id_source, id_item){
+        return this.datas_products_right.some((data) => data.id_source === id_source && data.id_item === id_item);
+    }
+    
+    isExistsDataDeleteBy(id_source, id_product){
+        return this.datas_products_left_delete.some((data) => data.id_source === id_source && data.id_product === id_product);
+    }
+    
     /**
      * Запомнить выбор от правых товаров (Элементов)
      * 
@@ -159,6 +167,13 @@ export class ListDataForServer{
         return true;
     }
     
+    /**
+     * Отменить выбор правого товара по data атрбутам
+     * 
+     * @param {type} id_source
+     * @param {type} id_item
+     * @returns {undefined}
+     */
     deleteRightBy(id_source, id_item){
         let index = this.datas_products_right.findIndex(item => item.id_source === id_source && item.id_item === id_item);
         if (index >= 0){
@@ -170,6 +185,12 @@ export class ListDataForServer{
         }
     }
     
+    /**
+     * Отменить выбор правого товара по индексу
+     * 
+     * @param {type} index
+     * @returns {undefined}
+     */
     deleteRightByIndex(index){
         document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_RIGHT, { detail: {
             data: this.datas_products_right[index],
@@ -178,6 +199,12 @@ export class ListDataForServer{
         this.datas_products_right.splice(index, 1);
     }
     
+    /**
+     * Отменить выбор левого товара
+     * 
+     * @param {type} index
+     * @returns {undefined}
+     */
     deleteLeftByIndex(index){
         document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_LEFT, { detail: {
             data: this.datas_products_left[index],
@@ -186,6 +213,13 @@ export class ListDataForServer{
         this.datas_products_left.splice(index, 1);
     }
     
+    /**
+     * Отмена удаления блока товаров
+     * Получилось вот такая тавтология ибо массив для удаления левых товаров называется datas_products_left_delete
+     * 
+     * @param {type} index индекс записи в datas_products_left_delete
+     * @returns {array} Новый массив datas_products_left_delete
+     */
     deleteDeleteByIndex(index){
         document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_DELETE, { detail: {
             data: this.datas_products_left_delete[index],
@@ -194,7 +228,14 @@ export class ListDataForServer{
         this.datas_products_left_delete.splice(index, 1);
     }
     
-
+    /**
+     * Удаление блока товаров
+     * 
+     * @param {type} data_product data данные блока удаленных товаров
+     * @returns {Boolean} 
+     *      true: если эти данные оказались в массиве новыми
+     *      false: если просто обновление записи в массив
+     */
     addBlockDelete(data_product){
         // Сморим, есть ли уже этот элемент в массиве левых товаров на удадение, ожидающем отправку
         for (let i = this.datas_products_left_delete.length - 1; i >= 0; --i) {
@@ -237,18 +278,25 @@ export class ListDataForServer{
             && (!isset_id_item    || (data.id_item    === id_item   )));
     }
     
-    sendToServer(onSuccess){
-        let data = {
-            list_products_right: this.datas_products_left,
-            list_products_left: this.datas_products_right
-        };
-        
-        Ajax.send('/product/compare-batch', data, (response) => {
-            if (response.status === 'ok'){
-                this.datas_products_left  = [];
-                this.datas_products_right = [];
-            }
-            onSuccess(response);
-        });
+    /**
+     * Сбрасывает все массивы без генерации событий
+     * @returns {undefined}
+     */
+    reset(){
+        this.datas_products_left.length = 0;
+        this.datas_products_right.length = 0;
+        this.datas_products_left_delete.length = 0;
+    }
+    
+    /**
+     * Содержатся ли данные в массивах
+     * 
+     * @returns {undefined}
+     */
+    isHasData(){
+        return (
+            this.datas_products_left.length ||
+            this.datas_products_right.length ||
+            this.datas_products_left_delete.length);
     }
 };

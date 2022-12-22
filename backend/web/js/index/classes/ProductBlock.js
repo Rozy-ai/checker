@@ -118,7 +118,7 @@ export class ProductBlock extends DomWithData{
         let list_product_right = this.getProductsRight();
         for (let item of list_product_right){
             let colorMarker = item.getStatatusColorMarker();
-            if ( colorMarker !== 'mismatch' ) {
+            if ( colorMarker !== 'mismatch' && colorMarker !== 'nocompare') {
                 return true;
             }
         }
