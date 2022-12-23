@@ -306,24 +306,13 @@ $local_import_stat = null;
                     </div>
                 </div>
                 <?php endif; ?>
-                <!--
-                    <div class="form-group _col-sm-3">
-                        <button type="submit" class="btn btn-primary products__filter-submit">Фильтровать</button>
-                    </div>
 
-                    <div class="form-group _col-sm-3">
-                        <a href="/product/" class="btn btn-secondary">Сбросить</a>
-                    </div>
-                    
-                    <div class="form-group _col-sm-3">
-                      <button id="show-all" class="btn btn-secondary">Показать все</button>
-                    </div> -->
+                <div class="form-group _col-sm-3">
+                    <a href="/product/" class="btn btn-secondary" id="id_button_reset_filters">Сбросить</a>
+                </div>
             </div>
             <!--</form>-->
-
-
         </div>
-
     </div>
 
     <div class="table-responsive__" id = "id_table_container">

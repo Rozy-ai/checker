@@ -8,9 +8,9 @@ namespace common\models;
 class Session extends \yii\web\Session{      
     public function saveFromParams(array $params){
         foreach ($params as $key => $value){
-            if ($value) {
+            //if ($value) {
                 $this->set($key, $value);
-            }
+            //}
         }
     }
     

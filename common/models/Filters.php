@@ -109,7 +109,26 @@ class Filters {
     public function setToDefault(){
         foreach (self::defaults as $key => $val){
             $this->$key = $val;
-        }        
+        }
+    }
+    
+    /**
+     * Сбрасывает только селекты
+     */
+    public function setToDefaultSelects(){
+        if (!$this->isExistsDefaultParams()){
+            $this->setToDefault();
+        }
+        
+        $this->f_profile = null;
+        $this->f_categories_root = null;
+        $this->f_id = null;
+        $this->f_asin = null;
+        $this->f_title = null;
+        $this->t_status = null;
+        $this->f_comparison_status = null;
+        $this->f_sort = null;
+        $this->f_username = null;
     }
     
     public function loadFromValue($key, $value, $with_default = true){

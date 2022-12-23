@@ -446,36 +446,7 @@ class ProductController extends Controller {
         return [
             'status'=>'ok'
         ];
-    }
-    
-    public function actionCompareBatch1(){
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        if (\Yii::$app->request->isGet) {
-            $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost) {
-            $params = \Yii::$app->request->post();
-        }
-        
-        $list_product_right = $params['list_products_right'];
-        if (!is_array($list_product_right)){
-            return [
-                'status' => 'info',
-                'message' => 'нет элементов для сравнения'
-            ];            
-        }
-        
-        try{
-            $this->indexPresenter->changeStatusProductsRight($list_product_right);
-        } catch (\Exception $ex) {
-            return [
-                'status' => 'error',
-                'message' => $ex->getMessage()
-            ];
-        }
-        
-        return $this->getRequestWithUpdateList();
-    }
+    }  
 
     /**
      * Сюда приходит, если пользователь нажал крестик на левом товаре
@@ -533,6 +504,13 @@ class ProductController extends Controller {
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
 
+    /**
+     * Действие удаления одного девого продукта вместе с правыми
+     * @param id_source
+     * @param id_product
+     * 
+     * @return type
+     */
     public function actionDeleteProduct() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
@@ -564,10 +542,61 @@ class ProductController extends Controller {
         }
 
         $source = Source::getById($filters->f_source);
+        if (!$source) {
+            return [
+                'status' => 'error',
+                'message' => 'Не удалось найти модель источника'
+            ];
+        }
+        
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
+    }
+    
+    /**
+     * Сбросить все фильтры c с сохранением пакетного выбора
+     * 
+     * @param listDataForServer
+     */
+    public function actionResetFilters(){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (\Yii::$app->request->isGet) {
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost) {
+            $params = \Yii::$app->request->post();
+        }
+        
+        $filters = new Filters();
+        $filters->loadFromSession();
+        $filters->setToDefaultSelects();
+        $filters->saveToSession();
+        
+        $data = $params['listDataForServer'];
+        try{
+            if ($data['datas_products_left'] || $data['datas_products_right'] || $data['datas_products_left_delete']){
+                $this->indexPresenter->changeStatusProducts($data['datas_products_left'], $data['datas_products_right'], $data['datas_products_left_delete']);
+            }
+        } catch (\Exception $ex) {
+            Yii::error($ex->getLine().':'.$ex->getMessage());
+            return ['status' => 'error', 'message' => 'Сохранение пакета выбраных статусов совершилось с ошибкой'];
+        }
+        $this->actionIndex();
+        /*
+        $source = Source::getById($filters->f_source);
+        if (!$source) {
+            return [
+                'status' => 'error',
+                'message' => 'Не удалось найти модель источника'
+            ];
+        }
+        $user = \Yii::$app->user->identity;
+        $is_admin = $user && $user->isAdmin();
+        return $this->getRequestWithUpdateList($source, $filters, $is_admin);
+         * 
+         */
     }
     
     private function getRequestWithUpdateList(Source $source = null, Filters $filters = null, bool $is_admin = null, $is_update_list = true, $is_compare_all=false) {
