@@ -41,7 +41,6 @@ use common\models\Comparison;
     <?php foreach ($list as $k => $item):   ?>
 
     <?php
-        $item->baseInfo = json_decode($item->baseInfo,true);
     $images_left = preg_split("/[; ]/", ArrayHelper::getValue($item->baseInfo,"Image"));
 
     $source_id = $item->source->id;
@@ -66,6 +65,7 @@ use common\models\Comparison;
         $dropsTitle = 'Drops(30/90)';
     }
     $price = ($item->baseInfo[$default_price_name]) ?: '-';
+
     $fba = $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"];
     
     $td2_asin = (!$is_admin && strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin;
@@ -88,7 +88,10 @@ use common\models\Comparison;
         <?php
         ?>
         <td class="products-list__td1">
-            <div class="product-list-item__data"><span>BSR:</span><br><span id="id_td1_bsr"><?=$bsr?></span></div>
+            <div class="product-list-item__data js-addition-info-for-price"
+                 data-addition_info_for_price='<?= $item->addition_info_for_price(); ?>'>
+                <span>BSR:</span><br><span id="id_td1_bsr"><?=$bsr?></span>
+            </div>
             <div class="product-list-item__data"><span><?= $dropsTitle ?>:</span><br><span id="id_td1_sales30"><?= $dropsValue ?></span></div>
             <div
                 class="product-list-item__data js-addition-info-for-price"

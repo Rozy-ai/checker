@@ -94,7 +94,8 @@ class TopSlider extends Widget {
             } elseif ($source->name === 'CHINA') {
                 $footer_right .= $this->getROIAli($item);
             }
-            $footer_right .= '<span><span class=" __blue-title">Price:</span>' . $item->price . ' </span>';
+            $footer_right .= '<span><span class=" __blue-title">Price:</span>' . $item->price . ' </span>' .
+                            '<span><span class=" __blue-title">Rating:</span>' . $item->rating . ' </span>';
         } else {
             if ($source->name === 'EBAY') {
                 $footer_right .= $this->getSales($item);

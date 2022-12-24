@@ -52,6 +52,16 @@ $('.slider__red_button').click(function(){
     statusCheck();
 })
 
+// marker
+$('body').on('mouseover', '.slider__right-item-other-marker', function (e) {
+  $(this).find('.slider__right-item-other-marker_image').show();
+})
+
+$('body').on('mouseout', '.slider__right-item-other-marker', function (e) {
+  $(this).find('.slider__right-item-other-marker_image').hide();
+})
+//
+
 
 window.addEventListener('load', function(){
   

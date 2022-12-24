@@ -1909,7 +1909,7 @@ table.tableInfo th {
 .slider-item__cnt-1 {
   display: block;
   text-align: left;
-  margin-top: 4px;
+  margin-top: 15px;
   padding-left: 6px;
 }
 .cnt-1__stock-n {}
@@ -2035,7 +2035,7 @@ table.tableInfo th {
   overflow: hidden;
   white-space: nowrap;
   /* text-overflow: ellipsis; */
-  padding: 0 6px;
+  padding: 2px 6px;
   text-align: left;
 }
 
@@ -2500,8 +2500,6 @@ table.tableInfo th {
   z-index: 1;
 }
 
-
-
 .slider-item__img {
   height: 65px;
   width: 100%;
@@ -2509,6 +2507,10 @@ table.tableInfo th {
   background-position: center;
   background-size: contain;
   background-color: white;
+}
+
+.-v-2 .slider-item__img {
+  height: 100%;
 }
 
 .slider__left-item-img {
@@ -2616,6 +2618,7 @@ table.tableInfo th {
 .slider__right-item-other-imgs {
     line-height: 40px;
     margin-left: 30px;
+    height: 45px;
 }
 
 .slider__right-item-other-img{
@@ -2627,6 +2630,37 @@ table.tableInfo th {
     background-position: center;
     background-repeat: no-repeat;
     cursor: pointer;
+}
+
+.slider__right-item-other-markers {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 15px -2px 0;
+}
+
+.slider__right-item-other-marker {
+  margin: 0 2px;
+  background: #c3c3c3;
+  border-radius: 5px;
+  height: 15px;
+  width: 100%;
+  cursor: pointer;
+  position: relative;
+}
+
+.slider__right-item-other-marker_image {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  height: 50px;
+  border: 2px solid grey;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: none;
+  z-index: 2;
 }
 
 .slider__left-item__data span{
@@ -2925,6 +2959,7 @@ button.navigation-image-arr:hover, button.navigation-image-arr:focus {
   width: 100%;
   margin-right: 12px;
   text-align: left;
+  height: 110px;
   /*padding: 8px 0 5px 0;*/
 }
 
@@ -2932,6 +2967,7 @@ button.navigation-image-arr:hover, button.navigation-image-arr:focus {
 
 .slider-item__link-img.-v-2 {
   width: 96px;
+  height: 100%;
 }
 
 .slider__green_button.-v-2:hover, .slider__green_button.-v-2.-hover{
