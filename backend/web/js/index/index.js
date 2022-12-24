@@ -54,6 +54,7 @@ EVENT_CHANGE_DATA_LEFT,
         } from './classes/ListDataForServer.js';
 
 const CLASS_BUTTON_MISSMATCH_ALL = '.product-list__item-mismatch-all'; // Левый крестик
+const CLASS_BUTTON_RESET_FILTERS = '#id_button_reset_filters';
 
 function main() {
     let listDataForServer = new ListDataForServer();
@@ -77,7 +78,7 @@ function main() {
             statistic.addUnit(event.detail.data.status);
             productRight.changeVisual(event.detail.data.status, Filters.getModeHide());
             // Eсли у всех правых товаров получился статус missmatch то левый должен автоматически стать mismatch
-            if (blockProduct.isHasStatusNotMismatch() === false) {
+            if (!blockProduct.isHasStatusNotMismatch(false)) {
                 let productLeft = blockProduct.getProductLeft();
                 let data = Object.assign({}, productLeft.data);
                 listDataForServer.addLeft(data);
@@ -139,6 +140,37 @@ function main() {
             blockProduct.changeVisual(STATUS_DEFAULT, is_mode_hide, Filters.getModeMinimize());
         }
     });
+    
+    /**
+     * Обработка нажания на "Сбросить" все фильтры.
+     * Вместе с отправкой текущих выборов
+     */
+    $('body').on('click', CLASS_BUTTON_RESET_FILTERS, function (e) { 
+        e.stopPropagation();
+        
+        Ajax.send("/product/reset-filters", {listDataForServer: listDataForServer}, (response) => {
+            switch (response.status) {
+                case 'ok':
+                    let html = response.html_index_table;
+                    var container = $("#id_table_container");
+                    container.html(html);
+                    //location.reload(); //Без этого подпупливает js и css в часности крестик выбора товара
+                    break;
+                case 'info':
+                    alert(response.message);
+                    break;
+                case 'error':
+                    alert(response.message);
+                    break;
+            }
+            lib.slider_init();
+
+            for (var key in response.other) {
+                let elem = $('#' + key);
+                elem.html(response.other[key]);
+            }
+        });
+    });
 
     /**
      * Нажатие на свернутом блоке товаров
@@ -172,7 +204,7 @@ function main() {
             let blockProduct = ProductBlock.getFromChild($this);
             let productLeft = blockProduct.getProductLeft();
 
-            if (blockProduct.isHasStatusNotMismatch()) {
+            if (blockProduct.isHasStatusNotMismatch(true)) {
                 if (!confirm('Некоторые правые товары именют статус отличный от missmatch и будет перезаписан. Продолжить?')){
                     return;
                 }
@@ -219,7 +251,9 @@ function main() {
     $('body').on('click', CLASS_BUTTON_RED, function (e) {
         e.stopPropagation();
         let $this = $(this);
-        let data = $this.data();
+
+        let productRigth = ProductRight.getFromChild($this);
+        let data = Object.assign({}, productRigth.data);
         data.status = 'MISMATCH';
 
         if (Filters.getModeBatch() === true) {
@@ -524,39 +558,6 @@ function main() {
         }
         ;
     }
-
-    /**
-     * Отсылаем данные пакетного сравнения товаров на сервер
-     * Если сервер вернул ошибку или предупреждение то появится окно в выбором продолжить или отменить
-     * 
-     * @param {function(is_confirm)} callback
-     *      is_confirm = true  - пользователь хочет продолжить дальнейшее действие
-     *      is_confirm = false - пользователь передумал выполнять действие
-     * @returns {undefined}
-     */
-    function sendListDatas(callback) {
-        Ajax.send("/product/compare-batch", {listDataForServer: listDataForServer}, (response) => {
-            switch (response.status) {
-                case 'ok':
-                    callback(true);
-                    break;
-                case 'info':
-                    if (confirm(response.message + '. Продолжить?')) {
-                        callback(true);
-                    } else {
-                        callback(false);
-                    }
-                    break;
-                case 'error':
-                    if (confirm(response.message + '. Продолжить?')) {
-                        callback(true);
-                    } else {
-                        callback(false);
-                    }
-                    break;
-            }
-        });
-    }
     
     /**
      * Асинхроммо отсылаем данные пакетного сравнения товаров на сервер. Вызывается перед переходом на другую страницу
@@ -571,21 +572,33 @@ function main() {
         if (!listDataForServer.datas_products_left.length &&
             !listDataForServer.datas_products_right.length &&
             !listDataForServer.datas_products_left_delete.length) return true;
-            
-        let response = await Ajax.sendAsync('/product/compare-batch', {listDataForServer: listDataForServer});
-        switch (response.status) {
-            case 'ok':
-                return true;
-            case 'info':
-                confirm(response.message + '. Продолжить?');
-            case 'error':
-                return confirm(response.message + '. Продолжить?');
-            default:
-                // Случай ошибки ajax
-                return confirm(response + '. Продолжить?');
+        
+        try{
+            let response = await Ajax.sendAsync('/product/compare-batch', {listDataForServer: listDataForServer});
+
+            switch (response.status) {
+                case 'ok':
+                    return true;
+                case 'info':
+                    confirm(response.message + '. Продолжить?');
+                case 'error':
+                    return confirm(response.message + '. Продолжить?');
+                default:
+                    // Случай ошибки ajax
+                    return confirm(response + '. Продолжить?');
+            }
+        } catch(e) {
+            return confirm(e + ' Продолжить?');
         }
     }
     
+    /**
+     * Проверить, все ли правые товары выбраны. Включет в себя выбор изначальный + выборы в массивах.
+     * Если все правые товары выбраны - отлылаем их на сервер с предупреждением что товары закончились
+     * 
+     * @param {type} is_mode_hide
+     * @returns {undefined}
+     */
     function checkAndSendAllStatuses(is_mode_hide){
         // Если режим скрытия выключен то обновлять список не нужно
         if (!is_mode_hide) return;
@@ -619,5 +632,43 @@ function main() {
             }
         }
     }
+    
+    /**************************************************************************
+     *** Старый шлак
+     **************************************************************************/    
+    
+    /**
+     * Скроллинг
+     */
+    $('body').on('scroll',function(){
+        let block = $('.products__products-list')[0].getBoundingClientRect();
+        let height = $('.products__filter-items').height() + $('#w0').height();
+    
+        if (block.top < height){
+            // -hidden  REMOVE
+            $('.navbar__fixed-slider.-hidden').removeClass('-hidden');
+
+            if ( $('.position-1 .products__filter-items').length ){
+                $('.position-2').append( $('.position-1 .products__filter-items') );
+            }
+            $('.position-2').parents('.navbar__fixed-slider').css('display', 'block');
+
+            let height = $('.navbar__fixed-slider').height() + 35 + $('#w0').height();
+            $('section.home').css('padding-top', height); // 262px
+
+            $('.navigation').hide();
+            $('.js-title-and-source_selector').hide();
+        }else{
+            $('.navbar__fixed-slider').addClass('-hidden');
+            if ( $('.position-2 .products__filter-items').length ){
+                $('.position-1').append( $('.position-2 .products__filter-items') );
+            }
+            $('section.home').css('padding-top', '');
+            $('.position-2').parents('.navbar__fixed-slider').css('display', '');
+            $('.navigation').show();
+            $('.js-title-and-source_selector').show();
+  
+        }
+    });
 }
 document.addEventListener("DOMContentLoaded", main);

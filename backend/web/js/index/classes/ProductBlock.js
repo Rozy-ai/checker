@@ -111,18 +111,23 @@ export class ProductBlock extends DomWithData{
     }
     
     /**
-     * Проверяет, есть ли в списке правых продуктов товары с отмеченными статусами отличными от missmatch
+     * Имеется ли статус отслычный от missmatch
+     * 
+     * @param {type} and_is_compare
+     *      true - товар имеет хоть катой то выбранный статус сравнения (не nocompare)
+     *      false - товар может быть без отмеченного 
      * @returns {Boolean}
      */
-    isHasStatusNotMismatch(){
+    isHasStatusNotMismatch(and_is_compare){
         let list_product_right = this.getProductsRight();
         for (let item of list_product_right){
             let colorMarker = item.getStatatusColorMarker();
-            if ( colorMarker !== 'mismatch' && colorMarker !== 'nocompare') {
+            
+            if ( colorMarker !== 'mismatch' && (!and_is_compare || colorMarker !== 'nocompare')) {
                 return true;
             }
         }
-        return false;
+        return false;        
     }
     
     /**
