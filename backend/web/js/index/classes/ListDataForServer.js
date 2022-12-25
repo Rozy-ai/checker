@@ -6,276 +6,272 @@ import {
 
 export const EVENT_CHANGE_DATA_LEFT = 'eventChangeDataLeft';
 export const EVENT_CHANGE_DATA_RIGHT = 'evenChangeDataRight';
-export const EVENT_CHANGE_DATA_DELETE = 'evenChangeDataDelete';
+export const EVENT_CHANGE_DATA_DELETE_LEFT = 'evenChangeDataDeleteLeft';
+export const EVENT_CHANGE_DATA_DELETE_RIGHT = 'evenChangeDataDeleteRight';
 
 export const ACTION_DATA_CREATE = 'create';
 export const ACTION_DATA_CHANGE = 'change';
 export const ACTION_DATA_DELETE = 'delete';
+
+const MISMATCH = 'mismatch';
     
 export class ListDataForServer{
     datas_products_left  = [];
     datas_products_right = [];
     datas_products_left_delete = [];
+    datas_products_right_delete = [];
+    
+    /**************************************************************************
+     *** isExistsData
+     **************************************************************************/
+    
+    isExistsDataLeftBy(id_source, id_product){
+        return this.datas_products_left.some((data) => data.id_source === id_source && data.id_product === id_product);
+    }
+    
+    isExistsDataLeftDeleteBy(id_source, id_product){
+        return this.datas_products_left_delete.some((data) => data.id_source === id_source && data.id_product === id_product);
+    }
     
     isExistsDataRightBy(id_source, id_item){
         return this.datas_products_right.some((data) => data.id_source === id_source && data.id_item === id_item);
     }
     
-    isExistsDataDeleteBy(id_source, id_product){
-        return this.datas_products_left_delete.some((data) => data.id_source === id_source && data.id_product === id_product);
-    }
+    isExistsDataRightDeleteBy(id_source, id_item){
+        return this.datas_products_right_delete.some((data) => data.id_source === id_source && data.id_item === id_item);
+    } 
+    
+    /**************************************************************************
+     *** deleteIfExists
+     **************************************************************************/
     
     /**
-     * Запомнить выбор от правых товаров (Элементов)
+     * Удалить товар из массива левых товаров на mismatch
+     * Когда левый товар удаляетсся из списка на mismatch то все правые товары тоже должны удалиться из списка. Всегда!
      * 
-     * @param {object} data_item
-     * @returns {boolean} Является ли запись товара новой
+     * @param {type} id_source
+     * @param {type} id_product
+     * @param {type} forced_products_right - правые товары проверять в любом случае
+     * @returns {undefined}
      */
-    addRight(data_item){
-        // Смотрим, есть ли в этом блоке левый товар в массиве удаленных.
-        // Если есть, то пользователь передумал удалять левый товар вместе со всем весь блоком
-        for (let i = this.datas_products_left_delete.length - 1; i >= 0; --i) {
-            let data = this.datas_products_left_delete[i];
-            if (data.id_product === data_item.id_product){
-                document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_DELETE, { detail: {
-                    data: this.datas_products_left_delete[i],
-                    action: ACTION_DATA_DELETE
-                }}));
-                this.datas_products_left_delete.splice(i, 1);
-                break; // Дальше смотреть нет смысла, ибо значение уникальны
-            }
+    deleteIfExistsLeftBy(id_source, id_product, forced_products_right = false){
+        // Ищем и удаляем запись в массиве
+        let index = this.datas_products_left.findIndex((data)=>data.id_source===id_source&&data.id_product===id_product);
+
+        if ( index >= 0 ){
+            document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_LEFT, { detail: {
+                data: this.datas_products_left[index],
+                action: ACTION_DATA_DELETE
+            }}));
+            this.datas_products_left.splice(index, 1);
+        } else if (!forced_products_right) {
+            return;
         }
-        
-        // Если хоть один правый товар приобрел статус отличный от mismatch то 
-        // не лоджно быть в масиве левых товаров соответствующего продукта
-        if (data_item.status !== 'MISMATCH'){
-            for (let i = this.datas_products_left.length - 1; i >= 0; --i) {         
-                let data = this.datas_products_left[i];
-                if (data.id_product === data_item.id_product){
-                    document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_LEFT, { detail: {
-                        data: data,
-                        action: ACTION_DATA_DELETE
-                    }}));
-                    this.datas_products_left.splice(i, 1);
-                }
-            }
-        }     
-        
-        // Сморим, есть ли уже этот элемент в массиве правых товаров, ожидающем отправку
-        for (let i = this.datas_products_right.length - 1; i >= 0; --i) {
-            let data = this.datas_products_right[i];
-            if (data.id_item === data_item.id_item && data.id_source === data_item.id_source) {
-                let statuslast = this.datas_products_right[i].status;
-                this.datas_products_right[i] = data_item; //Перезаписать
+
+        // Заодно снимаем все выборы из списка правых товаров тоторые будут все mismatch
+        this.datas_products_right = this.datas_products_right.filter((data)=>{
+            if (data.id_source !== id_source || data.id_product !== id_product){
+                return true;
+            } else {
                 document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_RIGHT, { detail: {
-                    data: this.datas_products_right[i],
-                    action: ACTION_DATA_CHANGE,
-                    statuslast: statuslast
-                }}));
-                return false;
-            }
-        }
-
-        // Если эмемента в массиве нет то запоминаем в массив элемент
-        this.datas_products_right.push(data_item);
-        document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_RIGHT, { detail: {
-            data: data_item,
-            action: ACTION_DATA_CREATE
-        }}));
-        return true;
-    }
-    
-    /**
-     * Запомнить выбор левых
-     * 
-     * @param {object} data_product
-     * @returns {boolean} Является ли товар новым
-     */
-    addLeft(data_product){
-        // Сморим, есть ли уже этот товар в массиве левых товаров, ожидающем отправку
-        for ( let data of this.datas_products_left){
-            if (data.id_product === data_product.id_product && data.id_source === data_product.id_source) {         
-                return false;
-            }
-        }
-        
-        // Смотрим, есть ли этот товар в массиве удаленных. Если есть, то пользователь передумал его удалять
-        for (let i = this.datas_products_left.length - 1; i >= 0; --i) {
-            let data = this.datas_products_left[i];
-            if (data.id_product === data_product.id_product){
-                document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_LEFT, { detail: {
                     data: data,
                     action: ACTION_DATA_DELETE
                 }}));
-                this.datas_products_left_delete.splice(i, 1);
-                break; // Дальше смотреть нет смысла, ибо значение уникальны
             }
-        }
-
-        // Если товара в массиве нет то запоминаем в массив левый товар
-        this.datas_products_left.push(data_product);
-        document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_LEFT, { detail: {
-            data: data_product,
-            action: ACTION_DATA_CREATE
-        }}));
-        return true;
+        });
     }
     
     /**
-     * Запомнить блок товаров на удаление
+     * Удалить товар из массива левых товаров на удаление
      * 
-     * @param {type} data_product data-данные левых товаров на удаление
-     * @returns {Boolean} Если запись в массив была новая, то true
+     * @param {type} id_source
+     * @param {type} id_product
+     * @param {type} forced_products_right - принудительная проверка правых товаров
+     * 
+     * @returns {undefined}
      */
-    addDelete(data_product){
-        // Сморим, есть ли уже этот товар в массиве левых товаров на удадение, ожидающем отправку
-        for (let i = this.datas_products_left_delete.length - 1; i >= 0; --i) {
-            let data = this.datas_products_left_delete[i];
-            if (data.id_product === data_product.id_product && data.id_source === data_product.id_source) {
-                return false;
-            }
-        }
-        
-        // Смотрим, есть ли уже этот товар в массиве, ожидающем отправку на missmatch.
-        // Если есть, то пользователь передумал его отмечать и хочет удалить
-        for (let i = this.datas_products_left.length - 1; i >= 0; --i) {
-            let data = this.datas_products_left[i];
-            if (data.id_product === data_product.id_product && data.id_source === data_product.id_source) {
-                //Убираем из массива datas_products_right
-                for (let j = this.datas_products_right.length - 1; j >= 0; --j) {
-                    let data_right = this.datas_products_right[j];
-                    if (data_right.id_source === data.id_source && data_right.id_product === data.id_product){
-                        this.deleteRightBy(data_right.id_source, data_right.id_item);
-                    }
-                }
-                //Убираем из массива datas_products_left
-                document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_LEFT, { detail: {
+    deleteIfExistsLeftDeleteBy(id_source, id_product, forced_products_right = false){
+        // Ищем и удаляем запись в массиве
+        let index = this.datas_products_left_delete.findIndex((data)=>data.id_source === id_source && data.id_product === id_product);
+
+        if (index >=0 ){
+            document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_DELETE_LEFT, { detail: {
+                data: this.datas_products_left_delete[index],
+                action: ACTION_DATA_DELETE
+            }}));
+            this.datas_products_left_delete.splice(index, 1);
+        } else if (!forced_products_right) {
+            return;
+        } 
+
+        // Заодно убираем все правые товары на удаление
+        this.datas_products_right_delete = this.datas_products_right_delete.filter((data)=>{
+            if (data.id_source !== id_source || data.id_product !== id_product){
+                return true;
+            } else {
+                document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_DELETE_RIGHT, { detail: {
                     data: data,
                     action: ACTION_DATA_DELETE
                 }}));
-                this.datas_products_left.splice(i, 1);
-                break; // Дальше смотреть нет смысла, ибо значение уникальны
             }
-        }
-        
-        // Если товара в массиве на удаление нет то запоминаем его
-        this.datas_products_left_delete.push(data_product);
-        document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_DELETE, { detail: {
-            data: data_product,
-            action: ACTION_DATA_CREATE
-        }}));
-        return true;
+        });        
     }
     
     /**
-     * Отменить выбор правого товара по data атрбутам
+     * Удалить товар из массива правых товаров на изменение статуса
+     * ( Убрать статус правого товара )
      * 
      * @param {type} id_source
      * @param {type} id_item
      * @returns {undefined}
      */
-    deleteRightBy(id_source, id_item){
-        let index = this.datas_products_right.findIndex(item => item.id_source === id_source && item.id_item === id_item);
-        if (index >= 0){
-            document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_RIGHT, { detail: {
-                data: this.datas_products_right[index],
-                action: ACTION_DATA_DELETE
-            }}));
-            this.datas_products_right.splice(index, 1);
-        }
-    }
-    
-    /**
-     * Отменить выбор правого товара по индексу
-     * 
-     * @param {type} index
-     * @returns {undefined}
-     */
-    deleteRightByIndex(index){
+    deleteIfExistsRightBy(id_source, id_item){
+        let index = this.datas_products_right.findIndex((data)=>data.id_source === id_source && data.id_item === id_item);
+        if ( index < 0 ) return;
+
         document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_RIGHT, { detail: {
             data: this.datas_products_right[index],
             action: ACTION_DATA_DELETE
-        }}));
+        }}));            
+        
         this.datas_products_right.splice(index, 1);
     }
     
     /**
-     * Отменить выбор левого товара
+     * Удалить товар из массива правых на удаление
+     * ( Убрать удаление правого товара )
      * 
-     * @param {type} index
+     * @param {type} id_source
+     * @param {type} id_item
      * @returns {undefined}
      */
-    deleteLeftByIndex(index){
+    deleteIfExistsRightDeleteBy(id_source, id_item){
+        let index = this.datas_products_right_delete.findIndex((data)=>data.id_source === id_source && data.id_item === id_item);
+        if ( index < 0 ) return; 
+        
+        document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_DELETE_RIGHT, { detail: {
+            data: this.datas_products_right_delete[index],
+            action: ACTION_DATA_DELETE
+        }}));
+    
+        this.datas_products_right_delete.splice(index, 1);
+    }
+    
+    /**************************************************************************
+     *** addData
+     **************************************************************************/
+        
+    /**
+     * Добавить левый товар в массив сравнений
+     * 
+     * @param {object} data_product
+     * param {object} list_data_item
+     * @returns {Boolean} Является ли товар новым
+     */
+    addDataLeft(data_product){ //list_data_item = []){
+        // Есть ли этот товар в массиве левых товаров. Если есть - уходим. Если нет - добавляем
+        if (this.isExistsDataLeftBy(data_product.id_source, data_product.id_product )) return false;
+
+        // Есть ли этот товар в массиве левых товаров на удаление. Если есть - убираем
+        this.deleteIfExistsLeftDeleteBy(data_product.id_source, data_product.id_product);
+
+        // Добавляем запись в массив левых товаров на mismatch
+        this.datas_products_left.push(Object.assign({}, data_product));
         document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_LEFT, { detail: {
-            data: this.datas_products_left[index],
-            action: ACTION_DATA_DELETE
+            data: data_product,
+            action: ACTION_DATA_CREATE
         }}));
-        this.datas_products_left.splice(index, 1);
+    
+        // Добавляем в массив все правые товары на mismatch
+        //list_data_item.each((data_item)=>this.addDataRight(data_item));
     }
     
     /**
-     * Отмена удаления блока товаров
-     * Получилось вот такая тавтология ибо массив для удаления левых товаров называется datas_products_left_delete
+     * Добавить левый товар в массив на удаление
      * 
-     * @param {type} index индекс записи в datas_products_left_delete
-     * @returns {array} Новый массив datas_products_left_delete
+     * @param {type} data_product
+     * @returns {undefined}
      */
-    deleteDeleteByIndex(index){
-        document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_DELETE, { detail: {
-            data: this.datas_products_left_delete[index],
-            action: ACTION_DATA_DELETE
-        }}));
-        this.datas_products_left_delete.splice(index, 1);
+    addDataDeleteLeft(data_product){
+        if (this.ifExistsDataDeleteLeftBy(data_product.id_source, data_product.id_product)) return;
+        
+        this.deleteIfExistsLeftBy(data_product.id_source, data_product.id_product);
+        
+        // Добавляем запись в массив левых товаров на удаление
+        this.datas_products_left_delete.push( Object.assign({}, data_product ) );
+        document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_DELETE_LEFT, { detail: {
+            data: data_product,
+            action: ACTION_DATA_CREATE
+        }}));        
     }
     
     /**
-     * Удаление блока товаров
+     * Добавить правый товар в массив сравнений
      * 
-     * @param {type} data_product data данные блока удаленных товаров
-     * @returns {Boolean} 
-     *      true: если эти данные оказались в массиве новыми
-     *      false: если просто обновление записи в массив
+     * @param {type} data_item
+     * @returns {undefined}
      */
-    addBlockDelete(data_product){
-        // Сморим, есть ли уже этот элемент в массиве левых товаров на удадение, ожидающем отправку
-        for (let i = this.datas_products_left_delete.length - 1; i >= 0; --i) {
-            let data = this.datas_products_left_delete[i];
-            if (data.id_product === data_product.id_product && data.id_source === data_product.id_source) {
-                this.datas_products_left_delete[i] = data_product; //Перезаписать
-                return false;
+    addDataRight(data_item){
+        // Есть ли этот товар в массиве правых товаров. Если есть - меняем
+        let index = this.datas_products_right.findIndex((data)=>data.id_source === data_item.id_source && data.id_item === data_item.id_item);           
+        if ( index >=0 ){
+            // Перезаписываем статус
+            if (this.datas_products_right[index].status !== data_item.status){
+                let status_last = this.datas_products_right[index].status;
+                this.datas_products_right[index] = Object.assign({},data_item); // Перезаписываем
+                // Генерируем событие изменения
+                document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_RIGHT, { detail: {
+                    status_last: status_last,
+                    data: data_item,
+                    action: ACTION_DATA_CHANGE
+                }}));
             }
+            return;
+        } else {
+            // Если товара в массиве нет то запоминаем data в массив правых товаров
+            this.datas_products_right.push( Object.assign({},data_item) );
+            
+            // Генерируем событие добавления
+            document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_RIGHT, { detail: {
+                data: data_item,
+                action: ACTION_DATA_CREATE
+            }}));
+        }
+
+        // Есть ли этот товар в массиве правых товаров на удаление. Если есть - убираем
+        this.deleteIfExistsRightDeleteBy(data_item.id_source, data_item.id_item);
+        
+        // Если соответственный левый товар есть в массиве левых на missmatch то удаляем его оттуда
+        if (data_item.status !== MISMATCH){
+            this.deleteIfExistsLeftBy(data_item.id_source, data_item.id_product); 
         }
         
-        // Смотрим, есть ли уже этот элемент в массиве левых товаров, ожидающем отправку. Если есть, то пользователь передумал его отмечать и хочет удалить
-        for (let i = this.datas_products_left.length - 1; i >= 0; --i) {
-            let data = this.datas_products_left[i];
-            if (data.id_product === data_product.id_product && data.id_source === data_product.id_source) {
-                this.datas_products_left.splice(i, 1);
-                break; // Дальше смотреть нет смысла, ибо значение уникальны                
-            }
-        }
-        
-        // Если эмемента в массиве на удаление нет то запоминаем в массив элемент
-        this.datas_products_left_delete.push(data_product);
-        return true;
+        // Если соответственный левый товар есть в массиве левых на удаление то удаляем его оттуда
+        this.deleteIfExistsLeftDeleteBy(data_item.id_source, data_item.id_product);
     }
     
     /**
-     * Получить иддексы данных, соответствующих значениям
-     * 
-     * @param {number}              id_source   id источника
-     * @param {number | undefined}  id_product  id левого  товара
-     * @param {number | undefined}  id_item     id правого товара
-     * @returns {array}
+     *  Добавить правый товар в массив сравнений
+     *  
+     * @param {type} data_item
+     * @returns {undefined}
      */
-    findIndexesDatasRightBy(id_source, id_product, id_item){
-        let isset_id_product = typeof(id_product)!=="undefined" && id_product!==null;
-        let isset_id_item    = typeof(id_item)   !=="undefined" && id_item   !==null;        
+    addDataDeleteRight(data_item){
+        // Проверка на дубли
+        if (this.isExistsDataDeleteRigth(data_item.id_source, data_item.id_item)) return;
         
-        return this.datas_products_right.findIndex(data => 
-            data.id_source === id_source
-            && (!isset_id_product || (data.id_product === id_product))
-            && (!isset_id_item    || (data.id_item    === id_item   )));
+        // Убираем из массива сравнения слева
+        this.deleteIfExistsLeftBy(data_item.id_source, data_item.id_product);
+        
+        //Если этот товар в списке на статус - удаляем его оттуда
+        this.deleteIfExistsRightBy(data_item.id_source, data_item.id_item);
+        
+        // Добавляем в список удаления правого товара
+        this.datas_products_right_delete.push( Object.assign({},data_item) );
+        document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_DELETE_RIGHT, { detail: {
+            data: data_item,
+            action: ACTION_DATA_CREATE
+        }}));
     }
     
     /**

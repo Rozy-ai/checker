@@ -10,18 +10,16 @@ CLASS_BUTTON_SHOW_PRODUCTS_ALL,
         } from './classes/Filters.js'
 
 import {
-    CLASS_BLOCK_PRODUCT_MIN,
-    CLASS_BLOCK_BUTTON_DELETE,
-    CLASS_BLOCK_BUTTON_CLOSE,
-    CLASS_BLOCK_PRODUCT,
-    
-    STATUS_BLOCK_DEFAULT,
-    STATUS_BLOCK_DELETE_ALL,
-    STATUS_BLOCK_MISMATCH_ALL,
-    STATUS_BLOCK_SELECT_ALL, 
-    
-    ProductBlock
-} from './classes/ProductBlock.js'
+CLASS_BLOCK_PRODUCT_MIN,
+        CLASS_BLOCK_BUTTON_DELETE,
+        CLASS_BLOCK_BUTTON_CLOSE,
+        CLASS_BLOCK_PRODUCT,
+        STATUS_DELETED,
+        STATUS_MISMATCH_ALL,
+        STATUS_NOT_FOUND,
+        STATUS_DEFAULT,
+        ProductBlock
+        } from './classes/ProductBlock.js'
 
 import {
 CLASS_PRODUCT_LEFT,
@@ -29,32 +27,31 @@ CLASS_PRODUCT_LEFT,
         } from './classes/ProductLeft.js'
 
 import {
-    CLASS_STATISTIC,
-    CLASS_ITEM_PRE_MATCH,
-    CLASS_ITEM_MATCH,
-    CLASS_ITEM_MISMATCH,
-    CLASS_ITEM_OTHER,
-    CLASS_ITEM_NOCOMPARE,
-    Statistic
-    } from './classes/Statistic.js'
+CLASS_STATISTIC,
+        CLASS_ITEM_PRE_MATCH,
+        CLASS_ITEM_MATCH,
+        CLASS_ITEM_MISMATCH,
+        CLASS_ITEM_OTHER,
+        CLASS_ITEM_NOCOMPARE,
+        Statistic
+        } from './classes/Statistic.js'
 
 import {
-    CLASS_PRODUCT_RIGHT,
-    CLASS_BUTTON_RED,
-    CLASS_BUTTON_YELLOY,
-    ProductRight
-} from './classes/ProductRight.js'
+CLASS_PRODUCT_RIGHT,
+        CLASS_BUTTON_RED,
+        CLASS_BUTTON_YELLOY,
+        ProductRight
+        } from './classes/ProductRight.js'
 
 import {
-    EVENT_CHANGE_DATA_LEFT,
-    EVENT_CHANGE_DATA_RIGHT,
-    EVENT_CHANGE_DATA_DELETE_LEFT,
-    EVENT_CHANGE_DATA_DELETE_RIGHT,
-    ACTION_DATA_CREATE,
-    ACTION_DATA_CHANGE,
-    ACTION_DATA_DELETE,
-    ListDataForServer
-} from './classes/ListDataForServer.js';
+EVENT_CHANGE_DATA_LEFT,
+        EVENT_CHANGE_DATA_RIGHT,
+        EVENT_CHANGE_DATA_DELETE,
+        ACTION_DATA_CREATE,
+        ACTION_DATA_CHANGE,
+        ACTION_DATA_DELETE,
+        ListDataForServer
+        } from './classes/ListDataForServer.js';
 
 const CLASS_BUTTON_MISSMATCH_ALL = '.product-list__item-mismatch-all'; // Левый крестик
 const CLASS_BUTTON_RESET_FILTERS = '#id_button_reset_filters';
@@ -62,101 +59,85 @@ const CLASS_BUTTON_RESET_FILTERS = '#id_button_reset_filters';
 function main() {
     let listDataForServer = new ListDataForServer();
     let $body = $('body');
-    
+
     /*
-     * Обработка события на добавление или удаление data данных в массиве изменения статуса девого товара
+     * Обработка события на добавление или удаление data данных правого товара в массив
+     */
+    document.addEventListener(EVENT_CHANGE_DATA_RIGHT, function (event) {
+        let productRight = ProductRight.getBy(event.detail.data.id_source, event.detail.data.id_item);
+        let blockProduct = ProductBlock.getFromChild(productRight.dom);
+        let statistic = Statistic.getFirstFromParent(blockProduct.dom);
+
+        if (event.detail.action === ACTION_DATA_DELETE) {
+            statistic.deleteUnit(event.detail.data.status);
+            productRight.changeVisual(productRight.data.status, Filters.getModeHide()); //Тут первоначальный статус
+            blockProduct.changeVisual(STATUS_DEFAULT, false);
+        }
+
+        if (event.detail.action === ACTION_DATA_CREATE) {
+            statistic.addUnit(event.detail.data.status);
+            productRight.changeVisual(event.detail.data.status, Filters.getModeHide());
+            // Eсли у всех правых товаров получился статус missmatch то левый должен автоматически стать mismatch
+            if (!blockProduct.isHasStatusNotMismatch(false)) {
+                let productLeft = blockProduct.getProductLeft();
+                let data = Object.assign({}, productLeft.data);
+                listDataForServer.addLeft(data);
+            } else if (!blockProduct.isHasProductRightWithoutColormarker()) {
+                blockProduct.changeVisual(STATUS_NOT_FOUND, Filters.getModeHide());
+            }
+            
+            //Если правые все правые продукты имеют статусы то нужна отправка на сервер с перезагрузкой
+            checkAndSendAllStatuses(Filters.getModeHide());
+        }
+
+        if (event.detail.action === ACTION_DATA_CHANGE) {
+            statistic.changeUnit(event.detail.statuslast, event.detail.data.status);
+            productRight.changeVisual(event.detail.data.status, Filters.getModeHide());
+
+        }
+    });
+
+    /*
+     * Обработка события на добавление или удаление data данных левого товара в массив на missmatchAll
      */
     document.addEventListener(EVENT_CHANGE_DATA_LEFT, function (event) {
         let productLeft = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
         let blockProduct = ProductBlock.getFromChild(productLeft.dom);
-        let productsRight = blockProduct.getProductsRight();
-        
-        switch (event.detail.action){
-            case ACTION_DATA_CREATE:
-                // Тут нужно чтобы все правые товары стали тоже missmatch
-                for (let item of productsRight) {
-                    let data = Object.assign({}, item.data);
-                    data.status = 'MISMATCH';
-                    listDataForServer.addDataRight(data);
-                    item.addStatusVisual(MISMATCH);
-                }
-                
-                blockProduct.addStatusVisual(STATUS_BLOCK_MISMATCH_ALL);
-                break;
-                
-            case ACTION_DATA_DELETE:     
-                blockProduct.removeStatusVisual(STATUS_BLOCK_MISMATCH_ALL);
-                break;
+        let is_mode_hide = Filters.getModeHide();
+
+        if (event.detail.action === ACTION_DATA_CREATE) {
+            // Тут нужно чтобы все правые товары стали тоже missmatch
+            let productsRight = blockProduct.getProductsRight();
+            for (let item of productsRight) {
+                let data = Object.assign({}, item.data);
+                data.status = 'MISMATCH';
+                listDataForServer.addRight(data);
+            }
+
+            blockProduct.changeVisual(STATUS_MISMATCH_ALL, is_mode_hide, Filters.getModeMinimize());
+            productLeft.changeVisual(true, is_mode_hide);
+        } else if (event.detail.action === ACTION_DATA_DELETE) {
+            blockProduct.changeVisual(STATUS_DEFAULT, is_mode_hide, Filters.getModeMinimize());
+            productLeft.changeVisual(false, is_mode_hide);
         }
     });
 
-    /*
-     * Обработка события на добавление или удаление data данных в массиве удаления девого товара
+    /**
+     * Обработка события на добавление или удаление data данных блока товаров в массив на удадение
      */
-    document.addEventListener(EVENT_CHANGE_DATA_DELETE_LEFT, function (event) {
+    document.addEventListener(EVENT_CHANGE_DATA_DELETE, function (event) {
         let productLeft = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
         let blockProduct = ProductBlock.getFromChild(productLeft.dom);
-        let productsRight = blockProduct.getProductsRight();
-        
-        switch (event.detail.action){
-            case ACTION_DATA_CREATE:
-                // Тут нужно чтобы все правые товары стали тоже удаленные
-                for (let item of productsRight) {
-                    let data = Object.assign({}, item.data);
-                    data.status = 'MISMATCH';
-                    listDataForServer.addDataRight(data);
-                    item.addStatusVisual(MISMATCH);
-                }
-                
-                blockProduct.addStatusVisual(STATUS_BLOCK_DELETE_ALL);
-                break;
-                
-            case ACTION_DATA_DELETE:
-                blockProduct.removeStatusVisual(STATUS_BLOCK_DELETE_ALL);
-                break;
-        }
-    });
+        let is_mode_hide = Filters.getModeHide();
 
-    document.addEventListener(EVENT_CHANGE_DATA_RIGHT, function (event) {
-        let productLeft = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
-        let blockProduct = ProductBlock.getFromChild(productLeft.dom);
-        let productRight = ProductRight.getBy(event.detail.data.id_source, event.detail.data.id_item);
-        
-        switch (event.detail.action){
-            case ACTION_DATA_CREATE:
-                productRight.addStatusVisual(event.detail.data.status);
-                
-                if ( blockProduct.isMismatchAll() ){
-                    this.listDataForServer.addDataLeft(productLeft.data);
-                }
-                
-                if ( blockProduct.isDeleteAll() ){
-                    this.listDataForServer.addDataDeleteLeft(productLeft.data);
-                }
-
-                break;
-            case ACTION_DATA_DELETE:
-                productRight.removeStatusVisual(event.detail.data.status);
-                break;
-            case ACTION_DATA_CHANGE:
-                productRight.removeStatusVisual(event.detail.status_last);
-                productRight.addStatusVisual(event.detail.data.status);
-                break;
-        };
-    });
-        
-    document.addEventListener(EVENT_CHANGE_DATA_DELETE_RIGHT, function (event) {
-        let productLeft = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
-        let blockProduct = ProductBlock.getFromChild(productLeft.dom);
-        let productsRight = blockProduct.getProductsRight();
-        
-        switch (event.detail.action){
-            case ACTION_DATA_CREATE:
-                productsRight.addStatusVisual('deleted');
-                break;
-            case ACTION_DATA_DELETE:
-                productsRight.removeStatusVisual('deleted');
-                break;
+        if (event.detail.action === ACTION_DATA_CREATE) {
+            blockProduct.changeVisual(STATUS_DELETED, is_mode_hide, false);
+            productLeft.changeVisual(false, is_mode_hide);
+            
+            //Если правые все правые продукты имеют статусы то нужна отправка на сервер с перезагрузкой
+            checkAndSendAllStatuses(Filters.getModeHide());
+        } else if (event.detail.action === ACTION_DATA_DELETE) {
+            blockProduct.changeVisual(STATUS_DEFAULT, is_mode_hide, Filters.getModeMinimize());
         }
     });
     
@@ -229,7 +210,7 @@ function main() {
                 }
             }
 
-            listDataForServer.addDataLeft(productLeft.data);
+            listDataForServer.addLeft(productLeft.data);
         } else {
             $this.hide();
             Ajax.sendFromButton(data_button, onResponce);
@@ -277,7 +258,7 @@ function main() {
 
         if (Filters.getModeBatch() === true) {
             // Добавить товар в список для отправки
-            listDataForServer.addDataRight(data);
+            listDataForServer.addRight(data);
         } else {
             $this.hide();
             Ajax.sendFromButton(data, (response) => {
@@ -311,7 +292,7 @@ function main() {
 
         if (Filters.getModeBatch() === true) {
             // Добавить товар в список для отправки
-            listDataForServer.addDataRight(data);
+            listDataForServer.addRight(data);
         } else {
             $this.hide();
             Ajax.sendFromButton(data, (response) => {
@@ -340,8 +321,30 @@ function main() {
         e.stopPropagation();
 
         let blockProduct = ProductBlock.getFromChild($(this));
-        this.listDataForServer.deleteIfExistsLeftBy(blockProduct.data.source_id, blockProduct.data.pid, true);
-        this.listDataForServer.deleteIfExistsLeftDeleteBy(blockProduct.data.source_id, blockProduct.data.pid, true);
+
+        for (let i = listDataForServer.datas_products_right.length - 1; i >= 0; --i) {
+            let data = listDataForServer.datas_products_right[i];
+            if (data.id_source === blockProduct.data.source_id &&
+                    data.id_product === blockProduct.data.pid) {
+                listDataForServer.deleteRightByIndex(i);
+            }
+        }
+
+        for (let i = listDataForServer.datas_products_left.length - 1; i >= 0; --i) {
+            let data = listDataForServer.datas_products_left[i];
+            if (data.id_source === blockProduct.data.source_id &&
+                    data.id_product === blockProduct.data.pid) {
+                listDataForServer.deleteLeftByIndex(i);
+            }
+        }
+
+        for (let i = listDataForServer.datas_products_left_delete.length - 1; i >= 0; --i) {
+            let data = listDataForServer.datas_products_left_delete[i];
+            if (data.id_source === blockProduct.data.source_id &&
+                    data.id_product === blockProduct.data.pid) {
+                listDataForServer.deleteDeleteByIndex(i);
+            }
+        }
     });
 
     /**
@@ -352,24 +355,16 @@ function main() {
     $body.on('click', '.js-reset-compare-all-visible-items', function (e) {
         e.stopPropagation();
 
-        for (let i = listDataForServer.datas_products_left.length - 1; i >= 0; --i) {
-            let data = listDataForServer.datas_products_left[i];
-            listDataForServer.deleteIfExistsLeftBy(data.id_source, data.id_product);
-        }
-        
-        for (let i = listDataForServer.datas_products_left_delete.length - 1; i >= 0; --i) {
-            let data = listDataForServer.datas_products_left_delete[i];
-            listDataForServer.deleteIfExistsLeftDeleteBy(data.id_source, data.id_product);
-        }
-
         for (let i = listDataForServer.datas_products_right.length - 1; i >= 0; --i) {
-            let data = listDataForServer.datas_products_right[i];
-            listDataForServer.deleteIfExistsRightBy(data.id_source, data.id_item);
+            listDataForServer.deleteRightByIndex(i);
         }
 
-        for (let i = listDataForServer.datas_products_right_delete.length - 1; i >= 0; --i) {
-            let data = listDataForServer.datas_products_right_delete[i];
-            listDataForServer.deleteIfExistsRightDeleteBy(data.id_source, data.id_item);
+        for (let i = listDataForServer.datas_products_left.length - 1; i >= 0; --i) {
+            listDataForServer.deleteLeftByIndex(i);
+        }
+
+        for (let i = listDataForServer.datas_products_left_delete.length - 1; i >= 0; --i) {
+            listDataForServer.deleteDeleteByIndex(i);
         }
     });
 
@@ -380,7 +375,7 @@ function main() {
         e.stopPropagation();
         let blockProduct = ProductBlock.getFromChild($(this));
         let productLeft = blockProduct.getProductLeft();
-        listDataForServer.addDataLeftDelete(productLeft.data);
+        listDataForServer.addDelete(productLeft.data);
     });
 
     /**
@@ -533,25 +528,35 @@ function main() {
      * @returns {undefined}
      */
     function changeModeHide(is_mode_hide) {
-        let is_mode_minimize = Filters.getModeMinimize();
+        let is_minimize = Filters.getModeMinimize();
 
-        // Отображаем и скрытые
         if (is_mode_hide === false) {
             $(CLASS_BLOCK_PRODUCT).show();
             $(CLASS_PRODUCT_RIGHT).show();
         }
-        
-        // Пробегаемся по списку выбранных левых товаров и отображаем их "по-другому"
-        for (let data of listDataForServer.datas_products_left) {
-            let product_block = ProductBlock.getByPid(data.id_product);
-            product_block.setModeVisual(is_mode_hide, is_mode_minimize);
-        }
 
-        // Пробегаемся по списку удаленных левых товаров и отображаем их "по-другому"
+        // Пробегаемся по списку удаленных товаров и отображаем их "по-другому"
         for (let data of listDataForServer.datas_products_left_delete) {
             let product_block = ProductBlock.getByPid(data.id_product);
-            product_block.setModeVisual(is_mode_hide, is_mode_minimize);
+            product_block.changeVisual(STATUS_DELETED, is_mode_hide, is_minimize);
         }
+        ;
+
+        // Пробегаемся по списку выбранных левых товаров и отображаем их "по-другому"
+        for (let data of listDataForServer.datas_products_left) {
+            let product_left = ProductLeft.getBy(data.id_source, data.id_product);
+            let product_block = ProductBlock.getFromChild(product_left.dom);
+            product_block.changeVisual('', is_mode_hide, is_minimize);
+            product_left.changeVisual(true, is_mode_hide);
+        }
+        ;
+
+        // Пробегаемся по списку выбранных правых товаров и отображаем их "по-другому"
+        for (let data of listDataForServer.datas_products_right) {
+            let product_right = ProductRight.getBy(data.id_source, data.id_item);
+            product_right.changeVisual(data.status, is_mode_hide);
+        }
+        ;
     }
     
     /**
@@ -565,9 +570,8 @@ function main() {
     async function sendListDatasAsync() {
         //Если данных нет то и отсылать не нужно
         if (!listDataForServer.datas_products_left.length &&
-            !listDataForServer.datas_products_left_delete.length &&
             !listDataForServer.datas_products_right.length &&
-            !listDataForServer.datas_products_right_delete.length) return true;
+            !listDataForServer.datas_products_left_delete.length) return true;
         
         try{
             let response = await Ajax.sendAsync('/product/compare-batch', {listDataForServer: listDataForServer});
@@ -595,22 +599,22 @@ function main() {
      * @param {type} is_mode_hide
      * @returns {undefined}
      */
-    function checkAndSendAllStatuses(is_mode_hide){       
+    function checkAndSendAllStatuses(is_mode_hide){
+        // Если режим скрытия выключен то обновлять список не нужно
+        if (!is_mode_hide) return;
+        
         let doms = $(CLASS_PRODUCT_RIGHT);
         
         // Если на странице есть товары без статуса то обновлять список не нужно
         for (let i = doms.length-1; i>=0; --i){
             let productRight = new ProductRight($(doms[i]));
             
-            if ( !productRight.data.status &&
-                 !listDataForServer.isExistsDataLeftBy(productRight.data.id_source, productRight.data.id_product) &&
-                 !listDataForServer.isExistsDataDeleteLeftBy(productRight.data.id_source, productRight.data.id_product) &&
-                 !listDataForServer.isExistsDataRightBy(productRight.data.id_source, productRight.data.id_item) &&
-                 !listDataForServer.isExistsDataRightDeleteBy(productRight.data.id_source, productRight.data.id_item))
+            if (!listDataForServer.isExistsDataLeftDeleteBy(productRight.data.id_source, productRight.data.id_product) &&
+                !productRight.data.status && 
+                !listDataForServer.isExistsDataRightBy(productRight.data.id_source, productRight.data.id_item))
             {
                 return;
             }
-      
         }
         
         if (confirm('Товары без статусов закончились. Даные сохранятся и страница будет перезагружена')) {
