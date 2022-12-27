@@ -106,6 +106,19 @@ export class ProductBlock extends DomWithData{
         return list;
     }
     
+    /**
+     * Получить только data атрибуты правых товаров
+     * @returns {Object}
+     */
+    getDatasRight(){
+        let list = [];
+        this.dom.find(CLASS_PRODUCT_RIGHT).each(function(index, el){
+            let productRight = new ProductRight($(this));
+            list.push(productRight.data);
+        });
+        return list;
+    }
+    
     getStatistic(){
         let dom = this.dom.find(CLASS_STATISTIC+':first');
         return new Statistic(dom);
@@ -133,14 +146,16 @@ export class ProductBlock extends DomWithData{
     
     /**
      * Являются ли все правые товары отмечеными статусом mismatch
-     * 
+     * @param {type} is_strict Строгое соответствие. Если false то может быть без выбора
      * @returns {Boolean}
-     */ 
-    isMismatchAll(){
+     */
+    isMismatchAll(is_strict = true){
         let list_product_right = this.getProductsRight();
         for (let item of list_product_right){
             let colorMarker = item.getStatatusColorMarker();
-            if ( colorMarker !== 'mismatch') return false;
+            if ( colorMarker !== 'mismatch' &&
+                (is_strict || colorMarker !== 'nocompare') &&
+                (is_strict || colorMarker !== '') ) return false;
         }
         return true;
     }
@@ -150,13 +165,22 @@ export class ProductBlock extends DomWithData{
      * 
      * @returns {Boolean}
      */
-    isDeleteAll(){
+    isDeletedAll(){
         let list_product_right = this.getProductsRight();
-        
         for (let item of list_product_right){
-            if (!item.isHasClassDeleted()) return false;
-        }   
+            let colorMarker = item.getStatatusColorMarker();
+            if ( colorMarker !== 'deleted') return false;
+        }
         return true;
+    }
+    
+    isSelectAll(){
+        let list_product_right = this.getProductsRight();
+        for (let item of list_product_right){
+            let colorMarker = item.getStatatusColorMarker();
+            if ( colorMarker === '' || colorMarker === 'nocompare') return false;
+        }
+        return true;        
     }
     
     /**
@@ -174,7 +198,7 @@ export class ProductBlock extends DomWithData{
     }
     
     /**
-     * Добавляет отображение одного из состояний
+     * Устанавливает отображение одного из состояний
 
      * @param {type} status
      *      STATUS_BLOCK_DEFAULT
@@ -183,46 +207,33 @@ export class ProductBlock extends DomWithData{
      *      STATUS_BLOCK_SELECT_ALL
      * @returns {undefined}
      */
-    addStatusVisual(status){
+    setStatusVisual(status){
+        let domMin = this.getDomMin();
+        
+        this.dom.removeClass('status_block_delete_all');
+        this.dom.removeClass('status_block_mismatch_all');
+        this.dom.removeClass('status_block_selected_all');
+        
+        domMin.removeClass('status_block_delete_all');
+        domMin.removeClass('status_block_mismatch_all');
+        domMin.removeClass('status_block_selected_all');
+        
         switch (status){
-            case STATUS_BLOCK_DEFAULT:
-                break;
             case STATUS_BLOCK_DELETE_ALL:
                 this.dom.addClass('status_block_delete_all');
+                domMin.addClass('status_block_delete_all');
                 break;
             case STATUS_BLOCK_MISMATCH_ALL:
                 this.dom.addClass('status_block_mismatch_all');
+                domMin.addClass('status_block_mismatch_all');
                 break;
             case STATUS_BLOCK_SELECT_ALL:
                 this.dom.addClass('status_block_selected_all');
+                domMin.addClass('status_block_selected_all');
                 break;
-        }
-    }
-    
-    /**
-     * Убирает отображение одного из состояний
-
-     * @param {type} status
-     *      STATUS_BLOCK_DEFAULT
-     *      STATUS_BLOCK_DELETE_ALL
-     *      STATUS_BLOCK_MISMATCH_ALL
-     *      STATUS_BLOCK_SELECT_ALL
-     * @returns {undefined}
-     */
-    removeStatusVisual(status){
-        switch (status){
             case STATUS_BLOCK_DEFAULT:
                 break;
-            case STATUS_BLOCK_DELETE_ALL:
-                this.dom.removeClass('status_block_delete_all');
-                break;
-            case STATUS_BLOCK_MISMATCH_ALL:
-                this.dom.removeClass('status_block_mismatch_all');
-                break;
-            case STATUS_BLOCK_SELECT_ALL:
-                this.dom.removeClass('status_block_selected_all');
-                break;
-        }
+        }  
     }
     
     /**
@@ -245,5 +256,22 @@ export class ProductBlock extends DomWithData{
                 this.dom.css('display', 'table-row');
             }
         }
+    }
+    
+    /**
+     * Зделать правые товары видимыми в блоке только отмеченные маркером с данным классом
+     * 
+     * @param {string} class_marker класс маркера цвета, который нужно оставить 
+     * @returns {undefined}
+     */
+    showProductsRight (class_marker) {
+        let items = this.getProductsRight();
+        for (let item of items){
+            if (item.dom.find('.color-marker').hasClass(class_marker)){
+                item.dom.show();
+            } else {
+                item.dom.hide();
+            }
+        };
     }
 };

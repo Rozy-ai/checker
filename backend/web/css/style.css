@@ -2156,19 +2156,20 @@ table.tableInfo th {
 }
 
 .status_block_delete_all{
-    background-color: rgba(200, 0, 0, 0.1)!important;
+    background-color: rgba(128, 128, 128, 0.23)!important;
 }
 
 .status_block_mismatch_all{
-    background-color: rgba(0, 0, 200, 0.1)!important;
+    background-color: rgba(150, 0, 0, 0.1)!important;
 }
 
 .status_block_selected_all{
-    background-color: rgba(0, 200, 0, 0.1)!important;
+    background-color: rgba(0, 150, 0, 0.1)!important;
 }
 
 .status_product_right_deleted{
-    background-color: rgba(200, 0, 0, 0.1)!important;
+    border-width: 2px;
+    border-color: #919191;
 }
 
 .products-list__slider {

@@ -238,21 +238,6 @@ class IndexPresenter {
         }
     }
 
-    public function deleteProduct(int $id_source, int $id_product) {
-        $source = Source::getById($id_source);
-        if (!($source instanceof Source)) {
-            throw new \Exception('Не удаось найти источник по данному id');
-        }
-
-        $product = Product::getById($source->class_1, $id_product);
-        $product->source = $source;
-        if (!($product instanceof Product)) {
-            throw new \Exception('Не удалось найти товар по данному id');
-        }
-
-        $product->delete();
-    }
-
     public function resetCompareProduct(int $id_source, int $id_product) {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -281,6 +266,7 @@ class IndexPresenter {
             if (!Comparison::setStatus($status, $id_source, $id_product, $id_item, $message)) {
                 throw new \Exception('Не удалось сохранить данные в базу данных');
             }
+            
             //После смены статуса на правом товаре если это быд последний товар,
             //То необходимо добавить левый товар в таблицу hidden_items
             if ($is_last) {
@@ -367,72 +353,42 @@ class IndexPresenter {
         }
     }
     
-    /**
-     * Если сравнение левого товара, это значит что все правые товары нужно сравнить так как левый и левый пометить как отмеченый всеми
-     * 
-     * @param type $list_data_product_left Масив data даных левых товаров
-     * @param type $list_data_product_right Масив data даных правых товаров
-     * @return boolean
-     * @throws \Exception
-     */
-    public function changeStatusProducts($list_data_product_left = [], $list_data_product_right = [], $list_data_product_left_delete = []) {
-        if (!is_array($list_data_product_left) &&
-            !is_array($list_data_product_right) &&
-            !is_array($list_data_product_left_delete)){
-                return false;
+    public function changeStatusProducts($list_data_product_right = []){
+        if (!is_array($list_data_product_right)) {
+            return;
         }
         $is_change_all = true;
-        $ids_product_and_source = [];
         
-        // Нужно удалить левые товары вместе со всеми правыми ели они есть
-        foreach ($list_data_product_left_delete as $data){
-            $id_source = $data['id_source'];
-            $id_product = $data['id_product'];
-            
-            // Если в массиве левых товаров на missmatch есть этот товар то убираем его
-            $list_data_product_left = array_filter($list_data_product_left, function($el) use ($id_source, $id_product){
-                return ($el['id_product'] !== $id_product || !$el['id_source'] !== $id_source);
-            });
-            // Если в массива правых товаров на изменение  есть этот товар - убираем его
-            $list_data_product_right = array_filter($list_data_product_right, function($el) use ($id_source, $id_product){
-                return ($el['id_product'] !== $id_product || !$el['id_source'] !== $id_source);
-            });
-            
-            try{
-                $this->deleteProduct($id_source, $id_product);
-            } catch (\Exception $ex) {
-                $is_change_all = false;
-            }
-        }
-        
-        // Сохраним статусы всех правых товаров
-        foreach($list_data_product_right as $data){
+        // Каких левых товаров коснулись новые статусы
+        $datas_left = [];
+        foreach ($list_data_product_right as $data){
             $id_source  = $data['id_source'];
             $id_product = $data['id_product'];
             $id_item    = $data['id_item'];
-            $status     = $data['status'];
             $message    = $data['message'];
+            $status     = $data['status'];
+            
+            //Добавляем в массив
+            $datas_left = array_merge($datas_left, array_udiff([['id_source'=>$id_source, 'id_product'=>$id_product]], $datas_left, function($data1, $data2){
+                return ($data1['id_source'] === $data2['id_source'] && $data1['id_product'] === $data2['id_product'])?0:2;
+            }));
+            
             try{
-                $this->changeStatusProductRight($status, $id_source, $id_product, $id_item, $message, false);
-                $ids_product_and_source[$id_product] = $id_source; // Надеюсь что тут не будет одинаковых id c разными источниками
-            } catch(\Exception $ex) {
+                if($status === 'DELETED'){
+                    Product::deleteItemBy($id_source, $id_item);
+                } else {
+                    $this->changeStatusProductRight($status, $id_source, $id_product, $id_item, $message, false);
+                }
+            } catch (\Exception $ex){
                 $is_change_all = false;
             }
         }
         
-        // Если есть левые товары, записывам в них статусы вместе со всеми правыми
-        foreach ($list_data_product_left as $data) {
+        // Рассмотрим левые продукты, с которыми были сравнения
+        foreach ($datas_left as $data){
             $id_source = $data['id_source'];
             $id_product = $data['id_product'];
-            try {
-                $this->missmatchToAll('', $id_product, $id_source, true);
-            } catch (\Exception $ex) {
-                $is_change_all = false;
-            }
-        }
-        
-        // Теперь проходимся по левым товарам и смотрим, не остались ли товары, не именющие правых без сравнений
-        foreach ($ids_product_and_source as $id_product => $id_source){
+            
             try{
                 $source = Source::getById($id_source);
                 if (!$source) {
@@ -443,9 +399,16 @@ class IndexPresenter {
                     throw new \Exception('Не удалось найти продукт с id = ' . $id_product);
                 }
                 $product->source = $source;
+                
                 $count_items = $product->countRightItems;
-                $count_comparisons = $product->countComparisons;
-                if (($count_items -$count_comparisons) <= 0){
+                if ($count_items <= 0){
+                    $product->delete();
+                    break;
+                }
+                
+                // Вот тут можно нисать countComparisons('MISMATCH')
+                $count_comparisons = $product->getCountComparisons();
+                if ($count_items-$count_comparisons <= 0){
                     $is_exists = HiddenItems::find()->where(['p_id' => $id_product, 'source_id' => $id_source])->exists();
                     if (!$is_exists) {
                         $h = new HiddenItems([
@@ -453,18 +416,18 @@ class IndexPresenter {
                             'source_id' => $id_source,
                             'status' => HiddenItems::STATUS_NOT_FOUND
                         ]);
-                        if (!$h->save()) {
+                        if (!$h->save()){
                             throw new \Exception('Не удалось занест левый товар в базу данных');
                         }
                     } else {
                         throw new \Exception('Запись товара уже существует в таблице hidden_items');
-                    }                    
+                    }                         
                 }
-            } catch (\Exception $ex) {
+                
+            } catch (\Exception $ex){
                 $is_change_all = false;
             }
         }
-        return $is_change_all;
     }
 
     /**

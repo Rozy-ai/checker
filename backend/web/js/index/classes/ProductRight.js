@@ -23,82 +23,47 @@ export class ProductRight extends DomWithData{
         return new this(el);
     }
     
-    /**
-     * Добавить визуальное отображение правого товара соответсвующего статусу 
-     * Тут статус совпадает с классом ( кроме deleted )
-     * @param {type} status
-     * @returns {undefined}
-     */
-    addStatusVisual(status){
+    setStatusVisual(status){
         status = status.toLowerCase();
-        let marker = this.dom.find('.color-marker');
+        
+        this.dom.find('.color-marker')
+                .removeClass('nocompare')
+                .removeClass('pre_match')
+                .removeClass('other')
+                .removeClass('match')
+                .removeClass('mismatch')
+                .removeClass('deleted')
+                .addClass(status);
+        
+        this.dom.find(CLASS_BUTTON_YELLOY).removeClass('-hover');
+        this.dom.find(CLASS_BUTTON_RED).removeClass('-hover');
+        this.dom.find('.slider-item__border').removeClass(STATUS_PRODUCT_RIGHT_DELETED);
         
         switch (status){
-            case 'nocompare':
-                marker.addClass('nocompare');
-                break;
-            case 'pre_match':
-                marker.addClass('pre_match');
-                this.dom.find(CLASS_BUTTON_YELLOY).addClass('-hover');
-                break;
-            case 'other':
-                marker.addClass('other');
-                break;
-            case 'match':
-                marker.addClass('match');
-                break;
             case 'mismatch':
-                marker.addClass('mismatch');
                 this.dom.find(CLASS_BUTTON_RED).addClass('-hover');
                 break;
-            case 'deleted':
-                this.dom.removeClass(STATUS_PRODUCT_RIGHT_DELETED);
+            case 'pre_match':
+                this.dom.find(CLASS_BUTTON_YELLOY).addClass('-hover');
                 break;
-            /*    
-            default:
-                this.dom.find(CLASS_BUTTON_RED).removeClass('-hover');
-                this.dom.find(CLASS_BUTTON_YELLOY).removeClass('-hover');
-                marker
-                    .removeClass('nocompare')
-                    .removeClass('pre_match')
-                    .removeClass('other')
-                    .removeClass('match')
-                    .removeClass('mismatch');
-            */
+            case 'deleted':
+                this.dom.find('.slider-item__border').addClass(STATUS_PRODUCT_RIGHT_DELETED);
+                break;
         }
     }
     
     /**
-     * Убрать визуальное отображение правого товара соответсвующего статусу
-     * Тут статус совпадает с классом
-     * @param {type} status
+     * Устанавливает режим просмотра товара
+     * 
+     * @param {type} is_mode_hide
+     * @param {type} is_mode_minimize
      * @returns {undefined}
      */
-    removeStatusVisual(status){
-        status = status.toLowerCase();
-        let marker = this.dom.find('.color-marker');
-        
-        switch (status){
-            case 'nocompare':
-                marker.removeClass('nocompare');
-                break;
-            case 'pre_match':
-                marker.removeClass('pre_match');
-                this.dom.find(CLASS_BUTTON_YELLOY).removeClass('-hover');
-                break;
-            case 'other':
-                marker.removeClass('other');
-                break;
-            case 'match':
-                marker.removeClass('match');
-                break;
-            case 'mismatch':
-                marker.removeClass('mismatch');
-                this.dom.find(CLASS_BUTTON_RED).removeClass('-hover');
-                break;
-            case 'deleted':
-                this.dom.removeClass(STATUS_PRODUCT_RIGHT_DELETED);
-                break;
+    setModeVisual(is_mode_hide){
+        if (is_mode_hide){
+            this.dom.hide();
+        } else {
+            this.dom.show();
         }
     }
     
@@ -113,10 +78,7 @@ export class ProductRight extends DomWithData{
         if (colorMarker.hasClass('other'))     return 'other';
         if (colorMarker.hasClass('match'))     return 'match';
         if (colorMarker.hasClass('mismatch'))  return 'mismatch';
+        if (colorMarker.hasClass('deleted'))   return 'deleted';
         return '';
-    }
-    
-    isHasClassDeleted(){
-        return this.dom.hasClass(STATUS_PRODUCT_RIGHT_DELETED);
     }
 };

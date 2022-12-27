@@ -4,7 +4,7 @@ import {
     DomWithData
 } from './DomWithData.js'
 
-export const CLASS_STATISTIC= 'div.block_statistic';
+export const CLASS_STATISTIC    = 'div.block_statistic';
 const CLASS_PROCESSED       = '.product-list-item__processed'; // Блок статистики, показывающий сколько товаров отработано
 const CLASS_ITEM_STATISTIC  = 'span.js-';
 
@@ -24,6 +24,10 @@ export class Statistic extends DomWithData{
     static getFirstFromParent($dom){
         return super.getFirstFromParent(CLASS_STATISTIC, $dom);
     };
+    
+    static getFromParent($dom){
+        return super.getFromParent(CLASS_STATISTIC, $dom);
+    };    
     
     /**
      * Увеличить значение в статистике

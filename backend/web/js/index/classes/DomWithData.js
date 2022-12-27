@@ -22,4 +22,8 @@ export class DomWithData {
     static getFirstFromParent(name_class, $parent_object){
         return new this($parent_object.find(name_class+':first'));
     }
+    
+    static getFromParent(name_class, $parent_object){
+        return new this($parent_object.find(name_class));
+    }
 }
