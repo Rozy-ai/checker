@@ -63,9 +63,11 @@ function main() {
      */
     document.addEventListener(EVENT_CHANGE_DATA_RIGHT, function (event) {
         let productLeft = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
-        let blockProduct = ProductBlock.getFromChild(productLeft.dom);
+        let blockProduct = ProductBlock.getFromChild(productLeft.dom); 
         let productRight = ProductRight.getBy(event.detail.data.id_source, event.detail.data.id_item);
-        let statistic = Statistic.getFromParent(blockProduct.dom);
+        
+        let parents_for_statistic = $(`[data-pid=${blockProduct.data.pid}]`);
+        let statistic = Statistic.getFromParents(parents_for_statistic);
         
         let is_mode_hide = Filters.getModeHide();
         let is_mode_minimize = Filters.getModeMinimize();

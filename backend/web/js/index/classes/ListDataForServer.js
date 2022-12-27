@@ -117,9 +117,6 @@ export class ListDataForServer{
      * @returns {undefined}
      */
     isHasData(){
-        return (
-            this.datas_products_left.length ||
-            this.datas_products_right.length ||
-            this.datas_products_left_delete.length);
+        return (this.datas_products_right.length);
     }
 };
