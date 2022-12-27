@@ -4,7 +4,7 @@ import {
     DomWithData
 } from './DomWithData.js'
 
-export const CLASS_STATISTIC= 'div.block_statistic';
+export const CLASS_STATISTIC    = 'div.block_statistic';
 const CLASS_PROCESSED       = '.product-list-item__processed'; // Блок статистики, показывающий сколько товаров отработано
 const CLASS_ITEM_STATISTIC  = 'span.js-';
 
@@ -14,7 +14,10 @@ export const CLASS_ITEM_MISMATCH   = '.js-mismatch';
 export const CLASS_ITEM_OTHER      = '.js-other';
 export const CLASS_ITEM_NOCOMPARE  = '.js-nocompare';
 
-
+/**
+ * Класс статистики. Может работать с несколькими родителями(блоками). Изменения идут во всех сразу
+ * @type {type}
+ */
 export class Statistic extends DomWithData{
 
     static getFromChild($child_object, data) {
@@ -23,6 +26,10 @@ export class Statistic extends DomWithData{
     
     static getFirstFromParent($dom){
         return super.getFirstFromParent(CLASS_STATISTIC, $dom);
+    };
+    
+    static getFromParents($doms){
+        return super.getFromParent(CLASS_STATISTIC, $doms);
     };
     
     /**
@@ -35,15 +42,15 @@ export class Statistic extends DomWithData{
         // Увеличивам количество в целевом квадратике
         let $class = CLASS_ITEM_STATISTIC+status_compare.toLowerCase();
         let $block = this.dom.find($class);
-        $block.text(Number($block.text())+1);
+        $block.text(Number($block.first().text())+1);
         
         // Уменьшаем количество в белом квадратике
         $block = this.dom.find(CLASS_ITEM_NOCOMPARE);
-        $block.text(Number($block.text())-1);
+        $block.text(Number($block.first().text())-1);
         
         // Меняем запись общее
         $block = this.dom.find(CLASS_PROCESSED);
-        let val = $block.text().split('/');
+        let val = $block.first().text().split('/');
         if (val.length !== 2) return;
         let v1 = Number(val[0])+1;
         $block.text(v1+'/'+val[1]);
@@ -59,15 +66,15 @@ export class Statistic extends DomWithData{
         // Уменьшаем количество в целевом квадратике
         let $class = CLASS_ITEM_STATISTIC+status_compare.toLowerCase();
         let $block = this.dom.find($class);
-        $block.text(Number($block.text())-1);
+        $block.text(Number($block.first().text())-1);
         
         // Увеличиваем количество в белом квадратике
         $block = this.dom.find(CLASS_ITEM_NOCOMPARE);
-        $block.text(Number($block.text())+1);
+        $block.text(Number($block.first().text())+1);
         
         // Меняем запись общее
         $block = this.dom.find(CLASS_PROCESSED);
-        let val = $block.text().split('/');
+        let val = $block.first().text().split('/');
         if (val.length !== 2) return;
         let v1 = Number(val[0])-1;
         $block.text(v1+'/'+val[1]);
@@ -84,12 +91,12 @@ export class Statistic extends DomWithData{
         // Уменьшаем количество в прошлом квадратике
         let $class = CLASS_ITEM_STATISTIC+status_last.toLowerCase();
         let $block = this.dom.find($class);
-        $block.text(Number($block.text())-1);
+        $block.text(Number($block.first().text())-1);
         
         // Увеличиваем количество в новом квадратике
         $class = CLASS_ITEM_STATISTIC+status_new.toLowerCase();
         $block = this.dom.find($class);
-        $block.text(Number($block.text())+1); 
+        $block.text(Number($block.first().text())+1); 
     };
     
     /**
@@ -106,7 +113,7 @@ export class Statistic extends DomWithData{
         this.dom.find(CLASS_PROCESSED).text(this.data.processed);
     };
     
-    getValue(class_item){
-        return +this.dom.find(class_item).text();
-    }
+    //getValue(class_item){
+    //    return +this.dom.find(class_item).text();
+    //}
 };

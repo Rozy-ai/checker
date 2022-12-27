@@ -178,11 +178,15 @@ class Product extends \yii\db\ActiveRecord {
     }
 
     /**
+     * Количество сравнений с данным товаром
      * 
-     * @return integer
+     * @param string $status
+     * @return int
      */
-    public function getCountComparisons() {
-        return Comparison::find()->where(['product_id' => $this->id, 'source_id' => $this->source->id])->count();
+    public function getCountComparisons($status = '') {
+        return $status?
+            Comparison::find()->where(['product_id' => $this->id, 'source_id' => $this->source->id, 'status' => $status])->count():
+            Comparison::find()->where(['product_id' => $this->id, 'source_id' => $this->source->id])->count();
     }
 
     /**
@@ -450,6 +454,17 @@ class Product extends \yii\db\ActiveRecord {
             $transaction->rollBack();
             throw new \Exception($ex->message);
         }
+    }
+    
+    /**
+     * Удалить из правой таблицы только запись с id = $id_item
+     *      Не путать со столбцом таблицы item_id!!! Это какая-то шляпа !!!!!!
+     * @param type $id_source
+     * @param type $id_item
+     */
+    public static function deleteItemBy($id_source, $id_item){
+        $source = Source::getById($id_source);
+        \Yii::$app->db->createCommand()->delete($source->table_2, ['id' => $id_item])->execute();
     }
 
     // ========================================================================

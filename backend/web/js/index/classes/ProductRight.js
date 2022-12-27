@@ -8,6 +8,8 @@ export const CLASS_PRODUCT_RIGHT               = '.slider__slider-item';
 export const CLASS_BUTTON_RED                  = '.slider__red_button';
 export const CLASS_BUTTON_YELLOY               = '.slider__yellow_button';
 
+export const STATUS_PRODUCT_RIGHT_DELETED      = 'status_product_right_deleted';
+
 export class ProductRight extends DomWithData{   
     static getFromChild($child_object, data) {
         return super.getFromChild(CLASS_PRODUCT_RIGHT, $child_object, data);
@@ -21,44 +23,45 @@ export class ProductRight extends DomWithData{
         return new this(el);
     }
     
-    /**
-     * Меняем классы и показываем или скрываем товары в зависимости от класса
-     * 
-     * @param {string} status
-     * @param {boolean} is_mode_hide
-     * @returns {undefined}
-     */
-    changeVisual(status, is_mode_hide = false){
+    setStatusVisual(status){
         status = status.toLowerCase();
-        // Меняем классы
+        
         this.dom.find('.color-marker')
                 .removeClass('nocompare')
                 .removeClass('pre_match')
                 .removeClass('other')
                 .removeClass('match')
                 .removeClass('mismatch')
+                .removeClass('deleted')
                 .addClass(status);
-
+        
+        this.dom.find(CLASS_BUTTON_YELLOY).removeClass('-hover');
+        this.dom.find(CLASS_BUTTON_RED).removeClass('-hover');
+        this.dom.find('.slider-item__border').removeClass(STATUS_PRODUCT_RIGHT_DELETED);
+        
         switch (status){
             case 'mismatch':
-                this.dom.find(CLASS_BUTTON_YELLOY).removeClass('-hover');
                 this.dom.find(CLASS_BUTTON_RED).addClass('-hover');
                 break;
             case 'pre_match':
-                this.dom.find(CLASS_BUTTON_RED).removeClass('-hover');
                 this.dom.find(CLASS_BUTTON_YELLOY).addClass('-hover');
                 break;
-            default:
-                this.dom.find(CLASS_BUTTON_YELLOY).removeClass('-hover');
-                this.dom.find(CLASS_BUTTON_RED).removeClass('-hover');
+            case 'deleted':
+                this.dom.find('.slider-item__border').addClass(STATUS_PRODUCT_RIGHT_DELETED);
+                break;
         }
-        
+    }
+    
+    /**
+     * Устанавливает режим просмотра товара
+     * 
+     * @param {type} is_mode_hide
+     * @param {type} is_mode_minimize
+     * @returns {undefined}
+     */
+    setModeVisual(is_mode_hide){
         if (is_mode_hide){
-            if (status){
-                this.dom.hide();
-            } else {
-                this.dom.show();
-            }
+            this.dom.hide();
         } else {
             this.dom.show();
         }
@@ -75,6 +78,7 @@ export class ProductRight extends DomWithData{
         if (colorMarker.hasClass('other'))     return 'other';
         if (colorMarker.hasClass('match'))     return 'match';
         if (colorMarker.hasClass('mismatch'))  return 'mismatch';
+        if (colorMarker.hasClass('deleted'))   return 'deleted';
         return '';
     }
 };

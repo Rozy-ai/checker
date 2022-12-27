@@ -426,9 +426,7 @@ class ProductController extends Controller {
         }
         
         $data = $params['listDataForServer'];
-        if (empty($data['datas_products_left']) && 
-            empty($data['datas_products_right']) && 
-            empty($data['datas_products_left_delete']))
+        if (empty($data['datas_products_right']))
         {
             return [
                 'status' => 'info',
@@ -437,7 +435,7 @@ class ProductController extends Controller {
         }
 
         try{
-            $this->indexPresenter->changeStatusProducts($data['datas_products_left'], $data['datas_products_right'], $data['datas_products_left_delete']);
+            $this->indexPresenter->changeStatusProducts($data['datas_products_right']);
         } catch (\Exception $ex) {
             Yii::error($ex->getLine().':'.$ex->getMessage());
             return ['status' => 'error', 'message' => 'Сохранение пакета выбраных статусов совершилось с ошибкой'];
