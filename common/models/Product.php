@@ -367,7 +367,6 @@ class Product extends \yii\db\ActiveRecord {
         $source_table2_name = $source->table_2;
 
         $q = new FiltersQuery($source->class_1);
-
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where(['and',
             //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),

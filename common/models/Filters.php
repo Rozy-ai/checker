@@ -72,6 +72,7 @@ class Filters {
         'f_number_page_current' => 1,
         //'f_comparison_status' => 'PRE_MATCH',
         'f_no_compare' => 'NOCOMPARE',
+        'f_profile' => 'General'
     ];
     
     /**

@@ -43,13 +43,13 @@ use yii\helpers\Url;
 $this->title = $source->name . " | " . Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = $source->name;
-if ($is_admin) {
+//if ($is_admin) {
     $this->params['breadcrumbs'][] = [
         'label' => Html::dropDownList('f_profile', $f_profile, $list_profiles, ['id' => 'id_f_profile', 'class' => 'form-control form-control-sm w-auto']),
         'template' => '<li>{link}</li>',
         'encode' => false
     ];
-}
+//}
 
 $this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
     . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all . ' (' . $count_products_right .')</div> по: '

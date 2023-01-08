@@ -15,6 +15,8 @@
 
 namespace backend\presenters;
 
+use common\models\Filters;
+use common\models\Product;
 use common\models\Source;
 use common\models\User;
 use common\models\Comparison;
@@ -227,7 +229,7 @@ trait TraitListFilters {
         if (!$this->source_table_class) {
             throw new \yii\base\InvalidParamException();
         }
-        //Получить уникальные значения столбца profile
+       /* //Получить уникальные значения столбца profile
         $q0 = $this->source_table_class::find()->distinct(true)->select(['profile'])->asArray();
         $res_1 = $q0->column();
 
@@ -268,8 +270,23 @@ trait TraitListFilters {
         }
 
         // !!!! что считать если один товар содержит 3 значения то товар же один ... дак выводить цифру 1 или 3
-        $a['{{all}}'] = 'Все (' . $q2_load_cnt . ')';
+        $a['{{all}}'] = 'Все (' . $q2_load_cnt . ')';*/
+        $user = \Yii::$app->user->identity;
+        $is_admin = $user && $user->isAdmin();
+        $filters = new Filters();
+        $filters->loadFromSession();
 
-        return array_merge($a, $list_out);
+        $filters->f_profile = 'General';
+        $count_general = Product::getCountProducts($this->source, $filters, $is_admin);
+        $profiles['General'] = "General ($count_general)";
+
+        $filters->f_profile = 'Free';
+        $count_free = Product::getCountProducts($this->source, $filters, $is_admin);
+        $profiles['Free'] = "Free ($count_free)";
+
+        $filters->f_profile = $user->username;
+        $count_login = Product::getCountProducts($this->source, $filters, $is_admin);
+        $profiles[$user->username] = "{$user->username} ($count_login)";
+        return $profiles;
     }
 }

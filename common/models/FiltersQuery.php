@@ -299,26 +299,23 @@ class FiltersQuery extends \yii\db\ActiveQuery
         if ($is_admin) {
             if($f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все')
                 return ['like', $source_table_name . '.profile', $f_profile];
+            return [];
         }
 
+        $add_profiles = [];
+        $add_profiles[] = $f_profile;
         // general-доступ pro-доступ
-        if ($f_profile == 'General' or $f_profile == 'Pro') {
-            return ['or',
-                ['like', $source_table_name . '.profile', 'General%', false],
-                ['like', $source_table_name . '.profile', 'General'],
-                ['like', $source_table_name . '.profile', 'Pro%', false],
-                ['like', $source_table_name . '.profile', 'Pro']
-            ];
-        }
 
-        // free-доступ
-        if ($f_profile == 'Free'){
-            return ['or',
-                ['like', $source_table_name . '.profile', 'Free%', false],
-                ['like', $source_table_name . '.profile', 'Free']
-            ];
+        if($f_profile == 'Pro'){
+            $add_profiles[] = 'General';
         }
-        return [];
+        // free-доступ
+        $sql = ["or"];
+        foreach ($add_profiles as $add_profile){
+            $sql[] = ['like', $source_table_name . '.profile', $add_profile . '%', false];
+            $sql[] = ['like', $source_table_name . '.profile', $add_profile];
+        }
+        return $sql;
     }
 
     /**
@@ -338,12 +335,14 @@ class FiltersQuery extends \yii\db\ActiveQuery
      */
     public function getSqlProfileFront(string $sourceTableName, ?string $fProfile, ?string $profileType): array
     {
+        $user = \Yii::$app->user->identity;
         if ($fProfile) {
             if ($profileType !== null) {
                 return ['or',
-                    ['like', $sourceTableName . '.profile', 'Free'],
+                //    ['like', $sourceTableName . '.profile', 'Free'],
                     ['like', $sourceTableName . '.profile', $fProfile],
-                    ['like', $sourceTableName . '.profile', 'Prepod'],
+                    ['like', $sourceTableName . '.profile', $fProfile . '%', false],
+                  //  ['like', $sourceTableName . '.profile', 'Prepod'],
                 ];
             } else {
 
