@@ -186,7 +186,9 @@ class ProductController extends Controller {
         $list = Product::getListProducts($source, $filters, $is_admin);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
         $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
-
+        if($filters->f_profile == 'Free') {
+            $filters->f_detail_view = 1; // Подробно
+        }
         return $this->render('index', [
             'f_source' => $src ? $src : $filters->f_source,
             'f_profile' => $filters->f_profile,

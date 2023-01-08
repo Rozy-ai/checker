@@ -295,22 +295,41 @@ class FiltersQuery extends \yii\db\ActiveQuery
      */
     public function getSqlProfile(bool $is_admin, string $source_table_name, $f_profile): array
     {
-        if ($is_admin && $f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все') {
-            return ['like', $source_table_name . '.profile', $f_profile];
-        } else {
-            return [];
+        // admin-доступ
+        if ($is_admin) {
+            if($f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все')
+                return ['like', $source_table_name . '.profile', $f_profile];
         }
+
+        // general-доступ pro-доступ
+        if ($f_profile == 'General' or $f_profile == 'Pro') {
+            return ['or',
+                ['like', $source_table_name . '.profile', 'General%', false],
+                ['like', $source_table_name . '.profile', 'General'],
+                ['like', $source_table_name . '.profile', 'Pro%', false],
+                ['like', $source_table_name . '.profile', 'Pro']
+            ];
+        }
+
+        // free-доступ
+        if ($f_profile == 'Free'){
+            return ['or',
+                ['like', $source_table_name . '.profile', 'Free%', false],
+                ['like', $source_table_name . '.profile', 'Free']
+            ];
+        }
+        return [];
     }
 
     /**
      * надо поле у источника добавить, где прописать максимальное кол-во
      * открытых просмотров для бесплатных товаров
-     * 
+     *
      * individual:
      *    юзер test - подходят с профилями
      *
      *    любой зареганый видит продукт с профилем начинающимся на General
-     * 
+     *
      *    free - доступен даже без авторизации, но ограниченное число
      * @param string $sourceTableName
      * @param string|null $fProfile
@@ -334,9 +353,9 @@ class FiltersQuery extends \yii\db\ActiveQuery
         return ['like', $sourceTableName . '.profile', 'Free'];
     }
 
-    public function getSqlTille(string $source_table_name, $f_title): array 
+    public function getSqlTille(string $source_table_name, $f_title): array
     {
-        return ($f_title)?
-            ['like', 'info', $f_title]:[];
+        return ($f_title) ?
+            ['like', 'info', $f_title] : [];
     }
 }

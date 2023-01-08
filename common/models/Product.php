@@ -384,10 +384,13 @@ class Product extends \yii\db\ActiveRecord {
                 //$q->getSqlNoInComparisons(),
                 //$q->getSqlSettingsMessage(),
         ]);
-
         // Получим все необходимые join
         $q->addJoins($source_table_name, $source_table2_name);
-
+        if ($filters->f_profile == 'Free') {
+            if ($source->max_free_show_count < $q->count()) {
+                return $source->max_free_show_count;
+            }
+        }
         return $q->count();
     }
 
