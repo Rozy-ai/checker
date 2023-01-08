@@ -286,7 +286,8 @@ trait TraitListFilters {
 
         $filters->f_profile = $user->username;
         $count_login = Product::getCountProducts($this->source, $filters, $is_admin);
-        $profiles[$user->username] = "{$user->username} ($count_login)";
+        if($count_login > 0)
+            $profiles[$user->username] = "{$user->username} ($count_login)";
         return $profiles;
     }
 }
