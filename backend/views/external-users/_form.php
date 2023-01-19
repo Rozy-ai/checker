@@ -1,6 +1,8 @@
 <?php
 
 use common\models\ExternalUser;
+use common\models\ExternalUserProfile;
+use yii\helpers\ArrayHelper;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
@@ -13,6 +15,11 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'email')->input('email', ['maxlength' => true]) ?>
     <?= $form->field($model, 'status')->dropDownList(ExternalUser::STATUSES, ['prompt' => '']) ?>
     <?= $form->field($model, 'password')->passwordInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'ex_profile_id')->dropDownList(
+            ArrayHelper::map(
+                    array_merge([null=>'Не выбран'], ExternalUserProfile::find()->all()), 'id', 'name'
+            )
+    ) ?>
     <div class="form-group">
         <button type="submit" class="btn btn-success">Сохранить</button>
     </div>
