@@ -116,7 +116,11 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
                     <div class="d-flex justify-content-between h-100">
                         <div class="d-flex flex-column justify-content-between w-100 products-list__info">
                             <div>
-                                <div class="-title"><a class="a-black main-item-title" target="_blank" href="<?= $urlKey_right ?>"><?= $variables_right['description_right'] ?></a></div>
+                                <div class="-title">
+                                    <a class="a-black main-item-title d-block" target="_blank" href="<?= $urlKey_right ?>">
+                                        <?= $variables_right['description_right'] ?>
+                                    </a>
+                                </div>
                                 <div> <?= $variables_right['footer_right'] ?> </div>
                             </div>
                             <?php if ((count($variables_right['images_right']) > 1)): ?>
