@@ -26,12 +26,13 @@ CLASS_PRODUCT_LEFT,
 } from './classes/ProductLeft.js'
 
 import {
-CLASS_STATISTIC,
+        CLASS_STATISTIC,
         CLASS_ITEM_PRE_MATCH,
         CLASS_ITEM_MATCH,
         CLASS_ITEM_MISMATCH,
         CLASS_ITEM_OTHER,
         CLASS_ITEM_NOCOMPARE,
+        CLASS_ITEM_STAT,
         Statistic
 } from './classes/Statistic.js'
 
@@ -63,12 +64,12 @@ function main() {
      */
     document.addEventListener(EVENT_CHANGE_DATA_RIGHT, function (event) {
         let productLeft = ProductLeft.getBy(event.detail.data.id_source, event.detail.data.id_product);
-        let blockProduct = ProductBlock.getFromChild(productLeft.dom); 
+        let blockProduct = ProductBlock.getFromChild(productLeft.dom);
         let productRight = ProductRight.getBy(event.detail.data.id_source, event.detail.data.id_item);
-        
+
         let parents_for_statistic = $(`[data-pid=${blockProduct.data.pid}]`);
         let statistic = Statistic.getFromParents(parents_for_statistic);
-        
+
         let is_mode_hide = Filters.getModeHide();
         let is_mode_minimize = Filters.getModeMinimize();
 
@@ -77,7 +78,7 @@ function main() {
             case ACTION_DATA_CREATE:
                 productRight.setStatusVisual(event.detail.data.status);
                 productRight.setModeVisual(is_mode_hide);
-                
+
                 if (blockProduct.isMismatchAll()) {
                     blockProduct.setStatusVisual(STATUS_BLOCK_MISMATCH_ALL);
                     blockProduct.setModeVisual(false, true);    //Видимый, свернутый
@@ -88,10 +89,10 @@ function main() {
                     blockProduct.setStatusVisual(STATUS_BLOCK_SELECT_ALL);
                     blockProduct.setModeVisual(false, true);    //Видимый, свернутый
                 }
-                
+
                 // Добавим статус в статискику
                 statistic.addUnit(event.detail.data.status);
-                
+
                 //Если правые все правые продукты имеют статусы то нужна отправка на сервер с перезагрузкой
                 checkAndSendAllStatuses(Filters.getModeHide());
 
@@ -99,17 +100,17 @@ function main() {
             case ACTION_DATA_DELETE:
                 productRight.setStatusVisual('');  // Убрать выделение
                 productRight.setModeVisual(false); // Отобразить в любом случае
-                
+
                 //Уберем из статистики
                 statistic.deleteUnit(event.detail.data.status);
-                
+
                 blockProduct.setStatusVisual(STATUS_BLOCK_DEFAULT);
                 blockProduct.setModeVisual(false, false);   // Видимый, развернутый
                 break;
-                
+
             case ACTION_DATA_CHANGE:
                 productRight.setStatusVisual(event.detail.data.status);
-                
+
                 if (blockProduct.isMismatchAll()) {
                     blockProduct.setStatusVisual(STATUS_BLOCK_MISMATCH_ALL);
                     blockProduct.setModeVisual(false, true); //Видимый, свернутый
@@ -123,10 +124,10 @@ function main() {
                     blockProduct.setStatusVisual(STATUS_BLOCK_DEFAULT);
                     blockProduct.setModeVisual(false, false); //Видимый, развернутый
                 }
-                
+
                 //Изменим статистику
                 statistic.changeUnit(event.detail.status_last, event.detail.data.status);
-                
+
                 break;
         }
         ;
@@ -170,7 +171,7 @@ function main() {
         e.stopPropagation();
         let pid = $(this).data('pid');
         let blockProduct = ProductBlock.getByPid(pid);
-        
+
         blockProduct.setModeVisual(false, false);  //Видимый, развернутый
         blockProduct.dom.find(CLASS_PRODUCT_RIGHT).show();
     });
@@ -201,10 +202,10 @@ function main() {
                     return;
                 }
             }
-            
+
             let datas_items_right = Object.assign([], blockProduct.getDatasRight());
             datas_items_right.forEach((data) => data.status = 'MISMATCH');
-            
+
             listDataForServer.addDatasRightList(datas_items_right);
         } else {
             $this.hide();
@@ -314,7 +315,7 @@ function main() {
      */
     $body.on('click', '.js-reset-compare', function (e) {
         e.stopPropagation();
-        
+
         let blockProduct = ProductBlock.getFromChild($(this));
         listDataForServer.deleteIfExistsRightBy(blockProduct.data.source_id, blockProduct.data.pid);
     });
@@ -342,7 +343,7 @@ function main() {
             listDataForServer.addDataRight(data_new);
         });
     });
-    
+
     /**
      * Кнопка удалить все. Нужно удалить только товары со статусом mismatch
      */
@@ -376,6 +377,12 @@ function main() {
     addActionChangeFilter('id_f_count_products_on_page', 'f_count_products_on_page');
     addActionChangeFilter('id_f_detail_view', 'f_detail_view');
     addActionChangeFilter('id_f_profile', 'f_profile');
+
+    $(CLASS_ITEM_STAT).on('click', (e) => {
+        const $this = $(e.target).closest(CLASS_ITEM_STAT);
+        $this.siblings(`${CLASS_ITEM_STAT}.active`).removeClass('active');
+        $this.addClass('active');
+    });
 
     $(CLASS_ITEM_PRE_MATCH).on('click', function (e) {
         e.stopPropagation();
@@ -423,7 +430,7 @@ function main() {
     /**
      * На этот момент в массивах данных быть не должно. Данные будут если предыдущие отправки завершились не удачно
      * Отправку данных выполнить тут очень не надежно и не всегда работает на разных браузерах.
-     * 
+     *
      * Если в массиве остальсь данные то выводим предупреждение
      * @returns {undefined}
      */
@@ -440,7 +447,7 @@ function main() {
     /**
      * Отправка на сервер нового значения фильтра
      * При успешном ответе происходит обновление списка и инициализация слайдера на котором отображены правые товары
-     * 
+     *
      * @param {string} id_filter    id фильтра
      * @param {string} name_filter  имя фильтра
      * @returns {undefined}
@@ -500,12 +507,12 @@ function main() {
 
     /**
      * Для всех товаров сменить режим отображения
-     * 
+     *
      * @param {type} is_mode_hide
      * @returns {undefined}
      */
     function changeModeHide(is_mode_hide) {
-        
+
         if (is_mode_hide === false) {
             // Отображаем все
             $(CLASS_BLOCK_PRODUCT).show();
@@ -516,7 +523,7 @@ function main() {
             for (let data of listDataForServer.datas_products_right) {
                 let product_right = ProductRight.getBy(data.id_source, data.id_item);
                 product_right.dom.hide();
-                
+
                 let blockProduct = ProductBlock.getByPid(product_right.data.id_product);
                 if (blockProduct.isMismatchAll()) {
                     blockProduct.setModeVisual(false, true);    // Видимый, свернутый
@@ -532,7 +539,7 @@ function main() {
     /**
      * Асинхроммо отсылаем данные пакетного сравнения товаров на сервер. Вызывается перед переходом на другую страницу
      * В случае ошибки или предупреджение со стороны сервера будет выведено предупреждение.
-     * 
+     *
      * @returns {boolean}
      *    true - подтверждено дадьшейшее действие
      *    false - отмена дальнейшкнр лействия
@@ -564,14 +571,14 @@ function main() {
     /**
      * Проверить, все ли правые товары выбраны. Включет в себя выбор изначальный + выборы в массивах.
      * Если все правые товары выбраны - отлылаем их на сервер с предупреждением что товары закончились
-     * 
+     *
      * @param {type} is_mode_hide
      * @returns {undefined}
      */
     function checkAndSendAllStatuses(is_mode_hide) {
         // Есть ли на странице color_marker = 'nocompare'. Есль есть то значит есть и продукт с неотмеченным статусом
         if ($('.color-marker.nocompare').length) return;
-            
+
         if (confirm('Товары без статусов закончились. Даные сохранятся и страница будет перезагружена')) {
             // Если все условия выполнены то отправляем данные товаров на сервер
             sendListDatasAsync().then(function (is_confirm) {
