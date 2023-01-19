@@ -20,6 +20,9 @@ use yii\behaviors\TimestampBehavior;
  * @property null|string $password
  * @property-read Billing[] $billings
  * @property-read string $name
+ * @property int|null $ex_profile_id
+ *
+ * @property ExternalUserProfile $exProfile
  */
 class ExternalUser extends \yii\db\ActiveRecord
 {
@@ -67,6 +70,7 @@ class ExternalUser extends \yii\db\ActiveRecord
             'password' => 'Пароль',
             'created_at' => 'Создан',
             'updated_at' => 'Обновлен',
+            'ex_profile_id' => 'Профиль',
         ];
     }
 
@@ -173,5 +177,10 @@ class ExternalUser extends \yii\db\ActiveRecord
             $this->generateEmailConfirmToken();
         }
         return true;
+    }
+
+    public function getExProfile()
+    {
+        return $this->hasOne(ExternalUserProfile::class, ['id' => 'ex_profile_id']);
     }
 }
