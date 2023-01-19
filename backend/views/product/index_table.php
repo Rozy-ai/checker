@@ -9,7 +9,7 @@
  * @var string $f_detail_view
  * @var string $f_hide_mode
  * @var string $f_profile
- * 
+ *
  */
 
 use yii\helpers\ArrayHelper;
@@ -44,19 +44,19 @@ use common\models\Comparison;
     $images_left = preg_split("/[; ]/", ArrayHelper::getValue($item->baseInfo,"Image"));
 
     $source_id = $item->source->id;
-    
+
     $list_comparison_statuses = Comparison::getListStatusForStatictic($item->id);
-    
+
     $list_comparison_statuses[Comparison::STATUS_NOCOMPARE] = count($item->addInfo)
         -$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]
         -$list_comparison_statuses[Comparison::STATUS_MATCH]
         -$list_comparison_statuses[Comparison::STATUS_MISMATCH]
         -$list_comparison_statuses[Comparison::STATUS_OTHER];
-    
+
     $counted = $item->aggregated ? $item->aggregated->counted : 0;
     $processed = "{$counted}/" . count($item->getAddInfo());
-    
-    
+
+
     $bsr = number_format($item->baseInfo["Sales Rank: Current"], 0, '', ' ');
     $dropsValue = $item->baseInfo["Sales Rank: Drops last 30 days"];
     $dropsTitle = 'Drops(30)';
@@ -67,17 +67,17 @@ use common\models\Comparison;
     $price = ($item->baseInfo[$default_price_name]) ?: '-';
 
     $fba = $item->baseInfo["Count of retrieved live offers: New, FBA"] . ' / ' . $item->baseInfo["Count of retrieved live offers: New, FBM"];
-    
+
     $td2_asin = (!$is_admin && strlen($item->asin) > 6) ? substr($item->asin, 0, 6) . '..' : $item->asin;
     $td2_toptext = Html::encode($item->baseInfo['Categories: Root']);
     $td2_brand = $item->baseInfo['Brand'] ?: $item->baseInfo['Manufacturer'];
-            
+
     $td3_title = $item->baseInfo['Title'];
-    
-    
+
+
     $is_minimize = ($f_detail_view == 2 || $f_detail_view == 3);
     ?>
-    
+
 
     <!-- ITEM полное отображение-->
     <tr
@@ -191,7 +191,7 @@ use common\models\Comparison;
 
         </td>
         <td class="products-list__td3">
-            <div class="products-list__slider-wrapper <?=($f_detail_view == 1 || $f_detail_view == 3)?'-v-2':''?> js-slider-root"
+            <div class="products-list__slider-wrapper <?=($f_detail_view == 1 || $f_detail_view == 3)?'-v-2':''?> js-slider-root">
                 <?php
                 echo TopSlider::widget([
                     'f_detail_view' => $f_detail_view,
@@ -213,7 +213,7 @@ use common\models\Comparison;
             <div class="slider_close -in-list"><div class="-line -line-1"></div><div class="-line -line-2"></div></div>
 
             <!--Дублирование значений сделано специально. data атрибуты используются для восстановления данных после визуальных манипуляций со значениями-->
-            <div 
+            <div
                 class="product-list-item__data -first-margin block_statistic"
                 data-<?=Comparison::STATUS_PRE_MATCH?>="<?=$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]?>"
                 data-<?=Comparison::STATUS_MATCH?>="<?=$list_comparison_statuses[Comparison::STATUS_MATCH]?>"
@@ -242,7 +242,7 @@ use common\models\Comparison;
             </div>
             <div class="product-list-item__data"><span>Profile:</span><br>
                 <?= $item->profile ?>
-            </div>  
+            </div>
             <?php endif;?>
 
             <div class="product-list-item__date " style="margin-bottom: 10px">
@@ -259,7 +259,7 @@ use common\models\Comparison;
             <div class="tbl" style="width: 100%;">
                 <div class="td">
 
-                    <div class="product-list-item__del js-del-item"  
+                    <div class="product-list-item__del js-del-item"
                         data-url = "/product/delete-product"
                         data-id_product="<?= $item->id ?>"
                         data-id_source="<?= $source_id ?>"
@@ -305,9 +305,9 @@ use common\models\Comparison;
         </td>
     </tr>
     <!-- / ITEM -->
-    
+
     <!-- ITEM свернутое отображение-->
-    
+
     <tr
         class="[ PRODUCT-LIST-ITEM ] product-list__product-list-item block_minimize <?=$is_minimize?'':'-hidden'?>"
         data-pid="<?= $item->id ?>"
@@ -329,7 +329,7 @@ use common\models\Comparison;
         <td class="products-list__td3_minimize">
             <div class="block_minimize_wrapper">
                 <p class="minimize_row"><span class=minimize_row_asin><?=$td2_asin?></span>  <span><?=$td2_toptext?></span> <span><?=$brand?"/ $brand":($manufacturer?"/ $manufacturer":'') ?></span></p>
-                <p class="minimize_wrapper_title"><?=$td3_title?></p>               
+                <p class="minimize_wrapper_title"><?=$td3_title?></p>
             </div>
         </td>
         <td class="products-list__td4 text-nowrap">
@@ -342,9 +342,9 @@ use common\models\Comparison;
                     <span class="js-nocompare nocompare"><?=$list_comparison_statuses[Comparison::STATUS_NOCOMPARE]?></span>
                 </div>
             </div>
-        </td>        
+        </td>
     </tr>
     <!-- /ITEM свернутое отображение-->
-    
+
     <?php endforeach;?>
 </table>
