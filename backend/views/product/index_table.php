@@ -19,7 +19,7 @@ use backend\components\TopSlider;
 use common\models\Comparison;
 ?>
 
-<table class="table table-striped [ PRODUCT-LIST ] products__products-list">
+<table class="table table-striped [ PRODUCT-LIST ] products__products-list products-list">
     <?php if ($local_import_stat): ?>
     <tr>
         <td colspan="4">
@@ -109,7 +109,7 @@ use common\models\Comparison;
 
         </td>
         <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
-            <div id='id_td2_asin'><?= $td2_asin ?></div>
+            <div id='id_td2_asin' class="products-list__asin"><?= $td2_asin ?></div>
             <div class="products-list__img-wrapper"
                 data-id_source="<?=$source_id?>"
                 data-id_product="<?=$item->id?>"
@@ -224,12 +224,12 @@ use common\models\Comparison;
             >
                 <?php
                 echo $ret = Html::tag('div',
-                        "<span class='js-pre_match pre_match'>{$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]}</span>
-                        <span class='js-match match'>{$list_comparison_statuses[Comparison::STATUS_MATCH]}</span>
-                        <span class='js-mismatch mismatch'>{$list_comparison_statuses[Comparison::STATUS_MISMATCH]}</span>
-                        <span class='js-other other'>{$list_comparison_statuses[Comparison::STATUS_OTHER]}</span>
-                        <span class='js-nocompare nocompare'>" . $list_comparison_statuses[Comparison::STATUS_NOCOMPARE] . "</span>",
-                        ['class' => 'product-list-item__compare-statistics']
+                        "<span class='js-product-stat js-nocompare nocompare'>{$list_comparison_statuses[Comparison::STATUS_NOCOMPARE]}</span>" .
+                        "<span class='js-product-stat js-pre_match pre_match'>{$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]}</span>" .
+                        "<span class='js-product-stat js-match match'>{$list_comparison_statuses[Comparison::STATUS_MATCH]}</span>" .
+                        "<span class='js-product-stat js-other other'>{$list_comparison_statuses[Comparison::STATUS_OTHER]}</span>" .
+                        "<span class='js-product-stat js-mismatch mismatch'>{$list_comparison_statuses[Comparison::STATUS_MISMATCH]}</span>",
+                        ['class' => 'product-list-item__compare-statistics d-flex justify-content-between']
                 );
                 ?>
 
