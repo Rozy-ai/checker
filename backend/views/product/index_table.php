@@ -335,11 +335,11 @@ use common\models\Comparison;
         <td class="products-list__td4 text-nowrap">
             <div class="product-list-item__data -first-margin block_statistic">
                 <div class="product-list-item__compare-statistics">
-                    <span class="js-pre_match pre_match"><?=$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]?></span>
-                    <span class="js-match match"><?=$list_comparison_statuses[Comparison::STATUS_MATCH]?></span>
-                    <span class="js-mismatch mismatch"><?=$list_comparison_statuses[Comparison::STATUS_MISMATCH]?></span>
-                    <span class="js-other other"><?=$list_comparison_statuses[Comparison::STATUS_OTHER]?></span>
-                    <span class="js-nocompare nocompare"><?=$list_comparison_statuses[Comparison::STATUS_NOCOMPARE]?></span>
+                    <span class="js-product-stat js-pre_match pre_match"><?=$list_comparison_statuses[Comparison::STATUS_PRE_MATCH]?></span>
+                    <span class="js-product-stat js-match match"><?=$list_comparison_statuses[Comparison::STATUS_MATCH]?></span>
+                    <span class="js-product-stat js-mismatch mismatch"><?=$list_comparison_statuses[Comparison::STATUS_MISMATCH]?></span>
+                    <span class="js-product-stat js-other other"><?=$list_comparison_statuses[Comparison::STATUS_OTHER]?></span>
+                    <span class="js-product-stat js-nocompare nocompare"><?=$list_comparison_statuses[Comparison::STATUS_NOCOMPARE]?></span>
                 </div>
             </div>
         </td>
