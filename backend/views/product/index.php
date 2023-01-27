@@ -51,11 +51,12 @@ $this->params['breadcrumbs'][] = $source->name;
     ];
 //}
 
+$list_count_products_on_page['ALL'] = 'ВСЕ';
 $this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
-    . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all . ' (' . $count_products_right .')</div> по: '
-    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, array_merge($list_count_products_on_page, ['ALL' => 'ВСЕ']), ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
-
+    . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right .') из ' . $count_products_all . ' </div> по: '
+    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
 $local_import_stat = null;
+
 
 \backend\assets\IconsAsset::register($this);
 \backend\assets\ProductIndexAsset::register($this);
@@ -367,8 +368,9 @@ $local_import_stat = null;
         <nav aria-label="Page navigation example ">
             <ul id="id_paginator" class="pagination justify-content-center">
                 <?php
-                echo $this->context->indexPresenter->getHTMLPaginator($f_number_page_current, $count_pages);    
+                echo $this->context->indexPresenter->getHTMLPaginator($f_number_page_current, $count_pages);
                 ?>
+
             </ul>
         </nav>
     </div>

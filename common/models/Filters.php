@@ -22,8 +22,14 @@ namespace common\models;
  */
 class Filters {
     /** @var string f_items__profile */
-    public $f_profile;    
-    
+    public $f_profile;
+
+    /** @var array[integer] list_count_products */
+    public $list_count_products;
+
+    /** @var integer f_count_products_on_page_index */
+    public $f_count_products_on_page_index;
+
     /** @var string f_items__show_n_on_page Количество товаров на странице */
     public $f_count_products_on_page;
 

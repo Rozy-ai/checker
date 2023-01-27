@@ -299,7 +299,7 @@ class ExportsController extends Controller{
       $where_2 = [ '`comparisons`.`status`' => $comparison ];
     }
 
-    $where = ['and',  $where_0, $where_2, $where_3];
+    $where = ['and',  $where_0, $where_2];
     $q ->andWhere($where);
 
     return $q;
@@ -388,9 +388,7 @@ Array (   [0] => Array (
 
     $connection = Yii::$app->getDb();
     $command = $connection->createCommand($q->createCommand()->getRawSql());
-
     $res = $command->queryAll();
-
 
 
     /*

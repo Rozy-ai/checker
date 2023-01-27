@@ -44,7 +44,7 @@ class IndexPresenter {
     }
 
     public function getListCountProductsOnPage() {
-        return [10, 20, 50, 100, 200];
+        return [10 => 10, 20 => 20, 50 => 50, 100 => 100, 200 => 200];
     }
 
     public function getNumberPageCurrent() {
@@ -484,6 +484,7 @@ class IndexPresenter {
             $i = $count_pages;
             $html.= "<li class=\"page-item $is_active\"><a class=\"page-link\" href=\"/product/index?page=$i\">$i</a></li>";
         }
+        $html.= "<li class=\"page-item\"><a class=\"page-link\" href=\"/product/index?all\">Показать все</a></li>";
         return $html;
     }
 

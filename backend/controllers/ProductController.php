@@ -183,9 +183,17 @@ class ProductController extends Controller {
         $this->layout = 'products_list';
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
+        $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
+        if (isset($params['all'])) {
+            $filters->f_count_products_on_page = 'ALL';
+        }
         $list = Product::getListProducts($source, $filters, $is_admin);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
-        $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
+        if($filters->f_count_products_on_page == 'ALL'){
+            $count_pages = 1;
+        } else {
+            $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
+        }
         if($filters->f_profile == 'Free') {
             $filters->f_detail_view = 1; // Подробно
         }
