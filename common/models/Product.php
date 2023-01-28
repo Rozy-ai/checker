@@ -226,7 +226,6 @@ class Product extends \yii\db\ActiveRecord {
         $source_table2_name = $source->table_2;
 
         $q = new FiltersQuery($source->class_1);
-
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where(['and',
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
@@ -263,6 +262,7 @@ class Product extends \yii\db\ActiveRecord {
         }
 
         // Получим все необходимые join
+
         $q->addJoins($source_table_name, $source_table2_name);
 
         // Отсечем не нужные записи
@@ -274,9 +274,7 @@ class Product extends \yii\db\ActiveRecord {
             $q->offset($offset);
         }
 
-        $list = $q->all();
-        //print_r($q->createCommand()->getRawSql());
-        //exit;
+        $list = $q->distinct()->all();
         foreach ($list as $k => $product) {
             $product->source = $source;
             $product->baseInfo = $product->info;
