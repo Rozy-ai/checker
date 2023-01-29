@@ -85,6 +85,7 @@ class Product extends \yii\db\ActiveRecord {
         return $class_source::findOne(['id' => $id]);
     }
 
+
     /**
      * Базовая информация о левом товаре
      * 
@@ -274,10 +275,11 @@ class Product extends \yii\db\ActiveRecord {
             $q->offset($offset);
         }
 
-        $list = $q->distinct()->all();
+        $list = $q->createCommand()->queryAll();
         foreach ($list as $k => $product) {
-            $product->source = $source;
-            $product->baseInfo = $product->info;
+           $list[$k] = self::getById($source->class_1, $product['id']);
+           $list[$k]->_source = $source;
+           $list[$k]->_baseInfo = $list[$k]->info;
         }
         return $list;
     }
