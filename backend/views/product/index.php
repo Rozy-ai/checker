@@ -61,6 +61,13 @@ $local_import_stat = null;
 \backend\assets\IconsAsset::register($this);
 \backend\assets\ProductIndexAsset::register($this);
 ?>
+<script>
+    window.onload = function() {
+
+        document.getElementById("show_all").click();
+
+    };
+</script>
 
 <div class="[ PRODUCTS ]">
     <div class="position-1">
@@ -359,7 +366,7 @@ $local_import_stat = null;
         <div class="col" style="text-align: right;max-width: 200px;">
             <div class="product-list-item__del -del-all js-del-all-visible-items">удалить все</div>
             <div class="product-list-item__reset-compare -compare-all js-reset-compare-all-visible-items">отменить все</div>
-            <div class="product-list-item__reset-compare -compare-all js-show_products_all">показать все</div>
+            <button id="show_all" class="product-list-item__reset-compare -compare-all js-show_products_all">показать все</button>
         </div>
     </div>
 
