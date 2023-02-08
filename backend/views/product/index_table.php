@@ -18,7 +18,8 @@ use yii\helpers\Url;
 use backend\components\TopSlider;
 use common\models\Comparison;
 ?>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/product-index.js"></script>
 <table class="table table-striped [ PRODUCT-LIST ] products__products-list products-list">
     <?php if ($local_import_stat): ?>
     <tr>
@@ -259,14 +260,14 @@ use common\models\Comparison;
             <div class="tbl" style="width: 100%;">
                 <div class="td">
 
-                    <div class="product-list-item__del js-del-item"
-                        data-url = "/product/delete-product"
+
+                    <button
+                            class="product-list-item__del js-del-item"
                         data-id_product="<?= $item->id ?>"
                         data-id_source="<?= $source_id ?>"
                     >
                         Удалить
-                    </div>
-
+                    </button>
                 </div>
                 <div class="td">
                     <div
@@ -289,15 +290,17 @@ use common\models\Comparison;
                 <?php if (($f_detail_view == 0 || $f_detail_view == 2) && $f_comparison_status === 'NOCOMPARE'):?>
                     <div
                         title="Только видимые"
-                        class="[ button-x-2 ] product-list-item__btn-red -change-2"
-                        href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
+                        id="js-reset-compare-all-visible-items"
+                        class="[ button-x-2 ] js-reset-compare-all-visible-items product-list-item__btn-red -change-2"
+                        onclick="window."
+                        href="/product/missall?id_product=<?= $item->id ?>&id_source=<?= $source_id ?>&return=1"
                     ></div>
 
                     <?php if (0): ?>
-                    <div
+                    <a
                         class="slider__left-item__btn-yellow yellow_button_v1 -change-1"
-                        href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
-                        ></div>
+                        href="/product/missall?id_product=<?= $item->id ?>&id_source=<?= $source_id ?>&return=1"
+                        ></a>
                     <?php endif; ?>
                 <?php endif;?>
             </div>
