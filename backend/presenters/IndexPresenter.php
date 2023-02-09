@@ -430,6 +430,12 @@ class IndexPresenter {
         }
     }
 
+    public function deleteProduct($id_source, $id_product){
+        $source = Source::get_source($id_source)['source_class'];
+        $product = $source::findOne(['id' => $id_product]);
+        return $product->delete();
+    }
+
     /**
      * Ренерит пагинатор на страницу
      * 

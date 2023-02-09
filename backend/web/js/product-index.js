@@ -110,12 +110,11 @@ $(document).ready(function () {
             return false;
 
         $('.product-list__product-list-item').each(function (a, b) {
-            //console.log($(b));
             let $btn_reset_in_item = $(b).find('.js-reset-compare');
             if ($btn_reset_in_item.length)
                 lib.reset_compare_item($btn_reset_in_item);
             console.log(a);
-        })
+        });
 
         console.log('reload');
         if ($('#filter-items__comparisons').val() !== 'ALL') {

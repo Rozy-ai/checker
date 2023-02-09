@@ -265,6 +265,7 @@ use common\models\Comparison;
                             class="product-list-item__del js-del-item"
                         data-id_product="<?= $item->id ?>"
                         data-id_source="<?= $source_id ?>"
+                            data-url = "/product/delete-product"
                     >
                         Удалить
                     </button>
@@ -292,7 +293,10 @@ use common\models\Comparison;
                         title="Только видимые"
                         id="js-reset-compare-all-visible-items"
                         class="[ button-x-2 ] js-reset-compare-all-visible-items product-list-item__btn-red -change-2"
-                        onclick="window."
+                        onclick="window.href = this.href"
+                        data-id_product="<?= $item->id ?>"
+                        data-id_source="<?= $source_id ?>"
+
                         href="/product/missall?id_product=<?= $item->id ?>&id_source=<?= $source_id ?>&return=1"
                     ></div>
 

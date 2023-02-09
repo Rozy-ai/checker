@@ -470,7 +470,7 @@ class ProductController extends Controller {
             $params = \Yii::$app->request->post();
         }
 
-        if (!$params['id_product'] || !$params['id_source'] || !$params['url']) {
+        if (!$params['id_product'] || !$params['id_source']) {
             //throw new InvalidArgumentException();
             return [
                 'status' => 'error',
@@ -478,7 +478,7 @@ class ProductController extends Controller {
             ];
         }
 
-        $url = $params['url'];
+        $url = $params['url'] ?? "";
         $id_product = (int) $params['id_product'];
         $id_source = (int) $params['id_source'];
         $confirm_to_action = (bool) $params['confirm'];
@@ -530,7 +530,6 @@ class ProductController extends Controller {
 
         $id_source = (int) $params['id_source'];
         $id_product = (int) $params['id_product'];
-
         try {
             $this->indexPresenter->deleteProduct($id_source, $id_product);
         } catch (\Exception $ex) {
