@@ -376,13 +376,17 @@ class ImportController extends \yii\web\Controller{
 
     self::save_stat('LOCAL_IMPORT',$stat['all'],$source_id);
 
+    $source_bo = Source::findOne(['id' => (int)$source_id]);
     if ($p_date_in_parser){
-      $source_bo = Source::findOne(['id' => (int)$source_id]);
       $source_bo->import_local__max_product_date = $p_date_in_parser;
       $source_bo->update();
+    } else {
+      $max_date = ImportController::get_max_product_date_in_parser(Source::findOne(['id' => (int)$source_id]));
+      if ($source_bo->import_local__max_product_date !== $max_date) {
+        $source_bo->import_local__max_product_date = $max_date;
+        $source_bo->update();
+      }
     }
-
-
 
     if ($stop === 1){
       echo '<pre>'.PHP_EOL;
@@ -392,6 +396,12 @@ class ImportController extends \yii\web\Controller{
       echo PHP_EOL;
       exit;
     }
+
+      return $this->render('result_statistics', [
+          'stat' => $stat,
+          'source_id' => $source_id,
+          'source' => $source,
+      ]);
   }
 
 
