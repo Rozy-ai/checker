@@ -5,6 +5,7 @@ use backend\assets\ProductIndexAsset;
 use common\models\HiddenItems;
 use common\models\ProfileTypeSetting;
 use common\models\Source;
+use common\models\Stats_import_export;
 use yii\helpers\Html;
 
 /**
@@ -74,8 +75,14 @@ ProductIndexAsset::register($this);
                     </select>
                 </div>
 
+                <?php
+                $stats = new Stats_import_export();
+                $last_import = $stats->getLastLocalImport();
+                $last_import_txt = "Количество обновленных: {$last_import['cnt']}\n".
+                    "и т.д."
+                ?>
                 <div class="form-group _col-sm-2 filter-items__last-update">
-                    last update:<br>
+                    last <?php echo Html::a('update','/import/local_import?source_id='.$f_source, ['title' => $last_import_txt]) ?>:<br>
                     <?= $last_update->created ?? 'Нет данных' ?>
                 </div>
             </div>

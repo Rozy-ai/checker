@@ -2,8 +2,10 @@
 
 use backend\components\TableView;
 use backend\components\TopSlider;
+use backend\models\Stats__import_export;
 use common\models\Comparison;
 use common\models\HiddenItems;
+use common\models\Stats_import_export;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -107,7 +109,13 @@ $local_import_stat = null;
                 <?php endif; ?>
 
                 <div class="form-group _col-sm-2 filter-items__last-update" >
-                    last update:
+                    <?php
+                    $stats = new Stats_import_export();
+                    $last_import = $stats->getLastLocalImport();
+                    $last_import_txt = "Количество обновленных: {$last_import['cnt']}\n".
+                                        "и т.д."
+                    ?>
+                    last <?php echo Html::a('update','/import/local_import?source_id='.$f_source, ['title' => $last_import_txt]) ?>:
                     <?= $last_update->created ?? 'Нет данных' ?>
                 </div>
 
