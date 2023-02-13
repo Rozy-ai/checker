@@ -44,7 +44,7 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 </div>
  
 <!-- VIEW 1 -->
-<div class='slider__view-1 <?= $option_class_slider ?> [ SLIDER ] product-view__slider'>
+<div class='slider__view-1 <?= $option_class_slider ?> [ SLIDER ] product-view__slider '>
     <?php 
         foreach ($items as $index => $item): 
     ?>
@@ -155,27 +155,24 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 
             <!-- / FORK -->
             <div
-                class="slider__yellow_button _slider__green_button -v-2 -v-3 -min <?= $comparisons[$item->id]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
-                data-url = "/product/compare"
-                data-id_source = "<?=$source_id?>"
-                data-id_product = "<?=$product->id?>"
-                data-id_item = "<?=$item->id?>"
-                data-status = "<?= Comparison::STATUS_PRE_MATCH ?>"
-                data-is_last = "<?=$is_last?>"
-            >
-            </div>
+                    class="slider__yellow_button _slider__green_button -v-2 -v-3 -min <?= $comparisons[$item->id]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
+                    data-url = "/product/compare"
+                    data-id_source = "<?=$source_id?>"
+                    data-id_product = "<?=$product->id?>"
+                    data-id_item = "<?=$item->id?>"
+                    data-status = "<?= Comparison::STATUS_PRE_MATCH ?>"
+                    data-is_last = "<?=$is_last?>"
+            ></div>
 
             <div
-                class="slider__red_button -min <?= $comparisons[$item->id]->status === 'MISMATCH' ? '-hover' : '' ?>"
-                data-url = "/product/compare"
-                data-id_source = "<?=$source_id?>"
-                data-id_product = "<?=$product->id?>"
-                data-id_item = "<?=$item->id?>"
-                data-status = "<?= Comparison::STATUS_MISMATCH ?>"
-                data-is_last = "<?=$is_last?>"
-            >
-
-            </div>
+                    class="slider__red_button -min <?= $comparisons[$item->id]->status === 'MISMATCH' ? '-hover' : '' ?>"
+                    data-url = "/product/compare"
+                    data-id_source = "<?=$source_id?>"
+                    data-id_product = "<?=$product->id?>"
+                    data-id_item = "<?=$item->id?>"
+                    data-status = "<?= Comparison::STATUS_MISMATCH ?>"
+                    data-is_last = "<?=$is_last?>"
+            ></div>
 
         </div>
 

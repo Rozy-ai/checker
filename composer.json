@@ -27,7 +27,8 @@
         "phpoffice/phpexcel": "^1.8",
         "ext-pdo": "*",
         "ext-mysqli": "*",
-        "kartik-v/yii2-widget-datepicker": "^1.4"
+        "kartik-v/yii2-widget-datepicker": "^1.4",
+        "supplyhog/yii2-clipboardjs": "@dev"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

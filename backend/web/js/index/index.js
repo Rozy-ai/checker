@@ -1,4 +1,11 @@
 'use strict';
+
+var win =  $(window);
+win.on('load', function () {
+    $('#preloader').delay(350).fadeOut('slow');
+    $('body').delay(350).css({'overflow': `visible`});
+});
+
 import {
     Ajax
 } from './classes/Ajax.js';
@@ -17,7 +24,8 @@ import {
     STATUS_BLOCK_DELETE_ALL,
     STATUS_BLOCK_MISMATCH_ALL,
     STATUS_BLOCK_SELECT_ALL,
-    ProductBlock
+    STATUS_BLOCK_PREMATCH_ALL,
+    ProductBlock,
 } from './classes/ProductBlock.js'
 
 import {
@@ -58,6 +66,9 @@ const CLASS_BLOCK_BUTTON_DELETE_ALL = '.js-del-all-visible-items';
 function main() {
     let listDataForServer = new ListDataForServer();
     let $body = $('body');
+
+    let active_filtr_status = $('#id_f_comparison_status').val();
+
 
     /**
      * Обработка события изменения статуса правого товара
@@ -111,23 +122,40 @@ function main() {
             case ACTION_DATA_CHANGE:
                 productRight.setStatusVisual(event.detail.data.status);
 
-                if (blockProduct.isMismatchAll()) {
-                    blockProduct.setStatusVisual(STATUS_BLOCK_MISMATCH_ALL);
-                    blockProduct.setModeVisual(false, true); //Видимый, свернутый
-                } else if (blockProduct.isDeletedAll()) {
-                    blockProduct.setStatusVisual(STATUS_BLOCK_DELETE_ALL);
-                    blockProduct.setModeVisual(false, true); //Видимый, свернутый
-                } else if (blockProduct.isSelectAll()) {
-                    blockProduct.setStatusVisual(STATUS_BLOCK_SELECT_ALL);
-                    blockProduct.setModeVisual(false, true); //Видимый, свернутый
-                }else{
-                    blockProduct.setStatusVisual(STATUS_BLOCK_DEFAULT);
-                    blockProduct.setModeVisual(false, false); //Видимый, развернутый
-                }
+                let filter_status = $('#id_f_comparison_status').val();
 
+                if (filter_status === "MISMATCH" || filter_status === "PRE_MATCH") {
+                    if (event.detail.data.status !== filter_status) {
+                        productRight.setModeVisual(true);
+                        if (filter_status === "MISMATCH" && blockProduct.isPrematchAll()) {
+                            blockProduct.setStatusVisual(STATUS_BLOCK_PREMATCH_ALL);
+                            blockProduct.setModeVisual(false, true); //Видимый, свернутый
+                        } else {
+                            if (blockProduct.isMismatchAll()) {
+                                blockProduct.setStatusVisual(STATUS_BLOCK_MISMATCH_ALL);
+                                blockProduct.setModeVisual(false, true); //Видимый, свернутый
+                            }
+                        }
+                    }
+                    // Сохраняем новый статус без перегрузки страницы (если надо будет вернуть статус)
+                    sendListDatasAsync();
+                } else {
+                    if (blockProduct.isMismatchAll()) {
+                        blockProduct.setStatusVisual(STATUS_BLOCK_MISMATCH_ALL);
+                        blockProduct.setModeVisual(false, true); //Видимый, свернутый
+                    } else if (blockProduct.isDeletedAll()) {
+                        blockProduct.setStatusVisual(STATUS_BLOCK_DELETE_ALL);
+                        blockProduct.setModeVisual(false, true); //Видимый, свернутый
+                    } else if (blockProduct.isSelectAll()) {
+                        blockProduct.setStatusVisual(STATUS_BLOCK_SELECT_ALL);
+                        blockProduct.setModeVisual(false, true); //Видимый, свернутый
+                    }else{
+                        blockProduct.setStatusVisual(STATUS_BLOCK_DEFAULT);
+                        blockProduct.setModeVisual(false, false); //Видимый, развернутый
+                    }
+                }
                 //Изменим статистику
                 statistic.changeUnit(event.detail.status_last, event.detail.data.status);
-
                 break;
         }
         ;
@@ -375,6 +403,7 @@ function main() {
     addActionChangeFilter('id_f_comparison_status', 'f_comparison_status');
     addActionChangeFilter('id_f_sort', 'f_sort');
     addActionChangeFilter('id_f_count_products_on_page', 'f_count_products_on_page');
+    addActionChangeFilter('id_f_count_products_on_page_footer', 'f_count_products_on_page');
     addActionChangeFilter('id_f_detail_view', 'f_detail_view');
     addActionChangeFilter('id_f_profile', 'f_profile');
 
@@ -519,18 +548,34 @@ function main() {
             $(CLASS_BLOCK_PRODUCT_MIN).hide();
             $(CLASS_PRODUCT_RIGHT).show();
         } else {
+            let filter_status = $('#id_f_comparison_status').val()
+
+
             // Скрываем все выбранные
             for (let data of listDataForServer.datas_products_right) {
                 let product_right = ProductRight.getBy(data.id_source, data.id_item);
-                product_right.dom.hide();
+                if (filter_status === "MISMATCH" || filter_status === "PRE_MATCH") {
+                    if (data.status !== filter_status) {
+                        product_right.dom.hide();
+                    }
+                } else {
+                    product_right.dom.hide();
+                }
+
 
                 let blockProduct = ProductBlock.getByPid(product_right.data.id_product);
-                if (blockProduct.isMismatchAll()) {
+                if (blockProduct.isMismatchAll() && filter_status !== 'MISMATCH') {
                     blockProduct.setModeVisual(false, true);    // Видимый, свернутый
                 } else if (blockProduct.isDeletedAll()) {
                     blockProduct.setModeVisual(false, true);    // Видимый, свернутый
                 } else if (blockProduct.isSelectAll()) {
-                    blockProduct.setModeVisual(false, true);    // Видимый, свернутый
+                    if (filter_status === "MISMATCH" || filter_status === "PRE_MATCH") {
+                        if ((filter_status === "MISMATCH" && blockProduct.isPrematchAll()) || filter_status === "PRE_MATCH" && blockProduct.isMismatchAll()) {
+                            blockProduct.setModeVisual(false, true);    // Видимый, свернутый
+                        }
+                    } else {
+                        blockProduct.setModeVisual(false, true);    // Видимый, свернутый
+                    }
                 }
             }
         }

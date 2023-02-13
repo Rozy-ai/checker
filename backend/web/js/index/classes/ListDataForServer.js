@@ -85,11 +85,21 @@ export class ListDataForServer{
         } else {
             // Если товара в массиве нет то запоминаем data в массив правых товаров
             this.datas_products_right.push( Object.assign({},data_item) );
-            
-            // Генерируем событие добавления
+
+            let action = ACTION_DATA_CREATE;
+            let status_last = null;
+
+            // Если изменяются списки со статусом, то вызываем событие изменения
+            if ($('#id_f_comparison_status').val() === "MISMATCH" || $('#id_f_comparison_status').val() === "PRE_MATCH") {
+                status_last = $('#id_f_comparison_status').val();
+                action = ACTION_DATA_CHANGE;
+            }
+
+            // Генерируем событие добавления/изменения
             document.dispatchEvent(new CustomEvent(EVENT_CHANGE_DATA_RIGHT, { detail: {
+                status_last: status_last,
                 data: data_item,
-                action: ACTION_DATA_CREATE
+                action: action
             }}));
         }
     }
