@@ -624,20 +624,22 @@ function main() {
         // Есть ли на странице color_marker = 'nocompare'. Есль есть то значит есть и продукт с неотмеченным статусом
         if ($('.color-marker.nocompare').length) return;
 
-        if (confirm('Товары без статусов закончились. Даные сохранятся и страница будет перезагружена')) {
+        // if (confirm('Товары без статусов закончились. Даные сохранятся и страница будет перезагружена')) {
             // Если все условия выполнены то отправляем данные товаров на сервер
-            sendListDatasAsync().then(function (is_confirm) {
-                if (!is_confirm) {
-                    return;
-                }
-                listDataForServer.reset();
-                location.reload();
-            });
-        } else {
-            if (Filters.getModeHide()) {
-                changeModeHide(Filters.toggleModeHide());
+        sendListDatasAsync().then(function (is_confirm) {
+            if (!is_confirm) {
+                return;
             }
-        }
+            listDataForServer.reset();
+            location.reload();
+        });
+        $('#preloader').show();
+
+        // } else {
+        //     if (Filters.getModeHide()) {
+        //         changeModeHide(Filters.toggleModeHide());
+        //     }
+        // }
     }
 
     /**************************************************************************

@@ -365,8 +365,8 @@ use common\models\Comparison;
                             <?=($brand ? "$brand" : '') ?>
                         </div>
                     </div>
-                    <div class="p-1" style="width: 40%;">
-                        <div class="block_minimize_data d-inline-block" style="width: 100%; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?=$td3_title?></div>
+                    <div class="p-1" style="width: 70%;">
+                        <div class="block_minimize_data d-inline-block" style="display: -webkit-box!important; width: 100%; font-weight: bold; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"><?=$td3_title?></div>
                     </div>
                 </div>
 

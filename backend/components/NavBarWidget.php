@@ -13,7 +13,7 @@ class NavBarWidget extends Widget {
         $sources = Source::find()->select(['id', 'name', 'country'])->all();
 
         $sourceItems = array_map(fn($item) => [
-            'label' => $item->name . ($item->country ? Html::img('@web/img/flags-normal/'.$item->country.'.png', ['alt' => '', 'style'=>['height' => 'auto', 'width'=> '30px']]) : ''),
+            'label' => "<div class='d-flex " . ($item->country ?  'justify-content-around' : '') . "'><div class='p-1'>" . $item->name . "</div>" . "<div class='p-1'>" . ($item->country ? Html::img('@web/img/flags-normal/'.$item->country.'.png', ['alt' => '', 'style'=>['height' => 'auto', 'width'=> '30px']]) : '') . "</div>" . "</div>",
             'url' => ['product/index', 'src' => $item->id],
             'encode' => false,
             'visible' => $item->checkAccess()
