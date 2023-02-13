@@ -4,8 +4,26 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e633f15d88d45af7aa0f43a10667de54",
+    "content-hash": "360ed9112a0822a2e722fb2381dacbf5",
     "packages": [
+        {
+            "name": "bower-asset/clipboard",
+            "version": "v1.7.1",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:zenorocha/clipboard.js.git",
+                "reference": "b6e6b80ab07eab03ce0d277515b3ed540773a330"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zenorocha/clipboard.js/zipball/b6e6b80ab07eab03ce0d277515b3ed540773a330",
+                "reference": "b6e6b80ab07eab03ce0d277515b3ed540773a330"
+            },
+            "type": "bower-asset",
+            "license": [
+                "MIT"
+            ]
+        },
         {
             "name": "bower-asset/inputmask",
             "version": "3.3.11",
@@ -1281,6 +1299,48 @@
                 "source": "https://github.com/php-fig/simple-cache/tree/master"
             },
             "time": "2017-10-23T01:57:42+00:00"
+        },
+        {
+            "name": "supplyhog/yii2-clipboardjs",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/supplyhog/yii2-clipboardjs.git",
+                "reference": "9bb74f4cfef3ddd05a572e0c0c59ed2cef3745f4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/supplyhog/yii2-clipboardjs/zipball/9bb74f4cfef3ddd05a572e0c0c59ed2cef3745f4",
+                "reference": "9bb74f4cfef3ddd05a572e0c0c59ed2cef3745f4",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/clipboard": "^1.5",
+                "php": ">=5.4.0",
+                "yiisoft/yii2": "*"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "supplyhog\\ClipboardJs\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Wil Wade",
+                    "email": "wil@supplyhog.com"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/supplyhog/yii2-clipboardjs/issues",
+                "source": "https://github.com/supplyhog/yii2-clipboardjs/tree/master"
+            },
+            "time": "2016-10-31T13:13:08+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -6071,7 +6131,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "supplyhog/yii2-clipboardjs": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -6081,5 +6143,5 @@
         "ext-mysqli": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.3.0"
 }

@@ -470,7 +470,7 @@ class ProductController extends Controller {
             $params = \Yii::$app->request->post();
         }
 
-        if (!$params['id_product'] || !$params['id_source']) {
+        if (!$params['id_product'] || !$params['id_source'] || !$params['url']) {
             //throw new InvalidArgumentException();
             return [
                 'status' => 'error',
@@ -478,7 +478,7 @@ class ProductController extends Controller {
             ];
         }
 
-        $url = $params['url'] ?? "";
+        $url = $params['url'];
         $id_product = (int) $params['id_product'];
         $id_source = (int) $params['id_source'];
         $confirm_to_action = (bool) $params['confirm'];
@@ -530,6 +530,7 @@ class ProductController extends Controller {
 
         $id_source = (int) $params['id_source'];
         $id_product = (int) $params['id_product'];
+
         try {
             $this->indexPresenter->deleteProduct($id_source, $id_product);
         } catch (\Exception $ex) {
@@ -643,8 +644,8 @@ class ProductController extends Controller {
         $source_name = $source->name;
         $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}') ? $filters->f_profile : 'Все';
         
-        $html_block_count = "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path";
-        $html_paginator = $this->indexPresenter->getHTMLPaginator($filters->f_number_page_current, $count_pages);
+        $html_block_count = "Показано $f_count_products_on_page($count_products_right) из $count_products_all ";
+        $html_paginator = $this->indexPresenter->getHTMLPaginator($filters->f_number_page_current, $count_pages, 5, $count_products_all <= 200);
 
         return [
             'status' => 'ok',
@@ -751,7 +752,6 @@ class ProductController extends Controller {
         $filters = new Filters();
         $filters->loadFromSession();
         $source = Source::getById($id_source);
-
         $model = Product::getProduct($source, $filters);
 
         $prev = null;
@@ -911,8 +911,9 @@ class ProductController extends Controller {
     public function actionUser_visible_fields() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $pid = $this->request->post('pid');
-
-        if (!User::isAdmin())
+        $user = \Yii::$app->user->identity;
+        $is_admin = ($user && $user->isAdmin());
+        if (!$is_admin)
             return false;
 
         $puv = P_user_visible::findOne(['p_id' => $pid]);

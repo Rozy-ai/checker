@@ -5,8 +5,30 @@
 /* @var $common_fields */
 /* @var $source_list */
 /* @var $type_list */
+
+use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+
+
+//$Country_codes = ['ru' => 'Россия', 'uk' => "Англия", 'us' => "США", 'ua' => "Украина", 'tr' => "Турция", 'ch' => "Китай", 'fr' => "Франция", 'vt' => "Вьетнам", 'it' => "Италия", 'pl' => "Польша"];
+$Country_codes = [
+    'us' => html_entity_decode('🇺🇸&emsp;United States'),
+    'ca' => html_entity_decode('🇨🇦&emsp;Canada'),
+    'mx' => html_entity_decode('🇲🇽&emsp;Mexico'),
+    'br' => html_entity_decode('🇧🇷&emsp;Brazil'),
+    'uk' => html_entity_decode('🏴󠁧󠁢󠁥󠁮󠁧󠁿󠁧󠁢󠁥󠁮󠁧󠁿&emsp;England'),
+    'de' => html_entity_decode('🇩🇪&emsp;Germany'),
+    'fr' => html_entity_decode('🇫🇷&emsp;France'),
+    'it' => html_entity_decode('🇮🇹&emsp;Italy'),
+    'es' => html_entity_decode('🇪🇸&emsp;Spain'),
+    'jp' => html_entity_decode('🇯🇵&emsp;Japan'),
+    'in' => html_entity_decode('🇮🇳&emsp;India'),
+    'ru' => html_entity_decode('🇷🇺&emsp;Russia')
+];
+
+
+
 
 $this->title = Yii::t('site', 'Источники');
 //$this->params['breadcrumbs'][] = $this->title;
@@ -49,6 +71,10 @@ $this->title = Yii::t('site', 'Источники');
     ]
   )
     ->label('Путь к sql фаилу для импорта из фаила (без загрузки)');?>
+    <?=$form->field($item, 'country')->dropDownList(
+        $Country_codes
+        ,[ 'prompt'=>'Выберите страну', 'options' => [ $item_res->country => [ 'selected'=> true ], 'multiple'=>'multiple'] ])
+        ->label('привязка к стране');?>
 
 
   <?php if ($item_res->id): ?>

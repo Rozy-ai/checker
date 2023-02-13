@@ -38,6 +38,7 @@ const CLASS_HIDE = '-hidden';
 export const STATUS_BLOCK_DEFAULT      = 'default';
 export const STATUS_BLOCK_DELETE_ALL   = 'delete_all';
 export const STATUS_BLOCK_MISMATCH_ALL = 'missmatch_all';
+export const STATUS_BLOCK_PREMATCH_ALL = 'pre_match';
 export const STATUS_BLOCK_SELECT_ALL   = 'notfound';
 
     
@@ -154,6 +155,22 @@ export class ProductBlock extends DomWithData{
         for (let item of list_product_right){
             let colorMarker = item.getStatatusColorMarker();
             if ( colorMarker !== 'mismatch' &&
+                (is_strict || colorMarker !== 'nocompare') &&
+                (is_strict || colorMarker !== '') ) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Являются ли все правые товары отмечеными статусом pre_match
+     * @param {type} is_strict Строгое соответствие. Если false то может быть без выбора
+     * @returns {Boolean}
+     */
+    isPrematchAll(is_strict = true){
+        let list_product_right = this.getProductsRight();
+        for (let item of list_product_right){
+            let colorMarker = item.getStatatusColorMarker();
+            if ( colorMarker !== 'pre_match' &&
                 (is_strict || colorMarker !== 'nocompare') &&
                 (is_strict || colorMarker !== '') ) return false;
         }

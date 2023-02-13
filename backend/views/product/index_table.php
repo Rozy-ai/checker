@@ -18,8 +18,7 @@ use yii\helpers\Url;
 use backend\components\TopSlider;
 use common\models\Comparison;
 ?>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/product-index.js"></script>
+
 <table class="table table-striped [ PRODUCT-LIST ] products__products-list products-list">
     <?php if ($local_import_stat): ?>
     <tr>
@@ -110,7 +109,29 @@ use common\models\Comparison;
 
         </td>
         <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
-            <div id='id_td2_asin' class="products-list__asin"><?= $td2_asin ?></div>
+            <div id='id_td2_asin' class="products-list__asin">
+                <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col-sm-6">
+                        <span><?= $td2_asin ?></span>
+                    </div>
+                    <div class="col-sm-3">
+                        <?= \supplyhog\ClipboardJs\ClipboardJsWidget::widget([
+                            'text' => $td2_asin,
+                            'label' => '<img src="'. Url::to('@web/img/copy.png') . '" data-src="'. Url::to('@web/img/copy.png') . '" alt="Copy " title="Copy " width="15" height="auto" class="lzy lazyload--done">',
+                            'htmlOptions' => [
+                                'class' => 'js-tooltip js-copy',
+                                'data-toggle' => "tooltip",
+                                'data-placement' => "bottom",
+                                'title' => 'Copy to clipboard'
+                            ],
+                            'tag' => 'button',
+                        ]) ?>
+                    </div>
+                </div>
+
+
+            </div>
             <div class="products-list__img-wrapper"
                 data-id_source="<?=$source_id?>"
                 data-id_product="<?=$item->id?>"
@@ -203,7 +224,7 @@ use common\models\Comparison;
                     'f_no_compare' => $f_no_compare,
                     'f_hide_mode' => $f_hide_mode,
                     'source' => $source
-                ])
+                ]);
                 ?>
             </div>
 
@@ -260,15 +281,14 @@ use common\models\Comparison;
             <div class="tbl" style="width: 100%;">
                 <div class="td">
 
-
-                    <button
-                            class="product-list-item__del js-del-item"
+                    <div class="product-list-item__del js-del-item"
+                        data-url = "/product/delete-product"
                         data-id_product="<?= $item->id ?>"
                         data-id_source="<?= $source_id ?>"
-                            data-url = "/product/delete-product"
                     >
                         Удалить
-                    </button>
+                    </div>
+
                 </div>
                 <div class="td">
                     <div
@@ -291,20 +311,15 @@ use common\models\Comparison;
                 <?php if (($f_detail_view == 0 || $f_detail_view == 2) && $f_comparison_status === 'NOCOMPARE'):?>
                     <div
                         title="Только видимые"
-                        id="js-reset-compare-all-visible-items"
-                        class="[ button-x-2 ] js-reset-compare-all-visible-items product-list-item__btn-red -change-2"
-                        onclick="window.href = this.href"
-                        data-id_product="<?= $item->id ?>"
-                        data-id_source="<?= $source_id ?>"
-
-                        href="/product/missall?id_product=<?= $item->id ?>&id_source=<?= $source_id ?>&return=1"
+                        class="[ button-x-2 ] product-list-item__btn-red -change-2"
+                        href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
                     ></div>
 
                     <?php if (0): ?>
-                    <a
+                    <div
                         class="slider__left-item__btn-yellow yellow_button_v1 -change-1"
-                        href="/product/missall?id_product=<?= $item->id ?>&id_source=<?= $source_id ?>&return=1"
-                        ></a>
+                        href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
+                        ></div>
                     <?php endif; ?>
                 <?php endif;?>
             </div>
@@ -335,8 +350,28 @@ use common\models\Comparison;
         </td>
         <td class="products-list__td3_minimize">
             <div class="block_minimize_wrapper">
-                <p class="minimize_row"><span class=minimize_row_asin><?=$td2_asin?></span>  <span><?=$td2_toptext?></span> <span><?=$brand?"/ $brand":($manufacturer?"/ $manufacturer":'') ?></span></p>
-                <p class="minimize_wrapper_title"><?=$td3_title?></p>
+                <div class="d-inline-flex" style="width: 100%;">
+                    <div class="p-1" style="width: 15%;">
+                        <div class="block_minimize_data d-inline-block" style="width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <span><?=$td2_asin?></span>
+                            <br>
+                            <?=$td2_toptext?>
+                        </div>
+                    </div>
+                    <div class="p-1" style="width: 15%;">
+                        <div class="block_minimize_data d-inline-block" style="width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <span>Brand</span>
+                            <br>
+                            <?=($brand ? "$brand" : '') ?>
+                        </div>
+                    </div>
+                    <div class="p-1" style="width: 40%;">
+                        <div class="block_minimize_data d-inline-block" style="width: 100%; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?=$td3_title?></div>
+                    </div>
+                </div>
+
+<!--                <p class="minimize_row"><span class=minimize_row_asin>--><?php //=$td2_asin?><!--</span>  <span>--><?php //=$td2_toptext?><!--</span> <span>--><?php //=$brand?"/ $brand":($manufacturer?"/ $manufacturer":'') ?><!--</span></p>-->
+<!--                <p class="minimize_wrapper_title">--><?php //=$td3_title?><!--</p>-->
             </div>
         </td>
         <td class="products-list__td4 text-nowrap">
