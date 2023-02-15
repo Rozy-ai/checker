@@ -282,7 +282,6 @@ class ExportsController extends Controller{
       $where_3 = [];
 
     }elseif($comparison === 'YES_NO_OTHER'){
-      /*
       $where_2 =
       [ 'OR' ,
         ['`comparisons`.`status`' => 'MATCH'],
@@ -290,7 +289,7 @@ class ExportsController extends Controller{
         ['`comparisons`.`status`' => 'OTHER'],
         ['`comparisons`.`status`' => 'PRE_MATCH'],
       ];
-      */
+
       $where_2 = ['and', "`comparisons`.`status` IS NOT NULL AND comparisons.`status` <> 'MISMATCH'"];
 
     }elseif ($comparison === 'NOCOMPARE'){
@@ -366,7 +365,7 @@ Array (   [0] => Array (
 
     $this->get_source($source_id);
 
-/*
+
     $q = $this->source_class::find()
       ->select('*')
       //->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
@@ -377,13 +376,12 @@ Array (   [0] => Array (
     }else{
       $q->where(['comparisons.status' => $comparison, 'comparisons.source_id' => $source_id]);
     }
-*/
+
     $q = $this->prepare_record_1($comparison);
 
     if (trim($profile) && $profile !== '{{all}}'){
       $q->andWhere( ['like', $this->source_table_name.'.`profile`' , $profile]);
     }
-
     $q->asArray();
 
     $connection = Yii::$app->getDb();

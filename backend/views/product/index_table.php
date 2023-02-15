@@ -18,7 +18,8 @@ use yii\helpers\Url;
 use backend\components\TopSlider;
 use common\models\Comparison;
 ?>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script type="text/javascript" src="/js/product-index.js"></script>
 <table class="table table-striped [ PRODUCT-LIST ] products__products-list products-list">
     <?php if ($local_import_stat): ?>
     <tr>
@@ -311,7 +312,7 @@ use common\models\Comparison;
                 <?php if (($f_detail_view == 0 || $f_detail_view == 2) && $f_comparison_status === 'NOCOMPARE'):?>
                     <div
                         title="Только видимые"
-                        class="[ button-x-2 ] product-list-item__btn-red -change-2"
+                        class="js-reset-compare-all-visible-items [ button-x-2 ] product-list-item__btn-red -change-2"
                         href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"
                     ></div>
 

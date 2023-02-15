@@ -197,6 +197,8 @@ class ProductController extends Controller {
         if($filters->f_profile == 'Free') {
             $filters->f_detail_view = 1; // Подробно
         }
+        if($filters->f_comparison_status == null)
+            $filters->f_comparison_status = 'ALL';
         return $this->render('index', [
             'f_source' => $src ? $src : $filters->f_source,
             'f_profile' => $filters->f_profile,
