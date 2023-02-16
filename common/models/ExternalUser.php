@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\ExternalUserProfileFieldVal;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 
@@ -23,6 +24,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int|null $ex_profile_id
  *
  * @property ExternalUserProfile $exProfile
+ * @property ExternalUserProfileFieldVal[] $externalUserProfileFieldVals
  */
 class ExternalUser extends \yii\db\ActiveRecord
 {
@@ -182,5 +184,15 @@ class ExternalUser extends \yii\db\ActiveRecord
     public function getExProfile()
     {
         return $this->hasOne(ExternalUserProfile::class, ['id' => 'ex_profile_id']);
+    }
+
+    /**
+     * Gets query for [[ExternalUserProfileFieldVals]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getExternalUserProfileFieldVals()
+    {
+        return $this->hasMany(ExternalUserProfileFieldVal::class, ['ex_user_id' => 'id']);
     }
 }
