@@ -33,16 +33,7 @@ $this->registerJsFile(Url::base(true) . "/js/ex-user-profile.js", [
         display: block;
     }
 </style>
-<!--<div id="ex-user-profile-field-vals">-->
-<!--    --><?php
-//    foreach ($model->externalUserProfileFieldVals as $fieldVal) {
-//        echo '<div class="ex-user-profile-field-val" data-field_id="'.$fieldVal->id.'">' . Html::encode($fieldVal->value) . '</div>';
-//    }
-//    ?>
-<!--</div>-->
-<div id="ex-user-profile-defs">
-
-</div>
+<div id="ex-user-profile-defs"></div>
 
 <?php $form = ActiveForm::begin(['id' => 'external-user-form', 'enableAjaxValidation' => true]); ?>
 
@@ -74,11 +65,6 @@ foreach (ExternalUserProfile::find()->all() as $profile) {
             'id' => 'externaluserprofilefieldval-field_id'.$fieldConfig->field_id . "-" . $i
         ])->label(false);
         echo '</div>';
-
-        //todo: сгенерировать ExternalUserProfileConfig заного?
-        // просто вывести ? ExternalUserProfileFieldVal $form->field($fieldActualVal, '');
-        // сохранять сначала ExternalUserProfile новый или с айди, и перезаписывать все ExternalUserProfileFieldVal
-        // для этого пользователя(field_id id)?
     }
 
     echo '</div>';
@@ -96,31 +82,11 @@ foreach (ExternalUserProfile::find()->all() as $profile) {
                     array_merge([null=>'Не выбран'], ExternalUserProfile::find()->all()), 'id', 'name'
             )
     ) ?>
-    <div id="ex-user-profile-actual">
-
-    </div>
-
+    <div id="ex-user-profile-actual"></div>
 
     <div class="form-group">
         <button type="submit" class="btn btn-success">Сохранить</button>
     </div>
 
-
-
     <?php ActiveForm::end(); ?>
 </div>
-
-<script>
-    window.addEventListener("load", function () {
-        jQuery(function ($) {
-            $('.ex-user-profile').appendTo('#ex-user-profile-defs');
-            $('#externaluser-ex_profile_id').on('change', function (e) {
-                let id = $(this).children(':selected').val();
-                $('#ex-user-profile-actual').children().appendTo('#ex-user-profile-defs');
-                if (!id)
-                    return;
-                $('.profile-id-' + id).appendTo('#ex-user-profile-actual');
-            });
-        });
-    });
-</script>
