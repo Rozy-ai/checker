@@ -127,6 +127,20 @@ class StatsController extends Controller
     );
   }
 
-
+    public static function getStatsLastLocalImportMessage() {
+        $import_stats = new Stats_import_export();
+        $last_import = $import_stats->getLastLocalImport();
+        $stat_data = json_decode($last_import['raw'], true);
+        if (!empty($stat_data)) {
+            $last_local_import_txt = "Количество обновленных: {$stat_data['all']}\n".
+                "Дубликатов по Asin: {$stat_data['asin_duplicate']}\n".
+                "Проигнорировано: {$stat_data['ignored']}\n".
+                "Заменено: {$stat_data['replaced']}\n".
+                "Добавлено новых: {$stat_data['added']}";
+        } else {
+            $last_local_import_txt = "Количество обновленных: {$last_import['cnt']}\n";
+        }
+        return $last_local_import_txt;
+    }
 
 }
