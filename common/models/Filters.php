@@ -22,14 +22,8 @@ namespace common\models;
  */
 class Filters {
     /** @var string f_items__profile */
-    public $f_profile;
-
-    /** @var array[integer] list_count_products */
-    public $list_count_products;
-
-    /** @var integer f_count_products_on_page_index */
-    public $f_count_products_on_page_index;
-
+    public $f_profile;    
+    
     /** @var string f_items__show_n_on_page Количество товаров на странице */
     public $f_count_products_on_page;
 
@@ -78,7 +72,6 @@ class Filters {
         'f_number_page_current' => 1,
         //'f_comparison_status' => 'PRE_MATCH',
         'f_no_compare' => 'NOCOMPARE',
-        'f_profile' => 'General'
     ];
     
     /**
@@ -116,26 +109,7 @@ class Filters {
     public function setToDefault(){
         foreach (self::defaults as $key => $val){
             $this->$key = $val;
-        }
-    }
-    
-    /**
-     * Сбрасывает только селекты
-     */
-    public function setToDefaultSelects(){
-        if (!$this->isExistsDefaultParams()){
-            $this->setToDefault();
-        }
-        
-        $this->f_profile = null;
-        $this->f_categories_root = null;
-        $this->f_id = null;
-        $this->f_asin = null;
-        $this->f_title = null;
-        $this->t_status = null;
-        $this->f_comparison_status = null;
-        $this->f_sort = null;
-        $this->f_username = null;
+        }        
     }
     
     public function loadFromValue($key, $value, $with_default = true){

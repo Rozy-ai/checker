@@ -81,7 +81,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     {
                         $links [] = Html::a($user->username, ['message/user', 'user' => $user->id], ['data-pjax' => 0]);
                     }
-                    return implode(', ', $links);
+                    return implode($links, ', ');
                 }
             ],
             [

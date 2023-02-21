@@ -42,47 +42,24 @@ use yii\helpers\Url;
 
 $this->title = $source->name . " | " . Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
-$this->params['breadcrumbs'][] = [
-    'label' => $source->name . "&emsp;" . ($source->country ? Html::img('@web/img/flags-normal/'.$source->country.'.png', ['alt' => '', 'style'=>['height' => 'auto', 'width'=> '30px']]) : ''),
-    'template' => '<li style="width: auto;">{link}</li>',
-    'encode' => false
-];
-//if ($is_admin) {
+$this->params['breadcrumbs'][] = $source->name;
+if ($is_admin) {
     $this->params['breadcrumbs'][] = [
         'label' => Html::dropDownList('f_profile', $f_profile, $list_profiles, ['id' => 'id_f_profile', 'class' => 'form-control form-control-sm w-auto']),
         'template' => '<li>{link}</li>',
         'encode' => false
     ];
-//}
-$is_active_show_all = True;
-if ($count_products_all > 200) {
-    $is_active_show_all = False;
 }
-$is_active_show_all ? $list_count_products_on_page['ALL'] = 'ВСЕ' : '';
 
 $this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
-    . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right .') из ' . $count_products_all . ' </div> по: '
-    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
+    . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all . ' (' . $count_products_right .')</div> по: '
+    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, array_merge($list_count_products_on_page, ['ALL' => 'ВСЕ']), ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
+
 $local_import_stat = null;
 
 \backend\assets\IconsAsset::register($this);
 \backend\assets\ProductIndexAsset::register($this);
 ?>
-
-<script>
-    document.body.classList.add('loaded_hiding');
-    window.onload = function() {
-        document.getElementById("show_all").click();
-        if ($('#id_f_comparison_status').val() === "MISMATCH" || $('#id_f_comparison_status').val() === "PRE_MATCH") {
-            document.getElementById("show_all").click();
-        }
-
-        // window.setTimeout(function () {
-            document.body.classList.add('loaded');
-            document.body.classList.remove('loaded_hiding');
-        // }, 500);
-    };
-</script>
 
 <div class="[ PRODUCTS ]">
     <div class="position-1">
@@ -329,13 +306,24 @@ $local_import_stat = null;
                     </div>
                 </div>
                 <?php endif; ?>
+                <!--
+                    <div class="form-group _col-sm-3">
+                        <button type="submit" class="btn btn-primary products__filter-submit">Фильтровать</button>
+                    </div>
 
-                <div class="form-group _col-sm-3">
-                    <a href="/product/" class="btn btn-secondary" id="id_button_reset_filters">Сбросить</a>
-                </div>
+                    <div class="form-group _col-sm-3">
+                        <a href="/product/" class="btn btn-secondary">Сбросить</a>
+                    </div>
+                    
+                    <div class="form-group _col-sm-3">
+                      <button id="show-all" class="btn btn-secondary">Показать все</button>
+                    </div> -->
             </div>
             <!--</form>-->
+
+
         </div>
+
     </div>
 
     <div class="table-responsive__" id = "id_table_container">
@@ -356,14 +344,7 @@ $local_import_stat = null;
 
     <div class="row">
         <div class="col">
-            <?php
-            echo '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
-                . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right .') из ' . $count_products_all . ' </div> по: '
-                . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page_footer', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
-            ?>
-
-
-<!--            <div class="featured-items">Показаны записи --><?php //= min($f_count_products_on_page, $count_products_all) ?><!-- из --><?php //= $count_products_all ?><!--.</div>-->
+            <div class="featured-items">Показаны записи <?= min($f_count_products_on_page, $count_products_all) ?> из <?= $count_products_all ?>.</div>
 
             <?php
             $e_comparison = isset($f_comparison_status) && $f_comparison_status ? strtolower($f_comparison_status) : 'match';
@@ -388,7 +369,7 @@ $local_import_stat = null;
         <div class="col" style="text-align: right;max-width: 200px;">
             <div class="product-list-item__del -del-all js-del-all-visible-items">удалить все</div>
             <div class="product-list-item__reset-compare -compare-all js-reset-compare-all-visible-items">отменить все</div>
-            <button id="show_all" class="product-list-item__reset-compare -compare-all js-show_products_all">показать все</button>
+            <div class="product-list-item__reset-compare -compare-all js-show_products_all">показать все</div>
         </div>
     </div>
 
@@ -397,9 +378,8 @@ $local_import_stat = null;
         <nav aria-label="Page navigation example ">
             <ul id="id_paginator" class="pagination justify-content-center">
                 <?php
-                echo $this->context->indexPresenter->getHTMLPaginator($f_number_page_current, $count_pages, 5, $is_active_show_all);
+                echo $this->context->indexPresenter->getHTMLPaginator($f_number_page_current, $count_pages);    
                 ?>
-
             </ul>
         </nav>
     </div>

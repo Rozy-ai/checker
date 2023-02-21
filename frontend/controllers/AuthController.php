@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace frontend\controllers;
 
+use common\models\ExternalUserProfileFieldVal;
 use Yii;
 use yii\widgets\ActiveForm;
 use frontend\components\User;
@@ -44,6 +45,16 @@ class AuthController extends Controller
         ];
     }
 
+    private function saveExternalUserProfileFields(\common\models\ExternalUser $model) {
+        ExternalUserProfileFieldVal::deleteAll(['ex_user_id' => $model->id]);
+        foreach($_POST['ExternalUserProfileFieldVal'] as $fieldValData) {
+            $fieldVal = new ExternalUserProfileFieldVal();
+            $fieldVal->ex_user_id = $model->id;
+            $fieldVal->field_id = $fieldValData['field_id'];
+            $fieldVal->value = $fieldValData['value'];
+            $fieldVal->save();
+        }
+    }
     /**
      * Signs user up.
      */
@@ -59,6 +70,7 @@ class AuthController extends Controller
                     'success',
                     "Регистрация завершена\nНа вашу почту отправлено письмо с ссылкой для подтверждения регистрации"
                 );
+                $this->saveExternalUserProfileFields($model);
                 return $this->goHome();
             }
         }

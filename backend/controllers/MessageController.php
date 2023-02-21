@@ -4,7 +4,7 @@ namespace backend\controllers;
 
 use backend\assets\MessageAsset;
 use Yii;
-use common\models\User;
+use backend\models\User;
 use common\models\Message;
 use common\models\MessageSearch;
 use yii\web\Controller;

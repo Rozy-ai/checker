@@ -35,12 +35,10 @@ const CLASS_BLOCK_PRODUCT_COMPLETED = 'product-list__completed';
 
 const CLASS_HIDE = '-hidden';
 
-export const STATUS_BLOCK_DEFAULT      = 'default';
-export const STATUS_BLOCK_DELETE_ALL   = 'delete_all';
-export const STATUS_BLOCK_MISMATCH_ALL = 'missmatch_all';
-export const STATUS_BLOCK_PREMATCH_ALL = 'pre_match';
-export const STATUS_BLOCK_SELECT_ALL   = 'notfound';
-
+export const STATUS_DELETED     = 'deleted';        // Блок ототображается с удаленным левым товаром
+export const STATUS_MISMATCH_ALL= 'missmatched';    // Отображение с нажатым красным крестиком слева
+export const STATUS_NOT_FOUND   = 'notfound';       // Отображение когда закончились правые товары без сравнения
+export const STATUS_DEFAULT     = 'default';        // Блок отображается нормально без выделений
     
 export class ProductBlock extends DomWithData{
     static getFromChild($child_object, data) {
@@ -107,97 +105,24 @@ export class ProductBlock extends DomWithData{
         return list;
     }
     
-    /**
-     * Получить только data атрибуты правых товаров
-     * @returns {Object}
-     */
-    getDatasRight(){
-        let list = [];
-        this.dom.find(CLASS_PRODUCT_RIGHT).each(function(index, el){
-            let productRight = new ProductRight($(this));
-            list.push(productRight.data);
-        });
-        return list;
-    }
-    
     getStatistic(){
         let dom = this.dom.find(CLASS_STATISTIC+':first');
         return new Statistic(dom);
     }
     
     /**
-     * Имеется ли статус отслычный от missmatch
-     * 
-     * @param {type} and_is_compare
-     *      true - товар имеет хоть катой то выбранный статус сравнения (не nocompare)
-     *      false - товар может быть без отмеченного 
+     * Проверяет, есть ли в списке правых продуктов товары с отмеченными статусами отличными от missmatch
      * @returns {Boolean}
      */
-    isHasStatusNotMismatch(and_is_compare){
+    isHasStatusNotMismatch(){
         let list_product_right = this.getProductsRight();
         for (let item of list_product_right){
             let colorMarker = item.getStatatusColorMarker();
-            
-            if ( colorMarker !== 'mismatch' && (!and_is_compare || colorMarker !== 'nocompare')) {
+            if ( colorMarker !== 'mismatch' ) {
                 return true;
             }
         }
-        return false;        
-    }
-    
-    /**
-     * Являются ли все правые товары отмечеными статусом mismatch
-     * @param {type} is_strict Строгое соответствие. Если false то может быть без выбора
-     * @returns {Boolean}
-     */
-    isMismatchAll(is_strict = true){
-        let list_product_right = this.getProductsRight();
-        for (let item of list_product_right){
-            let colorMarker = item.getStatatusColorMarker();
-            if ( colorMarker !== 'mismatch' &&
-                (is_strict || colorMarker !== 'nocompare') &&
-                (is_strict || colorMarker !== '') ) return false;
-        }
-        return true;
-    }
-
-    /**
-     * Являются ли все правые товары отмечеными статусом pre_match
-     * @param {type} is_strict Строгое соответствие. Если false то может быть без выбора
-     * @returns {Boolean}
-     */
-    isPrematchAll(is_strict = true){
-        let list_product_right = this.getProductsRight();
-        for (let item of list_product_right){
-            let colorMarker = item.getStatatusColorMarker();
-            if ( colorMarker !== 'pre_match' &&
-                (is_strict || colorMarker !== 'nocompare') &&
-                (is_strict || colorMarker !== '') ) return false;
-        }
-        return true;
-    }
-    
-    /**
-     * Являются ли все правые товары отмеченыt как удаленные
-     * 
-     * @returns {Boolean}
-     */
-    isDeletedAll(){
-        let list_product_right = this.getProductsRight();
-        for (let item of list_product_right){
-            let colorMarker = item.getStatatusColorMarker();
-            if ( colorMarker !== 'deleted') return false;
-        }
-        return true;
-    }
-    
-    isSelectAll(){
-        let list_product_right = this.getProductsRight();
-        for (let item of list_product_right){
-            let colorMarker = item.getStatatusColorMarker();
-            if ( colorMarker === '' || colorMarker === 'nocompare') return false;
-        }
-        return true;        
+        return false;
     }
     
     /**
@@ -213,59 +138,21 @@ export class ProductBlock extends DomWithData{
         }
         return false;
     }
-    
-    /**
-     * Устанавливает отображение одного из состояний
 
-     * @param {type} status
-     *      STATUS_BLOCK_DEFAULT
-     *      STATUS_BLOCK_DELETE_ALL
-     *      STATUS_BLOCK_MISMATCH_ALL
-     *      STATUS_BLOCK_SELECT_ALL
-     * @returns {undefined}
-     */
-    setStatusVisual(status){
-        let domMin = this.getDomMin();
-        
-        this.dom.removeClass('status_block_delete_all');
-        this.dom.removeClass('status_block_mismatch_all');
-        this.dom.removeClass('status_block_selected_all');
-        
-        domMin.removeClass('status_block_delete_all');
-        domMin.removeClass('status_block_mismatch_all');
-        domMin.removeClass('status_block_selected_all');
-        
-        switch (status){
-            case STATUS_BLOCK_DELETE_ALL:
-                this.dom.addClass('status_block_delete_all');
-                domMin.addClass('status_block_delete_all');
-                break;
-            case STATUS_BLOCK_MISMATCH_ALL:
-                this.dom.addClass('status_block_mismatch_all');
-                domMin.addClass('status_block_mismatch_all');
-                break;
-            case STATUS_BLOCK_SELECT_ALL:
-                this.dom.addClass('status_block_selected_all');
-                domMin.addClass('status_block_selected_all');
-                break;
-            case STATUS_BLOCK_DEFAULT:
-                break;
-        }  
-    }
-    
     /**
-     * Устанавливает режим просмотра товара
+     * Изменить визуальное отображение блока товара
      * 
-     * @param {type} is_mode_hide
-     * @param {type} is_mode_minimize
+     * @param {string} status_visual Статус отображения. В зависимоси от статуса могум менаться и стили и отображение
+     * @param {boolean} is_hide_mode Включено ли скрытие товаров после выбора
+     * @param {boolean} is_min Свернутый или развернутый режим
      * @returns {undefined}
      */
-    setModeVisual(is_mode_hide, is_mode_minimize){
-        if (is_mode_hide){
+    changeVisual(status_visual, is_hide_mode, is_min = false){
+        if (is_hide_mode){
             this.getDomMin().css('display', 'none');
             this.dom.css('display', 'none');
         } else {
-            if (is_mode_minimize){
+            if (is_min === true){
                 this.dom.css('display', 'none');
                 this.getDomMin().css('display', 'table-row');
             } else {
@@ -273,8 +160,50 @@ export class ProductBlock extends DomWithData{
                 this.dom.css('display', 'table-row');
             }
         }
+        
+        let productLeft = this.getProductLeft();
+        switch (status_visual){
+            // Когда навсегда удален левый товар вместе с правыми
+            case STATUS_DELETED:
+                this.dom.addClass(CLASS_BLOCK_PRODUCT_DELETED);
+                this.dom.removeClass(CLASS_BLOCK_PRODUCT_COMPLETED); 
+                productLeft.changeVisual(false, is_hide_mode);      // Выключаем левый крестик
+                break;
+            // Когда у всех правых товаров статус mismatch
+            case STATUS_MISMATCH_ALL:
+                this.dom.removeClass(CLASS_BLOCK_PRODUCT_DELETED);
+                this.dom.removeClass(CLASS_BLOCK_PRODUCT_COMPLETED);
+                productLeft.changeVisual(true, is_hide_mode);       // Включаем левый крестик
+                break;
+            // Когда в блоке закончилиь праыве товары без статусов
+            case STATUS_NOT_FOUND:
+                this.dom.removeClass(CLASS_BLOCK_PRODUCT_DELETED);  // Убираем выделение удаленного блока цветом
+                productLeft.changeVisual(false, is_hide_mode);      // Выключаем левый крестик
+                this.dom.addClass(CLASS_BLOCK_PRODUCT_COMPLETED);   // Зделаем блок светло зеленым
+                break;
+            // Отображение без всяких выделений
+            case STATUS_DEFAULT:
+                this.dom.removeClass(CLASS_BLOCK_PRODUCT_DELETED);
+                this.dom.removeClass(CLASS_BLOCK_PRODUCT_COMPLETED);
+                productLeft.changeVisual(false, is_hide_mode);      // Выключаем левый крестик
+                break;
+        }
+    }
+    /*
+    minimize(){
+        this.dom.addClass(CLASS_HIDE);
+        
+        let pid = this.dom.data('pid');
+        $(CLASS_BLOCK_PRODUCT_MIN+`[data-pid=${pid}]`).removeClass(CLASS_HIDE);
     }
     
+    maximize(){
+        this.dom.addClass(CLASS_HIDE);
+        
+        let pid = this.dom.data('pid');
+        $(CLASS_BLOCK_PRODUCT_MAX+`[data-pid=${pid}]`).removeClass(CLASS_HIDE);
+    }
+    */
     /**
      * Зделать правые товары видимыми в блоке только отмеченные маркером с данным классом
      * 

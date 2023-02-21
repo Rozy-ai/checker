@@ -183,22 +183,10 @@ class ProductController extends Controller {
         $this->layout = 'products_list';
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
-        $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
-        if (isset($params['all'])) {
-            $filters->f_count_products_on_page = 'ALL';
-        }
         $list = Product::getListProducts($source, $filters, $is_admin);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
-        if($filters->f_count_products_on_page == 'ALL'){
-            $count_pages = 1;
-        } else {
-            $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
-        }
-        if($filters->f_profile == 'Free') {
-            $filters->f_detail_view = 1; // Подробно
-        }
-        if($filters->f_comparison_status == null)
-            $filters->f_comparison_status = 'ALL';
+        $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
+
         return $this->render('index', [
             'f_source' => $src ? $src : $filters->f_source,
             'f_profile' => $filters->f_profile,
@@ -438,7 +426,9 @@ class ProductController extends Controller {
         }
         
         $data = $params['listDataForServer'];
-        if (empty($data['datas_products_right']))
+        if (empty($data['datas_products_left']) && 
+            empty($data['datas_products_right']) && 
+            empty($data['datas_products_left_delete']))
         {
             return [
                 'status' => 'info',
@@ -447,7 +437,7 @@ class ProductController extends Controller {
         }
 
         try{
-            $this->indexPresenter->changeStatusProducts($data['datas_products_right']);
+            $this->indexPresenter->changeStatusProducts($data['datas_products_left'], $data['datas_products_right'], $data['datas_products_left_delete']);
         } catch (\Exception $ex) {
             Yii::error($ex->getLine().':'.$ex->getMessage());
             return ['status' => 'error', 'message' => 'Сохранение пакета выбраных статусов совершилось с ошибкой'];
@@ -456,7 +446,36 @@ class ProductController extends Controller {
         return [
             'status'=>'ok'
         ];
-    }  
+    }
+    
+    public function actionCompareBatch1(){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (\Yii::$app->request->isGet) {
+            $params = \Yii::$app->request->get();
+        } elseif (\Yii::$app->request->isPost) {
+            $params = \Yii::$app->request->post();
+        }
+        
+        $list_product_right = $params['list_products_right'];
+        if (!is_array($list_product_right)){
+            return [
+                'status' => 'info',
+                'message' => 'нет элементов для сравнения'
+            ];            
+        }
+        
+        try{
+            $this->indexPresenter->changeStatusProductsRight($list_product_right);
+        } catch (\Exception $ex) {
+            return [
+                'status' => 'error',
+                'message' => $ex->getMessage()
+            ];
+        }
+        
+        return $this->getRequestWithUpdateList();
+    }
 
     /**
      * Сюда приходит, если пользователь нажал крестик на левом товаре
@@ -514,13 +533,6 @@ class ProductController extends Controller {
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
 
-    /**
-     * Действие удаления одного девого продукта вместе с правыми
-     * @param id_source
-     * @param id_product
-     * 
-     * @return type
-     */
     public function actionDeleteProduct() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
@@ -552,61 +564,10 @@ class ProductController extends Controller {
         }
 
         $source = Source::getById($filters->f_source);
-        if (!$source) {
-            return [
-                'status' => 'error',
-                'message' => 'Не удалось найти модель источника'
-            ];
-        }
-        
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
-    }
-    
-    /**
-     * Сбросить все фильтры c с сохранением пакетного выбора
-     * 
-     * @param listDataForServer
-     */
-    public function actionResetFilters(){
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        if (\Yii::$app->request->isGet) {
-            $params = \Yii::$app->request->get();
-        } elseif (\Yii::$app->request->isPost) {
-            $params = \Yii::$app->request->post();
-        }
-        
-        $filters = new Filters();
-        $filters->loadFromSession();
-        $filters->setToDefaultSelects();
-        $filters->saveToSession();
-        
-        $data = $params['listDataForServer'];
-        try{
-            if ($data['datas_products_left'] || $data['datas_products_right'] || $data['datas_products_left_delete']){
-                $this->indexPresenter->changeStatusProducts($data['datas_products_left'], $data['datas_products_right'], $data['datas_products_left_delete']);
-            }
-        } catch (\Exception $ex) {
-            Yii::error($ex->getLine().':'.$ex->getMessage());
-            return ['status' => 'error', 'message' => 'Сохранение пакета выбраных статусов совершилось с ошибкой'];
-        }
-        $this->actionIndex();
-        /*
-        $source = Source::getById($filters->f_source);
-        if (!$source) {
-            return [
-                'status' => 'error',
-                'message' => 'Не удалось найти модель источника'
-            ];
-        }
-        $user = \Yii::$app->user->identity;
-        $is_admin = $user && $user->isAdmin();
-        return $this->getRequestWithUpdateList($source, $filters, $is_admin);
-         * 
-         */
     }
     
     private function getRequestWithUpdateList(Source $source = null, Filters $filters = null, bool $is_admin = null, $is_update_list = true, $is_compare_all=false) {
@@ -646,8 +607,8 @@ class ProductController extends Controller {
         $source_name = $source->name;
         $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}') ? $filters->f_profile : 'Все';
         
-        $html_block_count = "Показано $f_count_products_on_page($count_products_right) из $count_products_all ";
-        $html_paginator = $this->indexPresenter->getHTMLPaginator($filters->f_number_page_current, $count_pages, 5, $count_products_all <= 200);
+        $html_block_count = "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path";
+        $html_paginator = $this->indexPresenter->getHTMLPaginator($filters->f_number_page_current, $count_pages);
 
         return [
             'status' => 'ok',
@@ -754,6 +715,7 @@ class ProductController extends Controller {
         $filters = new Filters();
         $filters->loadFromSession();
         $source = Source::getById($id_source);
+
         $model = Product::getProduct($source, $filters);
 
         $prev = null;
@@ -913,9 +875,8 @@ class ProductController extends Controller {
     public function actionUser_visible_fields() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $pid = $this->request->post('pid');
-        $user = \Yii::$app->user->identity;
-        $is_admin = ($user && $user->isAdmin());
-        if (!$is_admin)
+
+        if (!User::isAdmin())
             return false;
 
         $puv = P_user_visible::findOne(['p_id' => $pid]);

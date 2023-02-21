@@ -295,38 +295,22 @@ class FiltersQuery extends \yii\db\ActiveQuery
      */
     public function getSqlProfile(bool $is_admin, string $source_table_name, $f_profile): array
     {
-        // admin-доступ
-        if ($is_admin) {
-            if($f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все')
-                return ['like', $source_table_name . '.profile', $f_profile];
+        if ($is_admin && $f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все') {
+            return ['like', $source_table_name . '.profile', $f_profile];
+        } else {
             return [];
         }
-
-        $add_profiles = [];
-        $add_profiles[] = $f_profile;
-        // general-доступ pro-доступ
-
-        if($f_profile == 'Pro'){
-            $add_profiles[] = 'General';
-        }
-        // free-доступ
-        $sql = ["or"];
-        foreach ($add_profiles as $add_profile){
-            $sql[] = ['like', $source_table_name . '.profile', $add_profile . '%', false];
-            $sql[] = ['like', $source_table_name . '.profile', $add_profile];
-        }
-        return $sql;
     }
 
     /**
      * надо поле у источника добавить, где прописать максимальное кол-во
      * открытых просмотров для бесплатных товаров
-     *
+     * 
      * individual:
      *    юзер test - подходят с профилями
      *
      *    любой зареганый видит продукт с профилем начинающимся на General
-     *
+     * 
      *    free - доступен даже без авторизации, но ограниченное число
      * @param string $sourceTableName
      * @param string|null $fProfile
@@ -335,14 +319,12 @@ class FiltersQuery extends \yii\db\ActiveQuery
      */
     public function getSqlProfileFront(string $sourceTableName, ?string $fProfile, ?string $profileType): array
     {
-        $user = \Yii::$app->user->identity;
         if ($fProfile) {
             if ($profileType !== null) {
                 return ['or',
-                //    ['like', $sourceTableName . '.profile', 'Free'],
+                    ['like', $sourceTableName . '.profile', 'Free'],
                     ['like', $sourceTableName . '.profile', $fProfile],
-                    ['like', $sourceTableName . '.profile', $fProfile . '%', false],
-                  //  ['like', $sourceTableName . '.profile', 'Prepod'],
+                    ['like', $sourceTableName . '.profile', 'Prepod'],
                 ];
             } else {
 
@@ -352,9 +334,9 @@ class FiltersQuery extends \yii\db\ActiveQuery
         return ['like', $sourceTableName . '.profile', 'Free'];
     }
 
-    public function getSqlTille(string $source_table_name, $f_title): array
+    public function getSqlTille(string $source_table_name, $f_title): array 
     {
-        return ($f_title) ?
-            ['like', 'info', $f_title] : [];
+        return ($f_title)?
+            ['like', 'info', $f_title]:[];
     }
 }

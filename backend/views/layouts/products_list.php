@@ -24,18 +24,10 @@ ProductsAsset::register($this);
         <?php $this->head() ?>
     </head>
     <body class="d-flex flex-column h-100">
-
-        <!-- preloader -->
-        <div id="preloader">
-            <div class="preloader">
-                <div class="preloader__image"></div>
-            </div>
-        </div>
-        <!-- preloader end  -->
-
     <?php $this->beginBody() ?>
 
     <header>
+
         <?php
         echo \backend\components\NavBarWidget::widget([]);
 

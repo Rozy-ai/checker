@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use backend\models\ExternalUser;
 use backend\models\search\ExternalUsersSearch;
+use common\models\ExternalUserProfileFieldVal;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -79,6 +80,16 @@ class ExternalUsersController extends Controller
         ]);
     }
 
+    private function saveExternalUserProfileFields(ExternalUser $model) {
+        ExternalUserProfileFieldVal::deleteAll(['ex_user_id' => $model->id]);
+        foreach($_POST['ExternalUserProfileFieldVal'] as $fieldValData) {
+            $fieldVal = new ExternalUserProfileFieldVal();
+            $fieldVal->ex_user_id = $model->id;
+            $fieldVal->field_id = $fieldValData['field_id'];
+            $fieldVal->value = $fieldValData['value'];
+            $fieldVal->save();
+        }
+    }
     /**
      * Creates a new ExternalUser model.
      * If creation is successful, the browser will be redirected to the 'view' page.
@@ -94,6 +105,7 @@ class ExternalUsersController extends Controller
                     return $this->asJson(ActiveForm::validate($model));
                 }
                 if ($model->save()) {
+                    $this->saveExternalUserProfileFields($model);
                     return $this->redirect(['view', 'id' => $model->id]);
                 }
             }
@@ -122,6 +134,7 @@ class ExternalUsersController extends Controller
                 return $this->asJson(ActiveForm::validate($model));
             }
             if ($model->save()) {
+                $this->saveExternalUserProfileFields($model);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         }

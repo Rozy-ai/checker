@@ -85,7 +85,6 @@ class Product extends \yii\db\ActiveRecord {
         return $class_source::findOne(['id' => $id]);
     }
 
-
     /**
      * Базовая информация о левом товаре
      * 
@@ -179,15 +178,11 @@ class Product extends \yii\db\ActiveRecord {
     }
 
     /**
-     * Количество сравнений с данным товаром
      * 
-     * @param string $status
-     * @return int
+     * @return integer
      */
-    public function getCountComparisons($status = '') {
-        return $status?
-            Comparison::find()->where(['product_id' => $this->id, 'source_id' => $this->source->id, 'status' => $status])->count():
-            Comparison::find()->where(['product_id' => $this->id, 'source_id' => $this->source->id])->count();
+    public function getCountComparisons() {
+        return Comparison::find()->where(['product_id' => $this->id, 'source_id' => $this->source->id])->count();
     }
 
     /**
@@ -227,6 +222,7 @@ class Product extends \yii\db\ActiveRecord {
         $source_table2_name = $source->table_2;
 
         $q = new FiltersQuery($source->class_1);
+
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where(['and',
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
@@ -263,7 +259,6 @@ class Product extends \yii\db\ActiveRecord {
         }
 
         // Получим все необходимые join
-
         $q->addJoins($source_table_name, $source_table2_name);
 
         // Отсечем не нужные записи
@@ -275,14 +270,12 @@ class Product extends \yii\db\ActiveRecord {
             $q->offset($offset);
         }
 
-        $list = $q->distinct()->all();
+        $list = $q->all();
+        //print_r($q->createCommand()->getRawSql());
+        //exit;
         foreach ($list as $k => $product) {
-            $product->_source = $source;
-            $product->_baseInfo = $product->info;
-
-            //$list[$k] = self::getById($source->class_1, $product['id']);
-            //$list[$k]->_source = $source;
-            //$list[$k]->_baseInfo = $list[$k]->info;
+            $product->source = $source;
+            $product->baseInfo = $product->info;
         }
         return $list;
     }
@@ -370,6 +363,7 @@ class Product extends \yii\db\ActiveRecord {
         $source_table2_name = $source->table_2;
 
         $q = new FiltersQuery($source->class_1);
+
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where(['and',
             //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
@@ -386,13 +380,10 @@ class Product extends \yii\db\ActiveRecord {
                 //$q->getSqlNoInComparisons(),
                 //$q->getSqlSettingsMessage(),
         ]);
+
         // Получим все необходимые join
         $q->addJoins($source_table_name, $source_table2_name);
-        if ($filters->f_profile == 'Free') {
-            if ($source->max_free_show_count < $q->count()) {
-                return $source->max_free_show_count;
-            }
-        }
+
         return $q->count();
     }
 
@@ -459,17 +450,6 @@ class Product extends \yii\db\ActiveRecord {
             $transaction->rollBack();
             throw new \Exception($ex->message);
         }
-    }
-    
-    /**
-     * Удалить из правой таблицы только запись с id = $id_item
-     *      Не путать со столбцом таблицы item_id!!! Это какая-то шляпа !!!!!!
-     * @param type $id_source
-     * @param type $id_item
-     */
-    public static function deleteItemBy($id_source, $id_item){
-        $source = Source::getById($id_source);
-        \Yii::$app->db->createCommand()->delete($source->table_2, ['id' => $id_item])->execute();
     }
 
     // ========================================================================

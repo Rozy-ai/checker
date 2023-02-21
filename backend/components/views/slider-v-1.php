@@ -20,7 +20,7 @@ use common\models\Comparison;
 use yii\helpers\Html;
 use common\models\User;
 use yii\helpers\Url;
-
+        
 $source         = $product->source;
 $comparisons    = $product->comparisons;
 
@@ -44,7 +44,7 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
 </div>
  
 <!-- VIEW 1 -->
-<div class='slider__view-1 <?= $option_class_slider ?> [ SLIDER ] product-view__slider '>
+<div class='slider__view-1 <?= $option_class_slider ?> [ SLIDER ] product-view__slider'>
     <?php 
         foreach ($items as $index => $item): 
     ?>
@@ -149,54 +149,32 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
             <span class="slider__sales sales">
                 <span class="cnt-1__stock-title __blue-title">Price:</span><span class="grade cnt-1__stock-n"><?= $item->price ?></span>
             </span>
-            <div class="slider__sales sales" style="margin: 0">
-                <span class="__blue-title">R:</span><?= explode(' ', $item->rating)[0]; ?>
-            </div>
 
             <!-- / FORK -->
             <div
-                    class="slider__yellow_button _slider__green_button -v-2 -v-3 -min <?= $comparisons[$item->id]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
-                    data-url = "/product/compare"
-                    data-id_source = "<?=$source_id?>"
-                    data-id_product = "<?=$product->id?>"
-                    data-id_item = "<?=$item->id?>"
-                    data-status = "<?= Comparison::STATUS_PRE_MATCH ?>"
-                    data-is_last = "<?=$is_last?>"
-            ></div>
+                class="slider__yellow_button _slider__green_button -v-2 -v-3 -min <?= $comparisons[$item->id]->status === 'PRE_MATCH' ? '-hover' : '' ?>"
+                data-url = "/product/compare"
+                data-id_source = "<?=$source_id?>"
+                data-id_product = "<?=$product->id?>"
+                data-id_item = "<?=$item->id?>"
+                data-status = "<?= Comparison::STATUS_PRE_MATCH ?>"
+                data-is_last = "<?=$is_last?>"
+            >
+            </div>
 
             <div
-                    class="slider__red_button -min <?= $comparisons[$item->id]->status === 'MISMATCH' ? '-hover' : '' ?>"
-                    data-url = "/product/compare"
-                    data-id_source = "<?=$source_id?>"
-                    data-id_product = "<?=$product->id?>"
-                    data-id_item = "<?=$item->id?>"
-                    data-status = "<?= Comparison::STATUS_MISMATCH ?>"
-                    data-is_last = "<?=$is_last?>"
-            ></div>
+                class="slider__red_button -min <?= $comparisons[$item->id]->status === 'MISMATCH' ? '-hover' : '' ?>"
+                data-url = "/product/compare"
+                data-id_source = "<?=$source_id?>"
+                data-id_product = "<?=$product->id?>"
+                data-id_item = "<?=$item->id?>"
+                data-status = "<?= Comparison::STATUS_MISMATCH ?>"
+                data-is_last = "<?=$is_last?>"
+            >
+
+            </div>
 
         </div>
-
-        <?php if ((count($variables_right['images_right']) > 1)): ?>
-            <div class="slider__right-item-other-markers">
-                <?php foreach ($variables_right['images_right'] as $key=>$image_right): ?>
-                    <div class="slider__right-item-other-marker">
-                        <div class="slider__right-item-other-marker_image" style="background-image: url(<?=$image_right?>)"
-                             data-description_left   = "<?= htmlspecialchars($variables_left['description_left'])?>"
-                             data-description_right  = "<?= htmlspecialchars($variables_right['description_right'])?>"
-                             data-img_left           = "<?= htmlspecialchars($variables_left['img_left'])?>"
-                             data-img_right          = "<?= htmlspecialchars($image_right)?>"
-                             data-footer_left        = "<?= htmlspecialchars($variables_left ['footer_left'])?>"
-                             data-footer_right       = "<?= htmlspecialchars($variables_right['footer_right'])?>"
-                             data-count_images_right = "<?= htmlspecialchars($variables_right['count_images_right'])?>"
-                        ></div>
-                    </div>
-                <?php
-                    if($key > 3) {
-                        break;
-                    }
-                endforeach; ?>
-            </div>
-        <?php endif;?>
     </div>
     <?php $cnt++; endforeach; ?>
 </div>

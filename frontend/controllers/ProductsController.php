@@ -20,10 +20,6 @@ use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\Request;
 
-/**
- *  __construct($id,$module,IndexPresenter $indexPresenter,ProductPresenter $productPresenter,array $config = [])
- *  
- */
 class ProductsController extends Controller
 {
     public IndexPresenter $indexPresenter;

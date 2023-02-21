@@ -31,7 +31,7 @@ class Source extends \yii\db\ActiveRecord {
 
     public function rules() {
         return [
-            [['id', 'name', 'table_1', 'table_2', 'import_local__max_product_date', 'import_local__db_import_name', 'import__default_q_1', 'import__sql_file_path', 'country'], 'trim'],
+            [['id', 'name', 'table_1', 'table_2', 'import_local__max_product_date', 'import_local__db_import_name', 'import__default_q_1', 'import__sql_file_path'], 'trim'],
             [['max_free_show_count'], 'integer'],
             [['name', 'table_1'], 'required'],
         ];
