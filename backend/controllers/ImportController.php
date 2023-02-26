@@ -314,7 +314,7 @@ class ImportController extends \yii\web\Controller{
 
     if (isset($f)) $file_name = $f->getBaseName().'.'.$f->getExtension(); else $file_name = 'ИМПОРТ ИЗ БД';
 
-    self::save_stat($file_name,$stat['all'],$source_id);
+    self::save_stat($file_name,$stat['all'],$source_id, $stat);
 
 // считаем статистику и отправляем ее на import/result_statistics.php
 
@@ -335,14 +335,13 @@ class ImportController extends \yii\web\Controller{
     ]);
   }
 
-  public static function save_stat($file_name,$cnt,$source_id){
+  public static function save_stat($file_name, $cnt, $source_id, $raw){
     $stat_log = new Stats__import_export();
     $stat_log->type = 'IMPORT';
     $stat_log->file_name = $file_name;
     $stat_log->comparison = '';
     $stat_log->cnt = $cnt;
-    $stat_log->raw = '';
-    //$stat_log->raw = json_encode($out);
+    $stat_log->raw = json_encode($raw);
     $stat_log->source_id = $source_id;
     $stat_log->profile = '';
     $stat_log->created = date('Y-m-d H:i:s',time());
@@ -374,15 +373,19 @@ class ImportController extends \yii\web\Controller{
     $stat = $this->import_from_tmp_db($source,$q_1);
     $this->getView()->params['local_import_stat'] = $stat;
 
-    self::save_stat('LOCAL_IMPORT',$stat['all'],$source_id);
+    self::save_stat('LOCAL_IMPORT',$stat['all'],$source_id, $stat);
 
+    $source_bo = Source::findOne(['id' => (int)$source_id]);
     if ($p_date_in_parser){
-      $source_bo = Source::findOne(['id' => (int)$source_id]);
       $source_bo->import_local__max_product_date = $p_date_in_parser;
       $source_bo->update();
+    } else {
+      $max_date = ImportController::get_max_product_date_in_parser(Source::findOne(['id' => (int)$source_id]));
+      if ($source_bo->import_local__max_product_date !== $max_date) {
+        $source_bo->import_local__max_product_date = $max_date;
+        $source_bo->update();
+      }
     }
-
-
 
     if ($stop === 1){
       echo '<pre>'.PHP_EOL;
@@ -392,6 +395,12 @@ class ImportController extends \yii\web\Controller{
       echo PHP_EOL;
       exit;
     }
+
+      return $this->render('result_statistics', [
+          'stat' => $stat,
+          'source_id' => $source_id,
+          'source' => $source,
+      ]);
   }
 
 
