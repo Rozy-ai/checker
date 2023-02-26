@@ -2,10 +2,10 @@
 
 use backend\components\TableView;
 use backend\components\TopSlider;
+use backend\controllers\StatsController;
 use common\models\Comparison;
 use common\models\HiddenItems;
 use yii\helpers\Html;
-use yii\helpers\Url;
 
 /*
  * @var string $f_source
@@ -65,6 +65,8 @@ $this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block
     . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
 $local_import_stat = null;
 
+$last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
+
 \backend\assets\IconsAsset::register($this);
 \backend\assets\ProductIndexAsset::register($this);
 ?>
@@ -122,7 +124,7 @@ $local_import_stat = null;
                 <?php endif; ?>
 
                 <div class="form-group _col-sm-2 filter-items__last-update" >
-                    last update:
+                    last <?php echo Html::a('update','/import/local_import?source_id='.$f_source, ['title' => $last_local_import_txt]) ?>:
                     <?= $last_update->created ?? 'Нет данных' ?>
                 </div>
 

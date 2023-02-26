@@ -2,6 +2,7 @@
 
 use backend\assets\IconsAsset;
 use backend\assets\ProductIndexAsset;
+use backend\controllers\StatsController;
 use common\models\HiddenItems;
 use common\models\ProfileTypeSetting;
 use common\models\Source;
@@ -47,6 +48,8 @@ $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 
 $local_import_stat = null;
 
+$last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
+
 IconsAsset::register($this);
 ProductIndexAsset::register($this);
 ?>
@@ -75,7 +78,7 @@ ProductIndexAsset::register($this);
                 </div>
 
                 <div class="form-group _col-sm-2 filter-items__last-update">
-                    last update:<br>
+                    last <?php echo Html::a('update','/import/local_import?source_id='.$f_source, ['title' => $last_local_import_txt]) ?>:<br>
                     <?= $last_update->created ?? 'Нет данных' ?>
                 </div>
             </div>
