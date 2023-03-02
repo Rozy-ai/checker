@@ -270,7 +270,7 @@ class Product extends \yii\db\ActiveRecord {
             $q->offset($offset);
         }
 
-        $list = $q->all();
+        $list = $q->distinct()->all();
         //print_r($q->createCommand()->getRawSql());
         //exit;
         foreach ($list as $k => $product) {
