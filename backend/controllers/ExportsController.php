@@ -390,7 +390,6 @@ Array (   [0] => Array (
     $command = $connection->createCommand($q->createCommand()->getRawSql());
     $res = $command->queryAll();
 
-
     /*
             [id] => 6528
             [title] =>
@@ -438,7 +437,6 @@ Array (   [0] => Array (
 
       $item = $addInfo[$node_id];
       $r['item_right'] = $item;
-
       $out[] = $r;
     }
 
@@ -529,10 +527,14 @@ Array (   [0] => Array (
 
           $val = '---';
           if ($id_key['type'] === 'right_item'){
-            $val = $itm->$key_name;
+              if($itm->$key_name != null) {
+                  $val = $itm->$key_name;
+              }
           }
           if ($id_key['type'] === 'left_item'){
-            $val = $itm['parent_item'][$key_name];
+              if($itm['parent_item'][$key_name] != null) {
+                  $val = $itm['parent_item'][$key_name];
+              }
           }
 
           if (is_array($val)) $val = 'ARRAY!!!';
