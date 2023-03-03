@@ -278,11 +278,15 @@ trait TraitListFilters {
 
         $filters->f_profile = 'General';
         $count_general = Product::getCountProducts($this->source, $filters, $is_admin);
-        $profiles['General'] = "General ($count_general)";
+        if ($count_general) {
+            $profiles['General'] = "General ($count_general)";
+        }
 
         $filters->f_profile = 'Free';
         $count_free = Product::getCountProducts($this->source, $filters, $is_admin);
-        $profiles['Free'] = "Free ($count_free)";
+        if ($count_free) {
+            $profiles['Free'] = "Free ($count_free)";
+        }
 
         $filters->f_profile = $user->username;
         $count_login = Product::getCountProducts($this->source, $filters, $is_admin);
