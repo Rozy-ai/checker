@@ -229,6 +229,7 @@ class Product extends \yii\db\ActiveRecord {
         $q = new FiltersQuery($source->class_1);
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where(['and',
+            //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
             $q->getSqlAsin($source_table_name, $filters->f_asin),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
@@ -237,9 +238,10 @@ class Product extends \yii\db\ActiveRecord {
             $q->getSqlUsername($source_table_name, $filters->f_username),
             $q->getSqlComparisonStatus($filters->f_comparison_status),
             $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile)
-                //$q->getSqlAddInfoExists($source_table_name),
-                //$q->getSqlNoInComparisons(),
-                //$q->getSqlSettingsMessage(),
+
+            //$q->getSqlAddInfoExists($source_table_name),
+            //$q->getSqlNoInComparisons(),
+            //$q->getSqlSettingsMessage(),
         ]);
 
         // Добавим сортировку:
@@ -275,14 +277,15 @@ class Product extends \yii\db\ActiveRecord {
             $q->offset($offset);
         }
 
-        $list = $q->distinct()->all();
+        $list = $q->createCommand()->queryAll();
+    //    var_dump($list);
         foreach ($list as $k => $product) {
-            $product->_source = $source;
-            $product->_baseInfo = $product->info;
+           // $product->_source = $source;
+           // $product->_baseInfo = $product->info;
 
-            //$list[$k] = self::getById($source->class_1, $product['id']);
-            //$list[$k]->_source = $source;
-            //$list[$k]->_baseInfo = $list[$k]->info;
+            $list[$k] = self::getById($source->class_1, $product['id']);
+            $list[$k]->_source = $source;
+            $list[$k]->_baseInfo = $list[$k]->info;
         }
         return $list;
     }
@@ -388,11 +391,11 @@ class Product extends \yii\db\ActiveRecord {
         ]);
         // Получим все необходимые join
         $q->addJoins($source_table_name, $source_table2_name);
-        if ($filters->f_profile == 'Free') {
+      /*  if ($filters->f_profile == 'Free') {
             if ($source->max_free_show_count < $q->count()) {
                 return $source->max_free_show_count;
             }
-        }
+        }*/
         return $q->count();
     }
 
