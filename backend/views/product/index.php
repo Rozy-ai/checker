@@ -258,14 +258,14 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                 <div class="form-group _col-sm-3">
                     <select name="f_sort" id="id_f_sort" class="form-control">
                         <option value="">Сортировать по</option>
-                        <option value="created_ASC" <?= ($f_sort === 'created_ASC') ? 'selected' : '' ?> >дате добавления ↓</option>
-                        <option value="created_DESC" <?= ($f_sort === 'created_DESC') ? 'selected' : '' ?> >дате добавления ↑</option>
-                        <option value="updated_ASC" <?= ($f_sort === 'updated_ASC') ? 'selected' : '' ?> >дате обновления ↓</option>
-                        <option value="updated_DESC" <?= ($f_sort === 'updated_DESC') ? 'selected' : '' ?> >дате обновления ↑</option>
+                        <option value="created_ASC" <?= ($f_sort === 'created_ASC') ? 'selected' : '' ?> >дате добавления ↑</option>
+                        <option value="created_DESC" <?= ($f_sort === 'created_DESC') ? 'selected' : '' ?> >дате добавления ↓</option>
+                        <option value="updated_ASC" <?= ($f_sort === 'updated_ASC') ? 'selected' : '' ?> >дате обновления ↑</option>
+                        <option value="updated_DESC" <?= ($f_sort === 'updated_DESC') ? 'selected' : '' ?> >дате обновления ↓</option>
                     </select>
                 </div>
 
-                <?php if ($f_detail_view || $is_admin): ?>
+                <?php if ($is_admin): ?>
                 <div class="form-group _col-sm-3" >
                     <select name="f_detail_view" id="id_f_detail_view" class="form-control ">
                         <option value="0" <?= ($f_detail_view === '0')? 'selected':'' ?>>Кратко</option>

@@ -183,6 +183,7 @@ class ProductController extends Controller {
         $this->layout = 'products_list';
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
+        $compare_status = $filters->f_comparison_status;
         $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
         if (isset($params['all'])) {
             $filters->f_count_products_on_page = 'ALL';
@@ -196,6 +197,19 @@ class ProductController extends Controller {
         }
         if($filters->f_profile == 'Free') {
             $filters->f_detail_view = 1; // Подробно
+        }
+
+        if (!$is_admin) {
+            switch ($compare_status) {
+                case 'PRE_MATCH':
+                case 'MATCH':
+                    $filters->f_detail_view = 1; // Подробно
+                    break;
+                case 'NOCOMPARE':
+                case 'MISMATCH':
+                    $filters->f_detail_view = 0; // Кратко
+                    break;    
+            }
         }
         return $this->render('index', [
             'f_source' => $src ? $src : $filters->f_source,
