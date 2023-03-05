@@ -137,10 +137,32 @@ class FiltersQuery extends \yii\db\ActiveQuery
      * @param string|null $f_asin
      * @return array
      */
-    public function getSqlAsin(string $source_table_name, $f_asin): array
+    public function getSqlAsin(string $source_table_name, $f_asin, $f_asin_multiple): array
     {
-        return ($f_asin) ?
-            ['like', $source_table_name . '.ASIN', "$f_asin%", false] : [];
+        $f_asin_multiple = array_filter(preg_split("/\s+|\n+|(\s*,\s*)/", $f_asin_multiple), function ($v) {
+            return !empty($v);
+        });
+        $asinCondition = [];
+
+        if (!$f_asin && empty($f_asin_multiple)) {
+            return $asinCondition;
+        }
+
+        $asinCondition = ['or'];
+
+        if ($f_asin) {
+            $asinCondition[] = ['like', $source_table_name . '.ASIN', "$f_asin%", false];
+        }
+
+        if (!empty($f_asin_multiple)) {
+            foreach ($f_asin_multiple as $asin) {
+                $asinCondition[] = ['like', $source_table_name . '.ASIN', "$asin%", false];
+            }
+        }
+
+        return $asinCondition;
+        // return ($f_asin) ?
+        //     ['like', $source_table_name . '.ASIN', "$f_asin%", false] : [];
     }
 
     /**
