@@ -111,7 +111,11 @@ use common\models\Comparison;
         <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
             <div id='id_td2_asin' class="products-list__asin">
                 <div class="row">
-                    <div class="col-3"></div>
+                    <div class="col-3">
+                        <?php if ($item->date_update === $last_update->created) { ?>
+                            New
+                        <?php } ?>
+                    </div>
                     <div class="col-sm-6">
                         <span><?= $td2_asin ?></span>
                     </div>
@@ -271,9 +275,9 @@ use common\models\Comparison;
                 <div class="product-list-item__date-title">Добавлено:</div>
                 <div><?= date('d.m.Y H:i', strtotime($item->date_add)); ?></div>
 
-                <?php if ($item->updated): ?>
+                <?php if ($item->date_update): ?>
                 <div class="product-list-item__date-title" style="margin-top: 5px">Обновлено:</div>
-                <div><?= date('d.m.Y H:i', strtotime($item->updated->date)); ?></div>
+                <div><?= date('d.m.Y H:i', strtotime($item->date_update)); ?></div>
                 <?php endif;?>
             </div>
 

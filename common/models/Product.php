@@ -254,12 +254,14 @@ class Product extends \yii\db\ActiveRecord {
                 $q->orderBy($source_table_name . '.date_add DESC');
                 break;
             case 'updated_ASC' :
-                $q->addTable('p_updated');
-                $q->orderBy('p_updated.date ASC');
+                $q->orderBy($source_table_name . '.date_update ASC');
+                // $q->addTable('p_updated');
+                // $q->orderBy('p_updated.date ASC');
                 break;
             case 'updated_DESC' :
-                $q->addTable('p_updated');
-                $q->orderBy('p_updated.date DESC');
+                $q->orderBy($source_table_name . '.date_update DESC');
+                // $q->addTable('p_updated');
+                // $q->orderBy('p_updated.date DESC');
                 break;
             default:
                 $q->orderBy($source_table_name . '.id');
