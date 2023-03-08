@@ -11,6 +11,7 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\web\Controller;
 use common\models\Stats_import_export;
+use common\models\Filters;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -352,13 +353,16 @@ Array (   [0] => Array (
     $comparison = $this->request->post('comparisons');
     $profile = $this->request->post('profile');
     $is_new = !!(int)$this->request->post('is_new');
+    $filtered = false;
+    $ids = [];
 
     if (!$ids_keys || !$source_id || !$comparison || !$profile) {
       // http://checker.loc/exports/step_4?source_id=2&comparisons=match&profile={{all}}
 
       $source_id = $this->request->get('source_id');
-      $comparison = serialize($this->request->get('comparisons'));
+      $comparison = serialize([$this->request->get('comparisons')]);
       $profile = $this->request->get('profile');
+      $filtered = $this->request->get('filtered') === 'true';
       $ids_keys = $this->get_keys_from_db($source_id);
       $method = 'GET';
     }
@@ -388,6 +392,12 @@ Array (   [0] => Array (
     }
 
     $this->get_source($source_id);
+    if ($filtered) {
+      $filters = new Filters();
+      $filters->loadFromSession();
+      $list = Product::getListProducts(Source::getById($source_id), $filters, \Yii::$app->user->identity->isAdmin());
+      $ids = array_map(fn ($p) => $p->id, $list);
+    }
 
     /*
     $q = $this->source_class::find()
@@ -416,7 +426,9 @@ Array (   [0] => Array (
       }
     }
 
-    var_dump($q->createCommand()->rawSql); die;
+    if (!empty($ids)) {
+      $q->andWhere(['IN', $this->source_table_name . '.id', $ids]);
+    }
     $q->asArray();
 
     $connection = Yii::$app->getDb();

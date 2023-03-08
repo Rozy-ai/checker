@@ -63,6 +63,7 @@ const CLASS_BUTTON_MISSMATCH_ALL = '.product-list__item-mismatch-all'; // Лев
 const CLASS_BUTTON_RESET_FILTERS = '#id_button_reset_filters';
 const CLASS_BUTTON_ADDITIONAL_FILTERS = '#additional_filter_link';
 const CLASS_BLOCK_BUTTON_DELETE_ALL = '.js-del-all-visible-items';
+const CLASS_CHECKBOX_EXPORT_FILTERED = '#id_export_filtered';
 
 function main() {
     let listDataForServer = new ListDataForServer();
@@ -501,7 +502,7 @@ function main() {
             let value;
             switch ( id_filter ) {
                 case 'id_f_asin_multiple': value = filter.val().trim(); break;
-                case 'id_f_new': value = filter.prop('checked') ? 1 : 0; break;
+                case 'id_f_new': value = filter.prop( 'checked' ) ? 1 : 0; break;
                 //case 'id_f_batch_mode': value = +new Filters().getModeBatch(); break;
                 //case 'id_f_hide_mode': value = +new Filters().getModeHide(); break;
                 default:
@@ -691,6 +692,16 @@ function main() {
             $( '.navigation' ).show();
             $( '.js-title-and-source_selector' ).show();
 
+        }
+    } );
+
+    $( 'body' ).on( 'change', CLASS_CHECKBOX_EXPORT_FILTERED, ( e ) => {
+        const $this = $( e.target ),
+            $exportLink = $this.parent().siblings( '.product-list-item__export' );
+        if ( $this.prop( 'checked' ) ) {
+            $exportLink.attr( 'href', `${$exportLink.attr( 'href' )}&filtered=true` );
+        } else {
+            $exportLink.attr( 'href', `${$exportLink.attr( 'href' ).replace( '&filtered=true', '' )}` );
         }
     } );
 }

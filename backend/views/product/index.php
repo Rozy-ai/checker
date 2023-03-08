@@ -318,27 +318,38 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
     <div class="row">
         <div class="col">
             <?php
-            echo '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
+            echo '<div>' .
+                '<div class="d-inline-block cnt-items" id="id_block_count">' .
+                'Показано '
                 . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right . ') из ' . $count_products_all . ' </div> по: '
-                . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page_footer', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
+                . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page_footer', 'class' => 'form-control form-control-sm d-inline-block w-auto']) .
+                '</div>';
             ?>
 
 
             <!--            <div class="featured-items">Показаны записи --><?php //= min($f_count_products_on_page, $count_products_all) 
                                                                             ?><!-- из --><?php //= $count_products_all 
-                                                                                                                                                        ?><!--.</div>-->
+                                                                                            ?><!--.</div>-->
 
             <?php
             $e_comparison = isset($f_comparison_status) && $f_comparison_status ? strtolower($f_comparison_status) : 'match';
             $e_profile = isset($f_profile) && $f_profile && $f_profile !== 'Все' ? $f_profile : '{{all}} ';
             ?>
-            <a href="<?= '/exports/step_4?source_id=' . $source->id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4">
-                экспортировать
-            </a>
-            <?php if ($is_admin) : ?>
-                <a href="/import/step_1?source_id=<?= $source->id ?>" target="_blank" data-source_id="<?= $source->id ?>" class="product-list-item__import-from-sql js-import-from-sql">
-                    загрузить SQL
+            <div class="mt-2 d-flex align-items-center">
+                <a href="<?= '/exports/step_4?source_id=' . $source->id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4 mb-0">
+                    экспортировать
                 </a>
+                <div class="d-flex align-items-center ml-3">
+                    <input type="checkbox" id="id_export_filtered" class="form-control h-auto" />
+                    <label for="id_export_filtered" class="mb-0 ml-2">Выбранные</label>
+                </div>
+            </div>
+            <?php if ($is_admin) : ?>
+                <div class="mt-2">
+                    <a href="/import/step_1?source_id=<?= $source->id ?>" target="_blank" data-source_id="<?= $source->id ?>" class="product-list-item__import-from-sql js-import-from-sql mb-0">
+                        загрузить SQL
+                    </a>
+                </div>
             <?php endif; ?>
 
 
