@@ -301,6 +301,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
         <?=
         $this->render('index_table', [
             'list' => $list,
+            'last_update' => $last_update,
             'local_import_stat' => $local_import_stat,
             'is_admin' => $is_admin,
             'f_comparison_status' => $f_comparison_status,
