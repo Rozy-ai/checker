@@ -93,6 +93,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
             <?php if ($is_admin) { ?>
                 <?php echo AdditionalFilter::widget([
                     'f_asin_multiple' => $f_asin_multiple,
+                    'f_new' => $f_new,
                 ]); ?>
             <?php } ?>
             <!--<form method="get" action="change-filters" id="id_products__filter-form">-->

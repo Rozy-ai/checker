@@ -417,6 +417,7 @@ function main() {
     addActionChangeFilter( 'id_f_count_products_on_page_footer', 'f_count_products_on_page' );
     addActionChangeFilter( 'id_f_detail_view', 'f_detail_view' );
     addActionChangeFilter( 'id_f_profile', 'f_profile' );
+    addActionChangeFilter( 'id_f_new', 'f_new' );
 
     $( CLASS_ITEM_STAT ).on( 'click', ( e ) => {
         const $this = $( e.target ).closest( CLASS_ITEM_STAT );
@@ -500,6 +501,7 @@ function main() {
             let value;
             switch ( id_filter ) {
                 case 'id_f_asin_multiple': value = filter.val().trim(); break;
+                case 'id_f_new': value = filter.prop('checked') ? 1 : 0; break;
                 //case 'id_f_batch_mode': value = +new Filters().getModeBatch(); break;
                 //case 'id_f_hide_mode': value = +new Filters().getModeHide(); break;
                 default:

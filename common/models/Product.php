@@ -238,7 +238,8 @@ class Product extends \yii\db\ActiveRecord {
             $q->getSqlStatus($filters->f_status),
             $q->getSqlUsername($source_table_name, $filters->f_username),
             $q->getSqlComparisonStatus($filters->f_comparison_status),
-            $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile)
+            $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
+            $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
 
             //$q->getSqlAddInfoExists($source_table_name),
             //$q->getSqlNoInComparisons(),
@@ -386,7 +387,8 @@ class Product extends \yii\db\ActiveRecord {
             $q->getSqlStatus($filters->f_status),
             $q->getSqlUsername($source_table_name, $filters->f_username),
             $q->getSqlComparisonStatus($filters->f_comparison_status),
-            $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile)
+            $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
+            $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
 
                 //$q->getSqlAddInfoExists($source_table_name),
                 //$q->getSqlNoInComparisons(),

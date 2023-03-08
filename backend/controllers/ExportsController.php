@@ -1,5 +1,7 @@
 <?php
+
 namespace backend\controllers;
+
 use backend\models\Exports__saved_keys;
 use common\models\Source;
 use backend\models\Stats__import_export;
@@ -8,12 +10,14 @@ use common\models\Product;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\web\Controller;
+use common\models\Stats_import_export;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
-class ExportsController extends Controller{
+class ExportsController extends Controller
+{
   public $source_id;
   /**
    * @var Product
@@ -22,7 +26,8 @@ class ExportsController extends Controller{
   public $source_table_name;
   public $source_table_name_2;
 
-  public function actionIndex(){
+  public function actionIndex()
+  {
 
 
     // вывести таблицу список источников
@@ -31,16 +36,16 @@ class ExportsController extends Controller{
     // [X] match  [ ] mismatch  [ ] other  [ ] nocompare
     // [Далее→]   /exports/step_2?source_id=1&compare=match
 
-      //  /exports/step_2
+    //  /exports/step_2
 
 
     return $this->render('index', [
       'dataProvider' => [],
     ]);
-
   }
 
-  public function actionStep_2(){
+  public function actionStep_2()
+  {
     $data = $this->request->post('DynamicModel');
     $source_id = $data['source_id'];
     $comparisons = $data['comparisons'];
@@ -59,16 +64,18 @@ class ExportsController extends Controller{
 
 
 
-  public function actionStep_3(){
+  public function actionStep_3()
+  {
 
     $data = $this->request->post('DynamicModel');
     $ignore_step_3 = $data['ignore_step_3'];
     $source_id = $data['source_id'];
     $profile = $data['profile'];
+    $is_new = $data['is_new'];
 
     $comparisons = $data['comparisons'];
     if (!$source_id || !$comparisons) {
-      echo '<pre>'.PHP_EOL;
+      echo '<pre>' . PHP_EOL;
       print_r('нет source_id или comparisons');
       echo PHP_EOL;
       exit;
@@ -97,8 +104,7 @@ class ExportsController extends Controller{
 
     $q_ = Exports__saved_keys::find()
       ->where(['source_id' => $source_id])
-      ->orderBy(['position' => SORT_ASC])
-    ;
+      ->orderBy(['position' => SORT_ASC]);
     $res = $q_->all();
 
     // [use_previous_saved] => 0
@@ -106,36 +112,41 @@ class ExportsController extends Controller{
 
       $q = $this->source_class::find()
         //->select('*')
-        ->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
-        ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-        ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-        ->leftJoin('p_updated','p_updated.p_id = '.$this->source_table_name.'.id ')
-        ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ')
-        ->leftJoin('messages','messages.id = comparisons.messages_id')
+        ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source_table_name . '.id')
+        ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
+        ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source_table_name . '.id ')
+        ->leftJoin('p_updated', 'p_updated.p_id = ' . $this->source_table_name . '.id ')
+        ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
+        ->leftJoin('messages', 'messages.id = comparisons.messages_id')
 
-      //      ->where([$this->source_table_name.'.ASIN' => 'B0012NGQS4'])
+        //      ->where([$this->source_table_name.'.ASIN' => 'B0012NGQS4'])
       ;
       $q->limit(1000);
       $res = $q->all();
 
-      if (!$res) {echo '<pre>'.PHP_EOL;print_r('-------');echo PHP_EOL;exit;}
-
-      foreach ($res as $k => $item){
-        $getBaseInfo = $item->getBaseInfo() ?? [];
-        $amazon_keys = array_unique(array_merge(array_keys($getBaseInfo),$amazon_keys));
-        $source_data_keys = array_unique(array_merge(array_values($item->getAddInfo() ? $item->getAddInfo()[0]->attributes() : []),$source_data_keys));
+      if (!$res) {
+        echo '<pre>' . PHP_EOL;
+        print_r('-------');
+        echo PHP_EOL;
+        exit;
       }
 
-      $amazon_keys = $this->format_keys($amazon_keys,$source_id,'left_item');
-      $source_data_keys = $this->format_keys($source_data_keys,$source_id,'right_item');
+      foreach ($res as $k => $item) {
+        $getBaseInfo = $item->getBaseInfo() ?? [];
+        $amazon_keys = array_unique(array_merge(array_keys($getBaseInfo), $amazon_keys));
+        $source_data_keys = array_unique(array_merge(array_values($item->getAddInfo() ? $item->getAddInfo()[0]->attributes() : []), $source_data_keys));
+      }
 
-      $table_items = array_merge($amazon_keys,$source_data_keys);
+      $amazon_keys = $this->format_keys($amazon_keys, $source_id, 'left_item');
+      $source_data_keys = $this->format_keys($source_data_keys, $source_id, 'right_item');
+
+      $table_items = array_merge($amazon_keys, $source_data_keys);
 
       Exports__saved_keys::deleteAll(['source_id' => $source_id]);
 
       foreach ($table_items as $k => $t_item) {
 
-        if ($t_item['name'] !== 'parent_item'){
+        if ($t_item['name'] !== 'parent_item') {
           $e_insert = new Exports__saved_keys();
           $e_insert->name = $t_item['name'];
           $e_insert->type = $t_item['type'];
@@ -146,7 +157,7 @@ class ExportsController extends Controller{
         }
       }
 
-/*    [id] => 1
+      /*    [id] => 1
       [name] => url_ebay
       [source_id] => 1
       [type] => left_item
@@ -156,35 +167,35 @@ class ExportsController extends Controller{
 
       $q_ = Exports__saved_keys::find()
         ->where(['source_id' => $source_id])
-        ->orderBy(['position' => SORT_ASC])
-      ;
+        ->orderBy(['position' => SORT_ASC]);
       $res = $q_->all();
-
     } // if (!$data['use_previous_saved'])
 
     $table_items_out = [];
-    if ($res){
-      foreach ($res as $k => $db_item){
+    if ($res) {
+      foreach ($res as $k => $db_item) {
         foreach ($db_item as $db_k => $db_value)
           $table_items_out[$k][$db_k] = $db_value;
       }
     }
 
     return $this->render('exports_step_3_compare_table', [
-//      'amazon_keys' => $amazon_keys,
-//      'source_data_keys' => $source_data_keys,
+      //      'amazon_keys' => $amazon_keys,
+      //      'source_data_keys' => $source_data_keys,
       'table_items' => $table_items_out,
       'comparisons' => $comparisons,
       'source_id' => $source_id,
       'profile' => $profile,
       'ignore_step_3' => $ignore_step_3,
+      'is_new' => $is_new === 'is_new',
     ]);
 
     // [Экспортировать→]
 
   }
 
-  public function actionSelect_one(){
+  public function actionSelect_one()
+  {
     $source_id = $this->request->post('source_id');
     $checked = $this->request->post('checked');
     $id = $this->request->post('id');
@@ -201,11 +212,12 @@ class ExportsController extends Controller{
     ];
   }
 
-  public function actionSelect_all(){
+  public function actionSelect_all()
+  {
     $source_id = $this->request->post('source_id');
     $checked = $this->request->post('checked');
 
-    Exports__saved_keys::updateAll(['source_id' => $source_id,'selected' => $checked], 'source_id = '.$source_id);
+    Exports__saved_keys::updateAll(['source_id' => $source_id, 'selected' => $checked], 'source_id = ' . $source_id);
 
     // json
     \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -214,15 +226,16 @@ class ExportsController extends Controller{
     ];
   }
 
-  public function actionChange_position(){
+  public function actionChange_position()
+  {
     $data = $this->request->post('id_position');
 
     if ($data)
-    foreach ($data as $item){
-      $e = Exports__saved_keys::findOne(['id' => $item['id']]);
-      $e->position = $item['position'];
-      $e->save();
-    }
+      foreach ($data as $item) {
+        $e = Exports__saved_keys::findOne(['id' => $item['id']]);
+        $e->position = $item['position'];
+        $e->save();
+      }
 
     // json
     \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -236,18 +249,19 @@ class ExportsController extends Controller{
    * @param $comparison
    * @return \yii\db\ActiveQuery
    */
-  private function prepare_record_1($comparison){
+  private function prepare_record_1($comparison)
+  {
 
     /* @var $source_class yii\db\ActiveRecord */
     $source_class = $this->source_class;
 
     $q = $source_class::find()
       ->select('*')
-      ->addSelect($this->source_table_name.'.id as id')
+      ->addSelect($this->source_table_name . '.id as id')
       //->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
-      ->leftJoin('hidden_items','hidden_items.p_id = '.$this->source_table_name.'.id ')
-      ->leftJoin('p_all_compare','p_all_compare.p_id = '.$this->source_table_name.'.id ')
-      ->leftJoin('comparisons','comparisons.product_id = '.$this->source_table_name.'.id ');
+      ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
+      ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source_table_name . '.id ')
+      ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ');
 
     //->where(['<=>','hidden_items.source_id', $this->source_id])
     //->where('comparisons_aggregated.source_id = '.(int)$this->source_id );
@@ -256,7 +270,7 @@ class ExportsController extends Controller{
     if (0 && $this->source_table_name === 'parser_trademarkia_com') {
       $q->andWhere("info NOT LIKE '%\"add_info\":\"[]\"%'");
       $q->andWhere("info NOT LIKE '%\"add_info\": \"[]\"%'");
-    }else{
+    } else {
       //$q->innerJoin($this->source_table_name_2,$this->source_table_name_2.'.`asin` = '.$this->source_table_name.'.asin');
     }
 
@@ -265,50 +279,59 @@ class ExportsController extends Controller{
 
     $where_0 = [];
     if (0 && $this->source_table_name === 'parser_trademarkia_com') {
-      $where_0 = ['like','info','add_info'];
+      $where_0 = ['like', 'info', 'add_info'];
     }
 
-    $where_2 = [];
-    $where_3 = ['and',
-      ['hidden_items.p_id' => null],
-      ['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]],
-    ];  // $item_1__ignore_red = 1
+    //$where_2 = [];
+    $compareCondition = ['or'];
+    // $where_3 = [
+    //   'and',
+    //   ['hidden_items.p_id' => null],
+    //   ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]],
+    // ];  
+    // $item_1__ignore_red = 1
 
-
-    if ($comparison === 'ALL'){
-
-    }elseif($comparison === 'ALL_WITH_NOT_FOUND'){
-
-      $where_3 = [];
-
-    }elseif($comparison === 'YES_NO_OTHER'){
-      /*
-      $where_2 =
-      [ 'OR' ,
-        ['`comparisons`.`status`' => 'MATCH'],
-        ['`comparisons`.`status`' => 'MISMATCH'],
-        ['`comparisons`.`status`' => 'OTHER'],
-        ['`comparisons`.`status`' => 'PRE_MATCH'],
-      ];
-      */
-      $where_2 = ['and', "`comparisons`.`status` IS NOT NULL AND comparisons.`status` <> 'MISMATCH'"];
-
-    }elseif ($comparison === 'NOCOMPARE'){
-      $where_2 = ['and',['p_all_compare.p_id' => null],['OR',['hidden_items.source_id' => null],['<>','hidden_items.source_id', $this->source_id]]];
-    }else{
-      $where_2 = [ '`comparisons`.`status`' => $comparison ];
+    foreach ($comparison as $c) {
+      switch ($c) {
+        case 'YES_NO_OTHER':
+          $compareCondition[] = "`comparisons`.`status` IS NOT NULL AND comparisons.`status` <> 'MISMATCH'";
+          break;
+        case 'NOCOMPARE':
+          $compareCondition[] = ['and', ['p_all_compare.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]];
+          break;
+        default:
+          $compareCondition[] = ['`comparisons`.`status`' => $comparison];
+      }
     }
 
-    $where = ['and',  $where_0, $where_2];
-    $q ->andWhere($where);
+    // if ($comparison === 'ALL') {
+    // } elseif ($comparison === 'ALL_WITH_NOT_FOUND') {
+
+    //   $where_3 = [];
+    // } elseif ($comparison === 'YES_NO_OTHER') {
+    //   $where_2 =
+    //     [
+    //       'OR',
+    //       ['`comparisons`.`status`' => 'MATCH'],
+    //       ['`comparisons`.`status`' => 'MISMATCH'],
+    //       ['`comparisons`.`status`' => 'OTHER'],
+    //       ['`comparisons`.`status`' => 'PRE_MATCH'],
+    //     ];
+    //   $where_2 = ['and', "`comparisons`.`status` IS NOT NULL AND comparisons.`status` <> 'MISMATCH'"];
+    // } elseif ($comparison === 'NOCOMPARE') {
+    //   $where_2 = ['and', ['p_all_compare.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]];
+    // } else {
+    //   $where_2 = ['`comparisons`.`status`' => $comparison];
+    // }
+
+    //$where = ['and',  $where_0, $compareCondition];
+    $q->andWhere(['and',  $where_0, $compareCondition]);
 
     return $q;
   }
 
-
-
-
-  public function actionStep_4(){
+  public function actionStep_4()
+  {
     // http://checker.loc/exports/step_4?source_id=2&comparisons=match&profile={{all}}
 
     $method = 'POST';
@@ -328,8 +351,7 @@ Array (   [0] => Array (
     $source_id = $this->request->post('source_id');
     $comparison = $this->request->post('comparisons');
     $profile = $this->request->post('profile');
-
-
+    $is_new = !!(int)$this->request->post('is_new');
 
     if (!$ids_keys || !$source_id || !$comparison || !$profile) {
       // http://checker.loc/exports/step_4?source_id=2&comparisons=match&profile={{all}}
@@ -339,26 +361,27 @@ Array (   [0] => Array (
       $profile = $this->request->get('profile');
       $ids_keys = $this->get_keys_from_db($source_id);
       $method = 'GET';
-   }
-    $comparison = strtoupper(unserialize($comparison));
+    }
 
+    $comparison = unserialize($comparison);
+    $comparison = array_map(fn ($c) => strtoupper($c), $comparison);
 
-    if ($comparison === 'NOCOMPARE' || $comparison === 'ALL'){
-      echo '<pre>'.PHP_EOL;
-      print_r($comparison.' не поддерживается, выберите другой вариант');
+    if (count($comparison) == 1 && ($comparison === 'NOCOMPARE' || $comparison === 'ALL')) {
+      echo '<pre>' . PHP_EOL;
+      print_r($comparison[0] . ' не поддерживается, выберите другой вариант');
       echo PHP_EOL;
       exit;
     }
 
     if (!$ids_keys) {
-      echo '<pre>'.PHP_EOL;
+      echo '<pre>' . PHP_EOL;
       print_r('нет $ids_keys');
       echo PHP_EOL;
       exit;
     }
 
     if (!$source_id || !$comparison) {
-      echo '<pre>'.PHP_EOL;
+      echo '<pre>' . PHP_EOL;
       print_r('нет source_id или comparisons');
       echo PHP_EOL;
       exit;
@@ -366,7 +389,7 @@ Array (   [0] => Array (
 
     $this->get_source($source_id);
 
-/*
+    /*
     $q = $this->source_class::find()
       ->select('*')
       //->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
@@ -380,10 +403,20 @@ Array (   [0] => Array (
 */
     $q = $this->prepare_record_1($comparison);
 
-    if (trim($profile) && $profile !== '{{all}}'){
-      $q->andWhere( ['like', $this->source_table_name.'.`profile`' , $profile]);
+    if (trim($profile) && $profile !== '{{all}}') {
+      $q->andWhere(['like', $this->source_table_name . '.`profile`', $profile]);
     }
 
+    $last_import = Stats_import_export::getLastLocalImport();
+    if ($is_new && $last_import) {
+      if ($source_id == 1) {
+        $q->andWhere(['date_update' => $last_import->created]);
+      } else {
+        $q->andWhere(['parse_at' => $last_import->created]);
+      }
+    }
+
+    var_dump($q->createCommand()->rawSql); die;
     $q->asArray();
 
     $connection = Yii::$app->getDb();
@@ -422,16 +455,16 @@ Array (   [0] => Array (
 
 
 
-    foreach ($res as $k => $r){
+    foreach ($res as $k => $r) {
 
       $_array = [];
       $id = $r['id'];
       $node_id = $r['node'];
-      $res_ = $this->source_class::findOne(['id' => $id ]);
+      $res_ = $this->source_class::findOne(['id' => $id]);
 
-      if (!$res_){
+      if (!$res_) {
         $addInfo = [];
-      }else{
+      } else {
         $addInfo = $res_->getAddInfo();
       }
 
@@ -444,7 +477,7 @@ Array (   [0] => Array (
     $sheet = $spreadsheet->getActiveSheet();
 
 
-/*
+    /*
     $sheet->fromArray(
       [1, 2, 3],
       null,
@@ -458,8 +491,8 @@ Array (   [0] => Array (
       $itm = $item['item_right'];
 
       $cell = 1;
-      foreach ($ids_keys as $id_key){ // cell
-        if ((int)$id_key['checked'] === 1){
+      foreach ($ids_keys as $id_key) { // cell
+        if ((int)$id_key['checked'] === 1) {
           $key_name = $id_key['name'];
           $val = $key_name;
 
@@ -467,25 +500,23 @@ Array (   [0] => Array (
           $range_1 = $spreadsheet->getActiveSheetIndex();
 
 
-          $coo = $spreadsheet->getActiveSheet()->getCellByColumnAndRow($cell,1)->getCoordinate();
+          $coo = $spreadsheet->getActiveSheet()->getCellByColumnAndRow($cell, 1)->getCoordinate();
 
-          if ($id_key['type'] === 'left_item'){
+          if ($id_key['type'] === 'left_item') {
             $style_2 = 1;
 
             $color = new \PhpOffice\PhpSpreadsheet\Style\Color();
-            $spreadsheet->getActiveSheet()->getStyle($coo.":".$coo)->getFill()
+            $spreadsheet->getActiveSheet()->getStyle($coo . ":" . $coo)->getFill()
               ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-              ->setStartColor($color->setRGB('E0E000'))
-              ;
+              ->setStartColor($color->setRGB('E0E000'));
           }
-          if ($id_key['type'] === 'right_item'){
+          if ($id_key['type'] === 'right_item') {
             $style_1 = 2;
 
             $color = new \PhpOffice\PhpSpreadsheet\Style\Color();
-            $spreadsheet->getActiveSheet()->getStyle($coo.":".$coo)->getFill()
+            $spreadsheet->getActiveSheet()->getStyle($coo . ":" . $coo)->getFill()
               ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-              ->setStartColor($color->setRGB('04AC00'))
-              ;
+              ->setStartColor($color->setRGB('04AC00'));
           }
 
           //echo '<pre>'.PHP_EOL;
@@ -495,11 +526,11 @@ Array (   [0] => Array (
         }
       }
 
-//      $start = $spreadsheet->getActiveSheet()->getCell([1,1])->getCoordinate();
-//      $end = $spreadsheet->getActiveSheet()->getCell([$cell,1])->getCoordinate();
-//      $spreadsheet->getActiveSheet()->getStyle($start.':'.$end)->getFill()
-//        ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-//        ->getStartColor()->setARGB('FFFF0000');
+      //      $start = $spreadsheet->getActiveSheet()->getCell([1,1])->getCoordinate();
+      //      $end = $spreadsheet->getActiveSheet()->getCell([$cell,1])->getCoordinate();
+      //      $spreadsheet->getActiveSheet()->getStyle($start.':'.$end)->getFill()
+      //        ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+      //        ->getStartColor()->setARGB('FFFF0000');
     }
     /*
     $conditional2 = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
@@ -516,25 +547,25 @@ Array (   [0] => Array (
     */
 
     $row = 2;
-    foreach ($out as $item){ // row
+    foreach ($out as $item) { // row
       $itm = $item['item_right'];
 
       $cell = 1;
-      foreach ($ids_keys as $id_key){ // cell
+      foreach ($ids_keys as $id_key) { // cell
 
-        if ((int)$id_key['checked'] === 1){
+        if ((int)$id_key['checked'] === 1) {
           $key_name = $id_key['name'];
 
           $val = '---';
-          if ($id_key['type'] === 'right_item'){
-              if($itm->$key_name != null) {
-                  $val = $itm->$key_name;
-              }
+          if ($id_key['type'] === 'right_item') {
+            if ($itm->$key_name != null) {
+              $val = $itm->$key_name;
+            }
           }
-          if ($id_key['type'] === 'left_item'){
-              if($itm['parent_item'][$key_name] != null) {
-                  $val = $itm['parent_item'][$key_name];
-              }
+          if ($id_key['type'] === 'left_item') {
+            if ($itm['parent_item'][$key_name] != null) {
+              $val = $itm['parent_item'][$key_name];
+            }
           }
 
           if (is_array($val)) $val = 'ARRAY!!!';
@@ -556,15 +587,16 @@ Array (   [0] => Array (
     $source_name = Source::get_source($source_id)['source_name'];
     $comparison_db = $comparison;
     if ($comparison === 'YES_NO_OTHER') $comparison = 'RESULT';
-    $_comparison = '_'.$comparison ?: '';
+    $_comparison = '_' . $comparison ?: '';
     $_profile = $profile ?: '';
-    if ($_profile === '{{all}}') $_profile = '_ALL'; else $_profile = '_'.$_profile;
-    $date = '_'.date('Y.m.d_H.i',time());
-    $cnt_items = '_'.($row - 2);
+    if ($_profile === '{{all}}') $_profile = '_ALL';
+    else $_profile = '_' . $_profile;
+    $date = '_' . date('Y.m.d_H.i', time());
+    $cnt_items = '_' . ($row - 2);
 
     // EBAY_MATCH_All_2022.07.02_12.59_19
 
-    $filename = $source_name.$_comparison.$_profile.$date.$cnt_items.'.xlsx';
+    $filename = $source_name . $_comparison . $_profile . $date . $cnt_items . '.xlsx';
 
     $stat_log = new Stats__import_export();
     $stat_log->type = 'EXPORT';
@@ -575,36 +607,35 @@ Array (   [0] => Array (
     $stat_log->raw = '';
     $stat_log->source_id = $source_id;
     $stat_log->profile = $profile;
-    $stat_log->created = date('Y-m-d H:i:s',time());
+    $stat_log->created = date('Y-m-d H:i:s', time());
     $stat_log->insert();
 
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save('export/'.$filename);
+    $writer->save('export/' . $filename);
 
 
-    if ($method === 'POST'){
+    if ($method === 'POST') {
       // json
       \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
       return [
         'res' => 'ok',
-        'file' => 'export/'.$filename
+        'file' => 'export/' . $filename
       ];
     }
 
-    if ($method === 'GET'){
+    if ($method === 'GET') {
       //header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; filename="''"');
-      header("Location: /export/".$filename);
+      header("Location: /export/" . $filename);
       //header('Content-Disposition: attachment; filename="'.$filename.'"');
     }
 
     // https://www.codexworld.com/export-data-to-excel-in-php/
     exit;
-
-
   }
 
-  private function format_keys($data,$source_id,$type){
+  private function format_keys($data, $source_id, $type)
+  {
     /*
     * [id] => 1
       [name] => url_ebay
@@ -615,7 +646,7 @@ Array (   [0] => Array (
      * */
 
     $out = [];
-    foreach ($data as $k => $value){
+    foreach ($data as $k => $value) {
       $out[$k]['id'] = -1;
       $out[$k]['name'] = $value;
       $out[$k]['source_id'] = $source_id;
@@ -626,9 +657,10 @@ Array (   [0] => Array (
     return $out;
   }
 
-  private function get_source($source_id){
+  private function get_source($source_id)
+  {
     $s = Source::get_source($source_id);
-    if ($s){
+    if ($s) {
       $this->source_id = $s['source_id'];
       $this->source_class = $s['source_class'];
       $this->source_table_name = $s['source_table_name'];
@@ -636,11 +668,12 @@ Array (   [0] => Array (
     }
   }
 
-  private function get_keys_from_db($source_id){
+  private function get_keys_from_db($source_id)
+  {
     $out = [];
     $res = Exports__saved_keys::find()->where(['source_id' => $source_id])->orderBy(['position' => SORT_ASC])->all();
     if ($res) {
-      foreach ($res as $k => $item){
+      foreach ($res as $k => $item) {
         $_arr['id'] = $item->id;
         $_arr['checked'] = $item->selected;
         $_arr['name'] = $item->name;
@@ -652,5 +685,4 @@ Array (   [0] => Array (
 
     return $out;
   }
-
 }

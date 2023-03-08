@@ -379,4 +379,12 @@ class FiltersQuery extends \yii\db\ActiveQuery
         return ($f_title) ?
             ['like', 'info', $f_title] : [];
     }
+
+    public function getSqlNewProducts($f_new, $last_import) {
+        if (!(int)$f_new || !isset($last_import->created)) {
+            return [];
+        }
+
+        return ['date_update' => $last_import->created];
+    }
 }

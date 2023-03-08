@@ -103,9 +103,6 @@ use common\models\Comparison;
 
             <div class="product-list-item__data"><span>Brand_R:</span><br><?= $item->baseInfo["Brand_R"]?:"-"; ?></div>
             <div class="product-list-item__data"><span>FBA/FBM:</span><br><span id="id_td1_fba"><?=$fba?></span></div>
-            <?php if ($is_admin):?>
-            <div class="product-list-item__data"><span>Profile:</span><br><?= $item->profile ?></div>
-            <?php endif;?>
 
         </td>
         <td class="products-list__td2" style="<?= (count($images_left) > 1) ? "padding-right: 53px;" : "" ?>">
