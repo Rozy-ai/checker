@@ -18,6 +18,7 @@ use common\models\Comparison;
  *          Parser_trademarkia_com
  *          Parser_Google
  *          Parser_china
+ *          Parser_shopping
  *       В зависимости от источника
  *  
  * @property int $id
@@ -231,7 +232,7 @@ class Product extends \yii\db\ActiveRecord {
         $q->where(['and',
             //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
-            $q->getSqlAsin($source_table_name, $filters->f_asin),
+            $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
             $q->getSqlTille($source_table_name, $filters->f_title),
             $q->getSqlStatus($filters->f_status),
@@ -253,12 +254,14 @@ class Product extends \yii\db\ActiveRecord {
                 $q->orderBy($source_table_name . '.date_add DESC');
                 break;
             case 'updated_ASC' :
-                $q->addTable('p_updated');
-                $q->orderBy('p_updated.date ASC');
+                $q->orderBy($source_table_name . '.date_update ASC');
+                // $q->addTable('p_updated');
+                // $q->orderBy('p_updated.date ASC');
                 break;
             case 'updated_DESC' :
-                $q->addTable('p_updated');
-                $q->orderBy('p_updated.date DESC');
+                $q->orderBy($source_table_name . '.date_update DESC');
+                // $q->addTable('p_updated');
+                // $q->orderBy('p_updated.date DESC');
                 break;
             default:
                 $q->orderBy($source_table_name . '.id');
@@ -377,7 +380,7 @@ class Product extends \yii\db\ActiveRecord {
         $q->where(['and',
             //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
-            $q->getSqlAsin($source_table_name, $filters->f_asin),
+            $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
             $q->getSqlTille($source_table_name, $filters->f_title),
             $q->getSqlStatus($filters->f_status),

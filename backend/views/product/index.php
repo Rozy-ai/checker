@@ -2,6 +2,7 @@
 
 use backend\components\TableView;
 use backend\components\TopSlider;
+use backend\components\AdditionalFilter;
 use backend\controllers\StatsController;
 use common\models\Comparison;
 use common\models\HiddenItems;
@@ -43,16 +44,16 @@ use yii\helpers\Html;
 $this->title = $source->name . " | " . Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = Yii::t('site', 'Products');
 $this->params['breadcrumbs'][] = [
-    'label' => $source->name . "&emsp;" . ($source->country ? Html::img('@web/img/flags-normal/'.$source->country.'.png', ['alt' => '', 'style'=>['height' => 'auto', 'width'=> '30px']]) : ''),
+    'label' => $source->name . "&emsp;" . ($source->country ? Html::img('@web/img/flags-normal/' . $source->country . '.png', ['alt' => '', 'style' => ['height' => 'auto', 'width' => '30px']]) : ''),
     'template' => '<li style="width: auto;">{link}</li>',
     'encode' => false
 ];
 //if ($is_admin) {
-    $this->params['breadcrumbs'][] = [
-        'label' => Html::dropDownList('f_profile', $f_profile, $list_profiles, ['id' => 'id_f_profile', 'class' => 'form-control form-control-sm w-auto']),
-        'template' => '<li>{link}</li>',
-        'encode' => false
-    ];
+$this->params['breadcrumbs'][] = [
+    'label' => Html::dropDownList('f_profile', $f_profile, $list_profiles, ['id' => 'id_f_profile', 'class' => 'form-control form-control-sm w-auto']),
+    'template' => '<li>{link}</li>',
+    'encode' => false
+];
 //}
 $is_active_show_all = True;
 if ($count_products_all > 200) {
@@ -61,7 +62,7 @@ if ($count_products_all > 200) {
 $is_active_show_all ? $list_count_products_on_page['ALL'] = 'ВСЕ' : '';
 
 $this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
-    . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right .') из ' . $count_products_all . ' </div> по: '
+    . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right . ') из ' . $count_products_all . ' </div> по: '
     . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
 $local_import_stat = null;
 
@@ -80,8 +81,8 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
         }
 
         // window.setTimeout(function () {
-            document.body.classList.add('loaded');
-            document.body.classList.remove('loaded_hiding');
+        document.body.classList.add('loaded');
+        document.body.classList.remove('loaded_hiding');
         // }, 500);
     };
 </script>
@@ -89,6 +90,11 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
 <div class="[ PRODUCTS ]">
     <div class="position-1">
         <div class="[ FILTER-ITEMS ] products__filter-items mt-0">
+            <?php if ($is_admin) { ?>
+                <?php echo AdditionalFilter::widget([
+                    'f_asin_multiple' => $f_asin_multiple,
+                ]); ?>
+            <?php } ?>
             <!--<form method="get" action="change-filters" id="id_products__filter-form">-->
             <div class="form-row js-title-and-source_selector">
                 <!--div class="form-group _col-sm-2" style="width: 128px">
@@ -123,8 +129,8 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                     </div-->
                 <?php endif; ?>
 
-                <div class="form-group _col-sm-2 filter-items__last-update" >
-                    last <?php echo Html::a('update','/import/local_import?source_id='.$f_source, ['title' => $last_local_import_txt]) ?>:
+                <div class="form-group _col-sm-2 filter-items__last-update">
+                    last <?php echo Html::a('update', '/import/local_import?source_id=' . $f_source, ['title' => $last_local_import_txt]) ?>:
                     <?= $last_update->created ?? 'Нет данных' ?>
                 </div>
 
@@ -141,9 +147,9 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                 <!--div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">
                     <span>Показывать по:&nbsp;&nbsp;</span>
                     <select name="f_count_products_on_page" id="id_f_count_products_on_page" class="form-control ">
-                        <?php foreach ($list_count_products_on_page as $pnl):?>
+                        <?php foreach ($list_count_products_on_page as $pnl) : ?>
                         <option value="<?= $pnl ?>" <?= ((int) $f_count_products_on_page === $pnl) ? 'selected' : '' ?>><?= $pnl ?></option>
-                        <?php endforeach;?>
+                        <?php endforeach; ?>
                         <option value="ALL" <?= ($f_count_products_on_page === 'ALL') ? 'selected' : '' ?> >ВСЕ</option>
                     </select>
                 </div-->
@@ -151,76 +157,53 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
 
             <div class="form-row">
                 <div class="form-group _col-sm-2" style="width: 128px">
-                    <input
-                        value="<?= $f_asin ?>"
-                        type="text" class="form-control"
-                        placeholder="ASIN" 
-                        id="id_f_asin"
-                        name="f_asin"
-                        >
+                    <input value="<?= $f_asin ?>" type="text" class="form-control" placeholder="ASIN" id="id_f_asin" name="f_asin">
                 </div>
 
 
                 <div class="form-group _col-sm-3" style="width: 200px">
                     <select name="f_categories_root" id="id_f_categories_root" class="form-control">
                         <option value="">Categories:Root</option>
-                        <?php foreach ($list_categories_root as $where_3_item => $cnt):?>
-                        <option
-                            value="<?= $where_3_item ?>"
-                            <?= ($f_categories_root == $where_3_item) ? 'selected' : '' ?>
-                            ><?= $where_3_item ?> (<?= $cnt ?>)</option>
-                        <?php endforeach;?>
+                        <?php foreach ($list_categories_root as $where_3_item => $cnt) : ?>
+                            <option value="<?= $where_3_item ?>" <?= ($f_categories_root == $where_3_item) ? 'selected' : '' ?>><?= $where_3_item ?> (<?= $cnt ?>)</option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
                 <div class="form-group _col-sm-2">
-                    <input
-                        value="<?= $f_title ?>"
-                        type="text" class="form-control" placeholder="Title"  id="id_f_title" name="f_title">
+                    <input value="<?= $f_title ?>" type="text" class="form-control" placeholder="Title" id="id_f_title" name="f_title">
                 </div>
 
                 <div class="form-group _col-sm-2">
                     <select name="f_status" id="id_f_status" class="form-control">
-                        <option value="">Status</option>        
-                        <option 
-                            value="<?= HiddenItems::STATUS_NOT_FOUND ?>"
-                            <?= ($f_status == HiddenItems::STATUS_NOT_FOUND) ? 'selected' : ''; ?>
-                            ><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_NOT_FOUND) ?>
-                        </option>                                                   
-                        <option 
-                            value="<?= HiddenItems::STATUS_CHECK ?>"
-                            <?= ($f_status == HiddenItems::STATUS_CHECK) ? 'selected' : ''; ?>
-                            ><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_CHECK) ?>
-                        </option>                           
-                        <option 
-                            value="<?= HiddenItems::STATUS_ACCEPT ?>"
-                            <?= ($f_status == HiddenItems::STATUS_ACCEPT) ? 'selected' : ''; ?>
-                            ><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_ACCEPT) ?>
+                        <option value="">Status</option>
+                        <option value="<?= HiddenItems::STATUS_NOT_FOUND ?>" <?= ($f_status == HiddenItems::STATUS_NOT_FOUND) ? 'selected' : ''; ?>><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_NOT_FOUND) ?>
                         </option>
-                        <option 
-                            value="<?= HiddenItems::STATUS_NO_ACCEPT ?>"
-                            <?= ($f_status == HiddenItems::STATUS_NO_ACCEPT) ? 'selected' : ''; ?>
-                            ><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_NO_ACCEPT) ?>
+                        <option value="<?= HiddenItems::STATUS_CHECK ?>" <?= ($f_status == HiddenItems::STATUS_CHECK) ? 'selected' : ''; ?>><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_CHECK) ?>
+                        </option>
+                        <option value="<?= HiddenItems::STATUS_ACCEPT ?>" <?= ($f_status == HiddenItems::STATUS_ACCEPT) ? 'selected' : ''; ?>><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_ACCEPT) ?>
+                        </option>
+                        <option value="<?= HiddenItems::STATUS_NO_ACCEPT ?>" <?= ($f_status == HiddenItems::STATUS_NO_ACCEPT) ? 'selected' : ''; ?>><?= HiddenItems::getTitleStatuses(HiddenItems::STATUS_NO_ACCEPT) ?>
                         </option>
                     </select>
                 </div>
 
-                <?php if ($is_admin): ?>
-                <div class="form-group _col-sm-3">
-                    <select name="f_username" id="id_f_username" class="form-control">
-                        <option value="">User</option>
-                        <?php
-                        foreach ($list_username as $key => $data) {
-                            $name = $data['name'];
-                            $count = $data['count'];
-                            $is_active = ($key == $f_username) ? 'selected' : '';
-                            $st = "<option value=$key $is_active>$name ($count)</option>";
-                            echo $st;
-                        }
-                        ?>
-                    </select>
-                </div>
-                <?php endif;?>
+                <?php if ($is_admin) : ?>
+                    <div class="form-group _col-sm-3">
+                        <select name="f_username" id="id_f_username" class="form-control">
+                            <option value="">User</option>
+                            <?php
+                            foreach ($list_username as $key => $data) {
+                                $name = $data['name'];
+                                $count = $data['count'];
+                                $is_active = ($key == $f_username) ? 'selected' : '';
+                                $st = "<option value=$key $is_active>$name ($count)</option>";
+                                echo $st;
+                            }
+                            ?>
+                        </select>
+                    </div>
+                <?php endif; ?>
 
 
                 <div class="form-group _col-sm-3">
@@ -234,23 +217,23 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                             echo $st;
                         }
                         ?>
-                        <option value="" <?=$f_comparison_status?'':'selected'?>>All</option>
-                        <?php if (0):?>
-                        <option value="YES_NO_OTHER" <?= ($f_comparison_status === 'YES_NO_OTHER') ? 'selected' : '' ?>>Result</option>
-                        <?php foreach ($list_comparison_statuses as $k_6 => $where_6_item):?> 
-                        <option value="<?= $k_6 ?>" <?= ($f_comparison_status === $k_6) ? 'selected' : '' ?>>
-                            <?= ($k_6 === 'MISMATCH') ? 'Mismatch (No)' : '' ?>
-                            <?= ($k_6 === 'PRE_MATCH') ? 'Pre_match (Yes?)' : '' ?>
-                            <?= ($k_6 === 'MATCH') ? 'Match (Yes)' : '' ?>
-                            <?= ($k_6 === 'OTHER') ? 'Other' : '' ?>
-                            <?= ($k_6 === 'NOCOMPARE') ? 'Nocompare' : '' ?>
-                            <?php if (0):?>
-                            [<?= $k_6 ?>] (<?= $where_6_item ?>)
-                            <?php endif;?>
-                        </option>
-                        <?php endforeach; ?>
-                        <option value="ALL" <?= ($f_comparison_status === 'ALL') ? 'selected' : '' ?>>All</option>
-                        <?php endif;?>
+                        <option value="" <?= $f_comparison_status ? '' : 'selected' ?>>All</option>
+                        <?php if (0) : ?>
+                            <option value="YES_NO_OTHER" <?= ($f_comparison_status === 'YES_NO_OTHER') ? 'selected' : '' ?>>Result</option>
+                            <?php foreach ($list_comparison_statuses as $k_6 => $where_6_item) : ?>
+                                <option value="<?= $k_6 ?>" <?= ($f_comparison_status === $k_6) ? 'selected' : '' ?>>
+                                    <?= ($k_6 === 'MISMATCH') ? 'Mismatch (No)' : '' ?>
+                                    <?= ($k_6 === 'PRE_MATCH') ? 'Pre_match (Yes?)' : '' ?>
+                                    <?= ($k_6 === 'MATCH') ? 'Match (Yes)' : '' ?>
+                                    <?= ($k_6 === 'OTHER') ? 'Other' : '' ?>
+                                    <?= ($k_6 === 'NOCOMPARE') ? 'Nocompare' : '' ?>
+                                    <?php if (0) : ?>
+                                        [<?= $k_6 ?>] (<?= $where_6_item ?>)
+                                    <?php endif; ?>
+                                </option>
+                            <?php endforeach; ?>
+                            <option value="ALL" <?= ($f_comparison_status === 'ALL') ? 'selected' : '' ?>>All</option>
+                        <?php endif; ?>
 
                     </select>
                 </div>
@@ -258,78 +241,52 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                 <div class="form-group _col-sm-3">
                     <select name="f_sort" id="id_f_sort" class="form-control">
                         <option value="">Сортировать по</option>
-                        <option value="created_ASC" <?= ($f_sort === 'created_ASC') ? 'selected' : '' ?> >дате добавления ↓</option>
-                        <option value="created_DESC" <?= ($f_sort === 'created_DESC') ? 'selected' : '' ?> >дате добавления ↑</option>
-                        <option value="updated_ASC" <?= ($f_sort === 'updated_ASC') ? 'selected' : '' ?> >дате обновления ↓</option>
-                        <option value="updated_DESC" <?= ($f_sort === 'updated_DESC') ? 'selected' : '' ?> >дате обновления ↑</option>
+                        <option value="created_ASC" <?= ($f_sort === 'created_ASC') ? 'selected' : '' ?>>дате добавления ↑</option>
+                        <option value="created_DESC" <?= ($f_sort === 'created_DESC') ? 'selected' : '' ?>>дате добавления ↓</option>
+                        <option value="updated_ASC" <?= ($f_sort === 'updated_ASC') ? 'selected' : '' ?>>дате обновления ↑</option>
+                        <option value="updated_DESC" <?= ($f_sort === 'updated_DESC') ? 'selected' : '' ?>>дате обновления ↓</option>
                     </select>
                 </div>
 
-                <?php if ($f_detail_view || $is_admin): ?>
-                <div class="form-group _col-sm-3" >
-                    <select name="f_detail_view" id="id_f_detail_view" class="form-control ">
-                        <option value="0" <?= ($f_detail_view === '0')? 'selected':'' ?>>Кратко</option>
-                        <option value="1" <?= ($f_detail_view === '1')? 'selected':'' ?>>Подробно</option>
-                        <option value="2" <?= ($f_detail_view === '2')? 'selected':'' ?>>Кратко со списком</option>
-                        <option value="3" <?= ($f_detail_view === '3')? 'selected':'' ?>>Подробно со списком</option> 
-                    </select>
-                </div>
+                <?php if ($is_admin) : ?>
+                    <div class="form-group _col-sm-3">
+                        <select name="f_detail_view" id="id_f_detail_view" class="form-control ">
+                            <option value="0" <?= ($f_detail_view === '0') ? 'selected' : '' ?>>Кратко</option>
+                            <option value="1" <?= ($f_detail_view === '1') ? 'selected' : '' ?>>Подробно</option>
+                            <option value="2" <?= ($f_detail_view === '2') ? 'selected' : '' ?>>Кратко со списком</option>
+                            <option value="3" <?= ($f_detail_view === '3') ? 'selected' : '' ?>>Подробно со списком</option>
+                        </select>
+                    </div>
 
                 <?php endif; ?>
 
-                <?php if (0): ?>
-                <div class="custom-control custom-switch">
-                    <input 
-                        type="checkbox" 
-                        class="custom-control-input" 
-                        id="id_f_batch_mode" 
-                        name="f_batch_mode"
-                        <?= $f_batch_mode ? 'checked' : '' ?>
-                    >
-                    
-                    <label 
-                        class="custom-control-label"  
-                        for="id_f_batch_mode"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        title="Для сохранения значений статусов правых товаров необходимо сменить любой фильтр"
-                    >Пакетный режим
-                    </label>
-                </div>
-                <?php endif; ?>    
-                <?php 
-                if (0): 
-                ?>
-                <div class="custom-control custom-switch">
-                    <input 
-                        type="checkbox" 
-                        class="custom-control-input" 
-                        id="id_f_hide_mode" 
-                        name="f_hide_mode"
-                        <?= $f_hide_mode?'checked' : '' ?>
-                    >
+                <?php if (0) : ?>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="id_f_batch_mode" name="f_batch_mode" <?= $f_batch_mode ? 'checked' : '' ?>>
 
-                    <label 
-                        class="custom-control-label"  
-                        for="id_f_hide_mode"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        title="При включении выбранные элементы скрываются визуально"
-                    >Скрывать выбраные
-                    </label>
-                </div>                
-                <?php endif; ?>
-                <?php if (0): ?>
-                <div class="custom-control custom-switch">
-                    <div style="margin: 12px 10px 12px 0">
-                        <input
-                        <?= !empty($f_no_compare) ? 'checked' : '' ?>
-                            name="f_no_compare" type="checkbox" class="custom-control-input" id="id_f_no_compare">
-                        <label class="custom-control-label" for="f_no_compare" style="margin-left: 7px; position: relative;">
-                            <span style="top: 5px; position: relative;">No compare</span>
+                        <label class="custom-control-label" for="id_f_batch_mode" data-toggle="tooltip" data-placement="top" title="Для сохранения значений статусов правых товаров необходимо сменить любой фильтр">Пакетный режим
                         </label>
                     </div>
-                </div>
+                <?php endif; ?>
+                <?php
+                if (0) :
+                ?>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="id_f_hide_mode" name="f_hide_mode" <?= $f_hide_mode ? 'checked' : '' ?>>
+
+                        <label class="custom-control-label" for="id_f_hide_mode" data-toggle="tooltip" data-placement="top" title="При включении выбранные элементы скрываются визуально">Скрывать выбраные
+                        </label>
+                    </div>
+                <?php endif; ?>
+                <?php if (0) : ?>
+                    <div class="custom-control custom-switch">
+                        <div style="margin: 12px 10px 12px 0">
+                            <input <?= !empty($f_no_compare) ? 'checked' : '' ?> name="f_no_compare" type="checkbox" class="custom-control-input" id="id_f_no_compare">
+                            <label class="custom-control-label" for="f_no_compare" style="margin-left: 7px; position: relative;">
+                                <span style="top: 5px; position: relative;">No compare</span>
+                            </label>
+                        </div>
+                    </div>
                 <?php endif; ?>
 
                 <div class="form-group _col-sm-3">
@@ -340,10 +297,11 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
         </div>
     </div>
 
-    <div class="table-responsive__" id = "id_table_container">
+    <div class="table-responsive__" id="id_table_container">
         <?=
         $this->render('index_table', [
             'list' => $list,
+            'last_update' => $last_update,
             'local_import_stat' => $local_import_stat,
             'is_admin' => $is_admin,
             'f_comparison_status' => $f_comparison_status,
@@ -360,29 +318,26 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
         <div class="col">
             <?php
             echo '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
-                . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right .') из ' . $count_products_all . ' </div> по: '
+                . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right . ') из ' . $count_products_all . ' </div> по: '
                 . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page_footer', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
             ?>
 
 
-<!--            <div class="featured-items">Показаны записи --><?php //= min($f_count_products_on_page, $count_products_all) ?><!-- из --><?php //= $count_products_all ?><!--.</div>-->
+            <!--            <div class="featured-items">Показаны записи --><?php //= min($f_count_products_on_page, $count_products_all) 
+                                                                            ?><!-- из --><?php //= $count_products_all 
+                                                                                                                                                        ?><!--.</div>-->
 
             <?php
             $e_comparison = isset($f_comparison_status) && $f_comparison_status ? strtolower($f_comparison_status) : 'match';
             $e_profile = isset($f_profile) && $f_profile && $f_profile !== 'Все' ? $f_profile : '{{all}} ';
             ?>
-            <a href="<?= '/exports/step_4?source_id=' . $source->id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4" >
+            <a href="<?= '/exports/step_4?source_id=' . $source->id . '&comparisons=' . $e_comparison . '&profile=' . $e_profile ?>" class="product-list-item__export js-export-step-4">
                 экспортировать
             </a>
-            <?php if ($is_admin): ?>
-            <a
-                href="/import/step_1?source_id=<?= $source->id ?>"
-                target="_blank"
-                data-source_id="<?= $source->id ?>"
-                class="product-list-item__import-from-sql js-import-from-sql"
-                >
-                загрузить SQL
-            </a>
+            <?php if ($is_admin) : ?>
+                <a href="/import/step_1?source_id=<?= $source->id ?>" target="_blank" data-source_id="<?= $source->id ?>" class="product-list-item__import-from-sql js-import-from-sql">
+                    загрузить SQL
+                </a>
             <?php endif; ?>
 
 
@@ -394,18 +349,18 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
         </div>
     </div>
 
-    <?php if ($f_count_products_on_page !== 'ALL'):?>
-    <div class="products__pager">
-        <nav aria-label="Page navigation example ">
-            <ul id="id_paginator" class="pagination justify-content-center">
-                <?php
-                echo $this->context->indexPresenter->getHTMLPaginator($f_number_page_current, $count_pages, 5, $is_active_show_all);
-                ?>
+    <?php if ($f_count_products_on_page !== 'ALL') : ?>
+        <div class="products__pager">
+            <nav aria-label="Page navigation example ">
+                <ul id="id_paginator" class="pagination justify-content-center">
+                    <?php
+                    echo $this->context->indexPresenter->getHTMLPaginator($f_number_page_current, $count_pages, 5, $is_active_show_all);
+                    ?>
 
-            </ul>
-        </nav>
-    </div>
-    <?php endif;?>
+                </ul>
+            </nav>
+        </div>
+    <?php endif; ?>
 
 </div>
 
@@ -414,115 +369,120 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
 <br>
 <br>
 <br>
-<?php if (0): ?>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<?php if (0) : ?>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
 
-<?=
-TableView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
-    'summaryOptions' => [
-        'class' => 'allSingle',
-        'tag' => 'p'
-    ],
-    'headerRowOptions' => [
-        'class' => 'topTable',
-    ],
-    'filterRowOptions' => [
-        'class' => 'topSearch',
-    ],
-    'rowOptions' => ['class' => 'tableProducts'],
-    'layout' => "{summary}\n{items}\n{pager}",
-    'columns' => [
-        [
-            'attribute' => 'id',
-            'filter' => Html::activeInput('text', $searchModel, 'id', [
-                'class' => 'searchName'
-            ]),
-            'format' => 'raw',
-            'value' => function ($model) {
-                return Html::tag("div", implode("", [
-                    Html::tag('p', $model->id, ['class' => 'name']),
-                    Html::tag('p', $model->baseInfo["Sales Rank: Current"], ['class' => 'text']),
-                    Html::tag('p', $model->baseInfo["Sales Rank: Drops last 30 days"], ['class' => 'text']),
-                    Html::tag('p', $model->baseInfo["Price Amazon"], ['class' => 'text']),
-                        ]), ['class' => 'idName']);
-            }
+    <?=
+    TableView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'summaryOptions' => [
+            'class' => 'allSingle',
+            'tag' => 'p'
         ],
-        [
-            'attribute' => 'target_image',
-            'format' => 'raw',
-            'value' => function ($model) {
-                $result = '';
-                $canCompare = \Yii::$app->user->can('compare-products', ['product' => $model]);
-                if (isset($model->baseInfo["Image"]) and $model->baseInfo["Image"]) {
-                    $images = preg_split("/[; ]/", $model->baseInfo["Image"]);
-                    $result = Html::a(
-                                    Html::img($images[0], ['class' => 'targetImg']) . "<p class='text'>{$model->baseInfo['Title']}</p>",
-                                    ['view', 'id' => $model->id], ['class' => 'btn-image']
-                            ) . "<p class='view'>{$model->baseInfo['Categories: Root']}</p>"
-                            . ($canCompare ? Html::a("", ['missall', 'id' => $model->id, 'return' => true], ['class' => 'btn del']) : "");
+        'headerRowOptions' => [
+            'class' => 'topTable',
+        ],
+        'filterRowOptions' => [
+            'class' => 'topSearch',
+        ],
+        'rowOptions' => ['class' => 'tableProducts'],
+        'layout' => "{summary}\n{items}\n{pager}",
+        'columns' => [
+            [
+                'attribute' => 'id',
+                'filter' => Html::activeInput('text', $searchModel, 'id', [
+                    'class' => 'searchName'
+                ]),
+                'format' => 'raw',
+                'value' => function ($model) {
+                    return Html::tag("div", implode("", [
+                        Html::tag('p', $model->id, ['class' => 'name']),
+                        Html::tag('p', $model->baseInfo["Sales Rank: Current"], ['class' => 'text']),
+                        Html::tag('p', $model->baseInfo["Sales Rank: Drops last 30 days"], ['class' => 'text']),
+                        Html::tag('p', $model->baseInfo["Price Amazon"], ['class' => 'text']),
+                    ]), ['class' => 'idName']);
                 }
-                return Html::tag('div', $result, ['class' => 'targetImg']);
-            }
+            ],
+            [
+                'attribute' => 'target_image',
+                'format' => 'raw',
+                'value' => function ($model) {
+                    $result = '';
+                    $canCompare = \Yii::$app->user->can('compare-products', ['product' => $model]);
+                    if (isset($model->baseInfo["Image"]) and $model->baseInfo["Image"]) {
+                        $images = preg_split("/[; ]/", $model->baseInfo["Image"]);
+                        $result = Html::a(
+                            Html::img($images[0], ['class' => 'targetImg']) . "<p class='text'>{$model->baseInfo['Title']}</p>",
+                            ['view', 'id' => $model->id],
+                            ['class' => 'btn-image']
+                        ) . "<p class='view'>{$model->baseInfo['Categories: Root']}</p>"
+                            . ($canCompare ? Html::a("", ['missall', 'id' => $model->id, 'return' => true], ['class' => 'btn del']) : "");
+                    }
+                    return Html::tag('div', $result, ['class' => 'targetImg']);
+                }
+            ],
+            [
+                'attribute' => 'comparing_images',
+                'format' => 'raw',
+                'value' => function ($model) {
+                    return Html::tag('div', TopSlider::widget([
+                        'page' => 0, //$pages->page,
+                        'product' => $model,
+                        'options' => [
+                            'class' => 'sliderTop sliderProducts',
+                            'salesKey' => '',
+                            'delBtn' => true,
+                        ],
+                        'source' => $source
+                    ]), ['class' => 'comparingImg']);
+                }
+            ],
+            [
+                'attribute' => 'aggregated.users',
+                'format' => 'raw',
+                'value' => function ($model) {
+                    $value = Html::tag('p', empty($model->aggregated->users) ? "(не задано)" : $model->aggregated->users, ['class' => 'name']);
+                    return Html::tag('div', $value, ['class' => 'agg']);
+                }
+            ],
+            [
+                'attribute' => 'comparisons',
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-center'],
+                'value' => function ($model) {
+                    $statuses = [
+                        Comparison::STATUS_MATCH => 0,
+                        Comparison::STATUS_MISMATCH => 0,
+                        Comparison::STATUS_OTHER => 0,
+                    ];
+                    foreach ($model->comparisons as $comparison) :
+                        $statuses[$comparison->status]++;
+                    endforeach;
+                    $counted = $model->aggregated ? $model->aggregated->counted : 0;
+                    $ret = Html::a("{$counted}/" . count($model->getAddInfo()), ['product/result', 'id' => $model->id], ['class' => 'name']);
+                    $ret .= '<br/>';
+                    $ret .= Html::tag(
+                        'p',
+                        "{$statuses[Comparison::STATUS_MATCH]}/{$statuses[Comparison::STATUS_MISMATCH]}/{$statuses[Comparison::STATUS_OTHER]}",
+                        ['class' => 'name']
+                    );
+                    return Html::tag('div', $ret, ['class' => 'comparisons']);
+                },
+                'filter' => Html::activeDropDownList(
+                    $searchModel,
+                    'status',
+                    Comparison::getStatuses(),
+                    ['prompt' => '', 'class' => 'selectName']
+                )
+            ],
         ],
-        [
-            'attribute' => 'comparing_images',
-            'format' => 'raw',
-            'value' => function ($model) {
-                return Html::tag('div', TopSlider::widget([
-                            'page' => 0, //$pages->page,
-                            'product' => $model,
-                            'options' => [
-                                'class' => 'sliderTop sliderProducts',
-                                'salesKey' => '',
-                                'delBtn' => true,
-                            ],
-                            'source' => $source
-                        ]), ['class' => 'comparingImg']);
-            }
-        ],
-        [
-            'attribute' => 'aggregated.users',
-            'format' => 'raw',
-            'value' => function ($model) {
-                $value = Html::tag('p', empty($model->aggregated->users) ? "(не задано)" : $model->aggregated->users, ['class' => 'name']);
-                return Html::tag('div', $value, ['class' => 'agg']);
-            }
-        ],
-        [
-            'attribute' => 'comparisons',
-            'format' => 'raw',
-            'contentOptions' => ['class' => 'text-center'],
-            'value' => function ($model) {
-                $statuses = [
-                    Comparison::STATUS_MATCH => 0,
-                    Comparison::STATUS_MISMATCH => 0,
-                    Comparison::STATUS_OTHER => 0,
-                ];
-                foreach ($model->comparisons as $comparison):
-                    $statuses [$comparison->status]++;
-                endforeach;
-                $counted = $model->aggregated ? $model->aggregated->counted : 0;
-                $ret = Html::a("{$counted}/" . count($model->getAddInfo()), ['product/result', 'id' => $model->id], ['class' => 'name']);
-                $ret .= '<br/>';
-                $ret .= Html::tag(
-                                'p',
-                                "{$statuses[Comparison::STATUS_MATCH]}/{$statuses[Comparison::STATUS_MISMATCH]}/{$statuses[Comparison::STATUS_OTHER]}",
-                                ['class' => 'name']
-                );
-                return Html::tag('div', $ret, ['class' => 'comparisons']);
-            },
-            'filter' => Html::activeDropDownList($searchModel, 'status', Comparison::getStatuses(),
-                    ['prompt' => '', 'class' => 'selectName'])
-        ],
-    ],
-]);
-?>
+    ]);
+    ?>
 
-<?php endif;?>
+<?php endif; ?>

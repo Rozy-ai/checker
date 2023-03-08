@@ -11,6 +11,7 @@ namespace common\models;
  * @property $f_username                f_items__user            (where_4) username пользователя
  * @property $f_id                      f_items__id              (where_2) Товар с данным id
  * @property $f_asin                    asin товара из поля формы для ввода asin
+ * @property $f_asin_multiple           asin товаров из поля формы для ввода asin
  * @property $f_title                   f_items__comparing_images(where_5) Title
  * @property $t_status
  * @property $f_comparison_status       f_items__comparisons     (where_6) Фильтр выбора товара из поля выбора из Comparisons
@@ -41,6 +42,9 @@ class Filters {
 
     /** @var string  product => asin товара из поля формы для ввода asin*/
     public $f_asin;
+
+    /** @var string  product => список asin товаров из поля формы для ввода asin (multiple)*/
+    public $f_asin_multiple;
     
     /** @var string product => info["Categories: Root"] JSON*/
     public $f_categories_root;
@@ -131,6 +135,7 @@ class Filters {
         $this->f_categories_root = null;
         $this->f_id = null;
         $this->f_asin = null;
+        $this->f_asin_multiple = null;
         $this->f_title = null;
         $this->t_status = null;
         $this->f_comparison_status = null;
