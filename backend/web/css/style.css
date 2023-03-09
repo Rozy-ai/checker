@@ -3631,7 +3631,7 @@ a.a-black {
 
 .product-list-item__export{
   position: relative;
-  top: -6px;
+  /* top: -6px; */
   width: 140px;
   display: inline-block;
   margin-bottom: 10px;
@@ -3791,7 +3791,7 @@ a.a-black {
 
 .product-list-item__import-from-sql{
   position: relative;
-  top: -6px;
+  /* top: -6px; */
   width: 140px;
   display: inline-block;
   margin-bottom: 10px;

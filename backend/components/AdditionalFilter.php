@@ -7,6 +7,7 @@ use yii\base\Widget;
 class AdditionalFilter extends Widget
 {
     public $f_asin_multiple;
+    public $f_new;
 
     public function __construct(array $config = [])
     {
@@ -17,6 +18,7 @@ class AdditionalFilter extends Widget
     {
         return $this->render('additional-filter', [
             'f_asin_multiple' => $this->f_asin_multiple,
+            'f_new' => $this->f_new,
         ]);
     }
 }

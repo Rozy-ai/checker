@@ -606,8 +606,11 @@ class ImportController extends \yii\web\Controller
         }
 
         $sql_update = 'UPDATE checker.' . $tbl_1 . ' SET ' . implode(', ', $_set) . ' WHERE id = ' . $_id;
-
         $this->sql_cmd($sql_update);
+        $this->sql_cmd(
+          "UPDATE checker.$tbl_1 SET date_update = '" . date('Y-m-d H:i:s', $import_timestamp) . "' WHERE id = $_id",
+        );
+
 
         //$res = $command->execute();
         $this->clear_old_settings($res_2->id, $source_id);

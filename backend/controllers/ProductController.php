@@ -231,6 +231,7 @@ class ProductController extends Controller {
             'f_hide_mode' => $filters->f_hide_mode,
             'f_no_compare' => true,
             'f_hide_mode' => true,
+            'f_new' => $filters->f_new,
 
             'list_source' => $this->indexPresenter->getListSource(),
             'list_profiles' => $this->indexPresenter->getListProfiles(),
@@ -676,8 +677,10 @@ class ProductController extends Controller {
                 'f_no_compare' => $filters->f_no_compare,
                 'f_detail_view' => $filters->f_detail_view,
                 'f_number_page_current' => $filters->f_number_page_current,
+                'f_new' => $filters->f_new,
                 'count_pages' => $count_pages,
                 'source' => $source,
+                'last_update' => Stats_import_export::getLastLocalImport(),
             ]):null,
             'other' => [
                 'id_block_count' => $html_block_count,
@@ -1326,4 +1329,15 @@ class ProductController extends Controller {
         return $statuses;
     }
 
+    public function actionChangeProfile() {
+        $source_id = $this->request->post('source_id');
+        $value = $this->request->post('value');
+        $pid = $this->request->post('pid');
+        $source = Source::getById($source_id);
+
+        $product = Product::getById($source->class_1, $pid);
+        $product->updateAttributes(['profile' => $value]);
+
+        return json_encode(['status' => 'ok', 'value' => $value]);
+    }
 }

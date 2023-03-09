@@ -63,6 +63,9 @@ const CLASS_BUTTON_MISSMATCH_ALL = '.product-list__item-mismatch-all'; // Лев
 const CLASS_BUTTON_RESET_FILTERS = '#id_button_reset_filters';
 const CLASS_BUTTON_ADDITIONAL_FILTERS = '#additional_filter_link';
 const CLASS_BLOCK_BUTTON_DELETE_ALL = '.js-del-all-visible-items';
+const CLASS_CHECKBOX_EXPORT_FILTERED = '#id_export_filtered';
+const CLASS_BUTTON_EDIT_PROFILE = '.product-list-item__edit-profile';
+const CLASS_ELEMENT_PROFILE = '.product-list-item__profile';
 
 function main() {
     let listDataForServer = new ListDataForServer();
@@ -417,6 +420,7 @@ function main() {
     addActionChangeFilter( 'id_f_count_products_on_page_footer', 'f_count_products_on_page' );
     addActionChangeFilter( 'id_f_detail_view', 'f_detail_view' );
     addActionChangeFilter( 'id_f_profile', 'f_profile' );
+    addActionChangeFilter( 'id_f_new', 'f_new' );
 
     $( CLASS_ITEM_STAT ).on( 'click', ( e ) => {
         const $this = $( e.target ).closest( CLASS_ITEM_STAT );
@@ -500,6 +504,7 @@ function main() {
             let value;
             switch ( id_filter ) {
                 case 'id_f_asin_multiple': value = filter.val().trim(); break;
+                case 'id_f_new': value = filter.prop( 'checked' ) ? 1 : 0; break;
                 //case 'id_f_batch_mode': value = +new Filters().getModeBatch(); break;
                 //case 'id_f_hide_mode': value = +new Filters().getModeHide(); break;
                 default:
@@ -690,6 +695,54 @@ function main() {
             $( '.js-title-and-source_selector' ).show();
 
         }
+    } );
+
+    $( 'body' ).on( 'change', CLASS_CHECKBOX_EXPORT_FILTERED, ( e ) => {
+        const $this = $( e.target ),
+            $exportLink = $this.parent().siblings( '.product-list-item__export' );
+        if ( $this.prop( 'checked' ) ) {
+            $exportLink.attr( 'href', `${$exportLink.attr( 'href' )}&filtered=true` );
+        } else {
+            $exportLink.attr( 'href', `${$exportLink.attr( 'href' ).replace( '&filtered=true', '' )}` );
+        }
+    } );
+
+    $( 'body' ).on( 'click', CLASS_BUTTON_EDIT_PROFILE, ( e ) => {
+        const $btn = $( e.target ),
+            $profile = $btn.siblings( '.product-list-item__profile' );
+        $profile.attr( 'contenteditable', $profile.attr( 'contenteditable' ) !== 'true' );
+
+        if ($profile.attr( 'contenteditable' ) === 'true') {
+            $profile.focus();
+        }
+    } );
+
+    $( 'body' ).on( 'keypress', CLASS_ELEMENT_PROFILE, ( e ) => {
+        if ( e.keyCode === 13 ) {
+            e.preventDefault();
+            $( e.target ).blur();
+        }
+    } );
+
+    $( 'body' ).on( 'blur', CLASS_ELEMENT_PROFILE, ( e ) => {
+        const $this = $( e.target );
+        $this.attr('contenteditable', 'false');
+
+        if ($this.text().trim() === $this.data('value')) {
+            return;
+        }
+
+        Ajax.send(
+            "/product/change-profile",
+            {
+                pid: $this.data( 'pid' ),
+                value: $this.text().trim(),
+                source_id: $this.data('source-id'),
+            },
+            ( res ) => {
+                $this.attr('data-value', res.value);
+            }
+        );
     } );
 }
 document.addEventListener( "DOMContentLoaded", main );
