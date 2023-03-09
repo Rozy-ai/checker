@@ -1329,4 +1329,15 @@ class ProductController extends Controller {
         return $statuses;
     }
 
+    public function actionChangeProfile() {
+        $source_id = $this->request->post('source_id');
+        $value = $this->request->post('value');
+        $pid = $this->request->post('pid');
+        $source = Source::getById($source_id);
+
+        $product = Product::getById($source->class_1, $pid);
+        $product->updateAttributes(['profile' => $value]);
+
+        return json_encode(['status' => 'ok', 'value' => $value]);
+    }
 }

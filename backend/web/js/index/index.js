@@ -64,6 +64,8 @@ const CLASS_BUTTON_RESET_FILTERS = '#id_button_reset_filters';
 const CLASS_BUTTON_ADDITIONAL_FILTERS = '#additional_filter_link';
 const CLASS_BLOCK_BUTTON_DELETE_ALL = '.js-del-all-visible-items';
 const CLASS_CHECKBOX_EXPORT_FILTERED = '#id_export_filtered';
+const CLASS_BUTTON_EDIT_PROFILE = '.product-list-item__edit-profile';
+const CLASS_ELEMENT_PROFILE = '.product-list-item__profile';
 
 function main() {
     let listDataForServer = new ListDataForServer();
@@ -703,6 +705,44 @@ function main() {
         } else {
             $exportLink.attr( 'href', `${$exportLink.attr( 'href' ).replace( '&filtered=true', '' )}` );
         }
+    } );
+
+    $( 'body' ).on( 'click', CLASS_BUTTON_EDIT_PROFILE, ( e ) => {
+        const $btn = $( e.target ),
+            $profile = $btn.siblings( '.product-list-item__profile' );
+        $profile.attr( 'contenteditable', $profile.attr( 'contenteditable' ) !== 'true' );
+
+        if ($profile.attr( 'contenteditable' ) === 'true') {
+            $profile.focus();
+        }
+    } );
+
+    $( 'body' ).on( 'keypress', CLASS_ELEMENT_PROFILE, ( e ) => {
+        if ( e.keyCode === 13 ) {
+            e.preventDefault();
+            $( e.target ).blur();
+        }
+    } );
+
+    $( 'body' ).on( 'blur', CLASS_ELEMENT_PROFILE, ( e ) => {
+        const $this = $( e.target );
+        $this.attr('contenteditable', 'false');
+
+        if ($this.text().trim() === $this.data('value')) {
+            return;
+        }
+
+        Ajax.send(
+            "/product/change-profile",
+            {
+                pid: $this.data( 'pid' ),
+                value: $this.text().trim(),
+                source_id: $this.data('source-id'),
+            },
+            ( res ) => {
+                $this.attr('data-value', res.value);
+            }
+        );
     } );
 }
 document.addEventListener( "DOMContentLoaded", main );
