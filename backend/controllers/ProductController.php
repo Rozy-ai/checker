@@ -243,6 +243,7 @@ class ProductController extends Controller {
             
             'count_products_all' => $count_products_all,
             'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
+            'count_products_left' => $this->indexPresenter->getCountProductsOnPageLeft($list),
             'count_pages' => $count_pages,
             'is_admin' => $is_admin,
             'default_price_name' => Settings__fields_extend_price::get_default_price($source->id)->name ?: 'Price Amazon',
