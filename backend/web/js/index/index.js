@@ -66,6 +66,7 @@ const CLASS_BLOCK_BUTTON_DELETE_ALL = '.js-del-all-visible-items';
 const CLASS_CHECKBOX_EXPORT_FILTERED = '#id_export_filtered';
 const CLASS_BUTTON_EDIT_PROFILE = '.product-list-item__edit-profile';
 const CLASS_ELEMENT_PROFILE = '.product-list-item__profile';
+const CLASS_BUTTON_PRODUCT_FAVOR = '.products-list__favor';
 
 function main() {
     let listDataForServer = new ListDataForServer();
@@ -421,6 +422,7 @@ function main() {
     addActionChangeFilter( 'id_f_detail_view', 'f_detail_view' );
     addActionChangeFilter( 'id_f_profile', 'f_profile' );
     addActionChangeFilter( 'id_f_new', 'f_new' );
+    addActionChangeFilter( 'id_f_favor', 'f_favor' );
 
     $( CLASS_ITEM_STAT ).on( 'click', ( e ) => {
         const $this = $( e.target ).closest( CLASS_ITEM_STAT );
@@ -505,6 +507,7 @@ function main() {
             switch ( id_filter ) {
                 case 'id_f_asin_multiple': value = filter.val().trim(); break;
                 case 'id_f_new': value = filter.prop( 'checked' ) ? 1 : 0; break;
+                case 'id_f_favor': value = filter.prop( 'checked' ) ? 1 : 0; break;
                 //case 'id_f_batch_mode': value = +new Filters().getModeBatch(); break;
                 //case 'id_f_hide_mode': value = +new Filters().getModeHide(); break;
                 default:
@@ -744,5 +747,25 @@ function main() {
             }
         );
     } );
+
+    $(' body').on('click', CLASS_BUTTON_PRODUCT_FAVOR, (e) => {
+        const $this = $(e.target),
+            $parent = $this.closest('.products-list__img-wrapper');
+
+            Ajax.send(
+                "/product/toggle-product-favor",
+                {
+                    product_id: $parent.data('id_product'),
+                    source_id: $parent.data('id_source'),
+                },
+                ( res ) => {
+                    if (res.favored) {
+                        $this.removeClass('bi-star').addClass('bi-star-fill favored');
+                    } else {
+                        $this.removeClass('bi-star-fill favored').addClass('bi-star');
+                    }
+                }
+            );    
+    });
 }
 document.addEventListener( "DOMContentLoaded", main );

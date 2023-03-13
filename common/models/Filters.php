@@ -19,6 +19,7 @@ namespace common\models;
  * @property $f_number_page_current                                        Номер страницы текущий;
  * @property $f_sort                    created_ASC | created_DESC | updated_ASC | updated_DESC
  * @property $f_new
+ * @property $f_favor
  * 
  * @author kosten
  */
@@ -69,6 +70,8 @@ class Filters {
 
     /** @var string|integer f_new                     Новые товары */
     public $f_new;
+
+    public $f_favor;
     
     //                                      (where_7) Не используется
     //                                      (where_8) Выносим в User
@@ -146,6 +149,7 @@ class Filters {
         $this->f_sort = null;
         $this->f_username = null;
         $this->f_new = null;
+        $this->f_favor = null;
     }
     
     public function loadFromValue($key, $value, $with_default = true){

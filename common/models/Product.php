@@ -221,9 +221,10 @@ class Product extends \yii\db\ActiveRecord {
      * 
      * @param Source  $source
      * @param Filters $filters
+     * @param array $favorites
      * @return Product[]
      */
-    public static function getListProducts(Source $source, Filters $filters, bool $is_admin) {
+    public static function getListProducts(Source $source, Filters $filters, bool $is_admin, $favorites = []) {
         $source_table_name = $source->table_1;
         $source_table2_name = $source->table_2;
 
@@ -240,6 +241,7 @@ class Product extends \yii\db\ActiveRecord {
             $q->getSqlComparisonStatus($filters->f_comparison_status),
             $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
             $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
+            $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
 
             //$q->getSqlAddInfoExists($source_table_name),
             //$q->getSqlNoInComparisons(),
@@ -370,9 +372,10 @@ class Product extends \yii\db\ActiveRecord {
      * @param Source $source
      * @param Filters $filters
      * @param bool $is_admin
+     * @param array $favorites
      * @return int
      */
-    public static function getCountProducts(Source $source, Filters $filters, bool $is_admin) {
+    public static function getCountProducts(Source $source, Filters $filters, bool $is_admin, $favorites = []) {
         $source_table_name = $source->table_1;
         $source_table2_name = $source->table_2;
 
@@ -389,6 +392,7 @@ class Product extends \yii\db\ActiveRecord {
             $q->getSqlComparisonStatus($filters->f_comparison_status),
             $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
             $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
+            $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
 
                 //$q->getSqlAddInfoExists($source_table_name),
                 //$q->getSqlNoInComparisons(),
@@ -645,5 +649,13 @@ class Product extends \yii\db\ActiveRecord {
         }
 
         return array_merge($_tmp, $from_deep);
+    }
+
+    public static function getFavorites($source_id, $user_type = User__favorites::TYPE_USER_DEFAULT) {
+        return User__favorites::find()->where([
+            'source_id' => $source_id,
+            'user_type' => $user_type,
+            'user_id' => \Yii::$app->user->id,
+        ])->indexBy('product_id')->asArray()->all();
     }
 }
