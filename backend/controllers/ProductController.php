@@ -26,6 +26,7 @@ use common\models\Product;
 use common\models\Filters;
 use common\models\Stats_import_export;
 use common\models\Product_right;
+use common\models\User__favorites;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -187,11 +188,12 @@ class ProductController extends Controller {
         $is_admin = $user && $user->isAdmin();
         $compare_status = $filters->f_comparison_status;
         $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
+        $favorites = Product::getFavorites($source->id);
         if (isset($params['all'])) {
             $filters->f_count_products_on_page = 'ALL';
         }
-        $list = Product::getListProducts($source, $filters, $is_admin);
-        $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
+        $list = Product::getListProducts($source, $filters, $is_admin, $favorites);
+        $count_products_all = Product::getCountProducts($source, $filters, $is_admin, $favorites);
         if($filters->f_count_products_on_page == 'ALL'){
             $count_pages = 1;
         } else {
@@ -232,6 +234,7 @@ class ProductController extends Controller {
             'f_no_compare' => true,
             'f_hide_mode' => true,
             'f_new' => $filters->f_new,
+            'f_favor' => $filters->f_favor,
 
             'list_source' => $this->indexPresenter->getListSource(),
             'list_profiles' => $this->indexPresenter->getListProfiles(),
@@ -240,6 +243,7 @@ class ProductController extends Controller {
             'list_username' => $this->indexPresenter->getListUser(),
             'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses($is_admin, $filters->f_profile),
             'list' => $list,
+            'favorites' => $favorites,
             
             'count_products_all' => $count_products_all,
             'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
@@ -1339,5 +1343,24 @@ class ProductController extends Controller {
         $product->updateAttributes(['profile' => $value]);
 
         return json_encode(['status' => 'ok', 'value' => $value]);
+    }
+
+    public function actionToggleProductFavor() {
+        $attributes = [
+            'source_id' => $this->request->post('source_id'),
+            'product_id' => $this->request->post('product_id'),
+            'user_id' => \Yii::$app->user->id,
+        ];
+
+        $favor = User__favorites::findOne($attributes);
+        $favored = !!$favor;
+        if (!$favored) {
+            $favor = new User__favorites($attributes);
+            $favor->save();
+        } else {
+            $favor->delete();
+        }
+
+        return json_encode(['status' => 'ok', 'favored' => !$favored]);
     }
 }

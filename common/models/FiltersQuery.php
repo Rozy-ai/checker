@@ -387,4 +387,12 @@ class FiltersQuery extends \yii\db\ActiveQuery
 
         return ['date_update' => $last_import->created];
     }
+
+    public function getSqlFavorProducts(Source $source, $f_favor, $favorites) {
+        if (!(int)$f_favor || empty($favorites)) {
+            return [];
+        }
+
+        return ['IN', $source->table_1 . ".id", array_keys($favorites)];
+    }
 }

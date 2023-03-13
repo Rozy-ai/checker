@@ -127,6 +127,7 @@ use common\models\Comparison;
 
                 </div>
                 <div class="products-list__img-wrapper" data-id_source="<?= $source_id ?>" data-id_product="<?= $item->id ?>">
+                    <span class="products-list__favor bi bi-star<?= isset($favorites[$item->id]) ? '-fill favored' : ''; ?>"></span>
                     <?php
                     $brand = $item->baseInfo['Brand'];
                     $manufacturer = $item->baseInfo['Manufacturer'];
@@ -242,8 +243,7 @@ use common\models\Comparison;
                         <span>Profile:</span>
                         <div class="d-flex align-items-center">
                             <?php if ($is_admin) { ?>
-                                <div class="product-list-item__profile pt-2 pb-2 pr-2" data-source-id="<?= $source_id ?>" data-pid="<?= $item->id ?>"
-                                    data-value="<?= $item->profile ?>">
+                                <div class="product-list-item__profile pt-2 pb-2 pr-2" data-source-id="<?= $source_id ?>" data-pid="<?= $item->id ?>" data-value="<?= $item->profile ?>">
                                     <?= $item->profile ?>
                                 </div>
                                 <span class="btn bi bi-pencil product-list-item__edit-profile"></span>
@@ -339,7 +339,7 @@ use common\models\Comparison;
                     <!--                <p class="minimize_row"><span class=minimize_row_asin>--><?php //=$td2_asin
                                                                                                     ?><!--</span>  <span>--><?php //=$td2_toptext
                                                                                                                             ?><!--</span> <span>--><?php //=$brand?"/ $brand":($manufacturer?"/ $manufacturer":'') 
-                                                                                                                                                                    ?><!--</span></p>-->
+                                                                                                                                                    ?><!--</span></p>-->
                     <!--                <p class="minimize_wrapper_title">--><?php //=$td3_title
                                                                                 ?><!--</p>-->
                 </div>

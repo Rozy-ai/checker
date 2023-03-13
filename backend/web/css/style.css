@@ -2261,6 +2261,16 @@ table.tableInfo th {
 .products-list__img-wrapper {
   position: relative;
 }
+.products-list__favor {
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  cursor: pointer;
+  z-index: 2;
+}
+.products-list__favor.favored {
+  color: rgba(215, 192, 0, 0.7);
+}
 .products-list__img-wrapper-link {
   position: relative;
   display: block;

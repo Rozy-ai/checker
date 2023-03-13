@@ -34,6 +34,7 @@ class Session extends \yii\web\Session{
             'f_batch_mode'              => $this->get('f_batch_mode'),
             'f_hide_mode'               => $this->get('f_hide_mode'),
             'f_new'                     => $this->get('f_new'),
+            'f_favor'                   => $this->get('f_favor'),
         ];
     }
 }

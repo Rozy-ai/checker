@@ -94,6 +94,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                 <?php echo AdditionalFilter::widget([
                     'f_asin_multiple' => $f_asin_multiple,
                     'f_new' => $f_new,
+                    'f_favor' => $f_favor,
                 ]); ?>
             <?php } ?>
             <!--<form method="get" action="change-filters" id="id_products__filter-form">-->
@@ -311,6 +312,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
             'f_detail_view' => $f_detail_view,
             'f_hide_mode' => $f_hide_mode,
             'source' => $source,
+            'favorites' => $favorites,
         ]);
         ?>
     </div><!-- table-responsive -->
