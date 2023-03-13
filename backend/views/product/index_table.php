@@ -85,12 +85,19 @@ use common\models\Comparison;
             <?php
             ?>
             <td class="products-list__td1">
-                <div class="product-list-item__data js-addition-info-for-price" data-addition_info_for_price='<?= $item->addition_info_for_price(); ?>'>
-                    <span>BSR:</span><br><span id="id_td1_bsr"><?= $bsr ?></span>
+                <?php $bsrInfo = $item->addition_info_for_price('bsr'); ?>
+                <div class="product-list-item__data js-addition-info-for-price" data-addition_info_for_price='<?= $bsrInfo; ?>'>
+                    <span>BSR:</span>
+                    <?php if (!empty($bsrInfo)) {?><span class="bi bi-patch-question-fill"></span><?php } ?>
+                    <br>
+                    <span id="id_td1_bsr"><?= $bsr ?></span>
                 </div>
                 <div class="product-list-item__data"><span><?= $dropsTitle ?>:</span><br><span id="id_td1_sales30"><?= $dropsValue ?></span></div>
-                <div class="product-list-item__data js-addition-info-for-price" data-addition_info_for_price='<?= $item->addition_info_for_price(); ?>'>
-                    <span>Price:</span><br>
+                <?php $priceInfo = $item->addition_info_for_price(); ?>
+                <div class="product-list-item__data js-addition-info-for-price" data-addition_info_for_price='<?= $priceInfo; ?>'>
+                    <span>Price:</span>
+                    <?php if (!empty($priceInfo)) {?><span class="bi bi-patch-question-fill"></span><?php } ?>
+                    <br>
                     <span id="id_td1_price"><?= $price ?></span>
                 </div>
 

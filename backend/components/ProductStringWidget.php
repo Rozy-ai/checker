@@ -22,9 +22,16 @@ class ProductStringWidget extends Widget
 
     public function run(){
 
-      if (strtolower($this->leftTitle) === 'price') {
-        $addition_info_for_price = $this->p_item->addition_info_for_price();
-      } else $addition_info_for_price = '';
+      $addition_info_for_price = "";
+
+      switch ($this->leftTitle) {
+        case 'Price':
+          $addition_info_for_price = $this->p_item->addition_info_for_price();
+          break;
+        case 'BSR (BSR 30)':
+          $addition_info_for_price = $this->p_item->addition_info_for_price('bsr');
+          break;  
+      }
 
       // если значенияпустые то не выводить
       if (!$this->leftValue && !$this->leftValue) return false;
