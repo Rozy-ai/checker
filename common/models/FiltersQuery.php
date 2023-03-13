@@ -90,7 +90,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
         if ($f_no_compare && $f_source) {
             $this->addTable('hidden_items');
             return ['or',
-                ['IS', 'hidden_items.p_id', null],
+                ['IS NOT', 'hidden_items.p_id', null],
                 ['<>', 'hidden_items.source_id', $f_source]];
         } else {
             return [];
