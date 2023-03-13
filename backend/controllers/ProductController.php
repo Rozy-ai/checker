@@ -27,6 +27,7 @@ use common\models\Filters;
 use common\models\Stats_import_export;
 use common\models\Product_right;
 use common\models\User__favorites;
+use yii\helpers\VarDumper;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -181,6 +182,7 @@ class ProductController extends Controller {
             $filters->saveToSession();
         }
 
+        $filters->setSource($source);
         $this->indexPresenter->setSource($source);
 
         $this->layout = 'products_list';
@@ -189,6 +191,7 @@ class ProductController extends Controller {
         $compare_status = $filters->f_comparison_status;
         $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
         $favorites = Product::getFavorites($source->id);
+
         if (isset($params['all'])) {
             $filters->f_count_products_on_page = 'ALL';
         }
@@ -235,6 +238,9 @@ class ProductController extends Controller {
             'f_hide_mode' => true,
             'f_new' => $filters->f_new,
             'f_favor' => $filters->f_favor,
+            'left_filters_list' => $filters->leftFilters,
+            'right_filters_list' => $filters->rightFilters,
+            'additional_filter_values' => $filters->getAdditionalFilterValues(),
 
             'list_source' => $this->indexPresenter->getListSource(),
             'list_profiles' => $this->indexPresenter->getListProfiles(),
@@ -269,6 +275,7 @@ class ProductController extends Controller {
         $filters = new Filters();
         $filters->setToDefault();
         $filters->f_source = $source->id;
+        $filters->setSource($source);
 
         $products = Product::getListProducts($source, $filters, true);
         if (!is_array($products) || !count($products)) {
@@ -322,6 +329,8 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
         if (!$filters->isExistsDefaultParams()) {
             throw new \InvalidArgumentException('В сессии не хватает данных');
         }
@@ -341,8 +350,7 @@ class ProductController extends Controller {
         }
 
         $filters->setVsSession($name, $value);
-
-        $source = Source::getById($filters->f_source);
+        //VarDumper::dump(\Yii::$app->session->get($name), 10, true); die;
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
@@ -383,6 +391,8 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
         if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
@@ -390,7 +400,6 @@ class ProductController extends Controller {
             ];
         }
 
-        $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
@@ -434,6 +443,9 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
+
         if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
@@ -441,7 +453,6 @@ class ProductController extends Controller {
             ];
         }
 
-        $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
@@ -521,13 +532,15 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($id_source);
+        $filters->setSource($source);
+
         if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
                 'message' => 'В сесии не хватает данных'
             ];
         }
-        $source = Source::getById($id_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
@@ -564,6 +577,9 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
+
         if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
@@ -571,7 +587,6 @@ class ProductController extends Controller {
             ];
         }
 
-        $source = Source::getById($filters->f_source);
         if (!$source) {
             return [
                 'status' => 'error',
@@ -601,6 +616,8 @@ class ProductController extends Controller {
         
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
         $filters->setToDefaultSelects();
         $filters->saveToSession();
         
@@ -609,6 +626,7 @@ class ProductController extends Controller {
             if ($data['datas_products_left'] || $data['datas_products_right'] || $data['datas_products_left_delete']){
                 $this->indexPresenter->changeStatusProducts($data['datas_products_left'], $data['datas_products_right'], $data['datas_products_left_delete']);
             }
+            return ['status' => 'ok'];
         } catch (\Exception $ex) {
             Yii::error($ex->getLine().':'.$ex->getMessage());
             return ['status' => 'error', 'message' => 'Сохранение пакета выбраных статусов совершилось с ошибкой'];
@@ -644,6 +662,7 @@ class ProductController extends Controller {
         if (!$source){
             $source = Source::getById($filters->f_source);
         }
+        $filters->setSource($source);
 
         if (!isset($is_admin)){
             $user = \Yii::$app->user->identity;
@@ -776,6 +795,7 @@ class ProductController extends Controller {
         $filters = new Filters();
         $filters->loadFromSession();
         $source = Source::getById($id_source);
+        $filters->setSource($source);
         $model = Product::getProduct($source, $filters);
 
         $prev = null;

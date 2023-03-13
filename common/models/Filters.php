@@ -1,6 +1,8 @@
 <?php
 namespace common\models;
 
+use yii\helpers\VarDumper;
+
 /**
  * Класс содержит набор возможных фильтров 
  * и для получения списка этого фильтра в формате [ name => count ]
@@ -72,6 +74,9 @@ class Filters {
     public $f_new;
 
     public $f_favor;
+
+    public $additionalFilters = [];
+    public $additionalFiltersMapping = [];
     
     //                                      (where_7) Не используется
     //                                      (where_8) Выносим в User
@@ -82,6 +87,11 @@ class Filters {
     public $f_detail_view;                  // Отображение списка кратко/подробно
     public $f_batch_mode;                   // Режим пакетной выборки (Включен/выключен)
     public $f_hide_mode;                    // Режим скрытия товаров после выбора
+
+    /** @var Source $source */
+    public $source;
+    public $leftFilters = [];
+    public $rightFilters = [];
     
     /** @const array Значения по умолчанию для некоторых фильтров*/  
     const defaults = [
@@ -91,7 +101,7 @@ class Filters {
         'f_no_compare' => 'NOCOMPARE',
         'f_profile' => 'General'
     ];
-    
+
     /**
      * Загружаем фильтра сразу все
      * @param array $params
@@ -150,6 +160,10 @@ class Filters {
         $this->f_username = null;
         $this->f_new = null;
         $this->f_favor = null;
+
+        foreach ($this->additionalFiltersMapping as $key => $f) {
+            $this->{$key} = null;
+        }
     }
     
     public function loadFromValue($key, $value, $with_default = true){
@@ -193,7 +207,7 @@ class Filters {
         if (!$session){
             $session = \Yii::$app->session;
         }
-        $params = $session->loadToArray();
+        $params = $session->loadToArray($this->additionalFiltersMapping);
         foreach ($params as $key => $val){
             if (isset($val)){
                 $this->$key = $val;
@@ -224,5 +238,47 @@ class Filters {
             $session = \Yii::$app->session;
         }
         $session->set($key, $value);
+    }
+
+    public function appendAdditionalFilters($list) {
+        $this->additionalFilters = [
+            'column_json' => [],
+            'column' => [],
+        ];
+        
+        foreach ($list as $key => $f) {
+            $isRange = !!$f['range'];
+            $searchColumnKey = $f['json'] ? 'column_json' : 'column';
+            $f['is_range'] = $isRange;
+            
+            $this->additionalFilters[$searchColumnKey][$key] = $f;
+            if (!$isRange) {
+                $this->{$f['name']} = null;
+                $this->additionalFiltersMapping[$f['name']] = join(';', [$searchColumnKey, $key]);
+            } else {
+                $this->{$f['name'] . "_0"} = null;
+                $this->{$f['name'] . "_1"} = null;
+                $this->additionalFiltersMapping[$f['name'] . "_0"] = join(';', [$searchColumnKey, $key]);
+                $this->additionalFiltersMapping[$f['name'] . "_1"] = join(';', [$searchColumnKey, $key]);
+            }
+        }
+        //VarDumper::dump($this->getAdditionalFilterValues(), 10, true); die;
+    }
+
+    public function setSource(Source $source) {
+        $this->source = $source;
+        $this->leftFilters = ($source->getClass_1())::$filters ?? [];
+        $this->rightFilters = ($source->getClass_2())::$filters ?? [];
+
+        $this->appendAdditionalFilters(array_merge($this->leftFilters, $this->rightFilters));
+        $this->loadFromSession();
+    }
+
+    public function getAdditionalFilterValues() {
+        $values = [];
+        foreach($this->additionalFiltersMapping as $key => $mappedFilter) {
+            $values[$key] = $this->{$key};
+        }
+        return $values;
     }
 }

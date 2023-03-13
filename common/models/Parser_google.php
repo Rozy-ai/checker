@@ -7,16 +7,25 @@ use common\models\Source;
 use Yii;
 use yii\helpers\Json;
 
-
-class Parser_google extends Product{
+class Parser_google extends Product
+{
   protected $_baseInfo = [];
   protected $_addInfo = [];
   protected $_source_id = 3;
 
+  public static $filters = [
+    'Reviews: Rating' => [
+      'name' => 'f_reviews',
+      'label' => 'Reviews Rating',
+      'type' => 'integer',
+      'range' => false,
+      'field' => 'info',
+      'json' => true,
+    ]
+  ];
 
-  public static function tableName(){
+  public static function tableName()
+  {
     return 'parser_google';
   }
-
 }
-

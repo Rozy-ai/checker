@@ -7,6 +7,8 @@
 
 namespace common\models;
 
+use yii\helpers\VarDumper;
+
 /**
  * @author kosten
  *
@@ -89,9 +91,11 @@ class FiltersQuery extends \yii\db\ActiveQuery
     {
         if ($f_no_compare && $f_source) {
             $this->addTable('hidden_items');
-            return ['or',
+            return [
+                'or',
                 ['IS', 'hidden_items.p_id', null],
-                ['<>', 'hidden_items.source_id', $f_source]];
+                ['<>', 'hidden_items.source_id', $f_source]
+            ];
         } else {
             return [];
         }
@@ -110,9 +114,11 @@ class FiltersQuery extends \yii\db\ActiveQuery
     {
         if ($id_source && (!$f_comparison_status || $f_comparison_status === 'NOCOMPARE')) {
             $this->addTable('hidden_items');
-            return ['or',
+            return [
+                'or',
                 ['IS', 'hidden_items.p_id', null],
-                ['<>', 'hidden_items.source_id', $id_source]];
+                ['<>', 'hidden_items.source_id', $id_source]
+            ];
         } else {
             return [];
         }
@@ -227,32 +233,27 @@ class FiltersQuery extends \yii\db\ActiveQuery
     public function getSqlComparisonStatus($f_comparison_status): array
     {
         switch ($f_comparison_status) {
-            case 'MATCH':
-            {
-                $this->addTable('comparisons');
-                return ['like', 'comparisons.status', 'MATCH', false];
-            }
-            case 'MISMATCH':
-            {
-                $this->addTable('comparisons');
-                return ['like', 'comparisons.status', 'MISMATCH'];
-            }
-            case 'PRE_MATCH':
-            {
-                $this->addTable('comparisons');
-                return ['like', 'comparisons.status', 'PRE_MATCH'];
-            }
-            case 'OTHER':
-            {
-                $this->addTable('comparisons');
-                return ['like', 'comparisons.status', 'OTHER'];
-            }
-            case 'YES_NO_OTHER':
-            {
-                $this->addTable('comparisons');
-                return ['and', ['IS NOT', 'comparisons.status', null], ['<>', 'comparisons.status', 'MISMATCH']];
-            }
-            //case 'ALL_WITH_NOT_FOUND':  return [];
+            case 'MATCH': {
+                    $this->addTable('comparisons');
+                    return ['like', 'comparisons.status', 'MATCH', false];
+                }
+            case 'MISMATCH': {
+                    $this->addTable('comparisons');
+                    return ['like', 'comparisons.status', 'MISMATCH'];
+                }
+            case 'PRE_MATCH': {
+                    $this->addTable('comparisons');
+                    return ['like', 'comparisons.status', 'PRE_MATCH'];
+                }
+            case 'OTHER': {
+                    $this->addTable('comparisons');
+                    return ['like', 'comparisons.status', 'OTHER'];
+                }
+            case 'YES_NO_OTHER': {
+                    $this->addTable('comparisons');
+                    return ['and', ['IS NOT', 'comparisons.status', null], ['<>', 'comparisons.status', 'MISMATCH']];
+                }
+                //case 'ALL_WITH_NOT_FOUND':  return [];
             default:
                 return [];
         }
@@ -269,10 +270,12 @@ class FiltersQuery extends \yii\db\ActiveQuery
     {
 
         return ($source_table_name === 'parser_trademarkia_com') ?
-            ['and',
+            [
+                'and',
                 ['like', $source_table_name . '.info', 'add_info'],
                 "info NOT LIKE '%\"add_info\":\"[]\"%'",
-                "info NOT LIKE '%\"add_info\": \"[]\"%'"] : [];
+                "info NOT LIKE '%\"add_info\": \"[]\"%'"
+            ] : [];
     }
 
     /**
@@ -319,7 +322,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
     {
         // admin-доступ
         if ($is_admin) {
-            if($f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все')
+            if ($f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все')
                 return ['like', $source_table_name . '.profile', $f_profile];
             return [];
         }
@@ -328,12 +331,12 @@ class FiltersQuery extends \yii\db\ActiveQuery
         $add_profiles[] = $f_profile;
         // general-доступ pro-доступ
 
-        if($f_profile == 'Pro'){
+        if ($f_profile == 'Pro') {
             $add_profiles[] = 'General';
         }
         // free-доступ
         $sql = ["or"];
-        foreach ($add_profiles as $add_profile){
+        foreach ($add_profiles as $add_profile) {
             $sql[] = ['like', $source_table_name . '.profile', $add_profile . '%', false];
             $sql[] = ['like', $source_table_name . '.profile', $add_profile];
         }
@@ -360,14 +363,14 @@ class FiltersQuery extends \yii\db\ActiveQuery
         $user = \Yii::$app->user->identity;
         if ($fProfile) {
             if ($profileType !== null) {
-                return ['or',
-                //    ['like', $sourceTableName . '.profile', 'Free'],
+                return [
+                    'or',
+                    //    ['like', $sourceTableName . '.profile', 'Free'],
                     ['like', $sourceTableName . '.profile', $fProfile],
                     ['like', $sourceTableName . '.profile', $fProfile . '%', false],
-                  //  ['like', $sourceTableName . '.profile', 'Prepod'],
+                    //  ['like', $sourceTableName . '.profile', 'Prepod'],
                 ];
             } else {
-
             }
         }
 
@@ -380,7 +383,8 @@ class FiltersQuery extends \yii\db\ActiveQuery
             ['like', 'info', $f_title] : [];
     }
 
-    public function getSqlNewProducts($f_new, $last_import) {
+    public function getSqlNewProducts($f_new, $last_import)
+    {
         if (!(int)$f_new || !isset($last_import->created)) {
             return [];
         }
@@ -388,11 +392,50 @@ class FiltersQuery extends \yii\db\ActiveQuery
         return ['date_update' => $last_import->created];
     }
 
-    public function getSqlFavorProducts(Source $source, $f_favor, $favorites) {
+    public function getSqlFavorProducts(Source $source, $f_favor, $favorites)
+    {
         if (!(int)$f_favor || empty($favorites)) {
             return [];
         }
 
         return ['IN', $source->table_1 . ".id", array_keys($favorites)];
+    }
+
+    public function getSqlAdditionalFilters(Filters $filters)
+    {
+        $condition = [];
+        $filterValues = $filters->getAdditionalFilterValues();
+
+        foreach ($filters->additionalFiltersMapping as $key => $map) {
+            [$searchKey, $column] = explode(';', $map);
+            if ($searchKey === 'column_json' || empty($filterValues[$key])) {
+                continue;
+            }
+
+            if (!isset($filters->additionalFilters[$searchKey][$column])) {
+                continue;
+            }
+
+            $columnData = $filters->additionalFilters[$searchKey][$column];
+            $isRangeEnd = preg_match("/_1$/", $key); 
+            var_dump($column);
+            if (!$columnData['range']) {
+                $condition[] = [
+                    !$isRangeEnd ? '>=' : '<=',
+                    $column,
+                    $columnData['type'] === 'integer' ? (int)$filterValues[$key] : $filterValues[$key]
+                ];
+            }
+        }
+
+        if (!empty($condition)) {
+            array_unshift($condition, 'and');
+        }
+        var_dump($filterValues, $condition); die;
+
+        // VarDumper::dump($filters->additionalFiltersMapping, 10, true);
+        // VarDumper::dump($filters->getAdditionalFilterValues(), 10, true);
+        // die;
+        return $condition;
     }
 }

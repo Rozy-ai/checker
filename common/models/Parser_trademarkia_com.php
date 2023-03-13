@@ -23,14 +23,24 @@ use yii\helpers\Json;
  * @property string|null $date_add
  * @property string|null $statuses
  */
-class Parser_trademarkia_com extends Product{
+class Parser_trademarkia_com extends Product
+{
   protected $_baseInfo = [];
   protected $_addInfo = [];
 
-  public static function tableName(){
+  public static $filters = [
+    'Reviews: Rating' => [
+      'name' => 'f_reviews',
+      'label' => 'Reviews Rating',
+      'type' => 'integer',
+      'range' => false,
+      'field' => 'info',
+      'json' => true,
+    ]
+  ];
+
+  public static function tableName()
+  {
     return '{{%parser_trademarkia_com}}';
   }
-
-
 }
-

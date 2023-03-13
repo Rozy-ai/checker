@@ -95,6 +95,9 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                     'f_asin_multiple' => $f_asin_multiple,
                     'f_new' => $f_new,
                     'f_favor' => $f_favor,
+                    'left_filters' => $left_filters_list,
+                    'right_filters' => $right_filters_list,
+                    'additional_filter_values' => $additional_filter_values,
                 ]); ?>
             <?php } ?>
             <!--<form method="get" action="change-filters" id="id_products__filter-form">-->

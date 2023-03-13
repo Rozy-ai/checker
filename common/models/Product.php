@@ -260,6 +260,7 @@ class Product extends \yii\db\ActiveRecord
             $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
             $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
             $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
+            $q->getSqlAdditionalFilters($filters),
 
             //$q->getSqlAddInfoExists($source_table_name),
             //$q->getSqlNoInComparisons(),
@@ -301,6 +302,7 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
+        var_dump($q->createCommand()->rawSql); die;
         $list = $q->createCommand()->queryAll();
         //    var_dump($list);
         foreach ($list as $k => $product) {
