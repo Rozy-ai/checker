@@ -188,12 +188,14 @@ class ProductController extends Controller {
         $is_admin = $user && $user->isAdmin();
         $compare_status = $filters->f_comparison_status;
         $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
+
         $favorites = Product::getFavorites($source->id);
         if (isset($params['all'])) {
             $filters->f_count_products_on_page = 'ALL';
         }
         $list = Product::getListProducts($source, $filters, $is_admin, $favorites);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin, $favorites);
+        
         if($filters->f_count_products_on_page == 'ALL'){
             $count_pages = 1;
         } else {
@@ -241,11 +243,12 @@ class ProductController extends Controller {
             'list_count_products_on_page' => $this->indexPresenter->getListCountProductsOnPage(),
             'list_categories_root' => $this->indexPresenter->getListCategoriesRoot(),
             'list_username' => $this->indexPresenter->getListUser(),
-            'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses($is_admin, $filters->f_profile),
+            'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses($is_admin, $filters->f_profile, $filters),
             'list' => $list,
             'favorites' => $favorites,
             
             'count_products_all' => $count_products_all,
+            'count_products_right_all' => $count_products_right_all,
             'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
             'count_pages' => $count_pages,
             'is_admin' => $is_admin,

@@ -161,36 +161,48 @@ trait TraitListFilters {
         
         if (!$this->source_table_class || !$this->source_table_name || !$this->source_table2_name) {
             throw new \yii\base\InvalidParamException();
-        }
-        
+        }                
+                
         $q = new FiltersQuery($this->source_table_class);
         
-        $q->select(['comparisons.status', 'COUNT(*) as count_statuses'])
-          ->andWhere($q->getSqlProfile($is_admin, $this->source_table_name, $f_profile))
+        $q->select(['comparisons.status', 'COUNT(*) as count_statuses'
+                    , '( '
+                        .'SELECT COUNT(*) as count_result_statuses '
+                        .'FROM comparisons cp '
+                        .'WHERE cp.status =  comparisons.status '
+                        .'GROUP BY cp.status'
+                    .' ) as count_result_statuses'])
+          ->andWhere($q->getSqlProfile($is_admin, $this->source_table_name, $f_profile))        
+          ->andWhere($q->getSqlNoCompareItems(true, $this->source->id))      
           ->groupBy('comparisons.status')
           ->asArray();
+        //((`hidden_items`.`p_id` IS NULL) OR (`hidden_items`.`source_id` <> 1)) AND 
         
         $q->addTable('comparisons');
-        $q->addJoins($this->source_table_name);
+        $q->addJoins($this->source_table_name);            
         $q->indexBy('status');
+        
         //$q = $this->source_table_class::find()
         //->select(['comparisons.status', 'COUNT(*) as count_statuses'])
         //->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
         //->asArray()
         //->groupBy('comparisons.status');
         
+        $sql = $q->createCommand()->getRawSql();       
+        //echo $sql;
+        //die();
         $data = $q->all();
         $data['NOCOMPARE']=$data[null];
         
         // Приведем к нужному формату(Важен порядок):
         $list_comparisons = Comparison::getFilterStatuses();
         $out = [];
-        foreach ($list_comparisons as $key => $val){
-            
+        foreach ($list_comparisons as $key => $val){            
             if ($data[$key]){
                 $out[$key] = [
                         'name' => $val['name'],
-                        'count' => $data[$key]['count_statuses']
+                        'count' => $data[$key]['count_statuses'],
+                        'count_result' => $data[$key]['count_result_statuses']                        
                     ];
             }
         }
