@@ -192,10 +192,14 @@ class ProductController extends Controller {
         $favorites = Product::getFavorites($source->id);
         if (isset($params['all'])) {
             $filters->f_count_products_on_page = 'ALL';
+            
         }
+        
         $list = Product::getListProducts($source, $filters, $is_admin, $favorites);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin, $favorites);
+        $count_products_right_all = Product::getCountProductsRight($source, $filters, $is_admin, $favorites);
         
+        //[$list, $count_products_all, $count_products_right_all] = Product::getListProductsBack($source, $filters, $is_admin,$favorites);        
         if($filters->f_count_products_on_page == 'ALL'){
             $count_pages = 1;
         } else {
