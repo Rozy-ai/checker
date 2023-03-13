@@ -302,110 +302,20 @@ class Product extends \yii\db\ActiveRecord
         }
 
         $list = $q->createCommand()->queryAll();
-<<<<<<< HEAD
         //    var_dump($list);
-=======
-//      var_dump($list);        
->>>>>>> setrais
         foreach ($list as $k => $product) {
             // $product->_source = $source;
             // $product->_baseInfo = $product->info;
 
             $list[$k] = self::getById($source->class_1, $product['id']);
             $list[$k]->_source = $source;
-            $list[$k]->_baseInfo = $list[$k]->info;            
+            $list[$k]->_baseInfo = $list[$k]->info;
         }
         return $list;
     }
 
-<<<<<<< HEAD
     public static function getListProductsFront(Source $source, Filters $filters): array
     {
-=======
-    public static function getListProductsBack(Source $source, Filters $filters, bool $is_admin): array 
-    {
-        $source_table_name = $source->table_1;
-        $source_table2_name = $source->table_2;
-
-        $q = new FiltersQuery($source->class_1);
-        // !!! Если менять тут то нужно менять getCountProducts
-        $q->where(['and',
-            //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
-            $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
-            $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
-            $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
-            $q->getSqlTille($source_table_name, $filters->f_title),
-            $q->getSqlStatus($filters->f_status),
-            $q->getSqlUsername($source_table_name, $filters->f_username),
-            $q->getSqlComparisonStatus($filters->f_comparison_status),
-            $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
-            $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
-            $q->getSqlNoCompareItems(true, $this->source->id) 
-            //$q->getSqlAddInfoExists($source_table_name),
-            //$q->getSqlNoInComparisons(),
-            //$q->getSqlSettingsMessage(),
-        ]);
-
-        // Добавим сортировку:
-        switch ($filters->f_sort) {
-            case 'created_ASC':
-                $q->orderBy($source_table_name . '.date_add ASC');
-                break;
-            case 'created_DESC':
-                $q->orderBy($source_table_name . '.date_add DESC');
-                break;
-            case 'updated_ASC' :
-                $q->orderBy($source_table_name . '.date_update ASC');
-                // $q->addTable('p_updated');
-                // $q->orderBy('p_updated.date ASC');
-                break;
-            case 'updated_DESC' :
-                $q->orderBy($source_table_name . '.date_update DESC');
-                // $q->addTable('p_updated');
-                // $q->orderBy('p_updated.date DESC');
-                break;
-            default:
-                $q->orderBy($source_table_name . '.id');
-        }
-
-        // Получим все необходимые join
-
-        $q->addJoins($source_table_name, $source_table2_name);
-
-        // Отсечем не нужные записи
-        if ($filters->f_count_products_on_page !== 'ALL') {
-            $count_products_on_page = (int) $filters->f_count_products_on_page;
-
-            $offset = ($filters->f_number_page_current - 1) * $count_products_on_page;
-            $q->limit($count_products_on_page);
-            $q->offset($offset);
-        }
-
-        $list = $q->createCommand()->queryAll();
- //     echo $q->createCommand()->getRawSql();
-        
-        $count = $q->count();
-
-        /** @TODO remove to in sql query
-        foreach ($list as $k => $product) {
-            $list[$k] = self::getById($source->class_1, $product['id']);
-            $list[$k]->_source = $source;
-            $list[$k]->_baseInfo = $list[$k]->info;                                    
-        }*/
-        
-        $count_right = $q->select(['DISTINCT ( '
-            .'SELECT COUNT(*) as count_right '
-            .'FROM comparisons cp '
-            .'WHERE cp.status =  comparisons.status '
-            .'GROUP BY cp.status'
-            .' ) as count_right'])->createCommand()->queryColumn('count_right');
-
-        return [$list, (int)$count, (int)$count_right[0] ];
-                
-    }
-    
-    public static function getListProductsFront(Source $source, Filters $filters): array {
->>>>>>> setrais
         $source_table_name = $source->table_1;
         $source_table2_name = $source->table_2;
 
@@ -472,7 +382,7 @@ class Product extends \yii\db\ActiveRecord
         foreach ($list as $k => $product) {
             $product->source = $source;
             $product->baseInfo = $product->info;
-        }        
+        }
         return [$list, (int)$count];
     }
 
@@ -519,7 +429,7 @@ class Product extends \yii\db\ActiveRecord
         }*/
         return $q->count();
     }
-   
+
     /**
      * Получить одну модель продуктов согласно всем фильтрам
      * 
