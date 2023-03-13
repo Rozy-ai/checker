@@ -21,8 +21,8 @@ if (!isset($middleVal)) {
 ?>
 <tr class="my_tr">
     <td
-        class="name <?= (strtolower($leftTitle) === 'price') ? 'js-addition-info-for-price' : '' ?>"
-        <?php if (strtolower($leftTitle) === 'price'): ?>
+        class="name <?= (!empty($addition_info_for_price)) ? 'js-addition-info-for-price' : '' ?>"
+        <?php if (!empty($addition_info_for_price)): ?>
             data-addition_info_for_price='<?= $addition_info_for_price; ?>'
         <?php endif; ?>
         >
@@ -30,8 +30,8 @@ if (!isset($middleVal)) {
 
         </td>
         <td
-            class="info <?= (strtolower($leftTitle) === 'price') ? 'js-addition-info-for-price' : '' ?>"
-            <?php if (strtolower($leftTitle) === 'price'): ?>
+            class="info <?= (!empty($addition_info_for_price)) ? 'js-addition-info-for-price' : '' ?>"
+            <?php if (!empty($addition_info_for_price)): ?>
                 data-addition_info_for_price='<?= $addition_info_for_price; ?>'
             <?php endif; ?>
             >
