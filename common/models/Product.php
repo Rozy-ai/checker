@@ -232,13 +232,14 @@ class Product extends \yii\db\ActiveRecord
             ->exists();
     }
 
-    /**
+    /** @TODO OLD
      * Получить список продуктов согласно фильтрам
      * 
-     * @param Source  $source
+     * @param Source $source
      * @param Filters $filters
-     * @param array $favorites
-     * @return Product[]
+     * @param bool $is_admin
+     * @param type $favorites
+     * @return type
      */
     public static function getListProducts(Source $source, Filters $filters, bool $is_admin, $favorites = [])
     {
@@ -314,6 +315,162 @@ class Product extends \yii\db\ActiveRecord
         return $list;
     }
 
+    /**
+     * Получить запрос списка продуктов согласно фильтрам
+     * 
+     * @param Source $source
+     * @param Filters $filters
+     * @param bool $is_admin
+     * @param type $favorites
+     * @return type
+     */
+    public static function getListProductsQuery(Source $source, Filters $filters, bool $is_admin, $favorites = [])
+    {
+        $source_table_name = $source->table_1;
+        $source_table2_name = $source->table_2;
+
+        $query = new FiltersQuery($source->class_1);
+        // !!! Если менять тут то нужно менять getCountProducts
+        $query->where([
+            'and',
+            $query->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
+            $query->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
+            $query->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
+            $query->getSqlTille($source_table_name, $filters->f_title),
+            $query->getSqlStatus($filters->f_status),
+            $query->getSqlUsername($source_table_name, $filters->f_username),
+            $query->getSqlComparisonStatus($filters->f_comparison_status),
+            $query->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
+            $query->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
+            $query->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
+            $query->getSqlFavorProducts($source, $filters->f_favor, $favorites),
+        ]);
+
+        // Добавим сортировку:
+        switch ($filters->f_sort) {
+            case 'created_ASC':
+                $query->orderBy($source_table_name . '.date_add ASC');
+                break;
+            case 'created_DESC':
+                $query->orderBy($source_table_name . '.date_add DESC');
+                break;
+            case 'updated_ASC':
+                $query->orderBy($source_table_name . '.date_update ASC');
+                break;
+            case 'updated_DESC':
+                $query->orderBy($source_table_name . '.date_update DESC');
+                break;
+            default:
+                $query->orderBy($source_table_name . '.id');
+        }
+
+        // Получим все необходимые join
+
+        $query->addJoins($source_table_name, $source_table2_name);
+
+        // Отсечем не нужные записи
+        if ($filters->f_count_products_on_page !== 'ALL') {
+            $count_products_on_page = (int) $filters->f_count_products_on_page;
+
+            $offset = ($filters->f_number_page_current - 1) * $count_products_on_page;
+            $query->limit($count_products_on_page);
+            $query->offset($offset);
+        }
+        return $query;
+    }
+    
+    /**
+     * Получить список всех продуктов согласно фильтрам
+     * 
+     * @param Source $source
+     * @param Filters $filters
+     * @param bool $is_admin
+     * @param type $favorites
+     * @return type
+     */
+    public static function getListProductsAll(Source $source, Filters $filters, bool $is_admin, $favorites = []) 
+    {
+        $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);        
+        return self::getListProductsBuild( $query, $source);        
+    }    
+    
+    /**
+     * Получить обработка запрос списка всех продуктов
+     * 
+     * @param Query $query
+     * @param Source $source
+     * @return type
+     */
+    public static function getListProductsBuild( $query, Source $source) 
+    {
+        $list = $query->createCommand()->queryAll();
+        foreach ($list as $k => $product) {
+
+            $list[$k] = self::getById($source->class_1, $product['id']);
+            $list[$k]->_source = $source;
+            $list[$k]->_baseInfo = $list[$k]->info;
+        }
+        return $list;
+    }    
+
+    /**
+     * Получить левое кол-во продуктов согласно фильтрам
+     * 
+     * @param Source  $source
+     * @param Filters $filters
+     * @param array $favorites
+     * @return Product[]
+     */
+    public static function getCountProductsLeft(Source $source, Filters $filters, bool $is_admin, $favorites = []) 
+    {
+        $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);
+        return (int)$query->count();
+    }   
+    
+    /**
+     * Получить кол-во левое кол-во продуктов согласно фильтрам
+     * 
+     * @param Source  $source
+     * @param Filters $filters
+     * @param array $favorites
+     * @return Product[]
+     */
+    public static function getCountProductsRight(Source $source, Filters $filters, bool $is_admin, $favorites = []) 
+    {
+        $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);
+        //echo $query->createCommand()->getRawSql();
+        $count_right = $query->select(['DISTINCT ( '
+            .'SELECT COUNT(*) as count_right '
+            .'FROM comparisons cp '
+            . ( $filters->f_comparison_status ? 'WHERE cp.status =  comparisons.status GROUP BY cp.status' : '')
+            .' ) as count_right'])->createCommand()->queryColumn('count_right');
+        return (int)$count_right[0];
+    }    
+    
+    /** 
+     * Получить список + кол-во левое + кол-во правое продуктов согласно фильтра
+     * @param Source $source
+     * @param Filters $filters
+     * @param bool $is_admin
+     * @param type $favorites
+     * @return array
+     */
+    public static function getListProductsBack(Source $source, Filters $filters, bool $is_admin, $favorites = []): array 
+    {            
+        $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites );
+        $list =  self::getListProductsAll($source, $filters, $is_admin, $favorites);
+        $count = $query->count();
+        $count_right = $query->select(['DISTINCT ( '
+            .'SELECT COUNT(*) as count_right '
+            .'FROM comparisons cp '
+            .'WHERE cp.status =  comparisons.status '
+            .'GROUP BY cp.status'
+            .' ) as count_right'])->createCommand()->queryColumn('count_right');
+
+        return [$list, (int)$count, (int)$count_right[0] ];
+                
+    }
+    
     public static function getListProductsFront(Source $source, Filters $filters): array
     {
         $source_table_name = $source->table_1;
@@ -386,7 +543,7 @@ class Product extends \yii\db\ActiveRecord
         return [$list, (int)$count];
     }
 
-    /**
+    /** @TODO OLD 
      * Узнать количество всех левых продуктов
      * 
      * @param Source $source
