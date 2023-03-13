@@ -63,18 +63,6 @@ class IndexPresenter {
         return $cnt_all_right;
     }
 
-    public function getCountProductsOnPageLeft($list) {
-        if (!$list) {
-            return 0;
-        }
-        $cnt_all_right = 0;
-        foreach ($list as $product) {
-            $items = $product->baseInfo;
-            $cnt_all_left += count($items);
-        }
-        return $cnt_all_left;
-    }
-
     public function getLastLocalImport() {
         $s_import = Stats_import_export::find();
         $s_import->where(['type' => 'IMPORT']);
