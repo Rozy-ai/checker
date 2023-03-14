@@ -165,15 +165,8 @@ trait TraitListFilters {
                 
         $q = new FiltersQuery($this->source_table_class);
         
-        $q->select(['comparisons.status', 'COUNT(*) as count_statuses'
-                    , '( '
-                        .'SELECT COUNT(*) as count_result_statuses '
-                        .'FROM comparisons cp '
-                        .'WHERE cp.status =  comparisons.status '
-                        .'GROUP BY cp.status'
-                    .' ) as count_result_statuses'])
-          ->andWhere($q->getSqlProfile($is_admin, $this->source_table_name, $f_profile))        
-          ->andWhere($q->getSqlNoCompareItems(true, $this->source->id))      
+        $q->select(['comparisons.status', 'COUNT(*) as count_statuses'])
+          ->andWhere($q->getSqlProfile($is_admin, $this->source_table_name, $f_profile))
           ->groupBy('comparisons.status')
           ->asArray();
         
@@ -191,11 +184,9 @@ trait TraitListFilters {
             if ($data[$key]){
                 $out[$key] = [
                         'name' => $val['name'],
-                        'count' => $data[$key]['count_statuses'],
-                        'count_result' => $data[$key]['count_result_statuses']                        
+                        'count' => $data[$key]['count_statuses'],                      
                     ];                
                 $count[$key] = $data[$key]['count_statuses'];
-                $count_result[$key] = $data[$key]['count_result_statuses'];
                 $name[$key] = $val['name'];
                 
             }
