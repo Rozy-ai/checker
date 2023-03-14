@@ -152,7 +152,7 @@ class ProductController extends Controller {
         $filters = new Filters();
         $filters->loadFromSession();  
         $source = null;
-        // Если страница загружвется в первый раз, то будут отсутствовать обязательные параметры
+        // Если страница загружается в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
             $srcId = $src ? $src : $filters->f_source;
             $source = Source::getById($srcId);
@@ -168,7 +168,7 @@ class ProductController extends Controller {
                 $this->redirect('/product/index');
             }
         } else {
-            // Если страница загружается в первый раз то номер страницы нафиг не нужен, ибо по умолчанию установится в 1
+            // Если страница загружается в первый раз то номер страницы не нужен, ибо по умолчанию установится в 1
             $id_user = \Yii::$app->user->id;
             $source = Source::getForUser($id_user, $src);
 
@@ -310,6 +310,7 @@ class ProductController extends Controller {
     public function actionChangeFilter() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $request = \Yii::$app->request->post();
+        
         if (isset($request)) {
             $name = $request['name'];
             $value = $request['value'];
@@ -318,7 +319,7 @@ class ProductController extends Controller {
         if (!isset($name)) {
             return [
                 'status' => 'error',
-                'message' => 'Не удаось получить изменяемый фильтр',
+                'message' => 'Не удалось получить изменяемый фильтр',
             ];
         }
         

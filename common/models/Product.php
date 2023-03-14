@@ -232,7 +232,7 @@ class Product extends \yii\db\ActiveRecord
             ->exists();
     }
 
-    /** @TODO OLD
+    /** @TODO OLD Go to getListProductsAll
      * Получить список продуктов согласно фильтрам
      * 
      * @param Source $source
@@ -302,6 +302,8 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
+        //echo $q->createCommand()->getRawSql();
+        //die();
         $list = $q->createCommand()->queryAll();
         //    var_dump($list);
         foreach ($list as $k => $product) {
@@ -328,7 +330,7 @@ class Product extends \yii\db\ActiveRecord
     {
         $source_table_name = $source->table_1;
         $source_table2_name = $source->table_2;
-
+        
         $query = new FiltersQuery($source->class_1);
         // !!! Если менять тут то нужно менять getCountProducts
         $query->where([
@@ -346,8 +348,34 @@ class Product extends \yii\db\ActiveRecord
             $query->getSqlFavorProducts($source, $filters->f_favor, $favorites),
         ]);
 
+        // Добавим сортировку
+        $query = self::setSortListProductsQuery( $query, $filters->f_soft, $source_table_name );
+        
+        // Получим все необходимые join
+        $query->addJoins($source_table_name, $source_table2_name);
+
+        // Отсечем не нужные записи
+        if ($filters->f_count_products_on_page !== 'ALL') {
+            $count_products_on_page = (int) $filters->f_count_products_on_page;
+
+            $offset = ($filters->f_number_page_current - 1) * $count_products_on_page;
+            $query->limit($count_products_on_page);
+            $query->offset($offset);
+        }
+        return $query;
+    }
+    
+    /**
+     * Установка сортировки запроса списка продуктов
+     * 
+     * @param type $query
+     * @param type $soft
+     * @param type $source_table_name
+     * @return type
+     */
+    public static function setSortListProductsQuery( FiltersQuery $query, $soft, $source_table_name) {
         // Добавим сортировку:
-        switch ($filters->f_sort) {
+        switch ($sort) {
             case 'created_ASC':
                 $query->orderBy($source_table_name . '.date_add ASC');
                 break;
@@ -360,22 +388,9 @@ class Product extends \yii\db\ActiveRecord
             case 'updated_DESC':
                 $query->orderBy($source_table_name . '.date_update DESC');
                 break;
-            default:
+            default:                
                 $query->orderBy($source_table_name . '.id');
-        }
-
-        // Получим все необходимые join
-
-        $query->addJoins($source_table_name, $source_table2_name);
-
-        // Отсечем не нужные записи
-        if ($filters->f_count_products_on_page !== 'ALL') {
-            $count_products_on_page = (int) $filters->f_count_products_on_page;
-
-            $offset = ($filters->f_number_page_current - 1) * $count_products_on_page;
-            $query->limit($count_products_on_page);
-            $query->offset($offset);
-        }
+        }     
         return $query;
     }
     
@@ -438,12 +453,13 @@ class Product extends \yii\db\ActiveRecord
     public static function getCountProductsRight(Source $source, Filters $filters, bool $is_admin, $favorites = []) 
     {
         $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);
-        //echo $query->createCommand()->getRawSql();
         $count_right = $query->select(['DISTINCT ( '
             .'SELECT COUNT(*) as count_right '
             .'FROM comparisons cp '
             . ( $filters->f_comparison_status ? 'WHERE cp.status =  comparisons.status GROUP BY cp.status' : '')
             .' ) as count_right'])->createCommand()->queryColumn('count_right');
+        //echo $query->createCommand()->getRawSql();
+        //die();
         return (int)$count_right[0];
     }    
     

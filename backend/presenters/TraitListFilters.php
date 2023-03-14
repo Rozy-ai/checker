@@ -176,21 +176,11 @@ trait TraitListFilters {
           ->andWhere($q->getSqlNoCompareItems(true, $this->source->id))      
           ->groupBy('comparisons.status')
           ->asArray();
-        //((`hidden_items`.`p_id` IS NULL) OR (`hidden_items`.`source_id` <> 1)) AND 
         
         $q->addTable('comparisons');
         $q->addJoins($this->source_table_name);            
         $q->indexBy('status');
-        
-        //$q = $this->source_table_class::find()
-        //->select(['comparisons.status', 'COUNT(*) as count_statuses'])
-        //->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
-        //->asArray()
-        //->groupBy('comparisons.status');
-        
-        $sql = $q->createCommand()->getRawSql();       
-        //echo $sql;
-        //die();
+                     
         $data = $q->all();
         $data['NOCOMPARE']=$data[null];
         
@@ -203,21 +193,17 @@ trait TraitListFilters {
                         'name' => $val['name'],
                         'count' => $data[$key]['count_statuses'],
                         'count_result' => $data[$key]['count_result_statuses']                        
-                    ];
+                    ];                
+                $count[$key] = $data[$key]['count_statuses'];
+                $count_result[$key] = $data[$key]['count_result_statuses'];
+                $name[$key] = $val['name'];
+                
             }
-        }
-        /*
-        $out = [];
-        foreach ($data as $val){
-            if ($val['status'] == null){
-                $val['status'] = 'NOCOMPARE';
-            }
-            $out[$val['status']] = [
-                'name'  => $list_comparisons[$val['status']]['name'],
-                'count' => $val['count_statuses']
-            ];
-        }
-        */
+        }                
+        /** Выставляем значение по умолчанию согласно Checker_back5 п.3
+         *  найбольшее кол-во товаров справа первым */
+        array_multisort($count_result,SORT_DESC,$name,SORT_ASC,$out);
+        
         return $out;
     }
 
