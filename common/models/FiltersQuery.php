@@ -252,6 +252,11 @@ class FiltersQuery extends \yii\db\ActiveQuery
                 $this->addTable('comparisons');
                 return ['and', ['IS NOT', 'comparisons.status', null], ['<>', 'comparisons.status', 'MISMATCH']];
             }
+            /*case 'NOCOMPARE':
+            {
+                $this->addTable('comparisons');
+                return ['and', ['IS', 'comparisons.status', null], ['<>', 'comparisons.status', 'NOCOMPARE']];
+            }*/
             //case 'ALL_WITH_NOT_FOUND':  return [];
             default:
                 return [];
