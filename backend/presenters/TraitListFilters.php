@@ -56,7 +56,7 @@ trait TraitListFilters {
             throw new \yii\base\InvalidParamException();
         }
         $list = \Yii::$app->db->createCommand(
-            'SELECT info->\'$."Categories: Root"\' as cat, count(*) as count FROM '.$this->source_table_name.' GROUP BY cat')->queryAll(); 
+            'SELECT DISTINCT info->\'$."Categories: Root"\' as cat, count(*) as count FROM '.$this->source_table_name.' GROUP BY cat')->queryAll();
 
         $new_list = [];
         if (is_array($list)){
@@ -165,11 +165,12 @@ trait TraitListFilters {
         
         $q = new FiltersQuery($this->source_table_class);
         
-        $q->select(['comparisons.status', 'COUNT(*) as count_statuses'])
+        $q->select(['comparisons.status', 'COUNT(DISTINCT id) as count_statuses'])
           ->andWhere($q->getSqlProfile($is_admin, $this->source_table_name, $f_profile))
           ->groupBy('comparisons.status')
           ->asArray();
-        
+
+;
         $q->addTable('comparisons');
         $q->addJoins($this->source_table_name);
         $q->indexBy('status');

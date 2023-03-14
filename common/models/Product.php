@@ -277,15 +277,14 @@ class Product extends \yii\db\ActiveRecord {
             $q->offset($offset);
         }
 
-        $list = $q->createCommand()->queryAll();
-    //    var_dump($list);
+        $list = $q->distinct()->all();
         foreach ($list as $k => $product) {
-           // $product->_source = $source;
-           // $product->_baseInfo = $product->info;
+            $product->_source = $source;
+            $product->_baseInfo = $product->info;
 
-            $list[$k] = self::getById($source->class_1, $product['id']);
-            $list[$k]->_source = $source;
-            $list[$k]->_baseInfo = $list[$k]->info;
+            //$list[$k] = self::getById($source->class_1, $product['id']);
+            //$list[$k]->_source = $source;
+            //$list[$k]->_baseInfo = $list[$k]->info;
         }
         return $list;
     }
@@ -396,7 +395,7 @@ class Product extends \yii\db\ActiveRecord {
                 return $source->max_free_show_count;
             }
         }*/
-        return $q->count();
+        return $q->distinct()->count();
     }
 
     /**
