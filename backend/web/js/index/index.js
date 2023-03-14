@@ -59,6 +59,11 @@ import {
     ListDataForServer
 } from './classes/ListDataForServer.js';
 
+import {
+    /* Статус подверждения удаления левых продуктов */
+    STATUS_CONFIRM_DEL_LEFT_PRODUCT
+} from './classes/IcXpProductStatus.js';
+
 const CLASS_BUTTON_MISSMATCH_ALL = '.product-list__item-mismatch-all'; // Левый крестик
 const CLASS_BUTTON_RESET_FILTERS = '#id_button_reset_filters';
 const CLASS_BUTTON_ADDITIONAL_FILTERS = '#additional_filter_link';
@@ -240,7 +245,7 @@ function main() {
             let blockProduct = ProductBlock.getFromChild( $this );
 
             if ( !blockProduct.isMismatchAll( false ) ) {
-                if ( !confirm( 'Некоторые правые товары именют статус отличный от missmatch и будет перезаписан. Продолжить?' ) ) {
+                if ( STATUS_CONFIRM_DEL_LEFT_PRODUCT && !confirm( 'Некоторые правые товары именют статус отличный от missmatch и будет перезаписан. Продолжить?' ) ) {
                     return;
                 }
             }
