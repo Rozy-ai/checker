@@ -26,6 +26,7 @@ use common\models\Product;
 use common\models\Filters;
 use common\models\Stats_import_export;
 use common\models\Product_right;
+use common\models\User__favorites;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -151,9 +152,11 @@ class ProductController extends Controller {
         $filters = new Filters();
         $filters->loadFromSession();  
         $source = null;
-        // Если страница загружвется в первый раз, то будут отсутствовать обязательные параметры
+        // Если страница загружается в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
-            $source = Source::getById($src ? $src : $filters->f_source);
+            $srcId = $src ? $src : $filters->f_source;
+            $source = Source::getById($srcId);
+            $filters->f_source = $srcId;
             
             //  Если в запросе указан номер страницы, то установим его:
             if (isset($params['page'])){
@@ -165,7 +168,7 @@ class ProductController extends Controller {
                 $this->redirect('/product/index');
             }
         } else {
-            // Если страница загружается в первый раз то номер страницы нафиг не нужен, ибо по умолчанию установится в 1
+            // Если страница загружается в первый раз то номер страницы не нужен, ибо по умолчанию установится в 1
             $id_user = \Yii::$app->user->id;
             $source = Source::getForUser($id_user, $src);
 
@@ -183,12 +186,18 @@ class ProductController extends Controller {
         $this->layout = 'products_list';
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
+        $compare_status = $filters->f_comparison_status;
         $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
+
+        $favorites = Product::getFavorites($source->id);
         if (isset($params['all'])) {
             $filters->f_count_products_on_page = 'ALL';
+            
         }
-        $list = Product::getListProducts($source, $filters, $is_admin);
-        $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
+        
+        $list = Product::getListProducts($source, $filters, $is_admin, $favorites);
+        $count_products_all = Product::getCountProducts($source, $filters, $is_admin, $favorites);
+        
         if($filters->f_count_products_on_page == 'ALL'){
             $count_pages = 1;
         } else {
@@ -197,12 +206,26 @@ class ProductController extends Controller {
         if($filters->f_profile == 'Free') {
             $filters->f_detail_view = 1; // Подробно
         }
+
+        if (!$is_admin) {
+            switch ($compare_status) {
+                case 'PRE_MATCH':
+                case 'MATCH':
+                    $filters->f_detail_view = 1; // Подробно
+                    break;
+                case 'NOCOMPARE':
+                case 'MISMATCH':
+                    $filters->f_detail_view = 0; // Кратко
+                    break;    
+            }
+        }
         return $this->render('index', [
             'f_source' => $src ? $src : $filters->f_source,
             'f_profile' => $filters->f_profile,
             'f_count_products_on_page' => $filters->f_count_products_on_page,
             'f_number_page_current' => $filters->f_number_page_current,
             'f_asin' => $filters->f_asin,
+            'f_asin_multiple' => $filters->f_asin_multiple,
             'f_title' => $filters->f_title,
             'f_status' => $filters->f_status,
             'f_username' => $filters->f_username,
@@ -214,16 +237,20 @@ class ProductController extends Controller {
             'f_hide_mode' => $filters->f_hide_mode,
             'f_no_compare' => true,
             'f_hide_mode' => true,
+            'f_new' => $filters->f_new,
+            'f_favor' => $filters->f_favor,
 
             'list_source' => $this->indexPresenter->getListSource(),
             'list_profiles' => $this->indexPresenter->getListProfiles(),
             'list_count_products_on_page' => $this->indexPresenter->getListCountProductsOnPage(),
             'list_categories_root' => $this->indexPresenter->getListCategoriesRoot(),
             'list_username' => $this->indexPresenter->getListUser(),
-            'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses($is_admin, $filters->f_profile),
+            'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses($is_admin, $filters->f_profile, $filters),
             'list' => $list,
+            'favorites' => $favorites,
             
             'count_products_all' => $count_products_all,
+            'count_products_right_all' => $count_products_right_all,
             'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
             'count_pages' => $count_pages,
             'is_admin' => $is_admin,
@@ -281,6 +308,7 @@ class ProductController extends Controller {
     public function actionChangeFilter() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $request = \Yii::$app->request->post();
+        
         if (isset($request)) {
             $name = $request['name'];
             $value = $request['value'];
@@ -289,7 +317,7 @@ class ProductController extends Controller {
         if (!isset($name)) {
             return [
                 'status' => 'error',
-                'message' => 'Не удаось получить изменяемый фильтр',
+                'message' => 'Не удалось получить изменяемый фильтр',
             ];
         }
         
@@ -659,8 +687,10 @@ class ProductController extends Controller {
                 'f_no_compare' => $filters->f_no_compare,
                 'f_detail_view' => $filters->f_detail_view,
                 'f_number_page_current' => $filters->f_number_page_current,
+                'f_new' => $filters->f_new,
                 'count_pages' => $count_pages,
                 'source' => $source,
+                'last_update' => Stats_import_export::getLastLocalImport(),
             ]):null,
             'other' => [
                 'id_block_count' => $html_block_count,
@@ -1309,4 +1339,34 @@ class ProductController extends Controller {
         return $statuses;
     }
 
+    public function actionChangeProfile() {
+        $source_id = $this->request->post('source_id');
+        $value = $this->request->post('value');
+        $pid = $this->request->post('pid');
+        $source = Source::getById($source_id);
+
+        $product = Product::getById($source->class_1, $pid);
+        $product->updateAttributes(['profile' => $value]);
+
+        return json_encode(['status' => 'ok', 'value' => $value]);
+    }
+
+    public function actionToggleProductFavor() {
+        $attributes = [
+            'source_id' => $this->request->post('source_id'),
+            'product_id' => $this->request->post('product_id'),
+            'user_id' => \Yii::$app->user->id,
+        ];
+
+        $favor = User__favorites::findOne($attributes);
+        $favored = !!$favor;
+        if (!$favored) {
+            $favor = new User__favorites($attributes);
+            $favor->save();
+        } else {
+            $favor->delete();
+        }
+
+        return json_encode(['status' => 'ok', 'favored' => !$favored]);
+    }
 }

@@ -1,9 +1,11 @@
 <?
 /* @var $profiles_list */
+
 use common\models\Source;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-$model = new \yii\base\DynamicModel(['source_id','comparisons','test','use_previous_saved','profile','ignore_step_3']);
+
+$model = new \yii\base\DynamicModel(['source_id', 'comparisons', 'test', 'use_previous_saved', 'profile', 'ignore_step_3', 'is_new']);
 $model->addRule(['source_id'], 'integer');
 $model->addRule(['comparisons'], 'required');
 $model->addRule(['test'], 'trim');
@@ -12,57 +14,59 @@ $model->addRule(['profile'], 'string');
 $model->addRule(['ignore_step_3'], 'string');
 ?>
 <style>
-  #dynamicmodel-comparisons{
+  #dynamicmodel-comparisons {
     border: 1px solid #b4b4b4;
     border-radius: 6px;
     padding: 9px 6px 0 11px;
   }
-  .field-dynamicmodel-use_previous_saved label{
+
+  .field-dynamicmodel-use_previous_saved label {
     display: block;
   }
 </style>
 
 <div>
-  <h2 class="export_step_2_title" data-source_id="<?=Source::get_source($source_id)['source_id']?>">Выгрузка: Step 2 (<?=Source::get_source($source_id)['source_name']?>)</h2>
+  <h2 class="export_step_2_title" data-source_id="<?= Source::get_source($source_id)['source_id'] ?>">Выгрузка: Step 2 (<?= Source::get_source($source_id)['source_name'] ?>)</h2>
   <?php $form = ActiveForm::begin(['action' => '/exports/step_3',]); ?>
 
-    <?= $form->field($model,'source_id')->hiddenInput(['value' => $source_id])->label(false); ?>
+  <?= $form->field($model, 'source_id')->hiddenInput(['value' => $source_id])->label(false); ?>
 
-    <?= $form->field($model,'comparisons')->radioList(
-      [
-        'PRE_MATCH' => 'Prematch',
-        'match' => 'Match',
-        'mismatch' => 'Mismatch',
-        'other' => 'Other',
-        'YES_NO_OTHER' => 'Result (Match, Prematch, Other)',
-        //'nocomare' => 'nocompare',
-      ],
-      [ // можно без этого массива
-        'item' =>
-          function($index, $label, $name, $checked, $value)
-          {
-            return Html::radio($name,$label === 'match',['label'=>$label,'value' => $value]).'<br/>';
-          },
-      ]
+  <?= $form->field($model, 'comparisons')->checkboxList(
+    [
+      'match' => 'Match',
+      'PRE_MATCH' => 'Prematch',
+      'mismatch' => 'Mismatch',
+      'other' => 'Other',
+      'YES_NO_OTHER' => 'Result (Match, Prematch, Other)',
+      //'nocomare' => 'nocompare',
+    ],
+    [ // можно без этого массива
+      'item' =>
+      function ($index, $label, $name, $checked, $value) {
+        return Html::checkbox($name, strtolower($label) === 'match', ['label' => $label, 'value' => $value]) . '<br/>';
+      },
+    ]
 
-    )->label('<strong>Выберите сравнение:</strong>')?>
+  )->label('<strong>Выберите сравнение:</strong>') ?>
+  
+  <?= $form->field($model, 'is_new')->checkbox(['value' => 'is_new', 'label' => 'New', 'checked' => true]) ?>
 
-    <?= $form->field($model, 'profile')->dropDownList($profiles_list) ?>
+  <?= $form->field($model, 'profile')->dropDownList($profiles_list) ?>
 
-<!-- $profile_list -->
+  <!-- $profile_list -->
 
-    <?= $form->field($model, 'use_previous_saved')->checkbox(
-      [
-        'label' => 'использовать сохраненные ранее поля',
-        'checked' => true
-      ]
-    )?>
+  <?= $form->field($model, 'use_previous_saved')->checkbox(
+    [
+      'label' => 'использовать сохраненные ранее поля',
+      'checked' => true
+    ]
+  ) ?>
   <?= $form->field($model, 'ignore_step_3')->checkbox(
     [
       'label' => 'пропустить шаг 3',
       'checked' => false
     ]
-  )?>
+  ) ?>
 
 
 
@@ -81,4 +85,3 @@ $model->addRule(['ignore_step_3'], 'string');
 
 </div>
 <script src="/js/exports_step_2.js" defer></script>
-

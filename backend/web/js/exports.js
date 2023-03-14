@@ -112,9 +112,7 @@ $(function(){
     let source_id = $root.data('source_id');
     let comparisons = $root.data('comparisons');
     let profile = $root.data('profile');
-    
-    console.log(source_id);
-    console.log(comparisons);
+    let is_new = $root.data('new');
     
     let out = [];
     $items.each(function(a,b){
@@ -131,6 +129,7 @@ $(function(){
     dataToSend.source_id = source_id;
     dataToSend.comparisons = comparisons;
     dataToSend.profile = profile;
+    dataToSend.is_new = is_new;
     $.ajax({
     	url: "/exports/step_4",
     	type: "POST",

@@ -12,11 +12,10 @@ class Settings__fields_extend_price extends ActiveRecord{
 
   public function rules(){
     return [
-      [['id','source_id','name','title','default'],'trim'],
+      [['id','source_id','name','title','default','section'],'trim'],
       [['name'],'required'],
     ];
   }
-
 
   public static function get_default_price(int $source_id){
     return self::find()->where(['default' => '1', 'source_id' => $source_id ])->limit(1)->one();

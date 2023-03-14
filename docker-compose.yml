@@ -1,0 +1,50 @@
+version: '3.7'
+
+services:
+
+  web:
+    build: .
+    ports:
+      - ${PORT}:80
+    environment:
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - YII2_ENV=${YII2_ENV}
+      - FE_HOST=${FE_HOST}
+      - BE_HOST=${BE_HOST}
+      - VIRTUAL_HOST=${FE_HOST},${BE_HOST}
+    volumes:
+      # Re-use local composer cache via host volume
+      - composer-cache:/root/.composer/cache:delegated
+      # Mount source code
+      - ./:/app
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:5
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    restart: unless-stopped
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.1
+    ports:
+      - ${PMA_PORT}:80
+    environment:
+      - PMA_HOST=${MYSQL_HOST}
+      - UPLOAD_LIMIT=512M
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  composer-cache:

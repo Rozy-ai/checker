@@ -56,6 +56,10 @@ class Comparison extends ActiveRecordAlias {
         ],
     ];
     
+    /**
+     * Получение массива статусов ?:)
+     * @return array
+     */
     public static function getFilterStatuses(){
         return [
             'NOCOMPARE' => [
@@ -87,12 +91,15 @@ class Comparison extends ActiveRecordAlias {
                 'hex_color' => '',
                 'name' => 'Mismatch',
                 'name_2' => 'Нет',
-            ]
+            ]        
         ];
     }
     
 
-
+    /**
+     * Получение статусов фильтра
+     * @return string
+     */
     public static function get_filter_statuses(){
       $out = self::$status_data;
       
@@ -102,7 +109,7 @@ class Comparison extends ActiveRecordAlias {
         'name_2' => 'Не отмеченные',
       ];
 
-      $out = array_merge($out,self::$status_data);
+      //$out = array_merge($out,self::$status_data);
 
       $out['YES_NO_OTHER'] = [
         'hex_color' => '',
@@ -123,7 +130,12 @@ class Comparison extends ActiveRecordAlias {
       return $out;
 
     }
-
+    
+    /**
+     * Получение названий статусов
+     * @param type $status_code
+     * @return string
+     */
     public static function get_name_status($status_code) {
     	if ($status_code === 'MISMATCH') return 'Mismatch (No)';
         if ($status_code === 'PRE_MATCH') return 'Pre_match (?)';
@@ -132,7 +144,7 @@ class Comparison extends ActiveRecordAlias {
     }
     
     /**
-     * 
+     * Получение массива статусов в формате
      * @return array [
      *      key => status_name
      *      key => status_name
@@ -148,10 +160,8 @@ class Comparison extends ActiveRecordAlias {
 
         return $statuses;
     }
-    
-    // 
-    
-    /**
+        
+    /** @lear to use
      * Возвращает список статусов
      * 
      * @param int $id_product - id левого товара для поиска по соотвестстующим правым
@@ -183,7 +193,9 @@ class Comparison extends ActiveRecordAlias {
     }
        
     /**
+     * Получить код статуса
      * @param type $status_code
+     * @return type
      */
     public static function get_status_by_code($status_code) {
 
@@ -201,6 +213,11 @@ class Comparison extends ActiveRecordAlias {
         return '{{%comparisons}}';
     }
 
+    /**
+     * Получение ?:)
+     * @param ActiveRecordAlias $item
+     * @return type
+     */
     public static function get_no_compare_ids_for_item(ActiveRecordAlias $item) {
         $compared = $item->comparisons;
         $addInfo = $item->getAddInfo();
@@ -218,6 +235,12 @@ class Comparison extends ActiveRecordAlias {
         return array_diff($list_2, $list_1);
     }
 
+    /**
+     * Сравнение товаров
+     * @param type $p_id
+     * @param type $source_id
+     * @return type
+     */
     public static function can_compare($p_id, $source_id) {
 
         return $res = Comparison::find()
@@ -236,15 +259,15 @@ class Comparison extends ActiveRecordAlias {
      * {@inheritdoc}
      */
     public function rules() {
-//        $class = Source::get_source()['source_class'];
+//      $class = Source::get_source()['source_class'];
 
         return [
             [['user_id', 'product_id', 'status'], 'required'],
             [['user_id', 'product_id', 'source_id'], 'integer'],
             [['messages_id'], 'safe'],
             [['status', 'message'], 'string'],
-//            [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => $class::className(), 'targetAttribute' => ['product_id' => 'id']],
-//            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+//          [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => $class::className(), 'targetAttribute' => ['product_id' => 'id']],
+//          [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
@@ -437,7 +460,11 @@ class Comparison extends ActiveRecordAlias {
     
  
     */
-        
+      
+    /**
+     * Получение сообщений
+     * @return type
+     */
     public function getMessages() {
         return $this->hasOne(Message::class, ['id' => 'messages_id']);
     }

@@ -1,0 +1,9 @@
+Sales Rank: Current
+Sales Rank: 30 days avg.
+Sales Rank: 90 days avg.
+Sales Rank: 180 days avg.
+Sales Rank: 30 days drop %
+Sales Rank: 90 days drop %
+Sales Rank: Drops last 30 days
+Sales Rank: Drops last 90 days
+Sales Rank: Drops last 180 days

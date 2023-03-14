@@ -21,6 +21,7 @@ class Session extends \yii\web\Session{
             'f_number_page_current'     => $this->get('f_number_page_current'),
             'f_id'                      => $this->get('f_id'),
             'f_asin'                    => $this->get('f_asin'),
+            'f_asin_multiple'           => $this->get('f_asin_multiple'),
             'f_categories_root'         => $this->get('f_categories_root'),
             'f_title'                   => $this->get('f_title'),
             'f_status'                  => $this->get('f_status'),
@@ -31,7 +32,9 @@ class Session extends \yii\web\Session{
             'f_sort'                    => $this->get('f_sort'),
             'f_detail_view'             => $this->get('f_detail_view'),
             'f_batch_mode'              => $this->get('f_batch_mode'),
-            'f_hide_mode'               => $this->get('f_hide_mode')
+            'f_hide_mode'               => $this->get('f_hide_mode'),
+            'f_new'                     => $this->get('f_new'),
+            'f_favor'                   => $this->get('f_favor'),
         ];
     }
 }

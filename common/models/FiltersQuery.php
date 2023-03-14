@@ -90,7 +90,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
         if ($f_no_compare && $f_source) {
             $this->addTable('hidden_items');
             return ['or',
-                ['IS', 'hidden_items.p_id', null],
+                ['IS NOT', 'hidden_items.p_id', null],
                 ['<>', 'hidden_items.source_id', $f_source]];
         } else {
             return [];
@@ -137,10 +137,32 @@ class FiltersQuery extends \yii\db\ActiveQuery
      * @param string|null $f_asin
      * @return array
      */
-    public function getSqlAsin(string $source_table_name, $f_asin): array
+    public function getSqlAsin(string $source_table_name, $f_asin, $f_asin_multiple): array
     {
-        return ($f_asin) ?
-            ['like', $source_table_name . '.ASIN', "$f_asin%", false] : [];
+        $f_asin_multiple = array_filter(preg_split("/\s+|\n+|(\s*,\s*)/", $f_asin_multiple), function ($v) {
+            return !empty($v);
+        });
+        $asinCondition = [];
+
+        if (!$f_asin && empty($f_asin_multiple)) {
+            return $asinCondition;
+        }
+
+        $asinCondition = ['or'];
+
+        if ($f_asin) {
+            $asinCondition[] = ['like', $source_table_name . '.ASIN', "$f_asin%", false];
+        }
+
+        if (!empty($f_asin_multiple)) {
+            foreach ($f_asin_multiple as $asin) {
+                $asinCondition[] = ['like', $source_table_name . '.ASIN', "$asin%", false];
+            }
+        }
+
+        return $asinCondition;
+        // return ($f_asin) ?
+        //     ['like', $source_table_name . '.ASIN', "$f_asin%", false] : [];
     }
 
     /**
@@ -230,6 +252,11 @@ class FiltersQuery extends \yii\db\ActiveQuery
                 $this->addTable('comparisons');
                 return ['and', ['IS NOT', 'comparisons.status', null], ['<>', 'comparisons.status', 'MISMATCH']];
             }
+            /*case 'NOCOMPARE':
+            {
+                $this->addTable('comparisons');
+                return ['and', ['IS', 'comparisons.status', null], ['<>', 'comparisons.status', 'NOCOMPARE']];
+            }*/
             //case 'ALL_WITH_NOT_FOUND':  return [];
             default:
                 return [];
@@ -356,5 +383,21 @@ class FiltersQuery extends \yii\db\ActiveQuery
     {
         return ($f_title) ?
             ['like', 'info', $f_title] : [];
+    }
+
+    public function getSqlNewProducts($f_new, $last_import) {
+        if (!(int)$f_new || !isset($last_import->created)) {
+            return [];
+        }
+
+        return ['date_update' => $last_import->created];
+    }
+
+    public function getSqlFavorProducts(Source $source, $f_favor, $favorites) {
+        if (!(int)$f_favor || empty($favorites)) {
+            return [];
+        }
+
+        return ['IN', $source->table_1 . ".id", array_keys($favorites)];
     }
 }

@@ -1,12 +1,14 @@
 <?
 
 /* @var $dataProvider */
+/* @var string $section */
 
 use backend\models\Settings__fields_extend_price;
 use common\models\Source;
 use yii\helpers\Html;
 
-$this->title = Yii::t('site', 'Поля при наведении на Price');
+//$this->title = Yii::t('site', 'Поля при наведении на Price');
+$this->title = $settingsRow ? $settingsRow->title : Yii::t('site', 'Поля при наведении');
 //$this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -19,7 +21,7 @@ $this->title = Yii::t('site', 'Поля при наведении на Price');
       'dataProvider' => $dataProvider,
 
       'columns' => [
-        'id','name',
+        'id', 'name',
         [
           'attribute' => 'source_id',
           'format' => 'text', // "raw", "text", "html", ['date', 'php:Y-m-d'])
@@ -28,12 +30,12 @@ $this->title = Yii::t('site', 'Поля при наведении на Price');
           }
 
         ],
-        'default','title',
+        'default', 'title',
         [
           'attribute' => 'Edit',
           'format' => 'raw', // "raw", "text", "html", ['date', 'php:Y-m-d'])
-          'value' => function ($itm) {
-            return Html::a('Edit','/settings/fields_extend_price_edit?id='.$itm->id,['type' => "submit", 'class' => 'btn btn-primary']);
+          'value' => function ($itm) use ($section) {
+            return Html::a('Edit', '/settings/fields_extend_price_edit?id=' . $itm->id . '&section=' . $section, ['type' => "submit", 'class' => 'btn btn-primary']);
           }
         ],
 
@@ -76,8 +78,5 @@ $this->title = Yii::t('site', 'Поля при наведении на Price');
 
 
   </div>
-  <?=Html::a('Добавить','/settings/fields_extend_price_edit',['type' => "submit", 'class' => 'btn btn-primary']);?>
-
-
+  <?= Html::a('Добавить', '/settings/fields_extend_price_edit?section=' . $section, ['type' => "submit", 'class' => 'btn btn-primary']); ?>
 </div>
-

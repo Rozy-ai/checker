@@ -247,10 +247,10 @@ class SettingsController extends Controller{
 
 /************* Fields_extend_price */
   public function actionFields_extend_price(){
-
+    $section = $this->request->get('section') ?: 'price';
     $s = new Settings__fields_extend_price();
     $query = $s->find();
-    $query = Settings__fields_extend_price::find();
+    $query = Settings__fields_extend_price::find()->where(['section' => $section]);
 
     $dataProvider = new ActiveDataProvider([
       'query' => $query,
@@ -267,11 +267,14 @@ class SettingsController extends Controller{
 
     return $this->render('settings__fields_extend_price', [
       'dataProvider' => $dataProvider,
+      'settingsRow' => Settings__list::findOne(['route' => \Yii::$app->requestedRoute . "?section=" . $section]),
+      'section' => $section,
     ]);
   }
 
   public function actionFields_extend_price_edit(){
     $source_id = $this->request->get('source_id',false);
+    $section = $this->request->get('section');
 
     if ($this->request->getIsGet()){
       $id = $this->request->get('id',false);
@@ -287,7 +290,7 @@ class SettingsController extends Controller{
         if ($item->load($this->request->post())){
           $item->save();
           //Yii::$app->session->setFlash('success','Данные приняты');
-          return $this->redirect('/settings/fields_extend_price');
+          return $this->redirect('/settings/fields_extend_price?section=' . $section);
         }
       }else{
 
@@ -296,7 +299,7 @@ class SettingsController extends Controller{
           $item->insert();
         }
 
-        return $this->redirect('/settings/fields_extend_price');
+        return $this->redirect('/settings/fields_extend_price?section=' . $section);
       }
 
     }else{
@@ -339,6 +342,7 @@ class SettingsController extends Controller{
       'item_res' => $item_res,
       'source_list' => $source_list_formatted,
       'source_id' => $source_id,
+      'section' => $section,
       //'source_id_for_input' => $source_id ?: $item_res->source_id,
       'fields_in_source' => $fields_in_source,
     ]);
