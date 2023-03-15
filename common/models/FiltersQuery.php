@@ -89,11 +89,9 @@ class FiltersQuery extends \yii\db\ActiveQuery
     {
         if ($f_no_compare && $f_source) {
             $this->addTable('hidden_items');
-            return [
-                'or',
-                ['IS', 'hidden_items.p_id', null],
-                ['<>', 'hidden_items.source_id', $f_source]
-            ];
+            return ['or',
+                ['IS NOT', 'hidden_items.p_id', null],
+                ['<>', 'hidden_items.source_id', $f_source]];
         } else {
             return [];
         }
@@ -231,27 +229,37 @@ class FiltersQuery extends \yii\db\ActiveQuery
     public function getSqlComparisonStatus($f_comparison_status): array
     {
         switch ($f_comparison_status) {
-            case 'MATCH': {
-                    $this->addTable('comparisons');
-                    return ['like', 'comparisons.status', 'MATCH', false];
-                }
-            case 'MISMATCH': {
-                    $this->addTable('comparisons');
-                    return ['like', 'comparisons.status', 'MISMATCH'];
-                }
-            case 'PRE_MATCH': {
-                    $this->addTable('comparisons');
-                    return ['like', 'comparisons.status', 'PRE_MATCH'];
-                }
-            case 'OTHER': {
-                    $this->addTable('comparisons');
-                    return ['like', 'comparisons.status', 'OTHER'];
-                }
-            case 'YES_NO_OTHER': {
-                    $this->addTable('comparisons');
-                    return ['and', ['IS NOT', 'comparisons.status', null], ['<>', 'comparisons.status', 'MISMATCH']];
-                }
-                //case 'ALL_WITH_NOT_FOUND':  return [];
+            case 'MATCH':
+            {
+                $this->addTable('comparisons');
+                return ['like', 'comparisons.status', 'MATCH', false];
+            }
+            case 'MISMATCH':
+            {
+                $this->addTable('comparisons');
+                return ['like', 'comparisons.status', 'MISMATCH'];
+            }
+            case 'PRE_MATCH':
+            {
+                $this->addTable('comparisons');
+                return ['like', 'comparisons.status', 'PRE_MATCH'];
+            }
+            case 'OTHER':
+            {
+                $this->addTable('comparisons');
+                return ['like', 'comparisons.status', 'OTHER'];
+            }
+            case 'YES_NO_OTHER':
+            {
+                $this->addTable('comparisons');
+                return ['and', ['IS NOT', 'comparisons.status', null], ['<>', 'comparisons.status', 'MISMATCH']];
+            }
+            /*case 'NOCOMPARE':
+            {
+                $this->addTable('comparisons');
+                return ['and', ['IS', 'comparisons.status', null], ['<>', 'comparisons.status', 'NOCOMPARE']];
+            }*/
+            //case 'ALL_WITH_NOT_FOUND':  return [];
             default:
                 return [];
         }

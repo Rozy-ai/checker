@@ -97,9 +97,10 @@ class Filters
     const defaults = [
         'f_count_products_on_page' => 10,
         'f_number_page_current' => 1,
-        //'f_comparison_status' => 'PRE_MATCH',
+        //'f_comparison_status' => 'MISMATCH', // @TODO ALL',
         'f_no_compare' => 'NOCOMPARE',
-        'f_profile' => 'General'
+        'f_profile' => 'General',
+        'f_sort' => 'created_DESC'        
     ];
 
     /**
@@ -134,10 +135,12 @@ class Filters
             $this->setToDefault();
         }
     }
-
-    public function setToDefault()
-    {
-        foreach (self::defaults as $key => $val) {
+    
+    /**
+     * Установка значений по умолчанию
+     */
+    public function setToDefault(){
+        foreach (self::defaults as $key => $val){
             $this->$key = $val;
         }
     }
@@ -168,50 +171,43 @@ class Filters
             $this->{$key} = null;
         }
     }
-
-    public function loadFromValue($key, $value, $with_default = true)
-    {
-        $this->$key = $value ?: ($with_default ? self::defaults[$key] : null);
+    
+    /**
+     * Загружаей значение по ключу согластно истине
+     * @param type $key
+     * @param type $value
+     * @param type $with_default
+     */
+    public function loadFromValue($key, $value, $with_default = true){
+        $this->$key = $value ?:($with_default?self::defaults[$key] : null);
     }
-
-    public function toArray()
-    {
+    
+    /**
+     * Вывод значений свойств
+     * @return type
+     */
+    public function toArray(){
         return get_object_vars($this);
-
-        /*        
-        return [
-            'f_source' => $this->f_source,
-            'f_sort' => $this->f_sort,
-            'f_detail_fiew' => $this->f_detail_view,
-            
-            'f_profile' => $this->f_profile,
-            'f_count_products_on_page' => $this->f_count_products_on_page,
-            'f_number_page_current' => $this->f_number_page_current,            
-            'f_id' => $this->f_id,
-            'f_asin' => $this->f_asin,
-            'f_categories_root' => $this->f_categories_root,
-            'f_title' => $this->f_title,
-            'f_status' => $this->f_status,
-            'f_username' => $this->f_username,
-            'f_comparison_status' => $this->f_comparison_status,
-            'f_no_compare' => $this->f_no_compare,          
-        ];
-        * 
-        */
     }
-
-    public function saveToSession(Session $session = null)
-    {
-        if (!$session) {
+    
+    /**
+     * Запись параметров в сессию
+     * @param Session $session
+     */
+    public function saveToSession(Session $session = null){
+        if (!$session){
             $session = \Yii::$app->session;
         }
         $params = get_object_vars($this);
         $session->saveFromParams($params);
     }
-
-    public function loadFromSession(Session $session = null)
-    {
-        if (!$session) {
+    
+    /**
+     * Выгрузка параметров из сессии
+     * @param Session $session
+     */
+    public function loadFromSession(Session $session = null){
+        if (!$session){
             $session = \Yii::$app->session;
         }
         $params = $session->loadToArray($this->additionalFilterKeys);
@@ -239,9 +235,14 @@ class Filters
         }
         return true;
     }
-
-    public function setVsSession($key, $value, Session $session = null)
-    {
+    
+    /**
+     * Установка параметров в сессии
+     * @param type $key
+     * @param type $value
+     * @param Session $session
+     */
+    public function setVsSession($key, $value, Session $session = null){
         $this->$key = $value;
         if (!$session) {
             $session = \Yii::$app->session;

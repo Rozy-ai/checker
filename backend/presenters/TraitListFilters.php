@@ -161,8 +161,8 @@ trait TraitListFilters {
         
         if (!$this->source_table_class || !$this->source_table_name || !$this->source_table2_name) {
             throw new \yii\base\InvalidParamException();
-        }
-        
+        }                
+                
         $q = new FiltersQuery($this->source_table_class);
         
         $q->select(['comparisons.status', 'COUNT(*) as count_statuses'])
@@ -171,41 +171,27 @@ trait TraitListFilters {
           ->asArray();
         
         $q->addTable('comparisons');
-        $q->addJoins($this->source_table_name);
+        $q->addJoins($this->source_table_name);            
         $q->indexBy('status');
-        //$q = $this->source_table_class::find()
-        //->select(['comparisons.status', 'COUNT(*) as count_statuses'])
-        //->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
-        //->asArray()
-        //->groupBy('comparisons.status');
-        
+                     
         $data = $q->all();
         $data['NOCOMPARE']=$data[null];
         
         // Приведем к нужному формату(Важен порядок):
         $list_comparisons = Comparison::getFilterStatuses();
         $out = [];
-        foreach ($list_comparisons as $key => $val){
-            
-            if ($data[$key]){
+        foreach ($list_comparisons as $key => $val){            
+            if ($data[$key] && $data[$key]['count_statuses']<>0){
                 $out[$key] = [
                         'name' => $val['name'],
-                        'count' => $data[$key]['count_statuses']
-                    ];
+                        'count' => $data[$key]['count_statuses'],                      
+                    ];                
+                $count[$key] = $data[$key]['count_statuses'];
+                $name[$key] = $val['name'];
+                
             }
-        }
-        /*
-        $out = [];
-        foreach ($data as $val){
-            if ($val['status'] == null){
-                $val['status'] = 'NOCOMPARE';
-            }
-            $out[$val['status']] = [
-                'name'  => $list_comparisons[$val['status']]['name'],
-                'count' => $val['count_statuses']
-            ];
-        }
-        */
+        }               
+        
         return $out;
     }
 

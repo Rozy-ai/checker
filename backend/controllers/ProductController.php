@@ -152,7 +152,7 @@ class ProductController extends Controller {
         $filters = new Filters();
         $filters->loadFromSession();  
         $source = null;
-        // Если страница загружвется в первый раз, то будут отсутствовать обязательные параметры
+        // Если страница загружается в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
             $srcId = $src ? $src : $filters->f_source;
             $source = Source::getById($srcId);
@@ -168,7 +168,7 @@ class ProductController extends Controller {
                 $this->redirect('/product/index');
             }
         } else {
-            // Если страница загружается в первый раз то номер страницы нафиг не нужен, ибо по умолчанию установится в 1
+            // Если страница загружается в первый раз то номер страницы не нужен, ибо по умолчанию установится в 1
             $id_user = \Yii::$app->user->id;
             $source = Source::getForUser($id_user, $src);
 
@@ -189,13 +189,17 @@ class ProductController extends Controller {
         $is_admin = $user && $user->isAdmin();
         $compare_status = $filters->f_comparison_status;
         $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
+
         $favorites = Product::getFavorites($source->id);
 
         if (isset($params['all'])) {
             $filters->f_count_products_on_page = 'ALL';
+            
         }
+        
         $list = Product::getListProducts($source, $filters, $is_admin, $favorites);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin, $favorites);
+        
         if($filters->f_count_products_on_page == 'ALL'){
             $count_pages = 1;
         } else {
@@ -246,11 +250,12 @@ class ProductController extends Controller {
             'list_count_products_on_page' => $this->indexPresenter->getListCountProductsOnPage(),
             'list_categories_root' => $this->indexPresenter->getListCategoriesRoot(),
             'list_username' => $this->indexPresenter->getListUser(),
-            'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses($is_admin, $filters->f_profile),
+            'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses($is_admin, $filters->f_profile, $filters),
             'list' => $list,
             'favorites' => $favorites,
             
             'count_products_all' => $count_products_all,
+            'count_products_right_all' => $count_products_right_all,
             'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
             'count_pages' => $count_pages,
             'is_admin' => $is_admin,
@@ -309,6 +314,7 @@ class ProductController extends Controller {
     public function actionChangeFilter() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $request = \Yii::$app->request->post();
+        
         if (isset($request)) {
             $name = $request['name'];
             $value = $request['value'];
@@ -317,7 +323,7 @@ class ProductController extends Controller {
         if (!isset($name)) {
             return [
                 'status' => 'error',
-                'message' => 'Не удаось получить изменяемый фильтр',
+                'message' => 'Не удалось получить изменяемый фильтр',
             ];
         }
         

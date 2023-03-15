@@ -59,6 +59,11 @@ import {
     ListDataForServer
 } from './classes/ListDataForServer.js';
 
+import {
+    /* Статус подверждения удаления левых продуктов */
+    STATUS_CONFIRM_DEL_LEFT_PRODUCT
+} from './classes/IcXpProductStatus.js';
+
 const CLASS_BUTTON_MISSMATCH_ALL = '.product-list__item-mismatch-all'; // Левый крестик
 const CLASS_BUTTON_RESET_FILTERS = '#id_button_reset_filters';
 const CLASS_BUTTON_ADDITIONAL_FILTERS = '#additional_filter_link';
@@ -241,7 +246,7 @@ function main() {
             let blockProduct = ProductBlock.getFromChild( $this );
 
             if ( !blockProduct.isMismatchAll( false ) ) {
-                if ( !confirm( 'Некоторые правые товары именют статус отличный от missmatch и будет перезаписан. Продолжить?' ) ) {
+                if ( STATUS_CONFIRM_DEL_LEFT_PRODUCT && !confirm( 'Некоторые правые товары именют статус отличный от missmatch и будет перезаписан. Продолжить?' ) ) {
                     return;
                 }
             }
@@ -373,6 +378,28 @@ function main() {
         listDataForServer.deleteRightAll();
     } );
 
+    /**
+     * Кнопка отменить выбор на всех правых товарах, на всей странице
+     * Визуал меняется на событиях
+     */
+    $body.on( 'click', '.js-update-compare-all-visible-items', function ( e ) {
+        e.stopPropagation();
+        let q = confirm('Уверены?');
+        if (!q) {
+            return false;
+        } else {
+            sendListDatasAsync().then( function ( is_confirm ) {
+                if ( !is_confirm ) {
+                    return;
+                }
+                listDataForServer.reset();
+                location.reload();
+            }); 
+            $( '#preloader' ).show();
+        }
+        console.log('update');
+    } );
+    
     /**
      * Кнопка удалить. Нужно удалить только товары со статусом mismatch
      */

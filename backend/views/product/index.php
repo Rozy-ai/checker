@@ -62,7 +62,7 @@ if ($count_products_all > 200) {
 $is_active_show_all ? $list_count_products_on_page['ALL'] = 'ВСЕ' : '';
 
 $this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
-    . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right . ') из ' . $count_products_all . ' </div> по: '
+    . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all .' </div> по: '
     . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
 $local_import_stat = null;
 
@@ -214,11 +214,18 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                 <div class="form-group _col-sm-3">
                     <select name="f_comparison_status" id="id_f_comparison_status" class="form-control">
                         <?php
+                        
                         foreach ($list_comparison_statuses as $key => $data) {
+                            if (empty($f_comparison_status)) {
+                                $f_comparison_status = $key;
+                                $is_active = 'selected';                                
+                            } else {
+                                $is_active = ( $key == $f_comparison_status    ) ? 'selected' : '';
+                            }
                             $name = $data['name'];
                             $count = $data['count'];
-                            $is_active = ($key == $f_comparison_status) ? 'selected' : '';
-                            $st = "<option value=$key $is_active>$name ($count)</option>";
+
+                            $st = "<option value=$key $is_active>$name ( $count )</option>";
                             echo $st;
                         }
                         ?>
@@ -246,10 +253,10 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                 <div class="form-group _col-sm-3">
                     <select name="f_sort" id="id_f_sort" class="form-control">
                         <option value="">Сортировать по</option>
-                        <option value="created_ASC" <?= ($f_sort === 'created_ASC') ? 'selected' : '' ?>>дате добавления ↑</option>
-                        <option value="created_DESC" <?= ($f_sort === 'created_DESC') ? 'selected' : '' ?>>дате добавления ↓</option>
-                        <option value="updated_ASC" <?= ($f_sort === 'updated_ASC') ? 'selected' : '' ?>>дате обновления ↑</option>
-                        <option value="updated_DESC" <?= ($f_sort === 'updated_DESC') ? 'selected' : '' ?>>дате обновления ↓</option>
+                        <option value="created_ASC" <?= ($f_sort === 'created_ASC') ? 'selected' : '' ?>>дате добавления ↓</option>
+                        <option value="created_DESC" <?= ($f_sort === 'created_DESC') ? 'selected' : '' ?>>дате добавления ↑</option>
+                        <option value="updated_ASC" <?= ($f_sort === 'updated_ASC') ? 'selected' : '' ?>>дате обновления ↓</option>
+                        <option value="updated_DESC" <?= ($f_sort === 'updated_DESC') ? 'selected' : '' ?>>дате обновления ↑</option>
                     </select>
                 </div>
 
@@ -326,7 +333,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
             echo '<div>' .
                 '<div class="d-inline-block cnt-items" id="id_block_count">' .
                 'Показано '
-                . min($f_count_products_on_page, $count_products_all) . '(' . $count_products_right . ') из ' . $count_products_all . ' </div> по: '
+                . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all .' </div> по: '
                 . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page_footer', 'class' => 'form-control form-control-sm d-inline-block w-auto']) .
                 '</div>';
             ?>
@@ -363,6 +370,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
             <div class="product-list-item__del -del-all js-del-all-visible-items">удалить все</div>
             <div class="product-list-item__reset-compare -compare-all js-reset-compare-all-visible-items">отменить все</div>
             <button id="show_all" class="product-list-item__reset-compare -compare-all js-show_products_all">показать все</button>
+            <div class="product-list-item__reset-compare -compare-all js-update-compare-all-visible-items">обновить</div>
         </div>
     </div>
 
