@@ -302,25 +302,16 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
-<<<<<<< HEAD
+
         $list = $q->distinct()->all();
         foreach ($list as $k => $product) {
             $product->_source = $source;
             $product->_baseInfo = $product->info;
-=======
         //echo $q->createCommand()->getRawSql();
         //die();
-        $list = $q->createCommand()->queryAll();
+       // $list = $q->createCommand()->queryAll();
         //    var_dump($list);
-        foreach ($list as $k => $product) {
-            // $product->_source = $source;
-            // $product->_baseInfo = $product->info;
->>>>>>> 1a51ee5f01d1aa6dffdf03f7eaa5cab723cdaef3
-
-            //$list[$k] = self::getById($source->class_1, $product['id']);
-            //$list[$k]->_source = $source;
-            //$list[$k]->_baseInfo = $list[$k]->info;
-        }
+  
         return $list;
     }
 
