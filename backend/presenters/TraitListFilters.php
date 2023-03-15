@@ -181,7 +181,7 @@ trait TraitListFilters {
         $list_comparisons = Comparison::getFilterStatuses();
         $out = [];
         foreach ($list_comparisons as $key => $val){            
-            if ($data[$key]){
+            if ($data[$key] && $data[$key]['count_statuses']<>0){
                 $out[$key] = [
                         'name' => $val['name'],
                         'count' => $data[$key]['count_statuses'],                      
@@ -191,9 +191,6 @@ trait TraitListFilters {
                 
             }
         }                
-        /** Выставляем значение по умолчанию согласно Checker_back5 п.3
-         *  найбольшее кол-во товаров справа первым */
-        array_multisort($count_result,SORT_DESC,$name,SORT_ASC,$out);
         
         return $out;
     }
