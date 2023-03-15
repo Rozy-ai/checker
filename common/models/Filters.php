@@ -167,7 +167,7 @@ class Filters
         $this->f_new = null;
         $this->f_favor = null;
 
-        foreach ($this->additionalFilterKeys as $key) {
+        foreach ($this->additionalFilterKeys as $key => $name) {
             $this->{$key} = null;
         }
     }
@@ -264,19 +264,19 @@ class Filters
         ];
 
         foreach ($list as $filterType => $filters) {
-            foreach ($filters as $key => $f) {
+            foreach ($filters as $f) {
                 $isRange = !!$f['range'];
                 $searchColumnKey = !empty($f['json_column']) ? 'json_column' : 'column';
 
-                $this->additionalFilters[$filterType][$searchColumnKey][$key] = $f;
+                $this->additionalFilters[$filterType][$searchColumnKey][] = $f;
                 if (!$isRange) {
                     $this->{$f['name']} = null;
-                    $this->additionalFilterKeys[] = $f['name'];
+                    $this->additionalFilterKeys[$f['name']] = $f['key'];
                 } else {
                     $this->{$f['name'] . "_0"} = null;
                     $this->{$f['name'] . "_1"} = null;
-                    $this->additionalFilterKeys[] = $f['name'] . "_0";
-                    $this->additionalFilterKeys[] = $f['name'] . "_1";
+                    $this->additionalFilterKeys[$f['name'] . "_0"] = $f['key'];
+                    $this->additionalFilterKeys[$f['name'] . "_1"] = $f['key'];
                 }
             }
         }
@@ -292,14 +292,15 @@ class Filters
             'left' => $this->leftFilters,
             'right' => $this->rightFilters,
         ]);
+
         $this->loadFromSession();
     }
 
     public function getAdditionalFilterValues()
     {
         $values = [];
-        foreach ($this->additionalFilterKeys as $key) {
-            $values[$key] = $this->{$key};
+        foreach ($this->additionalFilterKeys as $name => $column) {
+            $values[$name] = $this->{$name};
         }
         return $values;
     }
