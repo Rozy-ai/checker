@@ -110,9 +110,11 @@ class FiltersQuery extends \yii\db\ActiveQuery
     {
         if ($id_source && (!$f_comparison_status || $f_comparison_status === 'NOCOMPARE')) {
             $this->addTable('hidden_items');
-            return ['or',
+            return [
+                'or',
                 ['IS', 'hidden_items.p_id', null],
-                ['<>', 'hidden_items.source_id', $id_source]];
+                ['<>', 'hidden_items.source_id', $id_source]
+            ];
         } else {
             return [];
         }
@@ -274,10 +276,12 @@ class FiltersQuery extends \yii\db\ActiveQuery
     {
 
         return ($source_table_name === 'parser_trademarkia_com') ?
-            ['and',
+            [
+                'and',
                 ['like', $source_table_name . '.info', 'add_info'],
                 "info NOT LIKE '%\"add_info\":\"[]\"%'",
-                "info NOT LIKE '%\"add_info\": \"[]\"%'"] : [];
+                "info NOT LIKE '%\"add_info\": \"[]\"%'"
+            ] : [];
     }
 
     /**
@@ -324,7 +328,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
     {
         // admin-доступ
         if ($is_admin) {
-            if($f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все')
+            if ($f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все')
                 return ['like', $source_table_name . '.profile', $f_profile];
             return [];
         }
@@ -333,12 +337,12 @@ class FiltersQuery extends \yii\db\ActiveQuery
         $add_profiles[] = $f_profile;
         // general-доступ pro-доступ
 
-        if($f_profile == 'Pro'){
+        if ($f_profile == 'Pro') {
             $add_profiles[] = 'General';
         }
         // free-доступ
         $sql = ["or"];
-        foreach ($add_profiles as $add_profile){
+        foreach ($add_profiles as $add_profile) {
             $sql[] = ['like', $source_table_name . '.profile', $add_profile . '%', false];
             $sql[] = ['like', $source_table_name . '.profile', $add_profile];
         }
@@ -365,14 +369,14 @@ class FiltersQuery extends \yii\db\ActiveQuery
         $user = \Yii::$app->user->identity;
         if ($fProfile) {
             if ($profileType !== null) {
-                return ['or',
-                //    ['like', $sourceTableName . '.profile', 'Free'],
+                return [
+                    'or',
+                    //    ['like', $sourceTableName . '.profile', 'Free'],
                     ['like', $sourceTableName . '.profile', $fProfile],
                     ['like', $sourceTableName . '.profile', $fProfile . '%', false],
-                  //  ['like', $sourceTableName . '.profile', 'Prepod'],
+                    //  ['like', $sourceTableName . '.profile', 'Prepod'],
                 ];
             } else {
-
             }
         }
 
@@ -385,7 +389,8 @@ class FiltersQuery extends \yii\db\ActiveQuery
             ['like', 'info', $f_title] : [];
     }
 
-    public function getSqlNewProducts($f_new, $last_import) {
+    public function getSqlNewProducts($f_new, $last_import)
+    {
         if (!(int)$f_new || !isset($last_import->created)) {
             return [];
         }
@@ -393,11 +398,41 @@ class FiltersQuery extends \yii\db\ActiveQuery
         return ['date_update' => $last_import->created];
     }
 
-    public function getSqlFavorProducts(Source $source, $f_favor, $favorites) {
+    public function getSqlFavorProducts(Source $source, $f_favor, $favorites)
+    {
         if (!(int)$f_favor || empty($favorites)) {
             return [];
         }
 
         return ['IN', $source->table_1 . ".id", array_keys($favorites)];
+    }
+
+    public function getSqlAdditionalFilters(Filters $filters, string $tableName = "", $filterType = 'left')
+    {
+        $condition = [];
+        $filterValues = $filters->getAdditionalFilterValues();
+
+        foreach($filters->additionalFilters[$filterType]['column'] as $columnName => $data) {
+            $isRange = $data['range'];
+            $names = !$isRange ? [$data['name']] : [$data["name"] . "_0", $data["name"] . "_1"];
+            
+            foreach($names as $i => $name) {
+                if (empty($filterValues[$name])) {
+                    continue;
+                }
+
+                $condition[] = [
+                    $i === 0 ? '>=' : '<=',
+                    empty($tableName) ? $columnName : $tableName . "." . $columnName,
+                    $data['type'] === 'number' ? (float)$filterValues[$name] : $filterValues[$name],
+                ];
+            }
+        }
+
+        if (!empty($condition)) {
+            array_unshift($condition, 'and');
+        }
+
+        return $condition;
     }
 }

@@ -250,7 +250,6 @@ class Product extends \yii\db\ActiveRecord
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where([
             'and',
-            //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
             $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
@@ -261,10 +260,7 @@ class Product extends \yii\db\ActiveRecord
             $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
             $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
             $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
-
-            //$q->getSqlAddInfoExists($source_table_name),
-            //$q->getSqlNoInComparisons(),
-            //$q->getSqlSettingsMessage(),
+            $q->getSqlAdditionalFilters($filters),
         ]);
 
         // Добавим сортировку:
@@ -302,14 +298,11 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
-
-        $list = $q->distinct()->all();
-
+        $list = $q->createCommand()->queryAll();
+        $list = self::filterLeftProducts($list, $filters);
         foreach ($list as $k => $product) {
-            // $product->_source = $source;
-            // $product->_baseInfo = $product->info;
-            
             $list[$k] = self::getById($source->class_1, $product['id']);
+            $list[$k]->initAddInfo();
             $list[$k]->_source = $source;
             $list[$k]->_baseInfo = $list[$k]->info;
         }
@@ -576,7 +569,6 @@ class Product extends \yii\db\ActiveRecord
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where([
             'and',
-            //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
             $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
@@ -587,10 +579,7 @@ class Product extends \yii\db\ActiveRecord
             $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
             $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
             $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
-
-            //$q->getSqlAddInfoExists($source_table_name),
-            //$q->getSqlNoInComparisons(),
-            //$q->getSqlSettingsMessage(),
+            $q->getSqlAdditionalFilters($filters),
         ]);
         // Получим все необходимые join
         $q->addJoins($source_table_name, $source_table2_name);
@@ -599,7 +588,44 @@ class Product extends \yii\db\ActiveRecord
                 return $source->max_free_show_count;
             }
         }*/
-        return $q->distinct()->count();
+        $list = $q->createCommand()->queryAll();
+        $list = self::filterLeftProducts($list, $filters);
+        return count($list);
+    }
+
+    public static function filterLeftProducts(array $list, Filters $filters) {
+        $list = array_filter($list, function ($p) use ($filters) {
+            $suitable = true;
+            $info = json_decode($p['info'], true);
+            $filterValues = $filters->getAdditionalFilterValues();
+            $jsonFilters = $filters->additionalFilters['left']['json_column'];
+            foreach($jsonFilters as $key => $f) {
+                $isRange = $f['range'];
+                $names = !$isRange ? [$f['name']] : [$f['name'] . "_0", $f['name'] . "_1"];
+                $fValues = array_map(fn($n) => $filterValues[$n], $names);
+                if (empty(array_filter($fValues, fn($v) => !empty($v)))) {
+                    continue;
+                }
+
+                switch ($f['type']) {
+                    case 'number':
+                        if (!$isRange) {
+                            $suitable = (float)$info[$key] >= (float)$fValues[0];
+                        } else {
+                            $suitable = (float)$info[$key] >= (float)$fValues[0] && (float)$info[$key] <= (float)$fValues[1];
+                        }
+                        break;
+                    default:
+                        $suitable = str_contains(strtolower($info[$key]), $fValues[0]);
+                        break;    
+                }
+                if (!$suitable) {
+                    break;
+                }
+            }
+            return $suitable;
+        });
+        return $list;
     }
 
     /**

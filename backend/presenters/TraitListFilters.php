@@ -261,6 +261,7 @@ trait TraitListFilters {
         $is_admin = $user && $user->isAdmin();
         $filters = new Filters();
         $filters->loadFromSession();
+        $filters->setSource($this->source);
 
         $filters->f_profile = 'General';
         $count_general = Product::getCountProducts($this->source, $filters, $is_admin);
