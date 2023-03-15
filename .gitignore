@@ -41,3 +41,4 @@ checker.sql
 composer.lock
 
 /backend/web/assets
+/.htaccess

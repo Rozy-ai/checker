@@ -213,10 +213,15 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                         <?php
                         
                         foreach ($list_comparison_statuses as $key => $data) {
-                            
+                            if (empty($f_comparison_status)) {
+                                $f_comparison_status = $key;
+                                $is_active = 'selected';                                
+                            } else {
+                                $is_active = ( $key == $f_comparison_status    ) ? 'selected' : '';
+                            }
                             $name = $data['name'];
                             $count = $data['count'];
-                            $is_active = ($key == $f_comparison_status) ? 'selected' : '';
+
                             $st = "<option value=$key $is_active>$name ( $count )</option>";
                             echo $st;
                         }
@@ -362,6 +367,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
             <div class="product-list-item__del -del-all js-del-all-visible-items">удалить все</div>
             <div class="product-list-item__reset-compare -compare-all js-reset-compare-all-visible-items">отменить все</div>
             <button id="show_all" class="product-list-item__reset-compare -compare-all js-show_products_all">показать все</button>
+            <div class="product-list-item__reset-compare -compare-all js-update-compare-all-visible-items">обновить</div>
         </div>
     </div>
 
