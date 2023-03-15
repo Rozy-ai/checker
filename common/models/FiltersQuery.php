@@ -407,14 +407,14 @@ class FiltersQuery extends \yii\db\ActiveQuery
         return ['IN', $source->table_1 . ".id", array_keys($favorites)];
     }
 
-    public function getSqlAdditionalFilters(Filters $filters, string $tableName = "", $filterType = 'left')
+    public function getSqlAdditionalFilters(Filters $filters, $filterType = 'left')
     {
         $condition = [];
         $filterValues = $filters->getAdditionalFilterValues();
 
-        foreach($filters->additionalFilters[$filterType]['column'] as $columnName => $data) {
+        foreach($filters->additionalFilters[$filterType]['column'] as $data) {
             $isRange = $data['range'];
-            $names = !$isRange ? [$data['name']] : [$data["name"] . "_0", $data["name"] . "_1"];
+            $names = !$isRange ? [$data['name']] : [$data['name'] . "_0", $data['name'] . "_1"];
             
             foreach($names as $i => $name) {
                 if (empty($filterValues[$name])) {
@@ -423,7 +423,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
 
                 $condition[] = [
                     $i === 0 ? '>=' : '<=',
-                    empty($tableName) ? $columnName : $tableName . "." . $columnName,
+                    $data['key'],
                     $data['type'] === 'number' ? (float)$filterValues[$name] : $filterValues[$name],
                 ];
             }
