@@ -378,6 +378,28 @@ function main() {
     } );
 
     /**
+     * Кнопка отменить выбор на всех правых товарах, на всей странице
+     * Визуал меняется на событиях
+     */
+    $body.on( 'click', '.js-update-compare-all-visible-items', function ( e ) {
+        e.stopPropagation();
+        let q = confirm('Уверены?');
+        if (!q) {
+            return false;
+        } else {
+            sendListDatasAsync().then( function ( is_confirm ) {
+                if ( !is_confirm ) {
+                    return;
+                }
+                listDataForServer.reset();
+                location.reload();
+            }); 
+            $( '#preloader' ).show();
+        }
+        console.log('update');
+    } );
+    
+    /**
      * Кнопка удалить. Нужно удалить только товары со статусом mismatch
      */
     $body.on( 'click', CLASS_BLOCK_BUTTON_DELETE, function ( e ) {

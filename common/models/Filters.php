@@ -87,7 +87,7 @@ class Filters {
     const defaults = [
         'f_count_products_on_page' => 10,
         'f_number_page_current' => 1,
-        'f_comparison_status' => 'MISMATCH', // @TODO ALL',
+        //'f_comparison_status' => 'MISMATCH', // @TODO ALL',
         'f_no_compare' => 'NOCOMPARE',
         'f_profile' => 'General',
         'f_sort' => 'created_DESC'        
