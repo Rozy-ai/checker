@@ -56,7 +56,7 @@ trait TraitListFilters {
             throw new \yii\base\InvalidParamException();
         }
         $list = \Yii::$app->db->createCommand(
-            'SELECT DISTINCT info->\'$."Categories: Root"\' as cat, count(*) as count FROM '.$this->source_table_name.' GROUP BY cat')->queryAll();
+            'SELECT info->\'$."Categories: Root"\' as cat, count(*) as count FROM '.$this->source_table_name.' GROUP BY cat')->queryAll(); 
 
         $new_list = [];
         if (is_array($list)){
@@ -161,52 +161,37 @@ trait TraitListFilters {
         
         if (!$this->source_table_class || !$this->source_table_name || !$this->source_table2_name) {
             throw new \yii\base\InvalidParamException();
-        }
-        
+        }                
+                
         $q = new FiltersQuery($this->source_table_class);
         
-        $q->select(['comparisons.status', 'COUNT(DISTINCT id) as count_statuses'])
+        $q->select(['comparisons.status', 'COUNT(*) as count_statuses'])
           ->andWhere($q->getSqlProfile($is_admin, $this->source_table_name, $f_profile))
           ->groupBy('comparisons.status')
           ->asArray();
-
-;
-        $q->addTable('comparisons');
-        $q->addJoins($this->source_table_name);
-        $q->indexBy('status');
-        //$q = $this->source_table_class::find()
-        //->select(['comparisons.status', 'COUNT(*) as count_statuses'])
-        //->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
-        //->asArray()
-        //->groupBy('comparisons.status');
         
+        $q->addTable('comparisons');
+        $q->addJoins($this->source_table_name);            
+        $q->indexBy('status');
+                     
         $data = $q->all();
         $data['NOCOMPARE']=$data[null];
         
         // Приведем к нужному формату(Важен порядок):
         $list_comparisons = Comparison::getFilterStatuses();
         $out = [];
-        foreach ($list_comparisons as $key => $val){
-            
-            if ($data[$key]){
+        foreach ($list_comparisons as $key => $val){            
+            if ($data[$key] && $data[$key]['count_statuses']<>0){
                 $out[$key] = [
                         'name' => $val['name'],
-                        'count' => $data[$key]['count_statuses']
-                    ];
+                        'count' => $data[$key]['count_statuses'],                      
+                    ];                
+                $count[$key] = $data[$key]['count_statuses'];
+                $name[$key] = $val['name'];
+                
             }
-        }
-        /*
-        $out = [];
-        foreach ($data as $val){
-            if ($val['status'] == null){
-                $val['status'] = 'NOCOMPARE';
-            }
-            $out[$val['status']] = [
-                'name'  => $list_comparisons[$val['status']]['name'],
-                'count' => $val['count_statuses']
-            ];
-        }
-        */
+        }               
+        
         return $out;
     }
 
@@ -279,11 +264,15 @@ trait TraitListFilters {
 
         $filters->f_profile = 'General';
         $count_general = Product::getCountProducts($this->source, $filters, $is_admin);
-        $profiles['General'] = "General ($count_general)";
+        if ($count_general) {
+            $profiles['General'] = "General ($count_general)";
+        }
 
         $filters->f_profile = 'Free';
         $count_free = Product::getCountProducts($this->source, $filters, $is_admin);
-        $profiles['Free'] = "Free ($count_free)";
+        if ($count_free) {
+            $profiles['Free'] = "Free ($count_free)";
+        }
 
         $filters->f_profile = $user->username;
         $count_login = Product::getCountProducts($this->source, $filters, $is_admin);
