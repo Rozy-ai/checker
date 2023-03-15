@@ -14,9 +14,9 @@ class Session extends \yii\web\Session{
         }
     }
     
-    public function loadToArray($additionalFilterMapping = []){
+    public function loadToArray($additionalFilterKeys = []){
         $additionalFilterValues = [];
-        foreach ($additionalFilterMapping as $key => $f) {
+        foreach ($additionalFilterKeys as $key) {
             $additionalFilterValues[$key] = $this->get($key);
         }
         return array_merge(

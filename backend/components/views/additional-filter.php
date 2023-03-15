@@ -35,7 +35,7 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
                     </div>
                 </div>
             </div>
-            <div class="row flex-lg-nowrap">
+            <div class="row flex-lg-nowrap align-items-start">
                 <div class="d-flex flex-wrap mb-4 col col-12 col-lg-6 additional-filters__left-products">
                     <div class="mb-2 w-100"><b>Товары слева</b></div>
                     <div class="row">
@@ -48,11 +48,11 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
                                 <label for="id_<?= $id ?>_0"><?= $lf['label'] ?></label>
                                 <div class="d-flex">
                                     <div class="col col-auto mr-2 pl-0 pr-0">
-                                        <input type="text" class="form-control" name="<?= $lf['name'] ?><?= $isRange ? '_0' : ''; ?>" id="id_<?= $id ?>_0" style="max-width: 80px;" placeholder="от" value="<?= $additional_filter_values[$lf['name'] . ($isRange ? '_0' : '')] ?: "" ?>" />
+                                        <input type="<?= $lf['type'] ?>" class="form-control" name="<?= $lf['name'] ?><?= $isRange ? '_0' : ''; ?>" id="id_<?= $id ?>_0" style="max-width: <?= $lf['type'] === 'number' ? '80px;' : '150px;' ?>" placeholder="<?= $lf['type'] === 'number' ? 'от' : '' ?>" value="<?= $additional_filter_values[$lf['name'] . ($isRange ? '_0' : '')] ?: "" ?>" />
                                     </div>
-                                    <?php if ($rf['range']) { ?>
+                                    <?php if ($lf['range']) { ?>
                                         <div class="col col-auto pl-0 pr-0">
-                                            <input type="text" class="form-control" name="<?= $lf['name'] ?><?= $isRange ? '_1' : ''; ?>" id="id_<?= $id ?>_1" style="max-width: 80px;" placeholder="до" value="<?= $additional_filter_values[$lf['name'] . ($isRange ? '_1' : '')] ?: "" ?>" />
+                                            <input type="<?= $lf['type'] ?>" class="form-control" name="<?= $lf['name'] ?><?= $isRange ? '_1' : ''; ?>" id="id_<?= $id ?>_1" style="max-width: <?= $lf['type'] === 'number' ? '80px;' : '150px;' ?>" placeholder="<?= $lf['type'] === 'number' ? 'до' : '' ?>" value="<?= $additional_filter_values[$lf['name'] . ($isRange ? '_1' : '')] ?: "" ?>" />
                                         </div>
                                     <?php } ?>
                                 </div>

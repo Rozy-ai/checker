@@ -27,7 +27,6 @@ use common\models\Filters;
 use common\models\Stats_import_export;
 use common\models\Product_right;
 use common\models\User__favorites;
-use yii\helpers\VarDumper;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -350,7 +349,6 @@ class ProductController extends Controller {
         }
 
         $filters->setVsSession($name, $value);
-        //VarDumper::dump(\Yii::$app->session->get($name), 10, true); die;
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 

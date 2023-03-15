@@ -7,8 +7,6 @@
 
 namespace common\models;
 
-use yii\helpers\VarDumper;
-
 /**
  * @author kosten
  *
@@ -401,29 +399,24 @@ class FiltersQuery extends \yii\db\ActiveQuery
         return ['IN', $source->table_1 . ".id", array_keys($favorites)];
     }
 
-    public function getSqlAdditionalFilters(Filters $filters)
+    public function getSqlAdditionalFilters(Filters $filters, string $tableName = "", $filterType = 'left')
     {
         $condition = [];
         $filterValues = $filters->getAdditionalFilterValues();
 
-        foreach ($filters->additionalFiltersMapping as $key => $map) {
-            [$searchKey, $column] = explode(';', $map);
-            if ($searchKey === 'column_json' || empty($filterValues[$key])) {
-                continue;
-            }
+        foreach($filters->additionalFilters[$filterType]['column'] as $columnName => $data) {
+            $isRange = $data['range'];
+            $names = !$isRange ? [$data['name']] : [$data["name"] . "_0", $data["name"] . "_1"];
+            
+            foreach($names as $i => $name) {
+                if (empty($filterValues[$name])) {
+                    continue;
+                }
 
-            if (!isset($filters->additionalFilters[$searchKey][$column])) {
-                continue;
-            }
-
-            $columnData = $filters->additionalFilters[$searchKey][$column];
-            $isRangeEnd = preg_match("/_1$/", $key); 
-            var_dump($column);
-            if (!$columnData['range']) {
                 $condition[] = [
-                    !$isRangeEnd ? '>=' : '<=',
-                    $column,
-                    $columnData['type'] === 'integer' ? (int)$filterValues[$key] : $filterValues[$key]
+                    $i === 0 ? '>=' : '<=',
+                    empty($tableName) ? $columnName : $tableName . "." . $columnName,
+                    $data['type'] === 'number' ? (float)$filterValues[$name] : $filterValues[$name],
                 ];
             }
         }
@@ -431,11 +424,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
         if (!empty($condition)) {
             array_unshift($condition, 'and');
         }
-        var_dump($filterValues, $condition); die;
 
-        // VarDumper::dump($filters->additionalFiltersMapping, 10, true);
-        // VarDumper::dump($filters->getAdditionalFilterValues(), 10, true);
-        // die;
         return $condition;
     }
 }
