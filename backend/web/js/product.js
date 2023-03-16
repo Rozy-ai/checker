@@ -1168,7 +1168,7 @@ $(function(){
     if (['MATCH','MISMATCH','PRE_MATCH','OTHER','NOCOMPARE'].includes(_comparison)){
       $('.js-'+_comparison.toLowerCase())[0].click();
     }else{
-      $('.js.-reset_filter_1234')[0].click();
+//      $('.js.-reset_filter_1234')[0].click();
     }
   
     update_url_in_items();

@@ -210,7 +210,7 @@ class ImportController extends \yii\web\Controller
     } else {
       // загружаем sql фаил в папку tmp
       $f = UploadedFile::getInstanceByName('DynamicModel[load_file]');
-      $path = __DIR__ . '/../tmp/';
+      $path = __DIR__ . '/tmp/';
       if (!is_dir($path)) {
         $res_mkdir = mkdir($path, 0777, true);
       }
@@ -645,6 +645,8 @@ class ImportController extends \yii\web\Controller
           //$res = $command->execute();
 
           if ($this->has_p_with_right_p($tbl_2, $asin)) $stat['p_with_right_p'] += 1;
+          /* Кол-во добавленных правых товаров */
+          $stat['cnt_product']+=$res; 
         }
 
         $stat['replaced'] += 1;
@@ -656,7 +658,7 @@ class ImportController extends \yii\web\Controller
         $_set_2 = [];
         foreach ($r_1 as $f_name => $f_value) {
           if ($f_name === 'id') continue;
-          if (!in_array($f_name, $field_names_tbl_1)) continue; // если в новой таблиуе поле котрого нет в старом
+          if (!in_array($f_name, $field_names_tbl_1)) continue; // если в новой таблице есть поле котрого нет в старом
           $_set_1[] = '`' . $f_name . '`';
           $_set_2[] = ':' . $f_name;
         }
@@ -700,6 +702,10 @@ class ImportController extends \yii\web\Controller
         );
         //$res_insert = $this->sql_cmd($sql_insert);
         $res_insert = $this->sql_cmd($sql_insert, [':asin' => $asin]);
+        
+        /* Кол-во добавленных левых товаров */
+        $stat['cnt_product_left']+=$res_insert;
+        
         //          echo '<pre>'.PHP_EOL;
         //          print_r($sql_insert);
         //          echo PHP_EOL;
@@ -719,6 +725,8 @@ class ImportController extends \yii\web\Controller
             "UPDATE checker.$tbl_2 SET parse_at = '" . date('Y-m-d H:i:s', $import_timestamp) . "' WHERE checker.$tbl_2.asin = :asin",
             [':asin' => $asin],
           );
+          
+          $stat['cnt_product']+=$res;
           //$command = $connection->createCommand($sql_copy);
           // $command->bindValue(':asin', $asin);
           // $res = $command->execute();

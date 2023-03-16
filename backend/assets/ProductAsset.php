@@ -13,6 +13,7 @@ class ProductAsset extends AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
+        'css/icxp.css',  
         'css/framework.css',
         'css/slick.css',
         'css/style.css',
@@ -23,6 +24,7 @@ class ProductAsset extends AssetBundle
     ];
 
     public $js = [
+        'js/icxp.js',  
         'js/zoom/jquery.ez-plus.js',
         'js/clipboard/clipboard.js',
         'js/product.js',

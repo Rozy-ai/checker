@@ -1,5 +1,4 @@
 <?php
-
 /* @var $this \yii\web\View */
 /* @var $content string */
 
@@ -10,6 +9,7 @@ use yii\bootstrap4\Breadcrumbs;
 use yii\bootstrap4\Html;
 use yii\bootstrap4\Nav;
 use yii\bootstrap4\NavBar;
+use yii\bootstrap4\BootstrapPluginAsset;
 
 //context module MessageController
 if (get_class($this->context->module->controller) === 'backend\controllers\MessageController'){
