@@ -3,6 +3,11 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 
+use common\models\Source;
+use backend\models\Stats__import_export;
+use common\models\Comparison;
+use common\models\Product;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\StatsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -10,6 +15,7 @@ use yii\grid\GridView;
 /* @var $dataProvider_export yii\data\ActiveDataProvider */
 
 $this->title = Yii::t('site', 'Stats');
+
 if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) !== null):
     if (!$searchModel->total):
         $this->title .= ' (' . Yii::t('site', 'by users') . ')';
@@ -139,16 +145,33 @@ $this->params['breadcrumbs'][] = $this->title;
         //'filterModel' => $searchModel,
         'columns' => [
             'created', 'file_name',
-            [
-                'attribute' => 'cnt_products_left',
-                'value' => 'cnt_products_left',
-                'options' => ['class' => 'cnt_products_left']
-            ],
-            [
-                'attribute' => 'cnt_products_rigth',
-                'value' => 'cnt_products_left',
-                'options' => ['class' => 'cnt_products_right']
-            ],
+                    [
+                      'attribute' => 'raw',
+                      'value' => 'raw',
+                      'options' => [ 'class' => 'cnt'],
+                      'format' => 'raw',
+                      'value' => function($model)                      
+                            {   $raw = json_decode($model->raw);
+                                return Html::tag('a', ( $raw->cnt_product ? '/' : 'нет' ).$raw->cnt_product_right, [ 
+                                    'data-toggle'=>'popover',
+                                    'data-trigger' => 'click hover',
+                                    'data-html' => 'true',    // allow html tags
+                                    'data-title'=> 'Import: Result ('.Source::get_source($model->source_id)['source_name'].')',
+                                    'data-content'=>$this->render('/import/result_statistics', 
+                                    [ //'stat' => $model->stat, 
+                                      'source' => Source::get_source($model->source_id),
+                                      'is_hint' => true,  
+                                    ]).'</div>',
+                                    'style'=>'cursor:help;'
+                              ]);                                
+                            } ,
+                    ],        
+                    [
+                      'attribute' => 'cnt',
+                      'value' => 'cnt',
+                      'options' => [ 'class' => 'cnt'],
+                      'visible' => false  
+                    ],                 
             [
                 'attribute' => 'source_id',
                 'format' => 'raw',
