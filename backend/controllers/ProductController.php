@@ -151,12 +151,17 @@ class ProductController extends Controller {
         
         $filters = new Filters();
         $filters->loadFromSession();  
+        $src = $src ?: 1;
+        if ($filters->f_source && $src != $filters->f_source) {
+            $filters->f_source = $src ?: 1;
+            $filters->setVsSession('f_source', $filters->f_source); 
+        }
         $source = null;
         // Если страница загружается в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
-            $srcId = $src ? $src : $filters->f_source;
-            $source = Source::getById($srcId);
-            $filters->f_source = $srcId;
+            //$srcId = $src ? $src : 1;
+            $source = Source::getById($src);
+            $filters->f_source = $src;
             
             //  Если в запросе указан номер страницы, то установим его:
             if (isset($params['page'])){
@@ -262,7 +267,7 @@ class ProductController extends Controller {
             'default_price_name' => Settings__fields_extend_price::get_default_price($source->id)->name ?: 'Price Amazon',
             
             'source' => $source,
-            'last_update' => Stats_import_export::getLastLocalImport()
+            'last_update' => Stats_import_export::getLastLocalImport($source->id)
         ]);
     }
 

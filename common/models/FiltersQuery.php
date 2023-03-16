@@ -400,7 +400,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
 
     public function getSqlFavorProducts(Source $source, $f_favor, $favorites)
     {
-        if (!(int)$f_favor || empty($favorites)) {
+        if (!(int)$f_favor) {
             return [];
         }
 

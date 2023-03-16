@@ -257,7 +257,7 @@ class Product extends \yii\db\ActiveRecord
             $q->getSqlUsername($source_table_name, $filters->f_username),
             $q->getSqlComparisonStatus($filters->f_comparison_status),
             $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
-            $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
+            $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport($filters->f_source)),
             $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
             $q->getSqlAdditionalFilters($filters),
         ]);
