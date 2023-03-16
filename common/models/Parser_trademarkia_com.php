@@ -50,7 +50,7 @@ class Parser_trademarkia_com extends Product
       'name' => 'f_bsr',
       'label' => 'BSR',
       'type' => 'number',
-      'range' => false,
+      'range' => true,
       'json_column' => 'info',
     ],
     [

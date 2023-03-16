@@ -600,9 +600,9 @@ class Product extends \yii\db\ActiveRecord
     ) {
         $filterValues = $filters->getAdditionalFilterValues();
         $pFilters = $filters->additionalFilters[$filter_type][$json_column ? 'json_column' : 'column'];
-        $sortFilters = array_filter($pFilters, function ($f) use ($filterValues) {
-            return $f['type'] === 'sort' && !empty($filterValues[$f['name']]);
-        });
+        $sortFilters = array_values(array_filter($pFilters, function ($f) {
+            return $f['type'] === 'sort';
+        }));
 
         $list = array_filter($list, function ($p) use ($filters, $json_column, $pFilters, $filterValues) {
             $suitable = true;
@@ -637,19 +637,18 @@ class Product extends \yii\db\ActiveRecord
             }
             return $suitable;
         });
-        
+
         if (!empty($sortFilters)) {
-            foreach($sortFilters as $sf) {
-                $sortOrder = $filterValues[$sf['name']];
-                usort($list, function ($a, $b) use ($sortOrder, $sf) {
-                    $firstValue = is_numeric((float)$a[$sf['key']]) ? (float)$a[$sf['key']] : $a[$sf['key']];
-                    $secondValue = is_numeric((float)$b[$sf['key']]) ? (float)$b[$sf['key']] : $b[$sf['key']];
-                    if ($sortOrder === SORT_DESC) {
-                        return $secondValue - $firstValue;
-                    }
-                    return $firstValue - $secondValue;
-                });
-            }
+            $sortField = $filterValues[$sortFilters[0]['name']];
+            $sortOrder = $filterValues[$sortFilters[1]['name']] ?? SORT_ASC;
+            usort($list, function ($a, $b) use ($sortOrder, $sortField) {
+                $firstValue = is_numeric((float)$a[$sortField]) ? (float)$a[$sortField] : $a[$sortField];
+                $secondValue = is_numeric((float)$b[$sortField]) ? (float)$b[$sortField] : $b[$sortField];
+                if ($sortOrder === SORT_DESC) {
+                    return $secondValue - $firstValue;
+                }
+                return $firstValue - $secondValue;
+            });
         }
 
         return $list;
