@@ -176,15 +176,16 @@ function main() {
      * Вместе с отправкой текущих выборов
      */
     $( 'body' ).on( 'click', CLASS_BUTTON_RESET_FILTERS, function ( e ) {
+        e.preventDefault();
         e.stopPropagation();
 
         Ajax.send( "/product/reset-filters", { listDataForServer: listDataForServer }, ( response ) => {
             switch ( response.status ) {
-                case 'ok':
-                    let html = response.html_index_table;
-                    var container = $( "#id_table_container" );
-                    container.html( html );
-                    //location.reload(); //Без этого подпупливает js и css в часности крестик выбора товара
+                case 'ok':    
+                    //let html = response.html_index_table;
+                    //var container = $( "#id_table_container" );
+                    //container.html( html );
+                    location.reload(); //Без этого подпупливает js и css в часности крестик выбора товара
                     break;
                 case 'info':
                     alert( response.message );
@@ -450,6 +451,9 @@ function main() {
     addActionChangeFilter( 'id_f_profile', 'f_profile' );
     addActionChangeFilter( 'id_f_new', 'f_new' );
     addActionChangeFilter( 'id_f_favor', 'f_favor' );
+    $('.additional-filters__right-products, .additional-filters__left-products').find('input, select, textarea').each((i, el) => {
+        addActionChangeFilter($(el).attr('id'), $(el).attr('name'));
+    });
 
     $( CLASS_ITEM_STAT ).on( 'click', ( e ) => {
         const $this = $( e.target ).closest( CLASS_ITEM_STAT );
@@ -528,7 +532,6 @@ function main() {
     function addActionChangeFilter( id_filter, name_filter ) {
         let filter = $( '#' + id_filter );
         filter.on( 'change', function ( e ) {
-            //$(document).on('change', '#'+id_filter, function(e){
             e.stopPropagation();
             let value;
             switch ( id_filter ) {
@@ -553,9 +556,9 @@ function main() {
                         if ( id_filter === 'id_f_hide_mode' ) {
                             changeModeHide( value );
                         } else {
-                            let html = response.html_index_table;
-                            var container = $( "#id_table_container" );
-                            container.html( html );
+                            //let html = response.html_index_table;
+                            //var container = $( "#id_table_container" );
+                            //container.html( html );
                             //lib.slider_init();
                             location.reload(); //Без этого подпупливает js и css в часности крестик выбора товара
                         }
@@ -571,12 +574,12 @@ function main() {
                         break;
                 }
                 //lib.slider_destroy();
-                lib.slider_init();
+                //lib.slider_init();
 
-                for ( var key in response.other ) {
-                    let elem = $( '#' + key );
-                    elem.html( response.other[key] );
-                }
+                // for ( var key in response.other ) {
+                //     let elem = $( '#' + key );
+                //     elem.html( response.other[key] );
+                // }
             } );
         } );
     }

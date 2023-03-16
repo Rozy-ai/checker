@@ -121,9 +121,9 @@ class Product extends \yii\db\ActiveRecord
      */
     public function getAddInfo()
     {
-        if (!$this->_addInfo) {
-            $this->initAddInfo();
-        }
+        // if (!$this->_addInfo) {
+        //     $this->initAddInfo();
+        // }
         return $this->_addInfo;
     }
 
@@ -141,14 +141,13 @@ class Product extends \yii\db\ActiveRecord
      * Заполняет свойство _addInfo массивом из правых элементов
      * @return Product_right[]
      */
-    public function initAddInfo()
+    public function initAddInfo(Filters $filters)
     {
         $asin = $this->asin;
         $source = $this->source;
-        $class_2 = $source->class_2; // Parser_trademarkia_com_result
-        $table_2 = $class_2::find()->where(['asin' => $asin])
-            ->orderBy(['parse_at' => SORT_ASC])
-            ->all() ?: [];
+        $class_2 = $source->class_2;
+        $table_2 = $class_2::find()->where(['asin' => $asin])->orderBy(['parse_at' => SORT_ASC])->asArray()->all() ?: [];
+        $table_2 = self::filterProducts($table_2, $filters, 'right', false);
 
         foreach ($table_2 as $item) {
             $out = [];
@@ -250,7 +249,6 @@ class Product extends \yii\db\ActiveRecord
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where([
             'and',
-            //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
             $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
@@ -259,12 +257,9 @@ class Product extends \yii\db\ActiveRecord
             $q->getSqlUsername($source_table_name, $filters->f_username),
             $q->getSqlComparisonStatus($filters->f_comparison_status),
             $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
-            $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
+            $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport($filters->f_source)),
             $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
-
-            //$q->getSqlAddInfoExists($source_table_name),
-            //$q->getSqlNoInComparisons(),
-            //$q->getSqlSettingsMessage(),
+            $q->getSqlAdditionalFilters($filters),
         ]);
 
         // Добавим сортировку:
@@ -302,14 +297,11 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
-
-        $list = $q->distinct()->all();
-
+        $list = $q->createCommand()->queryAll();
+        $list = self::filterProducts($list, $filters);
         foreach ($list as $k => $product) {
-            // $product->_source = $source;
-            // $product->_baseInfo = $product->info;
-            
             $list[$k] = self::getById($source->class_1, $product['id']);
+            $list[$k]->initAddInfo($filters);
             $list[$k]->_source = $source;
             $list[$k]->_baseInfo = $list[$k]->info;
         }
@@ -329,7 +321,7 @@ class Product extends \yii\db\ActiveRecord
     {
         $source_table_name = $source->table_1;
         $source_table2_name = $source->table_2;
-        
+
         $query = new FiltersQuery($source->class_1);
         // !!! Если менять тут то нужно менять getCountProducts
         $query->where([
@@ -348,8 +340,8 @@ class Product extends \yii\db\ActiveRecord
         ]);
 
         // Добавим сортировку
-        $query = self::setSortListProductsQuery( $query, $filters->f_soft, $source_table_name );
-        
+        $query = self::setSortListProductsQuery($query, $filters->f_soft, $source_table_name);
+
         // Получим все необходимые join
         $query->addJoins($source_table_name, $source_table2_name);
 
@@ -363,7 +355,7 @@ class Product extends \yii\db\ActiveRecord
         }
         return $query;
     }
-    
+
     /**
      * Установка сортировки запроса списка продуктов
      * 
@@ -372,7 +364,8 @@ class Product extends \yii\db\ActiveRecord
      * @param type $source_table_name
      * @return type
      */
-    public static function setSortListProductsQuery( FiltersQuery $query, $soft, $source_table_name) {
+    public static function setSortListProductsQuery(FiltersQuery $query, $soft, $source_table_name)
+    {
         // Добавим сортировку:
         switch ($sort) {
             case 'created_ASC':
@@ -387,12 +380,12 @@ class Product extends \yii\db\ActiveRecord
             case 'updated_DESC':
                 $query->orderBy($source_table_name . '.date_update DESC');
                 break;
-            default:                
+            default:
                 $query->orderBy($source_table_name . '.id');
-        }     
+        }
         return $query;
     }
-    
+
     /**
      * Получить список всех продуктов согласно фильтрам
      * 
@@ -402,12 +395,12 @@ class Product extends \yii\db\ActiveRecord
      * @param type $favorites
      * @return type
      */
-    public static function getListProductsAll(Source $source, Filters $filters, bool $is_admin, $favorites = []) 
+    public static function getListProductsAll(Source $source, Filters $filters, bool $is_admin, $favorites = [])
     {
-        $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);        
-        return self::getListProductsBuild( $query, $source);        
-    }    
-    
+        $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);
+        return self::getListProductsBuild($query, $source);
+    }
+
     /**
      * Получить обработка запрос списка всех продуктов
      * 
@@ -415,7 +408,7 @@ class Product extends \yii\db\ActiveRecord
      * @param Source $source
      * @return type
      */
-    public static function getListProductsBuild( $query, Source $source) 
+    public static function getListProductsBuild($query, Source $source)
     {
         $list = $query->createCommand()->queryAll();
         foreach ($list as $k => $product) {
@@ -425,7 +418,7 @@ class Product extends \yii\db\ActiveRecord
             $list[$k]->_baseInfo = $list[$k]->info;
         }
         return $list;
-    }    
+    }
 
     /**
      * Получить левое кол-во продуктов согласно фильтрам
@@ -435,12 +428,12 @@ class Product extends \yii\db\ActiveRecord
      * @param array $favorites
      * @return Product[]
      */
-    public static function getCountProductsLeft(Source $source, Filters $filters, bool $is_admin, $favorites = []) 
+    public static function getCountProductsLeft(Source $source, Filters $filters, bool $is_admin, $favorites = [])
     {
         $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);
         return (int)$query->count();
-    }   
-    
+    }
+
     /**
      * Получить кол-во левое кол-во продуктов согласно фильтрам
      * 
@@ -449,19 +442,19 @@ class Product extends \yii\db\ActiveRecord
      * @param array $favorites
      * @return Product[]
      */
-    public static function getCountProductsRight(Source $source, Filters $filters, bool $is_admin, $favorites = []) 
+    public static function getCountProductsRight(Source $source, Filters $filters, bool $is_admin, $favorites = [])
     {
         $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);
         $count_right = $query->select(['DISTINCT ( '
-            .'SELECT COUNT(*) as count_right '
-            .'FROM comparisons cp '
-            . ( $filters->f_comparison_status ? 'WHERE cp.status =  comparisons.status GROUP BY cp.status' : '')
-            .' ) as count_right'])->createCommand()->queryColumn('count_right');
+            . 'SELECT COUNT(*) as count_right '
+            . 'FROM comparisons cp '
+            . ($filters->f_comparison_status ? 'WHERE cp.status =  comparisons.status GROUP BY cp.status' : '')
+            . ' ) as count_right'])->createCommand()->queryColumn('count_right');
         //echo $query->createCommand()->getRawSql();
         //die();
         return (int)$count_right[0];
-    }    
-    
+    }
+
     /** 
      * Получить список + кол-во левое + кол-во правое продуктов согласно фильтра
      * @param Source $source
@@ -470,22 +463,21 @@ class Product extends \yii\db\ActiveRecord
      * @param type $favorites
      * @return array
      */
-    public static function getListProductsBack(Source $source, Filters $filters, bool $is_admin, $favorites = []): array 
-    {            
-        $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites );
+    public static function getListProductsBack(Source $source, Filters $filters, bool $is_admin, $favorites = []): array
+    {
+        $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);
         $list =  self::getListProductsAll($source, $filters, $is_admin, $favorites);
         $count = $query->count();
         $count_right = $query->select(['DISTINCT ( '
-            .'SELECT COUNT(*) as count_right '
-            .'FROM comparisons cp '
-            .'WHERE cp.status =  comparisons.status '
-            .'GROUP BY cp.status'
-            .' ) as count_right'])->createCommand()->queryColumn('count_right');
+            . 'SELECT COUNT(*) as count_right '
+            . 'FROM comparisons cp '
+            . 'WHERE cp.status =  comparisons.status '
+            . 'GROUP BY cp.status'
+            . ' ) as count_right'])->createCommand()->queryColumn('count_right');
 
-        return [$list, (int)$count, (int)$count_right[0] ];
-                
+        return [$list, (int)$count, (int)$count_right[0]];
     }
-    
+
     public static function getListProductsFront(Source $source, Filters $filters): array
     {
         $source_table_name = $source->table_1;
@@ -576,7 +568,6 @@ class Product extends \yii\db\ActiveRecord
         // !!! Если менять тут то нужно менять getCountProducts
         $q->where([
             'and',
-            //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
             $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
@@ -587,10 +578,7 @@ class Product extends \yii\db\ActiveRecord
             $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
             $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
             $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
-
-            //$q->getSqlAddInfoExists($source_table_name),
-            //$q->getSqlNoInComparisons(),
-            //$q->getSqlSettingsMessage(),
+            $q->getSqlAdditionalFilters($filters),
         ]);
         // Получим все необходимые join
         $q->addJoins($source_table_name, $source_table2_name);
@@ -599,7 +587,72 @@ class Product extends \yii\db\ActiveRecord
                 return $source->max_free_show_count;
             }
         }*/
-        return $q->distinct()->count();
+        $list = $q->createCommand()->queryAll();
+        $list = self::filterProducts($list, $filters);
+        return count($list);
+    }
+
+    public static function filterProducts(
+        array $list,
+        Filters $filters,
+        string $filter_type = 'left',
+        $json_column = true
+    ) {
+        $filterValues = $filters->getAdditionalFilterValues();
+        $pFilters = $filters->additionalFilters[$filter_type][$json_column ? 'json_column' : 'column'];
+        $sortFilters = array_filter($pFilters, function ($f) use ($filterValues) {
+            return $f['type'] === 'sort' && !empty($filterValues[$f['name']]);
+        });
+
+        $list = array_filter($list, function ($p) use ($filters, $json_column, $pFilters, $filterValues) {
+            $suitable = true;
+            $info = $json_column ? json_decode($p['info'], true) : $p;
+            foreach ($pFilters as $f) {
+                if ($f['type'] === 'sort') {
+                    continue;
+                }
+
+                $isRange = $f['range'];
+                $names = !$isRange ? [$f['name']] : [$f['name'] . "_0", $f['name'] . "_1"];
+                $fValues = array_map(fn ($n) => $filterValues[$n], $names);
+                if (empty(array_filter($fValues, fn ($v) => !empty($v)))) {
+                    continue;
+                }
+
+                switch ($f['type']) {
+                    case 'number':
+                        if (!$isRange) {
+                            $suitable = (float)$info[$f['key']] >= (float)$fValues[0];
+                        } else {
+                            $suitable = (float)$info[$f['key']] >= (float)$fValues[0] && (float)$info[$f['key']] <= (float)$fValues[1];
+                        }
+                        break;
+                    case 'text':
+                        $suitable = str_contains(strtolower($info[$f['key']]), $fValues[0]);
+                        break;
+                }
+                if (!$suitable) {
+                    break;
+                }
+            }
+            return $suitable;
+        });
+        
+        if (!empty($sortFilters)) {
+            foreach($sortFilters as $sf) {
+                $sortOrder = $filterValues[$sf['name']];
+                usort($list, function ($a, $b) use ($sortOrder, $sf) {
+                    $firstValue = is_numeric((float)$a[$sf['key']]) ? (float)$a[$sf['key']] : $a[$sf['key']];
+                    $secondValue = is_numeric((float)$b[$sf['key']]) ? (float)$b[$sf['key']] : $b[$sf['key']];
+                    if ($sortOrder === SORT_DESC) {
+                        return $secondValue - $firstValue;
+                    }
+                    return $firstValue - $secondValue;
+                });
+            }
+        }
+
+        return $list;
     }
 
     /**
@@ -771,7 +824,7 @@ class Product extends \yii\db\ActiveRecord
 
         $keys = Settings__fields_extend_price::find()
             ->where(['source_id' => $source_id, 'section' => $section])
-            ->orderBy(['default' => SORT_DESC])->all(); 
+            ->orderBy(['default' => SORT_DESC])->all();
 
         $b = $this->getBaseInfo();
 

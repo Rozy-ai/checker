@@ -151,12 +151,17 @@ class ProductController extends Controller {
         
         $filters = new Filters();
         $filters->loadFromSession();  
+        $src = $src ?: 1;
+        if ($filters->f_source && $src != $filters->f_source) {
+            $filters->f_source = $src ?: 1;
+            $filters->setVsSession('f_source', $filters->f_source); 
+        }
         $source = null;
         // Если страница загружается в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
-            $srcId = $src ? $src : $filters->f_source;
-            $source = Source::getById($srcId);
-            $filters->f_source = $srcId;
+            //$srcId = $src ? $src : 1;
+            $source = Source::getById($src);
+            $filters->f_source = $src;
             
             //  Если в запросе указан номер страницы, то установим его:
             if (isset($params['page'])){
@@ -181,6 +186,7 @@ class ProductController extends Controller {
             $filters->saveToSession();
         }
 
+        $filters->setSource($source);
         $this->indexPresenter->setSource($source);
 
         $this->layout = 'products_list';
@@ -190,6 +196,7 @@ class ProductController extends Controller {
         $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
 
         $favorites = Product::getFavorites($source->id);
+
         if (isset($params['all'])) {
             $filters->f_count_products_on_page = 'ALL';
             
@@ -239,6 +246,9 @@ class ProductController extends Controller {
             'f_hide_mode' => true,
             'f_new' => $filters->f_new,
             'f_favor' => $filters->f_favor,
+            'left_filters_list' => $filters->leftFilters,
+            'right_filters_list' => $filters->rightFilters,
+            'additional_filter_values' => $filters->getAdditionalFilterValues(),
 
             'list_source' => $this->indexPresenter->getListSource(),
             'list_profiles' => $this->indexPresenter->getListProfiles(),
@@ -257,7 +267,7 @@ class ProductController extends Controller {
             'default_price_name' => Settings__fields_extend_price::get_default_price($source->id)->name ?: 'Price Amazon',
             
             'source' => $source,
-            'last_update' => Stats_import_export::getLastLocalImport()
+            'last_update' => Stats_import_export::getLastLocalImport($source->id)
         ]);
     }
 
@@ -274,6 +284,7 @@ class ProductController extends Controller {
         $filters = new Filters();
         $filters->setToDefault();
         $filters->f_source = $source->id;
+        $filters->setSource($source);
 
         $products = Product::getListProducts($source, $filters, true);
         if (!is_array($products) || !count($products)) {
@@ -328,6 +339,8 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
         if (!$filters->isExistsDefaultParams()) {
             throw new \InvalidArgumentException('В сессии не хватает данных');
         }
@@ -347,8 +360,6 @@ class ProductController extends Controller {
         }
 
         $filters->setVsSession($name, $value);
-
-        $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
@@ -389,6 +400,8 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
         if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
@@ -396,7 +409,6 @@ class ProductController extends Controller {
             ];
         }
 
-        $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
@@ -440,6 +452,9 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
+
         if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
@@ -447,7 +462,6 @@ class ProductController extends Controller {
             ];
         }
 
-        $source = Source::getById($filters->f_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
@@ -527,13 +541,15 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($id_source);
+        $filters->setSource($source);
+
         if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
                 'message' => 'В сесии не хватает данных'
             ];
         }
-        $source = Source::getById($id_source);
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
@@ -570,6 +586,9 @@ class ProductController extends Controller {
 
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
+
         if (!$filters->isExistsDefaultParams()) {
             return [
                 'status' => 'error',
@@ -577,7 +596,6 @@ class ProductController extends Controller {
             ];
         }
 
-        $source = Source::getById($filters->f_source);
         if (!$source) {
             return [
                 'status' => 'error',
@@ -607,6 +625,8 @@ class ProductController extends Controller {
         
         $filters = new Filters();
         $filters->loadFromSession();
+        $source = Source::getById($filters->f_source);
+        $filters->setSource($source);
         $filters->setToDefaultSelects();
         $filters->saveToSession();
         
@@ -615,6 +635,7 @@ class ProductController extends Controller {
             if ($data['datas_products_left'] || $data['datas_products_right'] || $data['datas_products_left_delete']){
                 $this->indexPresenter->changeStatusProducts($data['datas_products_left'], $data['datas_products_right'], $data['datas_products_left_delete']);
             }
+            return ['status' => 'ok'];
         } catch (\Exception $ex) {
             Yii::error($ex->getLine().':'.$ex->getMessage());
             return ['status' => 'error', 'message' => 'Сохранение пакета выбраных статусов совершилось с ошибкой'];
@@ -650,6 +671,7 @@ class ProductController extends Controller {
         if (!$source){
             $source = Source::getById($filters->f_source);
         }
+        $filters->setSource($source);
 
         if (!isset($is_admin)){
             $user = \Yii::$app->user->identity;
@@ -782,6 +804,7 @@ class ProductController extends Controller {
         $filters = new Filters();
         $filters->loadFromSession();
         $source = Source::getById($id_source);
+        $filters->setSource($source);
         $model = Product::getProduct($source, $filters);
 
         $prev = null;

@@ -9,6 +9,9 @@ class AdditionalFilter extends Widget
     public $f_asin_multiple;
     public $f_new;
     public $f_favor;
+    public $right_filters;
+    public $left_filters;
+    public $additional_filter_values;
 
     public function __construct(array $config = [])
     {
@@ -21,6 +24,9 @@ class AdditionalFilter extends Widget
             'f_asin_multiple' => $this->f_asin_multiple,
             'f_new' => $this->f_new,
             'f_favor' => $this->f_favor,
+            'right_filters' => $this->right_filters,
+            'left_filters' => $this->left_filters,
+            'additional_filter_values' => $this->additional_filter_values,
         ]);
     }
 }
