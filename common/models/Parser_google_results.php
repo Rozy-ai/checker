@@ -3,7 +3,8 @@
 namespace common\models;
 
 
-class Parser_google_results extends \yii\db\ActiveRecord{
+class Parser_google_results extends \yii\db\ActiveRecord
+{
     public static $filters = [
         [
             'key' => 'ROI',
@@ -20,19 +21,19 @@ class Parser_google_results extends \yii\db\ActiveRecord{
             'range' => true,
         ],
         [
-            'key' => 'ROI',
-            'name' => 'f_price_sort',
-            'label' => 'Price Sort',
+            'key' => 'Sort Field',
+            'name' => 'f_right_sort_field',
+            'label' => 'Sort Field',
             'type' => 'sort',
             'values' => [
-                SORT_DESC => 'по убыванию ↓',
-                SORT_ASC => 'по возрастанию ↑',
-            ],
+                'ROI' => 'Price',
+                'Margin' => 'Margin'
+            ]
         ],
         [
-            'key' => 'Margin',
-            'name' => 'f_margin_sort',
-            'label' => 'Margin',
+            'key' => 'Sort Order',
+            'name' => 'f_right_sort_order',
+            'label' => 'Sort Order',
             'type' => 'sort',
             'values' => [
                 SORT_DESC => 'по убыванию ↓',

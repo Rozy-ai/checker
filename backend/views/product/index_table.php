@@ -40,8 +40,10 @@ use common\models\Comparison;
     <?php endif; ?>
 
     <?php foreach ($list as $k => $item) :   ?>
-
         <?php
+        if (empty($item->addInfo)) {
+            continue;
+        }
         $images_left = preg_split("/[; ]/", ArrayHelper::getValue($item->baseInfo, "Image"));
 
         $source_id = $item->source->id;

@@ -599,7 +599,71 @@ class Product extends \yii\db\ActiveRecord
                 return $source->max_free_show_count;
             }
         }*/
-        return $q->distinct()->count();
+        $list = $q->createCommand()->queryAll();
+        $list = self::filterProducts($list, $filters);
+        return count($list);
+    }
+
+    public static function filterProducts(
+        array $list,
+        Filters $filters,
+        string $filter_type = 'left',
+        $json_column = true
+    ) {
+        $filterValues = $filters->getAdditionalFilterValues();
+        $pFilters = $filters->additionalFilters[$filter_type][$json_column ? 'json_column' : 'column'];
+        $sortFilters = array_values(array_filter($pFilters, function ($f) {
+            return $f['type'] === 'sort';
+        }));
+
+        $list = array_filter($list, function ($p) use ($filters, $json_column, $pFilters, $filterValues) {
+            $suitable = true;
+            $info = $json_column ? json_decode($p['info'], true) : $p;
+            foreach ($pFilters as $f) {
+                if ($f['type'] === 'sort') {
+                    continue;
+                }
+
+                $isRange = $f['range'];
+                $names = !$isRange ? [$f['name']] : [$f['name'] . "_0", $f['name'] . "_1"];
+                $fValues = array_map(fn ($n) => $filterValues[$n], $names);
+                if (empty(array_filter($fValues, fn ($v) => !empty($v)))) {
+                    continue;
+                }
+
+                switch ($f['type']) {
+                    case 'number':
+                        if (!$isRange) {
+                            $suitable = (float)$info[$f['key']] >= (float)$fValues[0];
+                        } else {
+                            $suitable = (float)$info[$f['key']] >= (float)$fValues[0] && (float)$info[$f['key']] <= (float)$fValues[1];
+                        }
+                        break;
+                    case 'text':
+                        $suitable = str_contains(strtolower($info[$f['key']]), $fValues[0]);
+                        break;
+                }
+                if (!$suitable) {
+                    break;
+                }
+            }
+            return $suitable;
+        });
+
+        if (!empty($sortFilters)) {
+            $sortField = $filterValues[$sortFilters[0]['name']];
+            $sortOrder = $filterValues[$sortFilters[1]['name']] ?? SORT_ASC;
+            usort($list, function ($a, $b) use ($sortOrder, $sortField) {
+                $firstValue = is_numeric((float)$a[$sortField]) ? (float)$a[$sortField] : $a[$sortField];
+                $secondValue = is_numeric((float)$b[$sortField]) ? (float)$b[$sortField] : $b[$sortField];
+                if ($sortOrder === SORT_DESC) {
+                    return $secondValue - $firstValue;
+                }
+                return $firstValue - $secondValue;
+            });
+        }
+
+        return $list;
     }
 
     /**
