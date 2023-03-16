@@ -151,11 +151,11 @@ class ProductController extends Controller {
         
         $filters = new Filters();
         $filters->loadFromSession();  
-        $src = $src ?: 1;
+        /*$src = $src ?: 1;
         if ($filters->f_source && $src != $filters->f_source) {
             $filters->f_source = $src ?: 1;
             $filters->setVsSession('f_source', $filters->f_source); 
-        }
+        }*/
         $source = null;
         // Если страница загружается в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
@@ -186,7 +186,7 @@ class ProductController extends Controller {
             $filters->saveToSession();
         }
 
-        $filters->setSource($source);
+        /*$filters->setSource($source);*/
         $this->indexPresenter->setSource($source);
 
         $this->layout = 'products_list';
