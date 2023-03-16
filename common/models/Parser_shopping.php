@@ -69,6 +69,6 @@ class Parser_shopping extends Product
 
   public static function tableName()
   {
-    return 'parser_shopping';
+    return 'parser_google';
   }
 }
