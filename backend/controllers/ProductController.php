@@ -146,17 +146,18 @@ class ProductController extends Controller {
         $this->productPresenter = $productPresenter;
     }
 
-    public function actionIndex($src = 1) {
+    public function actionIndex($src = 1) 
+    {
         $params = $params = \Yii::$app->request->get();
         
         $filters = new Filters();
         $filters->loadFromSession();  
-        /*$src = $src ?: 1;
+        $src = $src ?: 1;
         if ($filters->f_source && $src != $filters->f_source) {
             $filters->f_source = $src ?: 1;
             $filters->setVsSession('f_source', $filters->f_source); 
         }
-        $source = null;*/
+        $source = null;
         // Если страница загружается в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
             //$srcId = $src ? $src : 1;
@@ -826,18 +827,16 @@ class ProductController extends Controller {
         ];
 
         return $this->render('view', [
-                    'model' => $model,
-                    'compare_item' => $compare_item,
-                    'compare_items' => $model->addInfo,
-                    'source' => $source,
-                    'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
-                    'filter-items__profile' => $this->productPresenter->filters->f_profile,
-                    'product_id' => $id_product,
-                    'item_id' => $id_item,
-                    'number_node' => $node,
-                    'is_admin' => $identity && $identity->isAdmin(),
-                    'active_comparison_status' => $active_comparison_status,
-                    'list_comparison_statuses' => Comparison::getStatuses()
+            'model' => $model,
+            'compare_item' => $compare_item,
+            'compare_items' => $model->addInfo,
+            'source' => $source,
+            'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
+            'filter-items__profile' => $this->productPresenter->filters->f_profile,
+            'number_node' => $node,
+            'is_admin' => $identity && $identity->isAdmin(),
+            'active_comparison_status' => $active_comparison_status,
+            'list_comparison_statuses' => Comparison::getStatuses()
         ]);
     }
 
