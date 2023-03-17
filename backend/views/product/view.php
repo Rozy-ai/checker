@@ -9,6 +9,7 @@
 <?php
 
 use backend\components\ProductWidget;
+use common\models\Product;
 use backend\components\TopSlider;
 use yii\data\Pagination;
 use yii\helpers\Html;
@@ -28,6 +29,7 @@ use common\models\Comparison;
 /* @var $is_admin */
 
 \backend\assets\ProductAsset::register($this);
+
 
 $this->title = "#{$model->id}";
 $base = $model->baseInfo;
@@ -125,7 +127,7 @@ $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[
         <div class="position-1 -hidden">
             <div class="slider__layout">
 
-                <?
+                <?php
                 $images_left = preg_split("/[; ]/", $base["Image"]);
 
                 $images_left[0];
@@ -145,7 +147,7 @@ $item = count($urls) && isset($add_info[$urls[$pages->page]]) ? $add_info[$urls[
                         <div
                             class="slider__left-item__data js-addition-info-for-price"
 
-                            data-addition_info_for_price='<?= $model->addition_info_for_price(); ?>'
+                            data-addition_info_for_price='<?php /*= $model->addition_info_for_price(); */?>'
 
                             ><span>Price:</span><br>
 
@@ -243,9 +245,11 @@ ProductWidget::widget([
     'left' => $base,
     'right' => count($add_info) > 0 ? $item : [],
     'right_info' => array_values($add_info),
-    'comparison' => isset($model->comparisons [$pages->page]) ? $model->comparisons [$pages->page] : null,
+    //'comparison' => isset($model->comparisons [$pages->page]) ? $model->comparisons [$pages->page] : null,
+    'comparison' => isset($model->comparisons [$pages->page]) ? $model->comparisons [$pages->page] : $model->comparisons [$item_id],
     'canCompare' => $can,
-    'product_id' => $model->id,
+    'product_id' => $product_id,
+    'item_id' => $item_id,
     'node_idx' => $node_idx,
     'p_item' => $model,
     'arrows' => $arrows,
