@@ -146,8 +146,7 @@ class ProductController extends Controller {
         $this->productPresenter = $productPresenter;
     }
 
-    public function actionIndex($src = 1) 
-    {
+    public function actionIndex($src = null) {
         $params = $params = \Yii::$app->request->get();
         
         $filters = new Filters();
@@ -187,7 +186,7 @@ class ProductController extends Controller {
             $filters->saveToSession();
         }
 
-        /*$filters->setSource($source);*/
+        $filters->setSource($source);
         $this->indexPresenter->setSource($source);
 
         $this->layout = 'products_list';
@@ -429,9 +428,9 @@ class ProductController extends Controller {
         }
 
         $status = (string) $params['status'];
-        $id_product = (int) $params['product_id'];
-        $id_item = (int) $params['item_id'];
-        $id_source = (int) $params['source_id'];
+        $id_product = (int) $params['id_product'];
+        $id_item = (int) $params['id_item'];
+        $id_source = (int) $params['id_source'];
         $message = (string) $params['message'];
         $is_last = (bool) $params['is_last'];
 
@@ -796,26 +795,23 @@ class ProductController extends Controller {
         }
 
         $id_product = (int) $params['id'];
-        $id_item = (int) $params['item_id'];
-        $node = (int) $params['number_node'];
         $id_source = (int) $params['source_id'];
 
-        if (!$id_product || !$id_item || !$id_source) {
+        if (!$id_product || !$id_source) {
             return $this->redirect('/product/index');
         }
 
         $filters = new Filters();
         $filters->loadFromSession();
-        $filters->f_id = $id_product;
         $source = Source::getById($id_source);
         $filters->setSource($source);
-        $model = Product::getProductComparisonById($source, $filters);
+        $model = Product::getProduct($source, $filters);
 
         $prev = null;
         $next = null;
 
         //$compare_item = $this->productPresenter->getItemCompare($product->addInfo);
-        //$node = 1; //$this->productPresenter->number_node;
+        $node = 1; //$this->productPresenter->number_node;
         $compare_item = AppHelper::get_item_by_number_key($model->addInfo, $node);
         $identity = \Yii::$app->user->identity;
         //Передаем параметры в шаблон
@@ -827,16 +823,16 @@ class ProductController extends Controller {
         ];
 
         return $this->render('view', [
-            'model' => $model,
-            'compare_item' => $compare_item,
-            'compare_items' => $model->addInfo,
-            'source' => $source,
-            'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
-            'filter-items__profile' => $this->productPresenter->filters->f_profile,
-            'number_node' => $node,
-            'is_admin' => $identity && $identity->isAdmin(),
-            'active_comparison_status' => $active_comparison_status,
-            'list_comparison_statuses' => Comparison::getStatuses()
+                    'model' => $model,
+                    'compare_item' => $compare_item,
+                    'compare_items' => $model->addInfo,
+                    'source' => $source,
+                    'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
+                    'filter-items__profile' => $this->productPresenter->filters->f_profile,
+                    'number_node' => $node,
+                    'is_admin' => $identity && $identity->isAdmin(),
+                    'active_comparison_status' => $active_comparison_status,
+                    'list_comparison_statuses' => Comparison::getStatuses()
         ]);
     }
 
