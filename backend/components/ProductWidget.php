@@ -78,6 +78,7 @@ class ProductWidget extends Widget
     public $comparison;
     public $canCompare;
     public $product_id;
+    public $item_id;
     public $node_idx;
     public $p_item;
     public $arrows;
@@ -117,10 +118,11 @@ class ProductWidget extends Widget
         'comparison' => $this->comparison,
         'canCompare' => $this->canCompare,
         'product_id' => $this->product_id,
-        'node_idx' => $this->node_idx,  // get node
+        'item_id' => $this->item_id,
+        'node_idx' => $this->node_idx,  // get node          
         'p_item' => $this->p_item,
         'arrows' => $this->arrows,
-        'model' => $this->model,
+        'model' => $model,          
         'compare_item' => $this->compare_item,
         'compare_items' => $this->compare_items,
         'source' => $this->source,

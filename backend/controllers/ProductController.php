@@ -191,7 +191,7 @@ class ProductController extends Controller
             $filters->saveToSession();
         }
 
-        /*$filters->setSource($source);*/
+        $filters->setSource($source);
         $this->indexPresenter->setSource($source);
 
         $this->layout = 'products_list';

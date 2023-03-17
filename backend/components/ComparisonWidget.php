@@ -17,6 +17,7 @@ class ComparisonWidget extends Widget
     public $comparison;
     public $canCompare;
     public $product_id;
+    public $item_id;
     public $node_idx;
     public $source_id;
 
@@ -36,8 +37,10 @@ class ComparisonWidget extends Widget
             'model' => $this,
             'messages' => $messages,
             'product_id' => $this->product_id,
+            'item_id' => $this->item_id,
             'node_idx' => $this->node_idx,
-            'source_id' => $this->source_id
+            'source_id' => $this->source_id,
+            'comparison' => $this->comparison,
         ]);
     }
 }

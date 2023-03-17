@@ -100,7 +100,8 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
                     <?=
                     Html::a(
                             "<div class=\"slider-item__img\" data-img='" . $variables_right['img_right'] . "' style=\"background-image: url('" . $variables_right['img_right'] . "')\"></div>",
-                            ['view', 'id' => $product->id,
+                            ['view', 'id' => $product->id, 
+                                'item_id' => $item->id,
                                 'node' => $node_id,
                                 'source_id' => $source_id,
                                 'comparisons' => $f_comparison_status,
@@ -168,6 +169,7 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
                 <div class="td -btn" style="display: none">
                     <?php $link = Url::to(['product/compare',
                         'id'=>$product->id,
+                        'item_id'=>$item->id,
                         'source_id'=>$source_id,
                         'node'=>($index+1),
                         'status'=>Comparison::STATUS_MISMATCH],true).$current;
@@ -182,6 +184,7 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
                 <div class="td -btn" style="display: none">
                     <?php $link = Url::to(['product/compare',
                         'id'=>$product->id,
+                        'item_id'=>$item->id,
                         'source_id'=>$source_id,
                         'node'=>($index+1),
                         'status'=>Comparison::STATUS_MATCH],true).$current;
