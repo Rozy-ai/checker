@@ -472,6 +472,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
             'comparison' => $comparison,
             'canCompare' => $canCompare,
             'product_id' => $product_id,
+            'item_id' => $item_id,  
             'node_idx' => $node_idx,
             'source_id' => $source->id
           ]) ?>

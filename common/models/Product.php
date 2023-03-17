@@ -608,7 +608,7 @@ class Product extends \yii\db\ActiveRecord
      * @return Product
      * @throws \yii\base\InvalidArgumentException
      */
-    public static function getProduct(Source $source, Filters $filters)
+    public function getProduct(Source $source, Filters $filters)
     {
         $source_table_name = $source->table_1;
         $source_table2_name = $source->table_2;
@@ -625,13 +625,47 @@ class Product extends \yii\db\ActiveRecord
         $q->addJoins($source_table_name, $source_table2_name);
 
         $q->orderBy($source_table_name . '.id ASC');
-        $q->limit(1);
+        $q->limit(1);                
         $product = $q->one();
         $product->source = $source;
         $product->baseInfo = $product->info;
         return $product;
     }
 
+    /**
+     * Получить одну модель продуктов согласно фильтра
+     * $filters->f_comparison_status - статуса продукта
+     * $filters->f_no_compare - статуса сравнения
+     * $filters->f_source - источника
+     * $filters->f_id - ид.продукта
+     * 
+     * @return Product
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function getProductComparisonById(Source $source, Filters $filters)
+    {
+        $source_table_name = $source->table_1;
+        $source_table2_name = $source->table_2;
+
+        $q = new FiltersQuery($source->class_1);
+
+        $q->where([
+            'and',
+            $q->getSqlComparisonStatus($filters->f_comparison_status),
+            $q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
+            $q->getSqlId($source_table_name, $filters->f_id)
+        ]);
+
+        $q->addJoins($source_table_name, $source_table2_name);
+
+        $q->orderBy($source_table_name . '.id ASC');
+        $q->limit(1);                
+        $product = $q->one();
+        $product->source = $source;
+        $product->baseInfo = $product->info;
+        return $product;
+    }
+    
     /**
      * Удалить данный продукт из базы данных вместе во всеми сравнениями 
      *  и соответственными правыми роварами
