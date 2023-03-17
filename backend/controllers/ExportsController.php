@@ -417,7 +417,7 @@ Array (   [0] => Array (
       $q->andWhere(['like', $this->source_table_name . '.`profile`', $profile]);
     }
 
-    $last_import = Stats_import_export::getLastLocalImport();
+    $last_import = Stats_import_export::getLastLocalImport($source_id);
     if ($is_new && $last_import) {
       if ($source_id == 1) {
         $q->andWhere(['date_update' => $last_import->created]);

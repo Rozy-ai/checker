@@ -41,39 +41,21 @@ class Parser_trademarkia_com_result extends \yii\db\ActiveRecord
             'range' => true,
         ],
         [
-            'key' => 'E_ratingS',
-            'name' => 'f_rating_sort',
-            'label' => 'Rating Sort',
+            'key' => 'Sort Field',
+            'name' => 'f_right_sort_field',
+            'label' => 'Sort Field',
             'type' => 'sort',
             'values' => [
-                SORT_DESC => 'по убыванию ↓',
-                SORT_ASC => 'по возрастанию ↑',
-            ],
+                'E_ratingS' => 'Rating',
+                'eBay_stock' => 'Stock',
+                'ROI' => 'Price',
+                'Margin' => 'Margin'
+            ]
         ],
         [
-            'key' => 'eBay_stock',
-            'name' => 'f_stock_sort',
-            'label' => 'Stock Sort',
-            'type' => 'sort',
-            'values' => [
-                SORT_DESC => 'по убыванию ↓',
-                SORT_ASC => 'по возрастанию ↑',
-            ],
-        ],
-        [
-            'key' => 'ROI',
-            'name' => 'f_price_sort',
-            'label' => 'Price Sort',
-            'type' => 'sort',
-            'values' => [
-                SORT_DESC => 'по убыванию ↓',
-                SORT_ASC => 'по возрастанию ↑',
-            ],
-        ],
-        [
-            'key' => 'Margin',
-            'name' => 'f_margin_sort',
-            'label' => 'Margin',
+            'key' => 'Sort Order',
+            'name' => 'f_right_sort_order',
+            'label' => 'Sort Order',
             'type' => 'sort',
             'values' => [
                 SORT_DESC => 'по убыванию ↓',

@@ -30,7 +30,7 @@ class Parser_shopping extends Product
       'name' => 'f_bsr',
       'label' => 'BSR',
       'type' => 'number',
-      'range' => false,
+      'range' => true,
       'json_column' => 'info',
     ],
     [
