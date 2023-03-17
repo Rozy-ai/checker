@@ -808,7 +808,8 @@ class ProductController extends Controller {
         $filters->f_id = $id_product;
         $source = Source::getById($id_source);
         $filters->setSource($source);
-        $model = Product::getProductComparisonById($source, $filters);
+        $model = Product::getById($source->class_1,$id_product); 
+        //$model = Product::getProductById($source, $filters);
 
         $prev = null;
         $next = null;
