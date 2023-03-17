@@ -49,8 +49,8 @@ use yii\helpers\Html;
         if ($model->comparison->status === 'MISMATCH') $_hover_mismatch = '-hover';
 
         ?>
-            <?= Html::a("", ['compare', 'id' => $product_id, 'source_id' => $source_id, 'node' => $node_idx, 'status' => Comparison::STATUS_MATCH], ['class' => 'btn yes '.$_hover_match]) ?>
-            <?= Html::a("", ['compare', 'id' => $product_id, 'source_id' => $source_id, 'node' => $node_idx, 'status' => Comparison::STATUS_MISMATCH, 'return' => 1], ['class' => 'btn del '.$_hover_mismatch]) ?>
+            <?= Html::a("", ['compare', 'product_id' => $product_id, 'source_id' => $source_id, 'node' => $node_idx, 'status' => Comparison::STATUS_MATCH], ['class' => 'btn yes '.$_hover_match]) ?>
+            <?= Html::a("", ['compare', 'product_id' => $product_id, 'source_id' => $source_id, 'node' => $node_idx, 'status' => Comparison::STATUS_MISMATCH, 'return' => 1], ['class' => 'btn del '.$_hover_mismatch]) ?>
             <button id="btnGroupDrop2" type="button" class="btn faq <?=$_hover_other?>" data-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false">&nbsp;
             </button>

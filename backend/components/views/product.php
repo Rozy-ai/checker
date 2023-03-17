@@ -107,7 +107,7 @@ $images_right = preg_split("/[; |,|\|]/", $right->srcKey);
             aria-labelledby="jobLabel"
           >
             <?php foreach ($compare_items as $k => $r_item):?>
-              <?
+              <?php
               $class = 'nocompare';
               switch ($model->comparisons [$k]->status):
                 case Comparison::STATUS_MATCH:
