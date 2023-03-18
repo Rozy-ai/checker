@@ -165,7 +165,7 @@ trait TraitListFilters {
                 
         $q = new FiltersQuery($this->source_table_class);
         
-        $q->select(['comparisons.status', 'COUNT(*) as count_statuses'])
+        $q->select(['comparisons.status', 'COUNT(DISTINCT id) as count_statuses'])
           ->andWhere($q->getSqlProfile($is_admin, $this->source_table_name, $f_profile))
           ->groupBy('comparisons.status')
           ->asArray();

@@ -590,7 +590,7 @@ class ProductController extends Controller
         } catch (\Exception $ex) {
             return [
                 'status' => 'error',
-                'message' => $ex->message
+                'message' => $ex->getMessage()
             ];
         }
 
@@ -840,7 +840,6 @@ class ProductController extends Controller
         ];
 
         return $this->render('view', [
-<<<<<<< HEAD
                     'model' => $model,
                     'compare_item' => $compare_item,
                     'compare_items' => $model->addInfo,
@@ -850,8 +849,7 @@ class ProductController extends Controller
                     'number_node' => $node,
                     'is_admin' => $identity && $identity->isAdmin(),
                     'active_comparison_status' => $active_comparison_status,
-                    'list_comparison_statuses' => Comparison::getStatuses()
-=======
+                    'list_comparison_statuses' => Comparison::getStatuses(),
             'model' => $model,
             'compare_item' => $compare_item,
             'compare_items' => $model->addInfo,
@@ -862,7 +860,6 @@ class ProductController extends Controller
             'is_admin' => $identity && $identity->isAdmin(),
             'active_comparison_status' => $active_comparison_status,
             'list_comparison_statuses' => Comparison::getStatuses()
->>>>>>> main
         ]);
     }
 

@@ -297,7 +297,7 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
-        $list = $q->createCommand()->queryAll();
+        $list = $q->distinct()->all();
         $list = self::filterProducts($list, $filters);
         foreach ($list as $k => $product) {
             $list[$k] = self::getById($source->class_1, $product['id']);
@@ -587,7 +587,7 @@ class Product extends \yii\db\ActiveRecord
                 return $source->max_free_show_count;
             }
         }*/
-        $list = $q->createCommand()->queryAll();
+        $list = $q->distinct()->createCommand()->queryAll();
         $list = self::filterProducts($list, $filters);
         return count($list);
     }
