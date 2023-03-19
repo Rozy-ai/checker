@@ -118,7 +118,7 @@ $is_last = ((count($items)-count($comparisons)) <= 1);
             <?=
             Html::a(
                     "<div class=\"slider-item__img\" data-img='" . $variables_right['img_right'] . "' style=\"background-image: url('" . $variables_right['img_right'] . "')\"></div>",
-                    ['view', 'id' => $product->id, 'number_node' => $index + 1, 'source_id' => $source_id, 'comparisons' => $f_comparison_status, 'filter-items__profile' => $f_profile],
+                    ['view', 'id' => $product->id, 'item_id' => $item->id, 'number_node' => $index + 1, 'source_id' => $source_id, 'comparisons' => $f_comparison_status, 'filter-items__profile' => $f_profile],
                     ['class' => 'linkImg slider-item__link-img']
             )
             ?>

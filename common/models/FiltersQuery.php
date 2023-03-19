@@ -178,6 +178,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
         return ($f_id) ? ['>', $source_table_name . '.id', $f_id] : [];
     }
 
+    
     /**
      * Фильтр поиска товара по Categories: Root
      *

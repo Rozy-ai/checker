@@ -1267,6 +1267,24 @@ $(function(){
     });
     
   })
+
+  $body.on('click','.js-compare',function(){
+    let $data = $(this).data();
+
+    $.ajax({
+    	url: "/product/compare",
+    	type: "POST",
+    	data: $data,
+    	beforeSend: function() {
+     
+    	},
+    	dataType: "json",
+    	success: function(response){
+        window.location = $data.url_next;
+    	}
+    });
+    
+  })
   
   function _change_missall_link(response){
     let link =  response.link;

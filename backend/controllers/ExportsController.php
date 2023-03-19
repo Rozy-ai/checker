@@ -570,14 +570,10 @@ Array (   [0] => Array (
 
           $val = '---';
           if ($id_key['type'] === 'right_item') {
-            if ($itm->$key_name != null) {
               $val = $itm->$key_name;
-            }
           }
           if ($id_key['type'] === 'left_item') {
-            if ($itm['parent_item'][$key_name] != null) {
               $val = $itm['parent_item'][$key_name];
-            }
           }
 
           if (is_array($val)) $val = 'ARRAY!!!';

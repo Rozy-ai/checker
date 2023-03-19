@@ -62,7 +62,7 @@ class ProductController extends Controller
         $params = $params = \Yii::$app->request->get();
 
         $filters = new Filters();
-        $filters->loadFromSession();
+        $filters->loadFromSession();  
         $src = $src ?: 1;
         if ($filters->f_source && $src != $filters->f_source) {
             $filters->f_source = $src ?: 1;
@@ -497,7 +497,7 @@ class ProductController extends Controller
         } catch (\Exception $ex) {
             return [
                 'status' => 'error',
-                'message' => $ex->message
+                'message' => $ex->getMessage()
             ];
         }
 
@@ -747,6 +747,16 @@ class ProductController extends Controller
         ];
 
         return $this->render('view', [
+                    'model' => $model,
+                    'compare_item' => $compare_item,
+                    'compare_items' => $model->addInfo,
+                    'source' => $source,
+                    'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
+                    'filter-items__profile' => $this->productPresenter->filters->f_profile,
+                    'number_node' => $node,
+                    'is_admin' => $identity && $identity->isAdmin(),
+                    'active_comparison_status' => $active_comparison_status,
+                    'list_comparison_statuses' => Comparison::getStatuses(),
             'model' => $model,
             'compare_item' => $compare_item,
             'compare_items' => $model->addInfo,
