@@ -19,7 +19,8 @@ use yii\helpers\Url;
 use backend\components\TopSlider;
 use common\models\Comparison;
 ?>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/product-index.js"></script>
 <table class="table table-striped [ PRODUCT-LIST ] products__products-list products-list">
     <?php if ($local_import_stat) : ?>
         <tr>
