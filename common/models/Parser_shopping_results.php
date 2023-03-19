@@ -25,19 +25,11 @@ class Parser_shopping_results extends \yii\db\ActiveRecord{
             'label' => 'Sort Field',
             'type' => 'sort',
             'values' => [
-                'ROI' => 'Price',
-                'Margin' => 'Margin'
+                'Price' => [
+                    'label' => 'Price',
+                    'order' => SORT_ASC,
+                ],
             ]
-        ],
-        [
-            'key' => 'Sort Order',
-            'name' => 'f_right_sort_order',
-            'label' => 'Sort Order',
-            'type' => 'sort',
-            'values' => [
-                SORT_DESC => 'по убыванию ↓',
-                SORT_ASC => 'по возрастанию ↑',
-            ],
         ],
     ];
 }

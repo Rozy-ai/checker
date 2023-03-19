@@ -26,19 +26,11 @@ class Parser_google_results extends \yii\db\ActiveRecord
             'label' => 'Sort Field',
             'type' => 'sort',
             'values' => [
-                'ROI' => 'Price',
-                'Margin' => 'Margin'
+                'ROI' => [
+                    'label' => 'Price',
+                    'order' => SORT_ASC,
+                ],
             ]
-        ],
-        [
-            'key' => 'Sort Order',
-            'name' => 'f_right_sort_order',
-            'label' => 'Sort Order',
-            'type' => 'sort',
-            'values' => [
-                SORT_DESC => 'по убыванию ↓',
-                SORT_ASC => 'по возрастанию ↑',
-            ],
         ],
     ];
 }
