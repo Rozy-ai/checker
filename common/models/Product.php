@@ -620,11 +620,11 @@ class Product extends \yii\db\ActiveRecord
     ) {
         $filterValues = $filters->getAdditionalFilterValues();
         $pFilters = $filters->additionalFilters[$filter_type][$json_column ? 'json_column' : 'column'];
-        $sortFilters = array_values(array_filter($pFilters, function ($f) {
-            return $f['type'] === 'sort';
+        $sortFilters = array_values(array_filter($pFilters, function ($f) use ($filterValues) {
+            return $f['type'] === 'sort' && !empty($filterValues[$f['name']]);
         }));
 
-        $list = array_filter($list, function ($p) use ($filters, $json_column, $pFilters, $filterValues) {
+        $list = array_filter($list, function ($p) use ($json_column, $pFilters, $filterValues) {
             $suitable = true;
             $info = $json_column ? json_decode($p['info'], true) : $p;
             foreach ($pFilters as $f) {
@@ -635,20 +635,16 @@ class Product extends \yii\db\ActiveRecord
                 $isRange = $f['range'];
                 $names = !$isRange ? [$f['name']] : [$f['name'] . "_0", $f['name'] . "_1"];
                 $fValues = array_map(fn ($n) => $filterValues[$n], $names);
-                if (empty(array_filter($fValues, fn ($v) => !empty($v)))) {
-                    continue;
-                }
 
                 switch ($f['type']) {
                     case 'number':
-                        if (!$isRange) {
-                            $suitable = (float)$info[$f['key']] >= (float)$fValues[0];
-                        } else {
-                            $suitable = (float)$info[$f['key']] >= (float)$fValues[0] && (float)$info[$f['key']] <= (float)$fValues[1];
+                        $suitable = empty($fValues[0]) || (float)$info[$f['key']] >= (float)$fValues[0];
+                        if ($isRange) {
+                            $suitable = $suitable && (empty($fValues[1]) || (float)$info[$f['key']] <= (float)$fValues[1]);
                         }
                         break;
                     case 'text':
-                        $suitable = str_contains(strtolower($info[$f['key']]), $fValues[0]);
+                        $suitable = empty($fValues[0]) || str_contains(strtolower($info[$f['key']]), $fValues[0]);
                         break;
                 }
                 if (!$suitable) {
@@ -659,16 +655,17 @@ class Product extends \yii\db\ActiveRecord
         });
 
         if (!empty($sortFilters)) {
-            $sortField = $filterValues[$sortFilters[0]['name']];
-            $sortOrder = $filterValues[$sortFilters[1]['name']] ?? SORT_ASC;
-            usort($list, function ($a, $b) use ($sortOrder, $sortField) {
-                $firstValue = is_numeric((float)$a[$sortField]) ? (float)$a[$sortField] : $a[$sortField];
-                $secondValue = is_numeric((float)$b[$sortField]) ? (float)$b[$sortField] : $b[$sortField];
-                if ($sortOrder === SORT_DESC) {
-                    return $secondValue - $firstValue;
-                }
-                return $firstValue - $secondValue;
-            });
+            foreach ($sortFilters as $f) {
+                $key = $filterValues[$f['name']];
+                usort($list, function ($a, $b) use ($f, $key) {
+                    $firstValue = is_numeric((float)$a[$key]) ? (float)$a[$key] : $a[$key];
+                    $secondValue = is_numeric((float)$b[$key]) ? (float)$b[$key] : $b[$key];
+                    if ($f['values'][$key]['order'] === SORT_DESC) {
+                        return $secondValue - $firstValue;
+                    }
+                    return $firstValue - $secondValue;
+                });
+            }
         }
 
         return $list;

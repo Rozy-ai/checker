@@ -80,10 +80,20 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
                                             </div>
                                         <?php } ?>
                                     <?php } else { ?>
+                                        <?php
+                                        $values = [];
+                                        foreach ($lf['values'] as $key => $v) {
+                                            if (!is_array($v)) {
+                                                $values[$key] = $v;
+                                            } else {
+                                                $values[$key] = $v['label'] . " " . ($v['order'] === SORT_DESC ? "↓" : "↑");
+                                            }
+                                        }
+                                        ?>
                                         <?= Html::dropDownList(
                                             $lf['name'],
                                             $additional_filter_values[$lf['name']],
-                                            array_merge([null => 'Выбрать'], $lf['values']),
+                                            array_merge([null => 'Выбрать'], $values),
                                             [
                                                 'class' => 'form-control',
                                                 'id' => $lf['name'] . '_0',
@@ -137,10 +147,20 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
                                             </div>
                                         <?php } ?>
                                     <?php } else { ?>
+                                        <?php
+                                        $values = [];
+                                        foreach ($rf['values'] as $key => $v) {
+                                            if (!is_array($v)) {
+                                                $values[$key] = $v;
+                                            } else {
+                                                $values[$key] = $v['label'] . " " . ($v['order'] === SORT_DESC ? "↓" : "↑");
+                                            }
+                                        }
+                                        ?>
                                         <?= Html::dropDownList(
                                             $rf['name'],
                                             $additional_filter_values[$rf['name']],
-                                            array_merge([null => 'Выбрать'], $rf['values']),
+                                            array_merge([null => 'Выбрать'], $values),
                                             [
                                                 'class' => 'form-control',
                                                 'id' => $rf['name'] . '_0',
