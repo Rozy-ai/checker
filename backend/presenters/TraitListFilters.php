@@ -264,13 +264,13 @@ trait TraitListFilters {
         $filters->setSource($this->source);
 
         $filters->f_profile = 'General';
-        $count_general = Product::getCountProducts($this->source, $filters, $is_admin);
+        $count_general = Product::getProfileProductCount($this->source, $filters, $is_admin);
         if ($count_general) {
             $profiles['General'] = "General ($count_general)";
         }
 
         $filters->f_profile = 'Free';
-        $count_free = Product::getCountProducts($this->source, $filters, $is_admin);
+        $count_free = Product::getProfileProductCount($this->source, $filters, $is_admin);
         if ($count_free) {
             $profiles['Free'] = "Free ($count_free)";
         }

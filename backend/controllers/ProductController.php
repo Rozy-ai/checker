@@ -33,7 +33,6 @@ use common\models\User__favorites;
  */
 class ProductController extends Controller
 {
-
     /** @var IndexPresenter */
     public $indexPresenter;
 
@@ -41,98 +40,6 @@ class ProductController extends Controller
     public $productPresenter;
     public $prev = null;
     public $next = null;
-
-    /** @var Source Модель источника товаров. Устанавливается в beforeAction */
-    //private Source $source;
-
-    /*
-
-      public function behaviors(){
-
-      $rules_3 = [];
-
-
-      $rules_1 = ['allow' => true, 'actions' => ['index','get_products_by_params'], 'roles' => ['@'],];
-
-      $rules_2 = [
-      'allow' => true,
-      'actions' => ['compare', 'view', 'result', 'missall', 'user_visible_fields','reset_compare','del_item','test1','get_products_by_params'],
-      //'roles' => ['compare-products'],
-      'roles' => ['@'],
-      'roleParams' => function(){
-      return ['product' => $this->source_class::findOne(['id' => Yii::$app->request->get('id')])];
-      },
-      ];
-
-      // если у товара есть 1. сообщение с 2. [X]_show_all
-
-      $id = $this->request->get('id');
-      /*
-      $_model = Product::find()
-      ->select('*')
-      ->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = parser_trademarkia_com.id')
-      ->leftJoin('hidden_items','hidden_items.p_id = parser_trademarkia_com.id ')
-      ->limit(1)
-      ->where(['like','info','add_info'])
-      ->andWhere(['id' => $id])
-      ->orderBy('id ASC');
-
-      $item = $_model->one();
-      $add_info = $compare_items = $item->addInfo;
-      //      comparisons.messages_id = messages.id ?? settings__visible_all = 1
-      //      where product_id = $id AND messages.settings__visible_all = 1
-
-      $res = Comparison::can_compare($id,$this->indexService->getSource()->id);   //getSource() возможно null
-
-      //echo '<pre>'.PHP_EOL;
-      //      print_r($res);
-      //echo PHP_EOL;
-      //      exit;
-      if ($res) {
-      $rules_3 = ['allow' => true, 'actions' => ['compare', 'view', 'result', 'missall', 'user_visible_fields','test1','get_arrow'], 'roles' => ['@'],];
-      }
-
-      // после того как новый нажал MATCH MISMATCH OTHER   ( comaprison )
-      // todo удалить comparison других?? или перезаписать на себя?
-
-      return array_merge(parent::behaviors(),
-      [
-      'access' =>
-      [
-      'class' => AccessControl::class,
-      'rules' => [$rules_1, $rules_2, $rules_3]
-      ],
-      //ImportController::className()
-      ]
-      );
-
-      }
-     */
-
-    /**
-      public function behaviors()
-      {
-      return [
-      'access' => [
-      'class' => AccessControl::className(),
-      'only' => ['login', 'logout', 'signup'],
-      'rules' => [
-      [
-      'allow' => true,
-      'actions' => ['login', 'signup'],
-      'roles' => ['?'],
-      ],
-      [
-      'allow' => true,
-      'actions' => ['logout'],
-      'roles' => ['@'],
-      ],
-      ],
-      ],
-      ];
-      }
-     *
-     */
 
     /**
      * @inheritdoc

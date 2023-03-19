@@ -592,6 +592,26 @@ class Product extends \yii\db\ActiveRecord
         return count($list);
     }
 
+    /**
+     * @param Source $source
+     * @param Filters $filters
+     * @param bool $is_admin
+     * @return int
+     */
+    public static function getProfileProductCount(Source $source, Filters $filters, bool $is_admin) {
+        $source_table_name = $source->table_1;
+        $source_table2_name = $source->table_2;
+
+        $q = new FiltersQuery($source->class_1);
+        $q->where([
+            'and',
+            $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
+        ]);
+        $q->addJoins($source_table_name, $source_table2_name);
+        $list = $q->createCommand()->queryAll();
+        return count($list);
+    }
+
     public static function filterProducts(
         array $list,
         Filters $filters,
