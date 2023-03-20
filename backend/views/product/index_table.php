@@ -295,7 +295,8 @@ use common\models\Comparison;
 
                 <div class="actions_for_right-visible-items">
                     <?php if (($f_detail_view == 0 || $f_detail_view == 2) && $f_comparison_status === 'NOCOMPARE') : ?>
-                        <div title="Только видимые" class="[ button-x-2 ] product-list-item__btn-red -change-2" href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"></div>
+                        <div title="Только видимые" class="[ button-x-2 ] js-reset-compare-all-visible-items product-list-item__btn-red -change-2" data-url="/product/missall"
+                             data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>"></div>
 
                         <?php if (0) : ?>
                             <div class="slider__left-item__btn-yellow yellow_button_v1 -change-1"
