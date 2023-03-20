@@ -302,6 +302,10 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
+
+
+        $list = $q->distinct()->all();
+
         $list = $q->distinct()->createCommand()->queryAll();
         $list = self::filterProducts($list, $filters);
 
@@ -599,6 +603,7 @@ class Product extends \yii\db\ActiveRecord
                 return $source->max_free_show_count;
             }
         }*/
+        return $q->distinct()->count();
 
         $list = $q->distinct()->createCommand()->queryAll();
         $list = self::filterProducts($list, $filters);
@@ -667,6 +672,7 @@ class Product extends \yii\db\ActiveRecord
             return $suitable;
         });
 
+
         if (!empty($sortFilters)) {
             foreach ($sortFilters as $f) {
                 $key = $filterValues[$f['name']];
@@ -682,6 +688,7 @@ class Product extends \yii\db\ActiveRecord
         }
 
         return $list;
+
     }
 
     /**
