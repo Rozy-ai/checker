@@ -62,7 +62,7 @@ if ($count_products_all > 200) {
 $is_active_show_all ? $list_count_products_on_page['ALL'] = 'ВСЕ' : '';
 
 $this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
-    . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all .' </div> по: '
+    . count($list) . ' из ' . $count_products_all .' </div> по: '
     . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
 $local_import_stat = null;
 
@@ -333,7 +333,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
             echo '<div>' .
                 '<div class="d-inline-block cnt-items" id="id_block_count">' .
                 'Показано '
-                . min($f_count_products_on_page, $count_products_all) . ' из ' . $count_products_all .' </div> по: '
+                . /**min($f_count_products_on_page, $count_products_all)**/ count($list) . ' из ' . $count_products_all .' </div> по: '
                 . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page_footer', 'class' => 'form-control form-control-sm d-inline-block w-auto']) .
                 '</div>';
             ?>
