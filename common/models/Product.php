@@ -302,9 +302,14 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
+<<<<<<< HEAD
 
         $list = $q->distinct()->all();
 
+=======
+        $list = $q->distinct()->createCommand()->queryAll();
+        $list = self::filterProducts($list, $filters);
+>>>>>>> main
         foreach ($list as $k => $product) {
             // $product->_source = $source;
             // $product->_baseInfo = $product->info;
@@ -599,7 +604,92 @@ class Product extends \yii\db\ActiveRecord
                 return $source->max_free_show_count;
             }
         }*/
+<<<<<<< HEAD
         return $q->distinct()->count();
+=======
+        $list = $q->distinct()->createCommand()->queryAll();
+        $list = self::filterProducts($list, $filters);
+        return count($list);
+    }
+
+    /**
+     * @param Source $source
+     * @param Filters $filters
+     * @param bool $is_admin
+     * @return int
+     */
+    public static function getProfileProductCount(Source $source, Filters $filters, bool $is_admin) {
+        $source_table_name = $source->table_1;
+        $source_table2_name = $source->table_2;
+
+        $q = new FiltersQuery($source->class_1);
+        $q->where([
+            'and',
+            $q->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
+        ]);
+        $q->addJoins($source_table_name, $source_table2_name);
+        $list = $q->createCommand()->queryAll();
+        return count($list);
+    }
+
+    public static function filterProducts(
+        array $list,
+        Filters $filters,
+        string $filter_type = 'left',
+        $json_column = true
+    ) {
+        $filterValues = $filters->getAdditionalFilterValues();
+        $pFilters = $filters->additionalFilters[$filter_type][$json_column ? 'json_column' : 'column'];
+        $sortFilters = array_values(array_filter($pFilters, function ($f) use ($filterValues) {
+            return $f['type'] === 'sort' && !empty($filterValues[$f['name']]);
+        }));
+
+        $list = array_filter($list, function ($p) use ($json_column, $pFilters, $filterValues) {
+            $suitable = true;
+            $info = $json_column ? json_decode($p['info'], true) : $p;
+            foreach ($pFilters as $f) {
+                if ($f['type'] === 'sort') {
+                    continue;
+                }
+
+                $isRange = $f['range'];
+                $names = !$isRange ? [$f['name']] : [$f['name'] . "_0", $f['name'] . "_1"];
+                $fValues = array_map(fn ($n) => $filterValues[$n], $names);
+
+                switch ($f['type']) {
+                    case 'number':
+                        $suitable = empty($fValues[0]) || (float)$info[$f['key']] >= (float)$fValues[0];
+                        if ($isRange) {
+                            $suitable = $suitable && (empty($fValues[1]) || (float)$info[$f['key']] <= (float)$fValues[1]);
+                        }
+                        break;
+                    case 'text':
+                        $suitable = empty($fValues[0]) || str_contains(strtolower($info[$f['key']]), $fValues[0]);
+                        break;
+                }
+                if (!$suitable) {
+                    break;
+                }
+            }
+            return $suitable;
+        });
+
+        if (!empty($sortFilters)) {
+            foreach ($sortFilters as $f) {
+                $key = $filterValues[$f['name']];
+                usort($list, function ($a, $b) use ($f, $key) {
+                    $firstValue = is_numeric((float)$a[$key]) ? (float)$a[$key] : $a[$key];
+                    $secondValue = is_numeric((float)$b[$key]) ? (float)$b[$key] : $b[$key];
+                    if ($f['values'][$key]['order'] === SORT_DESC) {
+                        return $secondValue - $firstValue;
+                    }
+                    return $firstValue - $secondValue;
+                });
+            }
+        }
+
+        return $list;
+>>>>>>> main
     }
 
     /**

@@ -21,6 +21,7 @@ use common\models\Source;
 use common\models\User;
 use common\models\Comparison;
 use common\models\FiltersQuery;
+use common\models\Stats_import_export;
 
 /**
  * Description of TraitListOfFilters
@@ -156,7 +157,7 @@ trait TraitListFilters {
      *    ]
      * @throws \yii\base\InvalidArgumentException
      */
-    public function getListComparisonStatuses(bool $is_admin, $f_profile){
+    public function getListComparisonStatuses(bool $is_admin, $f_profile, Filters $filters, Source $source, array $favorites = []) {
         //return Comparison::getFilterStatuses();
         
         if (!$this->source_table_class || !$this->source_table_name || !$this->source_table2_name) {
@@ -165,8 +166,22 @@ trait TraitListFilters {
                 
         $q = new FiltersQuery($this->source_table_class);
         
-        $q->select(['comparisons.status', 'COUNT(*) as count_statuses'])
-          ->andWhere($q->getSqlProfile($is_admin, $this->source_table_name, $f_profile))
+        $q->select(['comparisons.status', 'COUNT(DISTINCT id) as count_statuses'])
+          ->andWhere([
+            'and',
+            $q->getSqlProfile($is_admin, $this->source_table_name, $f_profile),
+            $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
+            $q->getSqlAsin($this->source_table_name, $filters->f_asin, $filters->f_asin_multiple),
+            $q->getSqlCategoriesRoot($this->source_table_name, $filters->f_categories_root),
+            $q->getSqlTille($this->source_table_name, $filters->f_title),
+            $q->getSqlStatus($filters->f_status),
+            $q->getSqlUsername($this->source_table_name, $filters->f_username),
+            $q->getSqlComparisonStatus($filters->f_comparison_status),
+            $q->getSqlProfile($is_admin, $this->source_table_name, $filters->f_profile),
+            $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport($filters->f_source)),
+            $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
+            $q->getSqlAdditionalFilters($filters),
+            ])
           ->groupBy('comparisons.status')
           ->asArray();
         
@@ -264,13 +279,13 @@ trait TraitListFilters {
         $filters->setSource($this->source);
 
         $filters->f_profile = 'General';
-        $count_general = Product::getCountProducts($this->source, $filters, $is_admin);
+        $count_general = Product::getProfileProductCount($this->source, $filters, $is_admin);
         if ($count_general) {
             $profiles['General'] = "General ($count_general)";
         }
 
         $filters->f_profile = 'Free';
-        $count_free = Product::getCountProducts($this->source, $filters, $is_admin);
+        $count_free = Product::getProfileProductCount($this->source, $filters, $is_admin);
         if ($count_free) {
             $profiles['Free'] = "Free ($count_free)";
         }

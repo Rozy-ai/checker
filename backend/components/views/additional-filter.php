@@ -50,33 +50,56 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
                             <div class="col col-auto mb-2">
                                 <?= Html::label($lf['label'], $id . '_0'); ?>
                                 <div class="d-flex">
-                                    <div class="col col-auto mr-2 pl-0 pr-0">
-                                        <?= Html::input(
-                                            $lf['type'],
-                                            $lf['name'] . ($isRange ? '_0' : ''),
-                                            $additional_filter_values[$lf['name'] . ($isRange ? '_0' : '')] ?: "",
-                                            [
-                                                'class' => 'form-control',
-                                                'id' => $id . '_0',
-                                                'placeholder' => $lf['type'] === 'number' ? 'от' : '',
-                                                'style' => 'max-width: ' . ($lf['type'] === 'number' ? '80px;' : '150px;'),
-                                            ]
-                                        ) ?>
-                                    </div>
-                                    <?php if ($lf['range']) { ?>
-                                        <div class="col col-auto pl-0 pr-0">
+                                    <?php if ($lf['type'] !== 'sort' && empty($lf['values'])) { ?>
+                                        <div class="col col-auto mr-2 pl-0 pr-0">
                                             <?= Html::input(
                                                 $lf['type'],
-                                                $lf['name'] . ($isRange ? '_1' : ''),
-                                                $additional_filter_values[$lf['name'] . ($isRange ? '_1' : '')] ?: "",
+                                                $lf['name'] . ($isRange ? '_0' : ''),
+                                                $additional_filter_values[$lf['name'] . ($isRange ? '_0' : '')] ?: "",
                                                 [
                                                     'class' => 'form-control',
-                                                    'id' => $id . '_1',
-                                                    'placeholder' => $lf['type'] === 'number' ? 'до' : '',
+                                                    'id' => $id . '_0',
+                                                    'placeholder' => $lf['type'] === 'number' ? 'от' : '',
                                                     'style' => 'max-width: ' . ($lf['type'] === 'number' ? '80px;' : '150px;'),
                                                 ]
                                             ) ?>
                                         </div>
+                                        <?php if ($lf['range']) { ?>
+                                            <div class="col col-auto pl-0 pr-0">
+                                                <?= Html::input(
+                                                    $lf['type'],
+                                                    $lf['name'] . ($isRange ? '_1' : ''),
+                                                    $additional_filter_values[$lf['name'] . ($isRange ? '_1' : '')] ?: "",
+                                                    [
+                                                        'class' => 'form-control',
+                                                        'id' => $id . '_1',
+                                                        'placeholder' => $lf['type'] === 'number' ? 'до' : '',
+                                                        'style' => 'max-width: ' . ($lf['type'] === 'number' ? '80px;' : '150px;'),
+                                                    ]
+                                                ) ?>
+                                            </div>
+                                        <?php } ?>
+                                    <?php } else { ?>
+                                        <?php
+                                        $values = [];
+                                        foreach ($lf['values'] as $key => $v) {
+                                            if (!is_array($v)) {
+                                                $values[$key] = $v;
+                                            } else {
+                                                $values[$key] = $v['label'] . " " . ($v['order'] === SORT_DESC ? "↓" : "↑");
+                                            }
+                                        }
+                                        ?>
+                                        <?= Html::dropDownList(
+                                            $lf['name'],
+                                            $additional_filter_values[$lf['name']],
+                                            array_merge([null => 'Выбрать'], $values),
+                                            [
+                                                'class' => 'form-control',
+                                                'id' => $lf['name'] . '_0',
+                                                'style' => 'max-width: 150px;',
+                                            ]
+                                        ); ?>
                                     <?php } ?>
                                 </div>
                             </div>
@@ -94,7 +117,7 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
                             <div class="col col-auto mb-2">
                                 <?= Html::label($rf['label'], $id . '_0'); ?>
                                 <div class="d-flex">
-                                    <?php if ($rf['type'] !== 'sort') { ?>
+                                    <?php if ($rf['type'] !== 'sort' && empty($rf['values'])) { ?>
                                         <div class="col col-auto mr-2 pl-0 pr-0">
                                             <?= Html::input(
                                                 $rf['type'],
@@ -124,10 +147,20 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
                                             </div>
                                         <?php } ?>
                                     <?php } else { ?>
+                                        <?php
+                                        $values = [];
+                                        foreach ($rf['values'] as $key => $v) {
+                                            if (!is_array($v)) {
+                                                $values[$key] = $v;
+                                            } else {
+                                                $values[$key] = $v['label'] . " " . ($v['order'] === SORT_DESC ? "↓" : "↑");
+                                            }
+                                        }
+                                        ?>
                                         <?= Html::dropDownList(
                                             $rf['name'],
                                             $additional_filter_values[$rf['name']],
-                                            array_merge([null => 'Выбрать'], $rf['values']),
+                                            array_merge([null => 'Выбрать'], $values),
                                             [
                                                 'class' => 'form-control',
                                                 'id' => $rf['name'] . '_0',

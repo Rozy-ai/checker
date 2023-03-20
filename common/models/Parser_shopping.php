@@ -58,9 +58,21 @@ class Parser_shopping extends Product
       'json_column' => 'info',
     ],
     [
+      'key' => 'Brand_R',
+      'name' => 'f_brand_r',
+      'label' => 'Brand_R',
+      'type' => 'text',
+      'range' => false,
+      'json_column' => 'info',
+      'values' => [
+        'available' => 'available',
+        'brand' => 'brand',
+      ]
+    ],
+    [
       'key' => 'Brand',
       'name' => 'f_brand',
-      'label' => 'Brand_R',
+      'label' => 'Brand',
       'type' => 'text',
       'range' => false,
       'json_column' => 'info',
