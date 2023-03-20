@@ -681,7 +681,6 @@ class Product extends \yii\db\ActiveRecord
         }
 
         return $list;
->>>>>>> main
     }
 
     /**
