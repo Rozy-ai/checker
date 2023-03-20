@@ -35,28 +35,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'options' => [ 'class' => 'cnt']
       ],
       [
-        'attribute' => 'stat',
-        'value' => 'stat',
-        'options' => [ 'class' => 'stat']
-      ],        
-      [
-        'attribute' => 'cnt_records',
-        'value' => 'cnt_records',
-        'options' => [ 'class' => 'cnt_records'],
-        'visible' => false  
-      ],        
-      [
-        'attribute' => 'cnt_products',
-        'value' => 'cnt_products',
-        'options' => [ 'class' => 'cnt_products'],
-        'visible' => false  
-      ],
-      [
-        'attribute' => 'cnt_products_right',
-        'value' => 'cnt_products_right',
-        'options' => [ 'class' => 'cnt_products_right'],
-        'visible' => false  
-      ],        
+        'attribute' => 'raw',
+        'value' => 'raw',
+        'options' => [ 'class' => 'raw']
+      ],          
       [
         'attribute' => 'source_id',
         'format' => 'raw',
