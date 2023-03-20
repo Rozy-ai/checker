@@ -146,19 +146,20 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'created', 'file_name',
                     [
+                      'label' => 'Товаров',
                       'attribute' => 'raw',
                       'value' => 'raw',
-                      'options' => [ 'class' => 'cnt'],
+                      'options' => [ 'class' => 'cnt text-center'],
                       'format' => 'raw',
                       'value' => function($model)                      
                             {   $raw = json_decode($model->raw);
-                                return Html::tag('a', ( $raw->cnt_product ? '/' : 'нет' ).$raw->cnt_product_right, [ 
+                                return Html::tag('a', $raw->added_product.'/'.$raw->added_product_right, [ 
                                     'data-toggle'=>'popover',
                                     'data-trigger' => 'click hover',
                                     'data-html' => 'true',    // allow html tags
                                     'data-title'=> 'Import: Result ('.Source::get_source($model->source_id)['source_name'].')',
                                     'data-content'=>$this->render('/import/result_statistics', 
-                                    [ //'stat' => $model->stat, 
+                                    [ 'stat' => $model->raw, 
                                       'source' => Source::get_source($model->source_id),
                                       'is_hint' => true,  
                                     ]).'</div>',

@@ -125,7 +125,9 @@ class StatsController extends Controller {
                     "Дубликатов по Asin: {$stat_data['asin_duplicate']}\n" .
                     "Проигнорировано: {$stat_data['ignored']}\n" .
                     "Заменено: {$stat_data['replaced']}\n" .
-                    "Добавлено новых: {$stat_data['added']}";
+                    "Добавлено новых: {$stat_data['added']}\n".
+                    "Добавлено товаров левых: {$stat_data['added_product']}\n".
+                    "Добавлено товаров правых: {$stat_data['added_product_left']}\n";
         } else {
             $last_local_import_txt = "Количество обновленных: {$last_import['cnt']}\n";
         }

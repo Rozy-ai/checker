@@ -108,7 +108,7 @@ class ImportController extends \yii\web\Controller
     if ((int)$v == 2) {
       $out['user'] = Yii::$app->getComponents()['db']['username'];
       $out['password'] = Yii::$app->getComponents()['db']['password'];
-      $out['dbname'] = 'checker_import';
+      $out['dbname'] = \Yii::$app->params['dbname'];
     }
 
     return $out;
@@ -124,8 +124,9 @@ class ImportController extends \yii\web\Controller
       $dsn = "mysql:host={$params['host']};dbname={$params['dbname']}";
 
       try {
-        $db = new PDO($dsn, $params['user'], $params['password']);
+        $db = new PDO($dsn, $params['user'], $params['password'] );
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
         $db->exec("SET CHARSET utf8");
 
         //$db->exec("set names utf-8");
@@ -154,7 +155,9 @@ class ImportController extends \yii\web\Controller
       try {
         $db2 = new PDO($dsn, $params['user'], $params['password']);
         $db2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $db2->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
         $db2->exec("SET CHARSET utf8");
+        
 
         //$db->exec("set names utf-8");
 
@@ -210,10 +213,23 @@ class ImportController extends \yii\web\Controller
     } else {
       // загружаем sql фаил в папку tmp
       $f = UploadedFile::getInstanceByName('DynamicModel[load_file]');
-      $path = __DIR__ . '/tmp/';
+      
+      if (is_dir('/tmp/')) {
+        $path = '/tmp/';
+      } else {
+        $path = __DIR__ . '/../tmp/';  
+      }
+      
       if (!is_dir($path)) {
         $res_mkdir = mkdir($path, 0777, true);
+        if (!$res_mkdir) {
+            echo '<pre>' . PHP_EOL;
+            print_r('не указан $source_id');
+            echo PHP_EOL;
+            exit;
+        }
       }
+      
       $path_file = $path . strtolower($source['source_name']) . '.' . $f->extension;
       $f->saveAs($path_file);
     }
@@ -310,7 +326,7 @@ class ImportController extends \yii\web\Controller
     // импортируем из checker_import в основную базу данных checker в зависимости от условия $q_1
 
     // todo :: удаляем фаил из временной папки
-    $stat = $this->import_from_tmp_db($source, $q_1);
+    $stat = $this->import_from_tmp_db($source, $q_1,time());
 
 
 
@@ -444,9 +460,14 @@ class ImportController extends \yii\web\Controller
       }
     }
 
-    if ($stmt->execute() && $type === 'select') {
-      return $stmt->fetchAll(2);
-    }
+    if ($stmt->execute()) {
+      if ( $type === 'select' )  {
+       $result = $stmt->fetchAll(2);       
+        return $result;
+      } else if ( $type === 'insert') {     
+        return $stmt->rowCount();         
+      }
+    } 
     return [];
 
     /*
@@ -479,7 +500,7 @@ class ImportController extends \yii\web\Controller
     // $res = $this->sql_cmd($sql,'query',[':asin' => $asin]);
     $db = self::getConnection_2();
     //$sql = $file;
-    if ($type === 'exec') {
+    /*if ($type === 'exec') {
 
       try {
         $db->beginTransaction();
@@ -489,7 +510,7 @@ class ImportController extends \yii\web\Controller
       }
 
       return [];
-    }
+    }*/
     $stmt = $db->prepare($sql);
 
     if ($bind_array) {
@@ -498,10 +519,13 @@ class ImportController extends \yii\web\Controller
       }
     }
 
-    if ($stmt->execute() && $type === 'select') {
-      return $stmt->fetchAll(2);
+    if ($stmt->execute()) {
+      if ( $type === 'select') {
+         return $stmt->fetchAll(2);
+      } else if ( $type === 'insert') {
+         return $stmt->rowCount();          
+      }
     }
-
     return [];
   }
 
@@ -524,7 +548,9 @@ class ImportController extends \yii\web\Controller
     $stat['ignored'] = 0;
     $stat['added'] = 0;
     $stat['p_with_right_p'] = 0;
-
+    $stat['added_product'] = 0;
+    $stat['added_product_right'] = 0;
+    
     $source_id = $source['source_id'];
 
     $tbl_1 = $source['source_table_name'];
@@ -635,7 +661,11 @@ class ImportController extends \yii\web\Controller
                           FROM $this->db_import_name.$tbl_2
                           WHERE $this->db_import_name.$tbl_2.asin = :asin;";
 
-          $res = $this->sql_cmd($sql_copy, [':asin' => $asin]);
+          $res = $this->sql_cmd($sql_copy, [':asin' => $asin],'insert');
+          
+          // Добавляем в статистику кол-во правых товаров
+          $stat['added_product_right']+=$res;
+          
           $this->sql_cmd(
             "UPDATE checker.$tbl_2 SET parse_at = '" . date('Y-m-d H:i:s', $import_timestamp) . "' WHERE checker.$tbl_2.asin = :asin",
             [':asin' => $asin],
@@ -644,9 +674,7 @@ class ImportController extends \yii\web\Controller
           //$command->bindValue(':asin', $asin);
           //$res = $command->execute();
 
-          if ($this->has_p_with_right_p($tbl_2, $asin)) $stat['p_with_right_p'] += 1;
-          /* Кол-во добавленных правых товаров */
-          $stat['cnt_product']+=$res; 
+          if ($this->has_p_with_right_p($tbl_2, $asin)) $stat['p_with_right_p'] += 1;    
         }
 
         $stat['replaced'] += 1;
@@ -701,10 +729,10 @@ class ImportController extends \yii\web\Controller
           [':asin' => $asin],
         );
         //$res_insert = $this->sql_cmd($sql_insert);
-        $res_insert = $this->sql_cmd($sql_insert, [':asin' => $asin]);
+        $res_insert = $this->sql_cmd($sql_insert, [':asin' => $asin],'insert');
         
         /* Кол-во добавленных левых товаров */
-        $stat['cnt_product_left']+=$res_insert;
+        $stat['added_product']+=$res_insert;
         
         //          echo '<pre>'.PHP_EOL;
         //          print_r($sql_insert);
@@ -720,13 +748,13 @@ class ImportController extends \yii\web\Controller
                           FROM $this->db_import_name.$tbl_2
                           WHERE $this->db_import_name.$tbl_2.asin = :asin
                           ;";
-          $res = $this->sql_cmd($sql_copy, [':asin' => $asin]);
+          $res = $this->sql_cmd($sql_copy, [':asin' => $asin],'insert');
           $this->sql_cmd(
             "UPDATE checker.$tbl_2 SET parse_at = '" . date('Y-m-d H:i:s', $import_timestamp) . "' WHERE checker.$tbl_2.asin = :asin",
             [':asin' => $asin],
           );
           
-          $stat['cnt_product']+=$res;
+          $stat['added_product_right']+=$res;
           //$command = $connection->createCommand($sql_copy);
           // $command->bindValue(':asin', $asin);
           // $res = $command->execute();

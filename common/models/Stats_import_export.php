@@ -14,11 +14,34 @@ class Stats_import_export extends \yii\db\ActiveRecord
         return '{{%stats__import_export}}';
     }
 
-    public static function getLastLocalImport($source_id = 1){
-        return self::find()
-            ->where(['type' => 'IMPORT', 'source_id' => $source_id])
-            ->orderBy(['created' => SORT_DESC])
-            ->limit(1)
-            ->one();       
+    /**
+     * Get last Import
+     * @param type $source_id
+     * @param type $file_name
+     * @return type
+     */
+    public static function getLastImport($source_id = 1, $file_name = 'LOCAL_IMPORT'){
+        $query = self::find();
+        $query->where(['type' => 'IMPORT', 'source_id' => $source_id]);
+        
+        if ( $file_name <> 'LOCAL_IMPORT') {    
+            $query->andWhere(['AND',['<>','file_name', 'LOCAL_IMPORT']]);    
+        } else {
+            $query->andWhere(['AND',['file_name'=>'LOCAL_IMPORT']]);  
+        }       
+        
+        $result = $query->orderBy(['created' => SORT_DESC])
+                        ->limit(1)
+                        ->one();       
+        return $result;
+    }
+    
+    public static function getLastOtherImport($source_id=1){
+        return self::getLastImport($source_id);
+    }
+    
+        
+    public static function getLastLocalImport($source_id=1){
+        return self::getLastImport($source_id,'LOCAL_IMPORT');
     }
 }
