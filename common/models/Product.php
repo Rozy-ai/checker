@@ -302,14 +302,9 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
-<<<<<<< HEAD
-
-        $list = $q->distinct()->all();
-
-=======
         $list = $q->distinct()->createCommand()->queryAll();
         $list = self::filterProducts($list, $filters);
->>>>>>> main
+
         foreach ($list as $k => $product) {
             // $product->_source = $source;
             // $product->_baseInfo = $product->info;
