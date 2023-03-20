@@ -90,7 +90,7 @@ ProductIndexAsset::register($this);
                     $profile_path = 'Все';
                 ?>
                 <div class="cnt-items col-sm-6" id="id_block_count">Показаны
-                    записи <?= min($f_count_products_on_page, $count_products_all) ?> из <?= $count_products_all; ?>
+                    записи <?= count($list) ?> из <?= $count_products_all; ?>
                     (<?= $count_products_right ?>) Источник <?= $source->name ?> / <?= $profile_path ?></div>
 
                 <div class="cnt-items col-sm-6" style="    text-align: right; padding-right: 0;">

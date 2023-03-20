@@ -207,7 +207,8 @@ class ProductsController extends Controller
         $source_name = $source->name;
         $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}') ? $filters->f_profile : 'Все';
 
-        $html_block_count = "Показаны записи $f_count_products_on_page из $count_products_all ($count_products_right) Источник $source_name / $profile_path";
+        $count_products = count($list);
+        $html_block_count = "Показаны записи $count_products из $count_products_all ($count_products_right) Источник $source_name / $profile_path";
         $html_paginator = $this->indexPresenter->getHTMLPaginator($filters->f_number_page_current, $count_pages);
 
         return [

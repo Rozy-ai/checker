@@ -303,7 +303,11 @@ class Product extends \yii\db\ActiveRecord
         }
 
 
+
         $list = $q->distinct()->all();
+
+        $list = $q->distinct()->createCommand()->queryAll();
+        $list = self::filterProducts($list, $filters);
 
         foreach ($list as $k => $product) {
             // $product->_source = $source;
@@ -599,7 +603,8 @@ class Product extends \yii\db\ActiveRecord
                 return $source->max_free_show_count;
             }
         }*/
-        
+        return $q->distinct()->count();
+
         $list = $q->distinct()->createCommand()->queryAll();
         $list = self::filterProducts($list, $filters);
         return count($list);
@@ -682,6 +687,11 @@ class Product extends \yii\db\ActiveRecord
         }
 
         return $list;
+<<<<<<< HEAD
+
+=======
+
+>>>>>>> origin/main
     }
 
     /**
