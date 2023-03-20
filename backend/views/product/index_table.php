@@ -276,9 +276,9 @@ use common\models\Comparison;
                     <div class="tbl" style="width: 100%;">
                         <div class="td">
 
-                            <div class="product-list-item__del js-del-item" data-url="/product/delete-product" data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>">
+                            <button class="product-list-item__del js-del-item" data-url="/product/delete-product" data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>">
                                 Удалить
-                            </div>
+                            </button>
 
                         </div>
                         <div class="td">
