@@ -135,7 +135,11 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                 <?php endif; ?>
 
                 <div class="form-group _col-sm-2 filter-items__last-update">
-                    last <?php echo Html::a('update', '/import/local_import?source_id=' . $f_source, ['title' => $last_local_import_txt]) ?>:
+                    last <?php echo Html::tag('a','update',
+                            ['data-url'=>'/import/local_import?source_id='.$f_source, 
+                             'href'=>'#',   
+                             'class' => 'js-update',   
+                             'title' => $last_local_import_txt]); ?>:
                     <?= $last_update->created ?? 'Нет данных' ?>
                 </div>
 

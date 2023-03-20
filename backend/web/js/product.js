@@ -1267,7 +1267,7 @@ $(function(){
     });
     
   })
-
+  
   $body.on('click','.js-compare',function(){
     let $data = $(this).data();
 

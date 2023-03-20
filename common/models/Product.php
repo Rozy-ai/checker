@@ -672,6 +672,7 @@ class Product extends \yii\db\ActiveRecord
             return $suitable;
         });
 
+
         if (!empty($sortFilters)) {
             foreach ($sortFilters as $f) {
                 $key = $filterValues[$f['name']];

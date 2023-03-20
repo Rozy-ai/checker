@@ -10,6 +10,7 @@ use common\models\Comparison;
 use common\models\HiddenItems;
 use common\models\Product;
 use common\models\Stats_import_export;
+use backend\controllers\StatsController;
 use PDO;
 use PDOException;
 use phpDocumentor\Reflection\Types\Null_;
@@ -125,17 +126,22 @@ class ImportController extends \yii\web\Controller
 
       try {
         $db = new PDO($dsn, $params['user'], $params['password'] );
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
-        $db->exec("SET CHARSET utf8");
-
+        //$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        //$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        //$db->exec("SET CHARSET utf8");
         //$db->exec("set names utf-8");
 
-      } catch (PDOException $e) {
-        echo '<pre>' . PHP_EOL;
-        print_r('Подключение не удалось: ' . $e->getMessage());
-        echo PHP_EOL;
-        exit;
+      } catch ( PDOException $e) {
+        if ($isAjax) {            
+            $data = array('error'=>true, 'message' => 'Подключение к источнику данных не удалось: ' . $e->getMessage());             
+            echo json_encode($data);
+            die();     
+        } else {  
+            echo '<pre>' . PHP_EOL;
+            print_r('Подключение не удалось: ' . $e->getMessage());
+            echo PHP_EOL;
+            exit;
+        }    
       }
 
       self::$db = $db;
@@ -376,15 +382,24 @@ class ImportController extends \yii\web\Controller
   public function actionLocal_import($source_id = null, $p_date_in_parser = null)
   {
     $stop = 0;
-    if (empty($source_id)) {
-      $source_id = $this->request->get('source_id', false);
-
+    $isAjax = $this->request->isAjax ;
+    
+    if ( empty($source_id) ) {
+        
+      $source_id = $this->request->get('source_id', false);                        
       $stop = 1;
-      if (!$source_id) {
-        echo '<pre>' . PHP_EOL;
-        print_r('не указан $source_id');
-        echo PHP_EOL;
-        exit;
+      
+      if (!$source_id) {                
+          if ($isAjax) {
+             $data = array('error'=>true, 'message' => 'Не указан ид.источника ($source_id)');             
+             echo json_encode($data);
+             die();     
+          } else {
+             echo '<pre>' . PHP_EOL;
+             print_r('не указан $source_id');
+             echo PHP_EOL;
+             exit;       
+          }   
       }
     }
 
@@ -400,31 +415,45 @@ class ImportController extends \yii\web\Controller
     self::save_stat('LOCAL_IMPORT', $stat['all'], $source_id, $stat, $created_timestamp);
 
     $source_bo = Source::findOne(['id' => (int)$source_id]);
+    
     if ($p_date_in_parser) {
-      $source_bo->import_local__max_product_date = $p_date_in_parser;
-      $source_bo->update();
-    } else {
-      $max_date = ImportController::get_max_product_date_in_parser(Source::findOne(['id' => (int)$source_id]));
-      if ($source_bo->import_local__max_product_date !== $max_date) {
-        $source_bo->import_local__max_product_date = $max_date;
+        $source_bo->import_local__max_product_date = $p_date_in_parser;
         $source_bo->update();
-      }
-    }
-
+    } else {
+        $max_date = ImportController::get_max_product_date_in_parser(Source::findOne(['id' => (int)$source_id]));
+        if ($source_bo->import_local__max_product_date !== $max_date) {
+            $source_bo->import_local__max_product_date = $max_date;
+            $source_bo->update();
+        }
+    }       
+    
     if ($stop === 1) {
-      echo '<pre>' . PHP_EOL;
-      print_r('Готово');
-      echo PHP_EOL;
-      print_r($stat);
-      echo PHP_EOL;
-      exit;
+        if ($isAjax) {
+            $data = array('error'=>true, 'message' => $message);             
+            echo json_encode($data);
+            die();            
+        }else{    
+            echo $message;
+            echo '<pre>' . PHP_EOL;
+            print_r('Готово');
+            echo PHP_EOL;
+            print_r($stat);
+            echo PHP_EOL;
+            exit;
+        }         
+    }        
+            
+    if ($isAjax) {   
+        $data = array('error'=>false, 'message' => StatsController::getStatsLastLocalImportMessage());             
+        echo json_encode($data);
+        die();     
+    } else {
+        return $this->render('result_statistics', [
+          'stat' => $stat,
+          'source_id' => $source_id,
+          'source' => $source,                      
+        ]);
     }
-
-    return $this->render('result_statistics', [
-      'stat' => $stat,
-      'source_id' => $source_id,
-      'source' => $source,
-    ]);
   }
 
 
