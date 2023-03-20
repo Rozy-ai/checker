@@ -604,9 +604,7 @@ class Product extends \yii\db\ActiveRecord
                 return $source->max_free_show_count;
             }
         }*/
-<<<<<<< HEAD
-        return $q->distinct()->count();
-=======
+        
         $list = $q->distinct()->createCommand()->queryAll();
         $list = self::filterProducts($list, $filters);
         return count($list);
