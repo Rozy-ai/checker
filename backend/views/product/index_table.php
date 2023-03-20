@@ -282,9 +282,9 @@ use common\models\Comparison;
 
                         </div>
                         <div class="td">
-                            <div class="js-reset-compare product-list-item__reset-compare -margin" data-url="/product/reset-compare" data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>">
+                            <button class="js-reset-compare product-list-item__reset-compare -margin" data-url="/product/reset-compare" data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>">
                                 Отменить
-                            </div>
+                            </button>
 
                         </div>
 
@@ -298,7 +298,11 @@ use common\models\Comparison;
                         <div title="Только видимые" class="[ button-x-2 ] product-list-item__btn-red -change-2" href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"></div>
 
                         <?php if (0) : ?>
-                            <div class="slider__left-item__btn-yellow yellow_button_v1 -change-1" href="/product/missall?id=<?= $item->id ?>&source_id=<?= $source_id ?>&return=1"></div>
+                            <div class="slider__left-item__btn-yellow yellow_button_v1 -change-1"
+
+                                 data-url="/product/missall"
+                                 data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>"
+                            ></div>
                         <?php endif; ?>
                     <?php endif; ?>
                 </div>
