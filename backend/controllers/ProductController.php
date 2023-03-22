@@ -118,9 +118,7 @@ class ProductController extends Controller
         } else {
             $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
         }
-        if($filters->f_profile == 'Free') {
-            $filters->f_detail_view = 1; // Подробно
-        }
+
 
         if (!$is_admin) {
             switch ($compare_status) {
