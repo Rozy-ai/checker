@@ -279,6 +279,7 @@ class ProductController extends Controller
     public function actionResetCompare() {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
+
         if (\Yii::$app->request->isGet) {
             $params = \Yii::$app->request->get();
         } elseif (\Yii::$app->request->isPost) {
@@ -304,21 +305,12 @@ class ProductController extends Controller
             ];
         }
 
-        $filters = new Filters();
-        $filters->loadFromSession();
-        $source = Source::getById($filters->f_source);
-        $filters->setSource($source);
-        if (!$filters->isExistsDefaultParams()) {
-            return [
-                'status' => 'error',
-                'message' => 'В сесии не хватает данных'
-            ];
-        }
 
-        $user = \Yii::$app->user->identity;
-        $is_admin = $user && $user->isAdmin();
 
-        return $this->getRequestWithUpdateList($source, $filters, $is_admin);
+        return [
+            'status' => 'ok',
+        ];
+     //   return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
 
     /**

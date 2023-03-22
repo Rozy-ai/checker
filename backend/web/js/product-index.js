@@ -117,9 +117,9 @@ $(document).ready(function () {
         });
 
         console.log('reload');
-        if ($('#filter-items__comparisons').val() !== 'ALL') {
+        //if ($('#filter-items__comparisons').val() !== 'ALL') {
             window.location.reload();
-        }
+     //  }
     });
 
     /**

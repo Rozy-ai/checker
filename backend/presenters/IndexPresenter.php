@@ -7,6 +7,7 @@
 
 namespace backend\presenters;
 
+use backend\models\P_all_compare;
 use common\models\Session;
 use common\models\Filters;
 use common\models\Stats_import_export;
@@ -243,6 +244,7 @@ class IndexPresenter {
         try {
             Comparison::deleteAll(['product_id' => $id_product, 'source_id' => $id_source]);
             HiddenItems::deleteAll(['p_id' => $id_product, 'source_id' => $id_source]);
+            P_all_compare::deleteAll(['p_id' => $id_product,'source_id' => $id_source]);
             $transaction->commit();
         } catch (\Exception $ex) {
             $transaction->rollback();

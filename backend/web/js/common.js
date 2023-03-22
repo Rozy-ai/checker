@@ -518,7 +518,7 @@ lib.inputHandler = function (wrapper, selector, callback, options) {
     $(wrapper).on('keyup', selector, processing); //keydown
 };
 
-/*
+
 lib.change_statistics_cnt = function ($item, action) {
     let $root = $item.parents('.product-list__product-list-item');
     if (!$root.length) {
@@ -606,7 +606,7 @@ lib.change_statistics_cnt = function ($item, action) {
         processed_block.text((parseInt(a_nn[0]) + 1) + '/' + a_nn[1])
     }
 }
-*/
+
 
 lib.slider_refresh = function slider_refresh(selector) {
     let _selector = selector || '._sliderTop';
@@ -670,7 +670,104 @@ lib.reset_compare_item = function ($this) {
     });
 };
 */
+
+
+lib.reset_compare_item = function($this){
+    let p_id = $this.data('id_product');
+    let source_id = $this.data('id_source');
+    alert(source_id)
+    //let $item = $this.parents('.product-list__product-list-item');
+
+    let $item = $this.parents('.product-list__product-list-item');
+    if (!$item.length){
+        $item = $this.parents('.product-page');
+    }
+
+    let $compare_items = $item.find('.slider__slider-item');
+    let $color_markers = $item.find('.color-marker');
+
+    $compare_items.find('.color-marker')
+        .removeClass('pre_match')
+        .removeClass('match')
+        .removeClass('nocompare')
+        .removeClass('other')
+        .removeClass('mismatch')
+        .addClass('nocompare');
+    $compare_items.find('.slider__yellow_button').removeClass('-hover');
+    $compare_items.find('.slider__red_button').removeClass('-hover');
+
+    lib.change_statistics_cnt($this,'reset');
+
+    if (!p_id) return false;
+
+    $.ajax({
+        url: '/product/reset-compare?id_product='+ p_id + '&id_source=' + source_id,
+        type: "get",
+        beforeSend: function() {},
+        dataType: "json",
+        success: function(response){
+            alert("ok")
+        },
+        error: function (jqXHR, exception) {
+            if (jqXHR.status === 0) {
+                alert('Not connect. Verify Network.');
+            } else if (jqXHR.status === 404) {
+                alert('Requested page not found (404).');
+            } else if (jqXHR.status === 500) {
+                alert('Internal Server Error (500).');
+            } else if (exception === 'parsererror') {
+                alert('Requested JSON parse failed.');
+            } else if (exception === 'timeout') {
+                alert('Time out error.');
+            } else if (exception === 'abort') {
+                alert('Ajax request aborted.');
+            } else {
+                alert('Uncaught Error. ' + jqXHR.responseText);
+            }
+        }
+    });
+    alert("what")
+}
+
 /*
+
+
+  let p_id = $this.data('p_id');
+  let source_id = $this.data('source_id');
+  //let $item = $this.parents('.product-list__product-list-item');
+
+  let $item = $this.parents('.product-list__product-list-item');
+  if (!$item.length){
+    $item = $this.parents('.product-page');
+  }
+
+  let $compare_items = $item.find('.slider__slider-item');
+  let $color_markers = $item.find('.color-marker');
+
+  $compare_items.find('.color-marker')
+                .removeClass('pre_match')
+                .removeClass('match')
+                .removeClass('nocompare')
+                .removeClass('other')
+                .removeClass('mismatch')
+                .addClass('nocompare');
+  $compare_items.find('.slider__yellow_button').removeClass('-hover');
+  $compare_items.find('.slider__red_button').removeClass('-hover');
+
+  lib.change_statistics_cnt($this,'reset');
+
+  if (!p_id) return false;
+
+  $.ajax({
+    url: '/product/reset_compare?id='+ p_id + '&source_id=' + source_id,
+    type: "get",
+    beforeSend: function() {},
+    dataType: "json",
+    success: function(response){
+
+    }
+  });
+
 lib.reset_compare_item = function ($this) {
     let p_id = $this.data('p_id');
     let source_id = $this.data('source_id');
