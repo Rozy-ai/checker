@@ -42,3 +42,7 @@ composer.lock
 
 /backend/web/assets
 /.htaccess
+/backend/presenters/$_TraitListFilters.php
+/backend/controllers/$_ProductController.php
+/common/models/$_Filters.php
+/common/models/$_Product.php

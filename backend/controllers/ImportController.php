@@ -444,7 +444,7 @@ class ImportController extends \yii\web\Controller
     }        
             
     if ($isAjax) {   
-        $data = array('error'=>false, 'message' => StatsController::getStatsLastLocalImportMessage());             
+        $data = array('error'=>false, 'message' => StatsController::getStatsLastLocalImportMessage(), 'time'=>$created_timestamp);             
         echo json_encode($data);
         die();     
     } else {
