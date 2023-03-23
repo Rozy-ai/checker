@@ -115,6 +115,7 @@ var lib = {};
             url: url,
             type: "POST",
             data: data,
+            async: true,
             dataType: "json",
             success: function (response) {
                 onSuccess(response);

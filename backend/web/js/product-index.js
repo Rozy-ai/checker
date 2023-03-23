@@ -4,7 +4,7 @@ $(document).ready(function () {
     //let datas_product_left = [];
     
     /**
-     * Получить DOM всего плока для данного элемента
+     * Получить DOM всего блока для данного элемента
      * @param {object} dom_object
      * @returns {unresolved}
      */
@@ -19,10 +19,9 @@ $(document).ready(function () {
     /**
      * Присваивание левому товару статуса STATUS_NOT_FOUND (левый крестик )
      */
-    $body.on('click', '.product-list__item-mismatch-all', function (e) {
+    $body.on('click', '.product-list__item-mismatch-all', function (e) {        
         e.stopPropagation();
-        let $this = $(this);
-        
+        let $this = $(this);        
         let data = $this.data();
         if (is_hide_mode()){
             let $block_product = getBlockProduct($this);
@@ -44,8 +43,9 @@ $(document).ready(function () {
             change_visual_block_product($block_product);      // Изменить визуальное отображение (Пока скрыть)
         } else {
             $this.hide();
-            lib.sendAjaxFromButton(data, onResponce);
+            lib.sendAjaxFromButton(data, onResponce);            
         }
+                
         
         function onResponce(response) {
             switch (response.status) {
@@ -65,6 +65,7 @@ $(document).ready(function () {
                         container.html(html);
                         lib.slider_init();
                     }
+                    update_status_item();
                     break;
                 case 'error':
                     alert(response.message);
@@ -78,29 +79,53 @@ $(document).ready(function () {
     /**
      * Кнопка "удалить товар"
      */
-    $body.on('click', '.js-del-item', function (e) {
+    $body.on('click', '.js-del-item', function (e) {        
         e.stopPropagation();
         let q = confirm('Уверены?');
         if (!q)
             return false;
+        
+        js_del_item(this);
+        
+    });    
+    
+    js_del_item = function (product) {
 
-        let $this = $(this);
+        let $this = $(product);
         let $data = $this.data();
+            $data.async = false;
 
         lib.sendAjaxFromButton($data, (response) => {
             if (response.status === 'ok') {
                 let html = response.html_index_table;
-                if (typeof (html) !== "undefined" && html !== null) {
+                if (typeof (html) !== "undefined" ) {
                     var container = $("#id_table_container");
                     container.html(html);
                     lib.slider_init();
                 }
+                update_status_item();
             } else if (response.status === 'error') {
                 alert(response.message);
             }
         });
-    });
+    }   
+        
+        
+    $body.on('click', '.js-del-all-visible-items', function () {
+        let q = confirm('Уверены?');
+        if (!q)
+            return false;
 
+        $('.product-list-item__del').each(function (a, b) {            
+            //console.log($(b));
+            js_del_item($(b));
+        })
+        
+        console.log('reload');
+        if ($('#filter-items__comparisons').val() !== 'ALL') {
+            window.location.reload();
+        }
+    })    
     /**
      * Кнопка "отменить все выделения статусов" на правых товарах"
      */
@@ -160,6 +185,7 @@ $(document).ready(function () {
             });
         }
         ;
+        update_status_item();
     });
 
     /**
@@ -188,7 +214,7 @@ $(document).ready(function () {
                         var container = $("#id_table_container");
                         container.html(html);
                         lib.slider_init();
-                    }
+                    } 
                 }
                 if (response.status === 'error') {
                     alert(response.message);
@@ -197,6 +223,7 @@ $(document).ready(function () {
             });
         }
         ;
+       update_status_item();
     });
 
     $('.slider_close').on('click', function (e) {
@@ -347,7 +374,25 @@ $(document).ready(function () {
         let block_products = $product.parent('.product-list__product-list-item');
         let count_items = block_products.find('._sliderTop').count();
         return count_items;
-    };
+    };         
+            
+    /** 
+     * Фукция обновления фильтра статуса товаров
+     * @returns {undefined}
+     */                
+    update_status_item = function () {
+        var items = $('.PRODUCT-LIST-ITEM:visible').find('.SLIDER-ITEM');
+        if ( !items.length ) {
+           let status = $('#id_f_comparison_status');
+           var status_next = status.find(':selected').next();     
+           var status_prev = status.find(':selected').prev();
+               if ( status_next.val().length > 0 ) {
+                   status.val(status_next.val());                   
+               } 
+               status.trigger( "change" );
+        } 
+    };    
+
     
     /**
      * Запомнить выбор от правых товаров (Элементов)

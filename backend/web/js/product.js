@@ -1252,7 +1252,7 @@ $(function(){
   
   $body.on('click','.js-missall',function(){
     let $data = $(this).data();
-
+    
     $.ajax({
     	url: "/product/missall",
     	type: "POST",
@@ -1269,8 +1269,7 @@ $(function(){
   })
   
   $body.on('click','.js-compare',function(){
-    let $data = $(this).data();
-
+    let $data = $(this).data();    
     $.ajax({
     	url: "/product/compare",
     	type: "POST",
@@ -1280,7 +1279,11 @@ $(function(){
     	},
     	dataType: "json",
     	success: function(response){
-        window.location = $data.url_next;
+            window.location = $data.url_next;
+            debugger;
+            if ( $('body').is('.js-compare') ) {
+                alert('Елементы присутствуют');
+            } 
     	}
     });
     

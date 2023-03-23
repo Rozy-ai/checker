@@ -57,9 +57,13 @@ $(document).ready(function(){
     	success: function(response){
             
             if (  !response.error ) {
+                datetime = new Date(response.time*1000).toLocaleString();
                 $('.js-update').attr('title',response.message);
-                $( '#preloader' ).hide();
-                alert('Слава Богу, импорт успешно выполнен! ');
+                $('.js-update:before').text(datetime);                
+                $( '#preloader' ).hide('slow',function() { 
+                    alert(/*Слава Богу*/'Импорт успешно выполнен! \n'+response.message);
+                });
+                                
             } else {
                 $( '#preloader' ).hide();
                 alert('Ошибка импорта! '+response.message);

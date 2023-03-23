@@ -45,36 +45,40 @@ class ProductController extends Controller
      * @inheritdoc
      * @param IndexService $indexService
      */
-    public function __construct($id, $module,
-            IndexPresenter $indexPresenter,
-            ProductPresenter $productPresenter,
-            array $config = []) {
+    public function __construct(
+        $id,
+        $module,
+        IndexPresenter $indexPresenter,
+        ProductPresenter $productPresenter,
+        array $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->indexPresenter = $indexPresenter;
         $this->productPresenter = $productPresenter;
     }
 
-    public function actionIndex($src = 1) {
+    public function actionIndex($src = null)
+    {
         $params = $params = \Yii::$app->request->get();
-        
+
         $filters = new Filters();
         $filters->loadFromSession();  
-        /*$src = $src ?: 1;
+        $src = $src ?: 1;
         if ($filters->f_source && $src != $filters->f_source) {
             $filters->f_source = $src ?: 1;
-            $filters->setVsSession('f_source', $filters->f_source); 
+            $filters->setVsSession('f_source', $filters->f_source);
         }
-        $source = null;*/
+        $source = null;
         // Если страница загружается в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
             //$srcId = $src ? $src : 1;
             $source = Source::getById($src);
             $filters->f_source = $src;
-            
+
             //  Если в запросе указан номер страницы, то установим его:
-            if (isset($params['page'])){
+            if (isset($params['page'])) {
                 $number_page_current = (int)$params['page'];
-                if ($number_page_current <= 0 ){
+                if ($number_page_current <= 0) {
                     throw new InvalidArgumentException('Указан не верный номер страницы');
                 }
                 $filters->setVsSession('f_number_page_current', $number_page_current);
@@ -94,7 +98,7 @@ class ProductController extends Controller
             $filters->saveToSession();
         }
 
-        /*$filters->setSource($source);*/
+        $filters->setSource($source);
         $this->indexPresenter->setSource($source);
 
         $this->layout = 'products_list';
@@ -107,13 +111,12 @@ class ProductController extends Controller
 
         if (isset($params['all'])) {
             $filters->f_count_products_on_page = 'ALL';
-            
         }
-        
+
         $list = Product::getListProducts($source, $filters, $is_admin, $favorites);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin, $favorites);
-        
-        if($filters->f_count_products_on_page == 'ALL'){
+
+        if ($filters->f_count_products_on_page == 'ALL') {
             $count_pages = 1;
         } else {
             $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
@@ -129,7 +132,7 @@ class ProductController extends Controller
                 case 'NOCOMPARE':
                 case 'MISMATCH':
                     $filters->f_detail_view = 0; // Кратко
-                    break;    
+                    break;
             }
         }
         return $this->render('index', [
@@ -164,14 +167,14 @@ class ProductController extends Controller
             'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses($is_admin, $filters->f_profile, $filters, $source, $favorites),
             'list' => $list,
             'favorites' => $favorites,
-            
+
             'count_products_all' => $count_products_all,
             'count_products_right_all' => $count_products_right_all,
             'count_products_right' => $this->indexPresenter->getCountProductsOnPageRight($list),
             'count_pages' => $count_pages,
             'is_admin' => $is_admin,
             'default_price_name' => Settings__fields_extend_price::get_default_price($source->id)->name ?: 'Price Amazon',
-            
+
             'source' => $source,
             'last_update' => Stats_import_export::getLastLocalImport($source->id)
         ]);
@@ -180,7 +183,8 @@ class ProductController extends Controller
     /*
      * Временная экспериментальная функция для замены node на id_product (Не используется)
      */
-    public function actionStart() {
+    public function actionStart()
+    {
         $source = Source::getById(1);
         if (!($source instanceof Source)) {
             echo "Не удалось найти источник";
@@ -222,10 +226,11 @@ class ProductController extends Controller
      * Изменение фильтра и отображение нового списка продуктов
      * @return type
      */
-    public function actionChangeFilter() {
+    public function actionChangeFilter()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $request = \Yii::$app->request->post();
-        
+
         if (isset($request)) {
             $name = $request['name'];
             $value = $request['value'];
@@ -237,9 +242,9 @@ class ProductController extends Controller
                 'message' => 'Не удалось получить изменяемый фильтр',
             ];
         }
-        
+
         // Если с запросом прищли данные сравнений, 
-        if ($data_comparisons['datas_products_left'] || $data_comparisons['datas_products_right']){
+        if ($data_comparisons['datas_products_left'] || $data_comparisons['datas_products_right']) {
             $is_comare_all = $this->indexPresenter->changeStatusProducts($data_comparisons['datas_products_left'], $data_comparisons['datas_products_right'], $data_comparisons['datas_products_left_delete']);
         }
 
@@ -276,7 +281,8 @@ class ProductController extends Controller
      *  Сюда приходит после нажатия на снопку сбросить для левого товара
      *  Требуется перерисовка списка продуктов
      */
-    public function actionResetCompare() {
+    public function actionResetCompare()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
 
@@ -316,7 +322,8 @@ class ProductController extends Controller
     /**
      * Сюда приходит после нажатия крестика на правом товаре
      */
-    public function actionCompare() {
+    public function actionCompare()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if (\Yii::$app->request->isGet) {
@@ -326,9 +333,9 @@ class ProductController extends Controller
         }
 
         $status = (string) $params['status'];
-        $id_product = (int) $params['product_id'];
-        $id_item = (int) $params['item_id'];
-        $id_source = (int) $params['source_id'];
+        $id_product = (int) $params['id_product'];
+        $id_item = (int) $params['id_item'];
+        $id_source = (int) $params['id_source'];
         $message = (string) $params['message'];
         $is_last = (bool) $params['is_last'];
 
@@ -365,43 +372,44 @@ class ProductController extends Controller
 
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
-    
-    public function actionCompareBatch(){
+
+    public function actionCompareBatch()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        
+
         if (\Yii::$app->request->isGet) {
             $params = \Yii::$app->request->get();
         } elseif (\Yii::$app->request->isPost) {
             $params = \Yii::$app->request->post();
         }
-        
+
         $data = $params['listDataForServer'];
-        if (empty($data['datas_products_right']))
-        {
+        if (empty($data['datas_products_right'])) {
             return [
                 'status' => 'info',
                 'message' => 'Нет данных для сохранения'
             ];
         }
 
-        try{
+        try {
             $this->indexPresenter->changeStatusProducts($data['datas_products_right']);
         } catch (\Exception $ex) {
-            Yii::error($ex->getLine().':'.$ex->getMessage());
+            Yii::error($ex->getLine() . ':' . $ex->getMessage());
             return ['status' => 'error', 'message' => 'Сохранение пакета выбраных статусов совершилось с ошибкой'];
         }
 
         return [
-            'status'=>'ok'
+            'status' => 'ok'
         ];
-    }  
+    }
 
     /**
      * Сюда приходит, если пользователь нажал крестик на левом товаре
      * Запрос get/post
      * @return type
      */
-    public function actionMissall() {
+    public function actionMissall()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if (\Yii::$app->request->isGet) {
@@ -461,7 +469,8 @@ class ProductController extends Controller
      * 
      * @return type
      */
-    public function actionDeleteProduct() {
+    public function actionDeleteProduct()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if (\Yii::$app->request->isGet) {
@@ -500,19 +509,20 @@ class ProductController extends Controller
                 'message' => 'Не удалось найти модель источника'
             ];
         }
-        
+
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
 
         return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
-    
+
     /**
      * Сбросить все фильтры c с сохранением пакетного выбора
      * 
      * @param listDataForServer
      */
-    public function actionResetFilters(){
+    public function actionResetFilters()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if (\Yii::$app->request->isGet) {
@@ -520,22 +530,22 @@ class ProductController extends Controller
         } elseif (\Yii::$app->request->isPost) {
             $params = \Yii::$app->request->post();
         }
-        
+
         $filters = new Filters();
         $filters->loadFromSession();
         $source = Source::getById($filters->f_source);
         $filters->setSource($source);
         $filters->setToDefaultSelects();
         $filters->saveToSession();
-        
+
         $data = $params['listDataForServer'];
-        try{
-            if ($data['datas_products_left'] || $data['datas_products_right'] || $data['datas_products_left_delete']){
+        try {
+            if ($data['datas_products_left'] || $data['datas_products_right'] || $data['datas_products_left_delete']) {
                 $this->indexPresenter->changeStatusProducts($data['datas_products_left'], $data['datas_products_right'], $data['datas_products_left_delete']);
             }
             return ['status' => 'ok'];
         } catch (\Exception $ex) {
-            Yii::error($ex->getLine().':'.$ex->getMessage());
+            Yii::error($ex->getLine() . ':' . $ex->getMessage());
             return ['status' => 'error', 'message' => 'Сохранение пакета выбраных статусов совершилось с ошибкой'];
         }
         $this->actionIndex();
@@ -553,9 +563,10 @@ class ProductController extends Controller
          * 
          */
     }
-    
-    private function getRequestWithUpdateList(Source $source = null, Filters $filters = null, bool $is_admin = null, $is_update_list = true, $is_compare_all=false) {
-        if (!$filters){
+
+    private function getRequestWithUpdateList(Source $source = null, Filters $filters = null, bool $is_admin = null, $is_update_list = true, $is_compare_all = false)
+    {
+        if (!$filters) {
             $filters = new Filters();
             $filters->loadFromSession();
             if (!$filters->isExistsDefaultParams()) {
@@ -565,40 +576,40 @@ class ProductController extends Controller
                 ];
             }
         }
-        
-        if (!$source){
+
+        if (!$source) {
             $source = Source::getById($filters->f_source);
         }
         $filters->setSource($source);
 
-        if (!isset($is_admin)){
+        if (!isset($is_admin)) {
             $user = \Yii::$app->user->identity;
             $is_admin = $user && $user->isAdmin();
         }
-        
-        if ($is_update_list){
+
+        if ($is_update_list) {
             $list = Product::getListProducts($source, $filters, $is_admin);
         } else {
             $list = null;
         }
-        
+
         $f_count_products_on_page = $filters->f_count_products_on_page;
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin);
         $count_products_right = $this->indexPresenter->getCountProductsOnPageRight($list);
         $count_pages = $this->indexPresenter->getCountPages($count_products_all, $filters->f_count_products_on_page);
-        if ($filters->f_number_page_current > $count_pages){
+        if ($filters->f_number_page_current > $count_pages) {
             $filters->setVsSession('f_number_page_current', 1);
         }
         $source_name = $source->name;
         $profile_path = ($filters->f_profile || $filters->f_profile === '{{all}}') ? $filters->f_profile : 'Все';
-        
+
         $html_block_count = "Показано $f_count_products_on_page($count_products_right) из $count_products_all ";
         $html_paginator = $this->indexPresenter->getHTMLPaginator($filters->f_number_page_current, $count_pages, 5, $count_products_all <= 200);
 
         return [
             'status' => 'ok',
             'message' => '',
-            'html_index_table' => ($list)?$this->renderPartial('index_table', [
+            'html_index_table' => ($list) ? $this->renderPartial('index_table', [
                 'list' => $list,
                 'local_import_stat' => null,
                 'is_admin' => $is_admin,
@@ -611,7 +622,7 @@ class ProductController extends Controller
                 'count_pages' => $count_pages,
                 'source' => $source,
                 'last_update' => Stats_import_export::getLastLocalImport(),
-            ]):null,
+            ]) : null,
             'other' => [
                 'id_block_count' => $html_block_count,
                 'id_paginator' => $html_paginator,
@@ -619,7 +630,7 @@ class ProductController extends Controller
             ]
         ];
     }
-    
+
     /*************************************************************************
      *** Старый шлак для страницы сравнения продуктов. Все что ниже
      *************************************************************************/
@@ -631,33 +642,36 @@ class ProductController extends Controller
      * @param int $item_1__ignore_red
      * @return array|\yii\db\ActiveRecord|null
      */
-    public function getNextModel($currentId, $prev = false, $item_1__ignore_red = 0) {
+    public function getNextModel($currentId, $prev = false, $item_1__ignore_red = 0)
+    {
 
         $model = $this->source_class::find()
-                ->where([$prev ? '<' : '>', 'id', $currentId])
-                ->andWhere(['like', 'info', 'add_info'])
-                ->orderBy(['id' => $prev ? SORT_DESC : SORT_ASC]);
+            ->where([$prev ? '<' : '>', 'id', $currentId])
+            ->andWhere(['like', 'info', 'add_info'])
+            ->orderBy(['id' => $prev ? SORT_DESC : SORT_ASC]);
         if ((int) $item_1__ignore_red === 1) {
 
             $model->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = parser_trademarkia_com.id')
-                    ->leftJoin('hidden_items', 'hidden_items.p_id = parser_trademarkia_com.id ')
-                    ->andWhere(['and', ['`hidden_items`.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]]);
+                ->leftJoin('hidden_items', 'hidden_items.p_id = parser_trademarkia_com.id ')
+                ->andWhere(['and', ['`hidden_items`.p_id' => null], ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]]);
         }
 
         if (\Yii::$app->authManager->getAssignment('admin', \Yii::$app->user->id) === null) {
             $condition = 'FIND_IN_SET(:value, ' . Aggregated::tableName() . '.users) > 0';
             $username = \Yii::$app->user->identity->username;
             $model
-                    ->joinWith(['aggregated'])
-                    ->andWhere(['OR',
-                        new Expression($condition, [':value' => $username]),
-                        new Expression(Aggregated::tableName() . '.product_id IS NULL')
-            ]);
+                ->joinWith(['aggregated'])
+                ->andWhere([
+                    'OR',
+                    new Expression($condition, [':value' => $username]),
+                    new Expression(Aggregated::tableName() . '.product_id IS NULL')
+                ]);
         }
         return $model->one();
     }
 
-    private function do_it_need_to_update($source, $p_date_in_parser) {
+    private function do_it_need_to_update($source, $p_date_in_parser)
+    {
         // [если дата в source]  меньше  [даты последнего товара(сортировка по дате) в базе парсера] → запускаем импорт
 
         if (!$source)
@@ -672,7 +686,8 @@ class ProductController extends Controller
         return $source['import_local__max_product_date'] < $p_date_in_parser;
     }
 
-    private function start_import($source) {
+    private function start_import($source)
+    {
         set_time_limit(60 * 5);
         $p_date_in_parser = ImportController::get_max_product_date_in_parser($source);
         // [если дата в source]  меньше  [даты последнего товара(сортировка по дате) в базе парсера] → запускаем импорт
@@ -683,7 +698,8 @@ class ProductController extends Controller
     }
 
     //http://localhost/product/view?id=8012&source_id=1&comparisons=&filter-items__profile=%7B%7Ball%7D%7D
-    public function actionView() {
+    public function actionView()
+    {
         $this->layout = 'product';
 
         if (\Yii::$app->request->isGet) {
@@ -693,27 +709,23 @@ class ProductController extends Controller
         }
 
         $id_product = (int) $params['id'];
-        $id_item = (int) $params['item_id'];
-        $node = (int) $params['number_node'];
         $id_source = (int) $params['source_id'];
 
-        if (!$id_product || !$id_item || !$id_source) {
+        if (!$id_product || !$id_source) {
             return $this->redirect('/product/index');
         }
 
         $filters = new Filters();
         $filters->loadFromSession();
-        $filters->f_id = $id_product;
         $source = Source::getById($id_source);
         $filters->setSource($source);
-        $model = Product::getById($source->class_1,$id_product); 
-        //$model = Product::getProductById($source, $filters);
+        $model = Product::getProduct($source, $filters);
 
         $prev = null;
         $next = null;
 
         //$compare_item = $this->productPresenter->getItemCompare($product->addInfo);
-        //$node = 1; //$this->productPresenter->number_node;
+        $node = 1; //$this->productPresenter->number_node;
         $compare_item = AppHelper::get_item_by_number_key($model->addInfo, $node);
         $identity = \Yii::$app->user->identity;
         //Передаем параметры в шаблон
@@ -731,8 +743,6 @@ class ProductController extends Controller
                     'source' => $source,
                     'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
                     'filter-items__profile' => $this->productPresenter->filters->f_profile,
-                    'product_id' => $id_product,
-                    'item_id' => $id_item,
                     'number_node' => $node,
                     'is_admin' => $identity && $identity->isAdmin(),
                     'active_comparison_status' => $active_comparison_status,
@@ -747,11 +757,11 @@ class ProductController extends Controller
             'is_admin' => $identity && $identity->isAdmin(),
             'active_comparison_status' => $active_comparison_status,
             'list_comparison_statuses' => Comparison::getStatuses()
-
         ]);
     }
 
-    public function actionResult($id) {
+    public function actionResult($id)
+    {
         $model = $this->findModel($id);
 
         $query = Comparison::find();
@@ -769,7 +779,8 @@ class ProductController extends Controller
      * @return bool|int|string
      * @throws NotFoundHttpException
      */
-    public function isStatusSet($id) {
+    public function isStatusSet($id)
+    {
         $model = $this->findModel($id);
         foreach (array_values($model->addinfo) as $index => $node) {
             if (Comparison::findOne(['product_id' => $id, 'node' => $index]) === null) {
@@ -779,19 +790,20 @@ class ProductController extends Controller
         return true;
     }
 
-    private function get_model_for_next($id) {
+    private function get_model_for_next($id)
+    {
         $f_items__source = $this->request->get('filter-items__source', 1);
         $direction = Yii::$app->request->get('direction', false);
         $item_1__ignore_red = Yii::$app->request->get('item_1__ignore_red', 0);
         $item_2__show_all = Yii::$app->request->get('item_2__show_all');
 
         $_model = $this->source_class::find()
-                ->select('*')
-                ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source_table_name . '.id')
-                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
-                //->where(['<=>','hidden_items.source_id', $this->source_id])
-                ->where('comparisons_aggregated.source_id = ' . (int) $this->source_id)
-                ->limit(1);
+            ->select('*')
+            ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source_table_name . '.id')
+            ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
+            //->where(['<=>','hidden_items.source_id', $this->source_id])
+            ->where('comparisons_aggregated.source_id = ' . (int) $this->source_id)
+            ->limit(1);
 
         $where_0 = [];
         if (0 && $this->source_table_name === 'parser_trademarkia_com') {
@@ -823,7 +835,7 @@ class ProductController extends Controller
         $where = ['and', $where_0, $where_1, $where_2];
 
         $_model->where($where)
-                ->orderBy('id ' . $order);
+            ->orderBy('id ' . $order);
 
         $model = $_model->one();
 
@@ -843,7 +855,8 @@ class ProductController extends Controller
      * @param $direction
      * @return array|\yii\db\Act iveRecord
      */
-    protected function findModel($id, $item_1__ignore_red = 0, $direction = 'next') {
+    protected function findModel($id, $item_1__ignore_red = 0, $direction = 'next')
+    {
         $model = null;
         if ((int) $item_1__ignore_red === 1) {
             if (HiddenItems::find()->where(['p_id' => $id, 'source_id' => $this->source_id])->limit(1)->one()) {
@@ -853,11 +866,11 @@ class ProductController extends Controller
                     $symbol = '>';
 
                 $model = $this->source_class::find()
-                        ->select('*')
-                        ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source_table_name . '.id')
-                        ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
-                        ->where(['and', ['`hidden_items`.p_id' => null], [$symbol, '`' . $this->source_table_name . '`.`id` ', $id]])
-                        ->andWhere(['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]);
+                    ->select('*')
+                    ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source_table_name . '.id')
+                    ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
+                    ->where(['and', ['`hidden_items`.p_id' => null], [$symbol, '`' . $this->source_table_name . '`.`id` ', $id]])
+                    ->andWhere(['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]]);
 
                 if (0 && $this->source_table_name === 'parser_trademarkia_com') {
                     $model->andWhere(['like', 'info', 'add_info']);
@@ -867,8 +880,8 @@ class ProductController extends Controller
             }
         } else {
             $model = $this->source_class::find()
-                    ->with('comparisons')
-                    ->where(['id' => $id]);
+                ->with('comparisons')
+                ->where(['id' => $id]);
             $model = $model->one();
         }
 
@@ -876,7 +889,8 @@ class ProductController extends Controller
         //throw new NotFoundHttpException(Yii::t('site', 'The requested page does not exist.'));
     }
 
-    public function actionUser_visible_fields() {
+    public function actionUser_visible_fields()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $pid = $this->request->post('pid');
         $user = \Yii::$app->user->identity;
@@ -902,24 +916,26 @@ class ProductController extends Controller
             ];
         }
     }
-    
-    public function actionGet_products_by_params() {
+
+    public function actionGet_products_by_params()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        
+
         $post = $this->request->post();
         $p_id = $this->request->post('p_id');
         $comparison = $this->request->post('comparison');
         $source_id = $this->request->post('source_id');
         $profile = $this->request->post('profile');
         $node_id = 1;
-        
+
         return [
             'res' => 'ok',
             'link' => '/product/view?id=' . $p_id . '&source_id=' . (int) $source_id . '&comparisons=' . $comparison,
         ];
     }
 
-    public function actionGet_products_by_params1() {
+    public function actionGet_products_by_params1()
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         /*
@@ -935,7 +951,7 @@ class ProductController extends Controller
         $source_id = $this->request->post('source_id');
         $profile = $this->request->post('profile');
         $node_id = 1;
-//    $direction = $this->request->post('direction','next');
+        //    $direction = $this->request->post('direction','next');
 
         if (!$p_id || !$comparison || !$source_id)
             return ['res' => 'fuck'];
@@ -945,10 +961,11 @@ class ProductController extends Controller
         /* start */
         $q = $this->prepare_record_1($source, $comparison, $profile);
 
-    if ($direction === 'prev' || $direction === 'next'){  }
+        if ($direction === 'prev' || $direction === 'next') {
+        }
 
         $prepare_joned = $this->prepare_get_joined($source->class_1, $source->table_1);
-        
+
         $prev = $this->prepare_2($source, clone $q, ['<', $source->table_1 . '.id', $p_id], 'DESC', $comparison, 'prev_items', 5);
         $next = $this->prepare_2($source, clone $q, ['>', $source->table_1 . '.id', $p_id], 'ASC', $comparison, 'next_items', 5);
         $this_item = $this->prepare_2($source, $prepare_joned, [$source->table_1 . '.id' => $p_id], 'ASC', $comparison, 'this_item', 1);
@@ -1003,7 +1020,6 @@ class ProductController extends Controller
         return $out;
 
         if ($all) {
-            
         } else
             return ['res' => 'fuck',];
 
@@ -1016,7 +1032,8 @@ class ProductController extends Controller
             return ['res' => 'fuck'];
     }
 
-    private function prepare_2($source, $q, $where, $order, $comparison, $direction, $limit = false) {
+    private function prepare_2($source, $q, $where, $order, $comparison, $direction, $limit = false)
+    {
         if ($where)
             $q->andWhere($where);
         if ($order)
@@ -1045,14 +1062,15 @@ class ProductController extends Controller
         $items[$direction] = $next_items ?? [];
 
         return $out = [
-//      'res' => 'ok',
-//      'sql' => $sql,
+            //      'res' => 'ok',
+            //      'sql' => $sql,
             'items' => $items,
-                //'link' => '/product/view?id='.$model->id.'&source_id='.(int)$this->source_id.'&comparisons='.$comparison,
+            //'link' => '/product/view?id='.$model->id.'&source_id='.(int)$this->source_id.'&comparisons='.$comparison,
         ];
     }
 
-    private function get_arrows($id, $_model, $direction, $item_1__ignore_red) {
+    private function get_arrows($id, $_model, $direction, $item_1__ignore_red)
+    {
         $where_0 = [];
         if (0 && $this->source_table_name === 'parser_trademarkia_com') {
             $where_0 = ['like', 'info', 'add_info'];
@@ -1061,7 +1079,8 @@ class ProductController extends Controller
         $where_1 = [];
         $where_2 = [];
         if ($item_1__ignore_red)
-            $where_2 = ['and',
+            $where_2 = [
+                'and',
                 ['hidden_items.p_id' => null],
                 ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $this->source_id]],
             ];  // $item_1__ignore_red = 1
@@ -1076,7 +1095,7 @@ class ProductController extends Controller
 
         $where = ['and', $where_0, $where_1, $where_2];
         $_model->where($where)
-                ->orderBy('id ' . $order);
+            ->orderBy('id ' . $order);
 
         $model = $_model->one();
 
@@ -1086,7 +1105,8 @@ class ProductController extends Controller
             return null;
     }
 
-    private function remove_mismatch($add_info, $id) {
+    private function remove_mismatch($add_info, $id)
+    {
         $out = [];
         foreach ($add_info as $k => $a_info) {
             $res = Comparison::findOne(['product_id' => $id, 'node' => $k, 'source_id' => $this->source_id]);
@@ -1100,7 +1120,8 @@ class ProductController extends Controller
         return $out;
     }
 
-    private function simple_pager($pages_cnt, $page_n, $left_right_n = 3) {
+    private function simple_pager($pages_cnt, $page_n, $left_right_n = 3)
+    {
         // $pages_cnt 1_|2_3_4_[5]_6_7_8|_9_10_11
         // 5-(cnt3)=2    от 2...
         //                       5
@@ -1148,7 +1169,8 @@ class ProductController extends Controller
         return $pager;
     }
 
-    public function actionDel_item() {
+    public function actionDel_item()
+    {
         $p_id = $this->request->get('id');
         $source_id = $this->request->get('source_id');
 
@@ -1177,7 +1199,8 @@ class ProductController extends Controller
      * @param $comparison
      * @return \yii\db\ActiveQuery
      */
-    private function prepare_record_1($source, $comparison, $profile) {
+    private function prepare_record_1($source, $comparison, $profile)
+    {
         /* @var $source_class yii\db\ActiveRecord */
         $source_class = $source->class_1;
         $source_table = $source->table_1;
@@ -1205,14 +1228,14 @@ class ProductController extends Controller
         }
 
         $where_2 = [];
-        $where_3 = ['and',
+        $where_3 = [
+            'and',
             ['hidden_items.p_id' => null],
             ['OR', ['hidden_items.source_id' => null], ['<>', 'hidden_items.source_id', $source_id]],
         ];  // $item_1__ignore_red = 1
 
 
         if ($comparison === 'ALL') {
-            
         } elseif ($comparison === 'ALL_WITH_NOT_FOUND') {
 
             $where_3 = [];
@@ -1241,24 +1264,26 @@ class ProductController extends Controller
 
         $q->andWhere($where);
 
-//    echo '<pre>'.PHP_EOL;
-//    print_r($q->createCommand()->getRawSql());
-//    echo PHP_EOL;
-//    exit;
+        //    echo '<pre>'.PHP_EOL;
+        //    print_r($q->createCommand()->getRawSql());
+        //    echo PHP_EOL;
+        //    exit;
 
         return $q;
     }
 
-    private function prepare_get_joined($source_class, $source_name) {
+    private function prepare_get_joined($source_class, $source_name)
+    {
         return $q = $source_class::find()
-                //->select('*')
-                //->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
-                ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_name . '.id ')
-                ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_name . '.id ')
-                ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_name . '.id ');
+            //->select('*')
+            //->leftJoin('comparisons_aggregated','comparisons_aggregated.product_id = '.$this->source_table_name.'.id')
+            ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_name . '.id ')
+            ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $source_name . '.id ')
+            ->leftJoin('comparisons', 'comparisons.product_id = ' . $source_name . '.id ');
     }
 
-    private function cnt_filter_statuses($source, $profile) {
+    private function cnt_filter_statuses($source, $profile)
+    {
         /*
           $out['YES_NO_OTHER'] = [
           'hex_color' => '',
@@ -1277,7 +1302,8 @@ class ProductController extends Controller
         return $statuses;
     }
 
-    public function actionChangeProfile() {
+    public function actionChangeProfile()
+    {
         $source_id = $this->request->post('source_id');
         $value = $this->request->post('value');
         $pid = $this->request->post('pid');
@@ -1289,7 +1315,8 @@ class ProductController extends Controller
         return json_encode(['status' => 'ok', 'value' => $value]);
     }
 
-    public function actionToggleProductFavor() {
+    public function actionToggleProductFavor()
+    {
         $attributes = [
             'source_id' => $this->request->post('source_id'),
             'product_id' => $this->request->post('product_id'),
