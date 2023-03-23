@@ -123,7 +123,6 @@ class ProductController extends Controller
         }
 
 
-
         if (!$is_admin) {
             switch ($compare_status) {
                 case 'PRE_MATCH':
