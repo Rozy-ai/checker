@@ -60,10 +60,8 @@ $(document).ready(function(){
                 datetime = new Date(response.time*1000).toLocaleString();
                 $('.js-update').attr('title',response.message);
                 $('.js-update:before').text(datetime);                
-                $( '#preloader' ).hide('slow',function() { 
-                    alert(/*Слава Богу*/'Импорт успешно выполнен! \n'+response.message);
-                });
-                                
+                //alert(/*Слава Богу*/'Импорт успешно выполнен! \n'+response.message);  
+                window.location.reload();                                 
             } else {
                 $( '#preloader' ).hide();
                 alert('Ошибка импорта! '+response.message);
