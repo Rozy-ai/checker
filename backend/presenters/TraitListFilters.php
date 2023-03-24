@@ -163,33 +163,62 @@ trait TraitListFilters {
         if (!$this->source_table_class || !$this->source_table_name || !$this->source_table2_name) {
             throw new \yii\base\InvalidParamException();
         }                
-                
-        $q = new FiltersQuery($this->source_table_class);
+                        
+        $query = new FiltersQuery($this->source_table_class);
         
-        $q->select(['comparisons.status', 'COUNT(DISTINCT id) as count_statuses'])
+        $query->select(['comparisons.status', 'COUNT(DISTINCT id) as count_statuses', '( '
+                        .'SELECT COUNT(cp.product_right_id) as count_result_statuses '
+                        .'FROM comparisons cp '
+                        .'WHERE cp.status =  comparisons.status '
+                        .'GROUP BY cp.status'
+                    .' ) as count_result_statuses'])
           ->andWhere([
             'and',
-            $q->getSqlProfile($is_admin, $this->source_table_name, $f_profile),
-            $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
-            $q->getSqlAsin($this->source_table_name, $filters->f_asin, $filters->f_asin_multiple),
-            $q->getSqlCategoriesRoot($this->source_table_name, $filters->f_categories_root),
-            $q->getSqlTille($this->source_table_name, $filters->f_title),
-            $q->getSqlStatus($filters->f_status),
-            $q->getSqlUsername($this->source_table_name, $filters->f_username),
-            $q->getSqlComparisonStatus($filters->f_comparison_status),
-            $q->getSqlProfile($is_admin, $this->source_table_name, $filters->f_profile),
-            $q->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport($filters->f_source)),
-            $q->getSqlFavorProducts($source, $filters->f_favor, $favorites),
-            $q->getSqlAdditionalFilters($filters),
+            $query->getSqlProfile($is_admin, $this->source_table_name, $f_profile, true),
+            //$query->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
+            $query->getSqlAsin($this->source_table_name, $filters->f_asin, $filters->f_asin_multiple),
+            $query->getSqlCategoriesRoot($this->source_table_name, $filters->f_categories_root),
+            $query->getSqlTille($this->source_table_name, $filters->f_title),
+            $query->getSqlStatus($filters->f_status),
+            $query->getSqlUsername($this->source_table_name, $filters->f_username),
+            //$query->getSqlComparisonStatus($filters->f_comparison_status),            
+            $query->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport($filters->f_source)),
+            $query->getSqlFavorProducts($source, $filters->f_favor, $favorites),
+            $query->getSqlAdditionalFilters($filters),
             ])
           ->groupBy('comparisons.status')
-          ->asArray();
+          ->asArray();        
         
-        $q->addTable('comparisons');
-        $q->addJoins($this->source_table_name);            
-        $q->indexBy('status');
-                     
-        $data = $q->all();
+        $query->addTable('comparisons');
+        $query->addJoins($this->source_table_name,'','right');            
+        $query->indexBy('status');
+        
+        $union = new FiltersQuery($this->source_table_class);
+        $union->select(['comparisons.status', 
+                                  'COUNT(DISTINCT id) AS `count_statuses`', 
+                                  'COUNT(DISTINCT id) AS `count_result_statuses`'])
+              ->andWhere([
+            'and', 
+            $union->getSqlProfile($is_admin, $this->source_table_name, $f_profile, true),
+            $union->getSqlIsMisssingComparisonsProduct(),                  
+            //$union->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
+            $union->getSqlAsin($this->source_table_name, $filters->f_asin, $filters->f_asin_multiple),
+            $union->getSqlCategoriesRoot($this->source_table_name, $filters->f_categories_root),
+            $union->getSqlTille($this->source_table_name, $filters->f_title),
+            $union->getSqlStatus($filters->f_status),
+            $union->getSqlUsername($this->source_table_name, $filters->f_username),
+            //$union->getSqlComparisonStatus($filters->f_comparison_status),            
+            $union->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport($filters->f_source)),
+            $union->getSqlFavorProducts($source, $filters->f_favor, $favorites),
+            $union->getSqlAdditionalFilters($filters),
+            ])
+            ->asArray();        
+              
+        $union->addTable('comparisons');        
+        $union->addJoins($this->source_table_name,'','left');                    
+        $query->union($union);
+                         
+        $data = $query->all();
         $data['NOCOMPARE']=$data[null];
         
         // Приведем к нужному формату(Важен порядок):
@@ -198,12 +227,13 @@ trait TraitListFilters {
         foreach ($list_comparisons as $key => $val){            
             if ($data[$key] && $data[$key]['count_statuses']<>0){
                 $out[$key] = [
-                        'name' => $val['name'],
-                        'count' => $data[$key]['count_statuses'],                      
-                    ];                
+                    'name' => $val['name'],
+                    'count' => $data[$key]['count_statuses'],                      
+                    'count_result' => $data[$key]['count_result_statuses']                        
+                ];                                
                 $count[$key] = $data[$key]['count_statuses'];
-                $name[$key] = $val['name'];
-                
+                $count_result[$key] = $data[$key]['count_result_statuses'];
+                $name[$key] = $val['name'];                
             }
         }               
         
