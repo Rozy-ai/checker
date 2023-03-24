@@ -305,9 +305,7 @@ class Product extends \yii\db\ActiveRecord
 
 
         $list = $q->distinct()->all();
-
-        $list = $q->distinct()->createCommand()->queryAll();
-        $list = self::filterProducts($list, $filters);
+        //$list = self::filterProducts($list, $filters);
 
         foreach ($list as $k => $product) {
             // $product->_source = $source;
@@ -333,26 +331,31 @@ class Product extends \yii\db\ActiveRecord
     {
         $source_table_name = $source->table_1;
         $source_table2_name = $source->table_2;
+               
+        // Полнотекстовый поиск
+        $is_fulltext = true;        
         
         $query = new FiltersQuery($source->class_1);
         // !!! Если менять тут то нужно менять getCountProducts
         $query->where([
             'and',
-            $query->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
+            //$query->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
             $query->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
             $query->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
             $query->getSqlTille($source_table_name, $filters->f_title),
             $query->getSqlStatus($filters->f_status),
             $query->getSqlUsername($source_table_name, $filters->f_username),
             $query->getSqlComparisonStatus($filters->f_comparison_status),
-            $query->getSqlProfile($is_admin, $source_table_name, $filters->f_profile),
+            $query->getSqlProfile($is_admin, $source_table_name, $filters->f_profile,$is_fulltext),            
             $query->getSqlNewProducts($filters->f_new, Stats_import_export::getLastLocalImport()),
             $query->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $query->getSqlFavorProducts($source, $filters->f_favor, $favorites),
         ]);
 
         // Добавим сортировку
-        $query = self::setSortListProductsQuery( $query, $filters->f_soft, $source_table_name );
+        if (!empty($filters->f_soft)) {
+            $query = self::setSortListProductsQuery( $query, $filters->f_soft, $source_table_name );
+        }
         
         // Получим все необходимые join
         $query->addJoins($source_table_name, $source_table2_name);
@@ -367,7 +370,7 @@ class Product extends \yii\db\ActiveRecord
         }
         return $query;
     }
-    
+        
     /**
      * Установка сортировки запроса списка продуктов
      * 
@@ -455,14 +458,20 @@ class Product extends \yii\db\ActiveRecord
      */
     public static function getCountProductsRight(Source $source, Filters $filters, bool $is_admin, $favorites = []) 
     {
+        // Приведем к одной записи
+        $filters->f_count_products_on_page = 1;
+        $filters->f_number_page_current = 1;
+        
+        // Уберем сортировку
+        $filters->f_soft = null;
+        
         $query = self::getListProductsQuery($source, $filters, $is_admin, $favorites);
-        $count_right = $query->select(['DISTINCT ( '
+        $count_right = $query->select([' ( '
             .'SELECT COUNT(*) as count_right '
             .'FROM comparisons cp '
             . ( $filters->f_comparison_status ? 'WHERE cp.status =  comparisons.status GROUP BY cp.status' : '')
             .' ) as count_right'])->createCommand()->queryColumn('count_right');
-        //echo $query->createCommand()->getRawSql();
-        //die();
+        
         return (int)$count_right[0];
     }    
     
@@ -605,9 +614,8 @@ class Product extends \yii\db\ActiveRecord
         }*/
         return $q->distinct()->count();
 
-        $list = $q->distinct()->createCommand()->queryAll();
-        $list = self::filterProducts($list, $filters);
-        return count($list);
+        //$list = self::filterProducts($list, $filters);
+        //return count($list);
     }
 
     /**

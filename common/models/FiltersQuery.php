@@ -38,13 +38,14 @@ class FiltersQuery extends \yii\db\ActiveQuery
      *
      * @param string $source_table_name
      * @param string $source_table2_name
+     * @param type $type 
      */
-    public function addJoins(string $source_table_name, string $source_table2_name = '')
+    public function addJoins(string $source_table_name, string $source_table2_name = '', $type='left')
     {
         foreach ($this->tables as $table) {
             switch ($table) {
                 case 'hidden_items':
-                    $this->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ');
+                    $this->leftJoin('hidden_items', 'hidden_items.p_id = ' . $source_table_name . '.id ');                    
                     break;
                 case 'comparisons_aggregated':
                     $this->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id=' . $source_table_name . '.id');
@@ -54,9 +55,13 @@ class FiltersQuery extends \yii\db\ActiveQuery
                     break;
                 case 'p_updated':
                     $this->leftJoin('p_updated', 'p_updated.p_id = ' . $source_table_name . '.id ');
-                    break;
+                    break;              
                 case 'comparisons':
-                    $this->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ');
+                    if ( $type == 'left' ) { 
+                        $this->leftJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ');
+                    } else if ( $type == 'right' ) {
+                        $this->rightJoin('comparisons', 'comparisons.product_id = ' . $source_table_name . '.id ');                    
+                    }
                     break;
                 case 'messages':
                     $this->leftJoin('messages', 'messages.id = comparisons.messages_id');
@@ -96,7 +101,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
             return [];
         }
     }
-
+                
 
     /**
      * Фильтр проверки на отсутствие товара в таблице hidden_items
@@ -119,6 +124,15 @@ class FiltersQuery extends \yii\db\ActiveQuery
             return [];
         }
     }
+    
+    /**
+     * Get array for where is missing comparisons product
+     * @return type
+     */
+    public function getSqlIsMisssingComparisonsProduct() {
+        return ['IS','comparisons.product_id', NULL];
+    }
+
 
     /**
      * Фильтр поиска по id
@@ -255,11 +269,11 @@ class FiltersQuery extends \yii\db\ActiveQuery
                 $this->addTable('comparisons');
                 return ['and', ['IS NOT', 'comparisons.status', null], ['<>', 'comparisons.status', 'MISMATCH']];
             }
-            /*case 'NOCOMPARE':
+            case 'NOCOMPARE':
             {
                 $this->addTable('comparisons');
-                return ['and', ['IS', 'comparisons.status', null], ['<>', 'comparisons.status', 'NOCOMPARE']];
-            }*/
+                //return ['and', ['IS', 'comparisons.status', null], ['<>', 'comparisons.status', 'NOCOMPARE']];
+            }
             //case 'ALL_WITH_NOT_FOUND':  return [];
             default:
                 return [];
@@ -325,11 +339,15 @@ class FiltersQuery extends \yii\db\ActiveQuery
      * @param string|null $f_profile
      * @return array
      */
-    public function getSqlProfile(bool $is_admin, string $source_table_name, $f_profile): array
+    public function getSqlProfile(bool $is_admin, string $source_table_name, $f_profile, $ifulltext=false): array
     {
         // admin-доступ
         if ($is_admin && $f_profile && $f_profile !== '{{all}}' && $f_profile !== 'Все') {
-            return ['like', $source_table_name . '.profile', $f_profile];
+            if (!$ifulltext) {
+                return ['like', $source_table_name . '.profile', $f_profile];
+            } else {
+                return ['regexp', $source_table_name . '.profile', $f_profile];
+            }
         } else {
             return [];
         }

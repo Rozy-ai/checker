@@ -65,14 +65,14 @@ class ProductController extends Controller
         $filters->loadFromSession();  
         $src = $src ?: 1;
         if ($filters->f_source && $src != $filters->f_source) {
-            $filters->f_source = $src ?: 1;
-            $filters->setVsSession('f_source', $filters->f_source);
+            $filters->f_source = $src;
+            $filters->setVsSession('f_source', $src);
         }
         $source = null;
         // Если страница загружается в первый раз, то будут отсутствовать обязательные параметры
         if ($filters->isExistsDefaultParams()) {
-            //$srcId = $src ? $src : 1;
             $source = Source::getById($src);
+            // Выставляем по параметрам
             $filters->f_source = $src;
 
             //  Если в запросе указан номер страницы, то установим его:
@@ -85,7 +85,8 @@ class ProductController extends Controller
                 $this->redirect('/product/index');
             }
         } else {
-            // Если страница загружается в первый раз то номер страницы не нужен, ибо по умолчанию установится в 1
+            // Если страница загружается не первый раз то номер страницы не нужен, 
+            // ибо по умолчанию установится в 1
             $id_user = \Yii::$app->user->id;
             $source = Source::getForUser($id_user, $src);
 
@@ -94,6 +95,7 @@ class ProductController extends Controller
             }
 
             $filters->setToDefault();
+            // Источник принимаем от пользователя
             $filters->f_source = $source->id;
             $filters->saveToSession();
         }
@@ -104,8 +106,7 @@ class ProductController extends Controller
         $this->layout = 'products_list';
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
-        $compare_status = $filters->f_comparison_status;
-        $filters->list_count_products = $this->indexPresenter->getListCountProductsOnPage();
+        $compare_status = $filters->f_comparison_status;        
 
         $favorites = Product::getFavorites($source->id);
 
@@ -115,6 +116,7 @@ class ProductController extends Controller
 
         $list = Product::getListProducts($source, $filters, $is_admin, $favorites);
         $count_products_all = Product::getCountProducts($source, $filters, $is_admin, $favorites);
+        $count_products_right_all = Product::getCountProductsRight($source, $filters, $is_admin, $favorites);
 
         if ($filters->f_count_products_on_page == 'ALL') {
             $count_pages = 1;
