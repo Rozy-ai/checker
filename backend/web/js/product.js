@@ -28,6 +28,17 @@ $(function(){
   
   });
   
+  var win = $( window );
+  win.on( 'load', function () {
+        $( '#preloader' ).delay( 350 ).fadeOut( 'slow' );
+        $( 'body' ).delay( 350 ).css( { 'overflow': `visible` } );
+  } );
+
+  $body.on( 'click', '.js-preload', function () {
+        debugger;
+        $( '#preloader' ).delay( 350 ).fadeOut( 'slow' );
+        $( 'body' ).delay( 350 ).css( { 'overflow': `visible` } );
+  } );
   
   $body.on('click','.product-page__product-statistics-1234 span',function(){
     let $this = $(this);

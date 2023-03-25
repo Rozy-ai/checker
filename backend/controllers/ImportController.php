@@ -429,10 +429,10 @@ class ImportController extends \yii\web\Controller
     
     if ($stop === 1) {
         if ($isAjax) {
-            $data = array('error'=>true, 'message' => $message);             
+            $data = array('error'=>true, 'time'=>$created_timestamp, 'message' => $message);             
             echo json_encode($data);
             die();            
-        }else{    
+        }else{ 
             echo $message;
             echo '<pre>' . PHP_EOL;
             print_r('Готово');
