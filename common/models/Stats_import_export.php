@@ -20,7 +20,7 @@ class Stats_import_export extends \yii\db\ActiveRecord
      * @param type $file_name
      * @return type
      */
-    public static function getLastImport($source_id = 1, $file_name = 'LOCAL_IMPORT'){
+    public static function getLastImport($source_id = 1, $file_name = null){
         $query = self::find();
         $query->where(['type' => 'IMPORT', 'source_id' => $source_id]);
         
