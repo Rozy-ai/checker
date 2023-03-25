@@ -50,7 +50,7 @@ $this->title = Yii::t('site', 'Список источников');
           'format' => 'raw', // "raw", "text", "html", ['date', 'php:Y-m-d'])
           'value' => function ($itm) {
             $html = '<div>';
-            $html.=  '<div>'.Html::a('Start','/import/local_import?source_id='.$itm->id,['type' => "submit", 'class' => 'btn btn-primary']).'</div>';
+            $html.=  '<div>'.Html::a('Start','/import/local_import?source_id='.$itm->id,['type' => "submit", 'class' => 'btn btn-primary js-preload']).'</div>';
             $html.=  '<div>'.Html::tag('span',Stats_import_export::getLastLocalImport($itm->id)->created ).'</div>';
             $html.= '</div>';
             return $html;

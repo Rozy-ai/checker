@@ -34,6 +34,14 @@ $product = $this->params['product'];
 
     <body class="d-flex flex-column h-100 p-page">
 
+            <!-- preloader -->
+        <div id="preloader">
+            <div class="preloader">
+                <div class="preloader__image"></div>
+            </div>
+        </div>
+        <!-- preloader end  -->
+        
     <?php $this->beginBody() ?>
 
     <header>

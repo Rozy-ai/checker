@@ -30,7 +30,14 @@ if (get_class($this->context->module->controller) === 'backend\controllers\Messa
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
 </head>
-<body class="d-flex flex-column h-100">
+<body class="d-flex flex-column h-100">    
+    <!-- preloader -->
+    <div id="preloader">
+        <div class="preloader">
+            <div class="preloader__image"></div>
+        </div>
+    </div>
+    <!-- preloader end  -->
 <?php $this->beginBody() ?>
 
 <header>

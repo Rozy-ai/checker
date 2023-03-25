@@ -120,16 +120,18 @@ class StatsController extends Controller {
         $import_stats = new Stats_import_export();
         $last_import = $import_stats->getLastLocalImport();
         $stat_data = json_decode($last_import['raw'], true);
+            $last_local_import_txt = "";
+            //$last_local_import_txt.= "Дата импорта: ".date('Y-m-d H:i:s',strtotime($last_import['created']))."\n";
         if (!empty($stat_data)) {
-            $last_local_import_txt = "Количество обновленных: {$stat_data['all']}\n" .
-                    "Дубликатов по Asin: {$stat_data['asin_duplicate']}\n" .
-                    "Проигнорировано: {$stat_data['ignored']}\n" .
-                    "Заменено: {$stat_data['replaced']}\n" .
-                    "Добавлено новых: {$stat_data['added']}\n".
-                    "Добавлено товаров левых: {$stat_data['added_product']}\n".
-                    "Добавлено товаров правых: {$stat_data['added_product_left']}\n";
+            $last_local_import_txt.= "Количество обновленных: {$stat_data['all']}\n";
+            $last_local_import_txt.= "Дубликатов по Asin: {$stat_data['asin_duplicate']}\n";
+            $last_local_import_txt.= "Проигнорировано: {$stat_data['ignored']}\n";
+            $last_local_import_txt.= "Заменено: {$stat_data['replaced']}\n";
+            $last_local_import_txt.= "Добавлено новых: {$stat_data['added']}\n";
+            $last_local_import_txt.= "Добавлено товаров левых: {$stat_data['added_product']}\n";
+            $last_local_import_txt.= "Добавлено товаров правых: {$stat_data['added_product_right']}\n";
         } else {
-            $last_local_import_txt = "Количество обновленных: {$last_import['cnt']}\n";
+            $last_local_import_txt.= "Количество обновленных: {$last_import['cnt']}\n";
         }
         return $last_local_import_txt;
     }
