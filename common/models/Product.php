@@ -239,7 +239,7 @@ class Product extends \yii\db\ActiveRecord
      * @param Filters $filters
      * @param bool $is_admin
      * @param type $favorites
-     * @return type
+     * @return array
      */
     public static function getListProducts(Source $source, Filters $filters, bool $is_admin, $favorites = [])
     {

@@ -84,21 +84,9 @@ class ExportsController extends Controller
 
     $this->get_source($source_id);
 
-
-    //     [DynamicModel] => Array
-    //        (
-    //            [source_id] => 1
-    //            [comparisons] => Array
-    //                (
-    //                    [0] => match
-    //                )
-    //
-    //        )
-
     // todo:: вытягиваем сохраненные ранее для этого источника ключи
-
     // таблица ключей
-    $amazon_keys = [];
+    $amazon_keys = ['profile'];
     $source_data_keys = [];
     $table_items = [];
 
@@ -112,16 +100,12 @@ class ExportsController extends Controller
     if (!$data['use_previous_saved'] || !$res) { // создаем заново
 
       $q = $this->source_class::find()
-        //->select('*')
         ->leftJoin('comparisons_aggregated', 'comparisons_aggregated.product_id = ' . $this->source_table_name . '.id')
         ->leftJoin('hidden_items', 'hidden_items.p_id = ' . $this->source_table_name . '.id ')
         ->leftJoin('p_all_compare', 'p_all_compare.p_id = ' . $this->source_table_name . '.id ')
         ->leftJoin('p_updated', 'p_updated.p_id = ' . $this->source_table_name . '.id ')
         ->leftJoin('comparisons', 'comparisons.product_id = ' . $this->source_table_name . '.id ')
-        ->leftJoin('messages', 'messages.id = comparisons.messages_id')
-
-        //      ->where([$this->source_table_name.'.ASIN' => 'B0012NGQS4'])
-      ;
+        ->leftJoin('messages', 'messages.id = comparisons.messages_id');
       $q->limit(1000);
       $res = $q->all();
 
@@ -134,7 +118,7 @@ class ExportsController extends Controller
 
       foreach ($res as $k => $item) {
         $getBaseInfo = $item->getBaseInfo() ?? [];
-        $amazon_keys = array_unique(array_merge(array_keys($getBaseInfo), $amazon_keys));
+        $amazon_keys = array_unique(array_merge($amazon_keys, array_keys($getBaseInfo)));
         $source_data_keys = array_unique(array_merge(array_values($item->getAddInfo() ? $item->getAddInfo()[0]->attributes() : []), $source_data_keys));
       }
 
@@ -158,19 +142,11 @@ class ExportsController extends Controller
         }
       }
 
-      /*    [id] => 1
-      [name] => url_ebay
-      [source_id] => 1
-      [type] => left_item
-      [selected] => 0
-      [position] => 0
-*/
-
       $q_ = Exports__saved_keys::find()
         ->where(['source_id' => $source_id])
         ->orderBy(['position' => SORT_ASC]);
       $res = $q_->all();
-    } // if (!$data['use_previous_saved'])
+    }
 
     $table_items_out = [];
     if ($res) {
@@ -336,18 +312,6 @@ class ExportsController extends Controller
     // http://checker.loc/exports/step_4?source_id=2&comparisons[]=match&profile={{all}}
 
     $method = 'POST';
-    /*
-Array (   [0] => Array (
-                    [id] => 119
-                    [checked] => 0
-                    [name] => Locale
-                    [type] => left_item
-        ) [1] => Array (
-                    [id] => 123
-                    [checked] => 1
-                    [name] => Title
-                    [type] => left_item
-        ) ... */
     $ids_keys = $this->request->post('items');
     $source_id = $this->request->post('source_id');
     $comparison = $this->request->post('comparisons');
@@ -432,7 +396,6 @@ Array (   [0] => Array (
     }
     $q->asArray();
 
-    //var_dump($q->createCommand()->rawSql); die;
     $connection = Yii::$app->getDb();
     $command = $connection->createCommand($q->createCommand()->getRawSql());
     $res = $command->queryAll();
@@ -477,6 +440,9 @@ Array (   [0] => Array (
       foreach ($ids_keys as $id_key) { // cell
         if ((int)$id_key['checked'] === 1) {
           $key_name = $id_key['name'];
+          if (empty($key_name)) {
+            continue;
+          }
           $val = $key_name;
 
           $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($cell, 1, $val);
@@ -531,20 +497,23 @@ Array (   [0] => Array (
 
     $row = 2;
     foreach ($out as $item) { // row
-      $itm = $item['item_right'];
-
+      //$itm = $item['item_right'];
       $cell = 1;
       foreach ($ids_keys as $id_key) { // cell
-
         if ((int)$id_key['checked'] === 1) {
           $key_name = $id_key['name'];
 
-          $val = '---';
-          if ($id_key['type'] === 'right_item') {
-              $val = $itm->$key_name;
+          if (empty($key_name)) {
+            continue;
           }
-          if ($id_key['type'] === 'left_item') {
-              $val = $itm['parent_item'][$key_name];
+
+          $val = '---';
+          if ($key_name === 'profile') {
+            $val = $item[$key_name];
+          } else if ($id_key['type'] === 'right_item') {
+            $val = $item['item_right']->$key_name;
+          } else if ($id_key['type'] === 'left_item') {
+            $val = $item['item_right']['parent_item'][$key_name];
           }
 
           if (is_array($val)) $val = 'ARRAY!!!';
