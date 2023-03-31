@@ -1,6 +1,8 @@
 <?php
 
+use common\models\Source;
 /**
+ * @var Source $source
  * @var string $f_asin_multiple 
  * @var string|integer $f_new
  * @var string|integer $f_favor
@@ -22,9 +24,6 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
         </a>
         <div class="w-100 additional-filters" class="pt-2" <?php echo !$filtersOpened ? 'style="display: none;"' : ''; ?>>
             <div class="row mb-4">
-                <div class="col col-12 col-md-4 col-lg-3">
-                    <?= Html::textarea('f_asin_multiple', $f_asin_multiple ?: "", ['class' => 'form-control', 'placeholder' => 'ASIN (multiple)', 'id' => 'id_f_asin_multiple']); ?>
-                </div>
                 <div class="col col-auto">
                     <div class="d-flex align-items-center">
                         <?= Html::checkbox('f_new', !!(int)$f_new, ['id' => 'id_f_new', 'class' => 'form-control h-auto', 'label' => null]); ?>
@@ -40,7 +39,7 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
             </div>
             <div class="row flex-lg-nowrap align-items-start">
                 <div class="d-flex flex-wrap mb-4 col col-12 col-lg-6 additional-filters__left-products">
-                    <div class="mb-2 w-100"><b>Товары слева</b></div>
+                    <div class="mb-2 w-100"><b>Товары Amazon</b></div>
                     <div class="row">
                         <?php foreach ($left_filters as $lf) { ?>
                             <?php
@@ -104,10 +103,13 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
                                 </div>
                             </div>
                         <?php } ?>
+                        <div class="col col-12 col-md-6">
+                            <?= Html::textarea('f_asin_multiple', $f_asin_multiple ?: "", ['class' => 'form-control', 'placeholder' => 'ASIN (multiple)', 'id' => 'id_f_asin_multiple']); ?>
+                        </div>
                     </div>
                 </div>
                 <div class="d-flex flex-wrap mb-4 col col-12 col-lg-6 additional-filters__right-products">
-                    <div class="mb-2 w-100"><b>Товары справа</b></div>
+                    <div class="mb-2 w-100"><b>Товары <?= $source->name ?></b></div>
                     <div class="row">
                         <?php foreach ($right_filters as $rf) { ?>
                             <?php
