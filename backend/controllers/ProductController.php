@@ -27,6 +27,7 @@ use common\models\Filters;
 use common\models\Stats_import_export;
 use common\models\Product_right;
 use common\models\User__favorites;
+use common\models\ProfileName;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -62,7 +63,7 @@ class ProductController extends Controller
         $params = $params = \Yii::$app->request->get();
 
         $filters = new Filters();
-        $filters->loadFromSession();  
+        $filters->loadFromSession();
         $src = $src ?: 1;
         if ($filters->f_source && $src != $filters->f_source) {
             $filters->f_source = $src;
@@ -106,7 +107,7 @@ class ProductController extends Controller
         $this->layout = 'products_list';
         $user = \Yii::$app->user->identity;
         $is_admin = $user && $user->isAdmin();
-        $compare_status = $filters->f_comparison_status;        
+        $compare_status = $filters->f_comparison_status;
 
         $favorites = Product::getFavorites($source->id);
 
@@ -137,6 +138,7 @@ class ProductController extends Controller
                     break;
             }
         }
+        $profiles = ProfileName::find()->asArray()->indexBy('id')->all();
         return $this->render('index', [
             'f_source' => $src ? $src : $filters->f_source,
             'f_profile' => $filters->f_profile,
@@ -169,6 +171,7 @@ class ProductController extends Controller
             'list_comparison_statuses' => $this->indexPresenter->getListComparisonStatuses($is_admin, $filters->f_profile, $filters, $source, $favorites),
             'list' => $list,
             'favorites' => $favorites,
+            'profiles' => array_map(fn ($p) => $p['name'], $profiles),
 
             'count_products_all' => $count_products_all,
             'count_products_right_all' => $count_products_right_all,
@@ -318,7 +321,7 @@ class ProductController extends Controller
         return [
             'status' => 'ok',
         ];
-     //   return $this->getRequestWithUpdateList($source, $filters, $is_admin);
+        //   return $this->getRequestWithUpdateList($source, $filters, $is_admin);
     }
 
     /**
@@ -739,16 +742,16 @@ class ProductController extends Controller
         ];
 
         return $this->render('view', [
-                    'model' => $model,
-                    'compare_item' => $compare_item,
-                    'compare_items' => $model->addInfo,
-                    'source' => $source,
-                    'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
-                    'filter-items__profile' => $this->productPresenter->filters->f_profile,
-                    'number_node' => $node,
-                    'is_admin' => $identity && $identity->isAdmin(),
-                    'active_comparison_status' => $active_comparison_status,
-                    'list_comparison_statuses' => Comparison::getStatuses(),
+            'model' => $model,
+            'compare_item' => $compare_item,
+            'compare_items' => $model->addInfo,
+            'source' => $source,
+            'filter_comparisons' => $this->productPresenter->filters->f_comparisons,
+            'filter-items__profile' => $this->productPresenter->filters->f_profile,
+            'number_node' => $node,
+            'is_admin' => $identity && $identity->isAdmin(),
+            'active_comparison_status' => $active_comparison_status,
+            'list_comparison_statuses' => Comparison::getStatuses(),
             'model' => $model,
             'compare_item' => $compare_item,
             'compare_items' => $model->addInfo,
@@ -1313,8 +1316,14 @@ class ProductController extends Controller
 
         $product = Product::getById($source->class_1, $pid);
         $product->updateAttributes(['profile' => $value]);
+        
+        $profile = ProfileName::find()->where(['name' => $value])->one();
+        if (!$profile) {
+            $profile = new ProfileName(['name' => $value]);
+            $profile->save();
+        }
 
-        return json_encode(['status' => 'ok', 'value' => $value]);
+        return json_encode(['status' => 'ok', 'value' => $value, 'profile' => $profile->toArray(['id', 'name'])]);
     }
 
     public function actionToggleProductFavor()

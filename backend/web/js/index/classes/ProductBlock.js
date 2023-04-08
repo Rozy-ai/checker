@@ -27,7 +27,7 @@ import {
 
 export const CLASS_BLOCK_BUTTON_DELETE = '.js-del-item';
 export const CLASS_BLOCK_BUTTON_CLOSE = '.slider_close';
-//export const CLASS_BLOCK_PRODUCT = '.product-list__product-list-item';
+export const CLASS_BLOCK_PRODUCT_ROW = '.product-list__product-list-item';
 export const CLASS_BLOCK_PRODUCT = '.block_maximize';
 export const CLASS_BLOCK_PRODUCT_MIN = '.block_minimize';
 const CLASS_BLOCK_PRODUCT_DELETED  = 'product-list__deleted';

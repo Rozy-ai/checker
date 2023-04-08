@@ -10,6 +10,7 @@
  * @var string $f_detail_view
  * @var string $f_hide_mode
  * @var string $f_profile
+ * @var array $profiles
  *
  */
 
@@ -20,7 +21,7 @@ use backend\components\TopSlider;
 use common\models\Comparison;
 ?>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/product-index.js"></script>
+<script type="text/javascript" src="/js/product-index.js"></script>
 <table class="table table-striped [ PRODUCT-LIST ] products__products-list products-list">
     <?php if ($local_import_stat) : ?>
         <tr>
@@ -91,7 +92,7 @@ use common\models\Comparison;
                 <?php $bsrInfo = $item->addition_info_for_price('bsr'); ?>
                 <div class="product-list-item__data js-addition-info-for-price" data-addition_info_for_price='<?= $bsrInfo; ?>'>
                     <span>BSR:</span>
-                    <?php if (!empty($bsrInfo)) {?><span class="bi bi-patch-question-fill"></span><?php } ?>
+                    <?php if (!empty($bsrInfo)) { ?><span class="bi bi-patch-question-fill"></span><?php } ?>
                     <br>
                     <span id="id_td1_bsr"><?= $bsr ?></span>
                 </div>
@@ -99,7 +100,7 @@ use common\models\Comparison;
                 <?php $priceInfo = $item->addition_info_for_price(); ?>
                 <div class="product-list-item__data js-addition-info-for-price" data-addition_info_for_price='<?= $priceInfo; ?>'>
                     <span>Price:</span>
-                    <?php if (!empty($priceInfo)) {?><span class="bi bi-patch-question-fill"></span><?php } ?>
+                    <?php if (!empty($priceInfo)) { ?><span class="bi bi-patch-question-fill"></span><?php } ?>
                     <br>
                     <span id="id_td1_price"><?= $price ?></span>
                 </div>
@@ -259,6 +260,18 @@ use common\models\Comparison;
                                 <span class="btn bi bi-pencil product-list-item__edit-profile"></span>
                             <?php } ?>
                         </div>
+                        <div class="mb-3">
+                            <?= Html::dropDownList(
+                                'product-profile',
+                                $f_profile,
+                                $profiles,
+                                [
+                                    'data-source-id' => $source_id,
+                                    'data-pid' => $item->id,
+                                    'class' => 'form-control product-list-item__profile-list',
+                                ],
+                            ) ?>
+                        </div>
                     </div>
                 <?php endif; ?>
 
@@ -295,15 +308,10 @@ use common\models\Comparison;
 
                 <div class="actions_for_right-visible-items">
                     <?php if (($f_detail_view == 0 || $f_detail_view == 2) && $f_comparison_status === 'NOCOMPARE') : ?>
-                        <div title="Только видимые" class="[ button-x-2 ] js-reset-compare-all-visible-items product-list-item__btn-red -change-2" data-url="/product/missall"
-                             data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>"></div>
+                        <div title="Только видимые" class="[ button-x-2 ] js-reset-compare-all-visible-items product-list-item__btn-red -change-2" data-url="/product/missall" data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>"></div>
 
                         <?php if (0) : ?>
-                            <div class="slider__left-item__btn-yellow yellow_button_v1 -change-1"
-
-                                 data-url="/product/missall"
-                                 data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>"
-                            ></div>
+                            <div class="slider__left-item__btn-yellow yellow_button_v1 -change-1" data-url="/product/missall" data-id_product="<?= $item->id ?>" data-id_source="<?= $source_id ?>"></div>
                         <?php endif; ?>
                     <?php endif; ?>
                 </div>

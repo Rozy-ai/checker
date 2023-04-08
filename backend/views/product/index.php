@@ -60,19 +60,33 @@ if ($count_products_all > 200) {
     $is_active_show_all = False;
 }
 $is_active_show_all ? $list_count_products_on_page['ALL'] = 'ВСЕ' : '';
-
-$this->params['breadtail'] = '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
-    . count($list) . ' (' . $count_products_right .' ) из ' . $count_products_all  .' ( '. $count_products_right_all .' ) </div> по: '
-    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']);
 $local_import_stat = null;
-
 $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
+
+$this->params['breadtail'] = '<div class="d-flex align-items-center">' .
+    '<div class="form-group mb-0 mr-3 _col-sm-2 filter-items__last-update">last ' .
+    Html::tag(
+        'a',
+        'update',
+        [
+            'data-url' => '/import/local_import?source_id=' . $f_source,
+            'href' => '#',
+            'class' => 'js-update',
+            'title' => $last_local_import_txt
+        ]
+    ) . ': ' . ($last_update->created ?? 'Нет данных') .
+    '</div>' .
+    '<div class="d-inline-block cnt-items" id="id_block_count">Показано '
+    . count($list) . ' (' . $count_products_right . ' ) из ' . $count_products_all  . ' ( ' . $count_products_right_all . ' ) </div> по: '
+    . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page', 'class' => 'form-control form-control-sm d-inline-block w-auto']) .
+    '</div>';
 
 \backend\assets\IconsAsset::register($this);
 \backend\assets\ProductIndexAsset::register($this);
 ?>
 
 <script>
+    window.currentProfile = '<?= $f_profile ?>';
     document.body.classList.add('loaded_hiding');
     window.onload = function() {
         document.getElementById("show_all").click();
@@ -92,6 +106,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
         <div class="[ FILTER-ITEMS ] products__filter-items mt-0">
             <?php if ($is_admin) { ?>
                 <?php echo AdditionalFilter::widget([
+                    'source' => $source,
                     'f_asin_multiple' => $f_asin_multiple,
                     'f_new' => $f_new,
                     'f_favor' => $f_favor,
@@ -133,16 +148,6 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                         </select>
                     </div-->
                 <?php endif; ?>
-
-                <div class="form-group _col-sm-2 filter-items__last-update">
-                    last <?php echo Html::tag('a','update',
-                            ['data-url'=>'/import/local_import?source_id='.$f_source, 
-                             'href'=>'#',   
-                             'class' => 'js-update',   
-                             'title' => $last_local_import_txt]); ?>:
-                    <?= $last_update->created ?? 'Нет данных' ?>
-                </div>
-
             </div>
 
             <div class="form-row form-inline" style="width: 100%;">
@@ -218,18 +223,18 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
                 <div class="form-group _col-sm-3">
                     <select name="f_comparison_status" id="id_f_comparison_status" class="form-control">
                         <?php
-                        
+
                         foreach ($list_comparison_statuses as $key => $data) {
                             if (empty($f_comparison_status)) {
                                 $f_comparison_status = $key;
-                                $is_active = 'selected';                                
+                                $is_active = 'selected';
                             } else {
-                                $is_active = ( $key == $f_comparison_status    ) ? 'selected' : '';
+                                $is_active = ($key == $f_comparison_status) ? 'selected' : '';
                             }
                             $name = $data['name'];
                             $count = $data['count'];
                             $count_result = $data['count_result'];
-                            $st = "<option value=$key $is_active>$name ( $count / ".( empty($count_result) ? 0 : $count_result )." )</option>";
+                            $st = "<option value=$key $is_active>$name ( $count / " . (empty($count_result) ? 0 : $count_result) . " )</option>";
                             echo $st;
                         }
                         ?>
@@ -327,6 +332,7 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
             'f_hide_mode' => $f_hide_mode,
             'source' => $source,
             'favorites' => $favorites,
+            'profiles' => $profiles,
         ]);
         ?>
     </div><!-- table-responsive -->
@@ -337,7 +343,9 @@ $last_local_import_txt = StatsController::getStatsLastLocalImportMessage();
             echo '<div>' .
                 '<div class="d-inline-block cnt-items" id="id_block_count">' .
                 'Показано '
-                . /**min($f_count_products_on_page, $count_products_all)**/ count($list) . ' (' . $count_products_right .' ) из ' . $count_products_all .' ( '. $count_products_right_all .' ) </div> по: '
+                .
+                /**min($f_count_products_on_page, $count_products_all)**/
+                count($list) . ' (' . $count_products_right . ' ) из ' . $count_products_all . ' ( ' . $count_products_right_all . ' ) </div> по: '
                 . Html::dropDownList('f_count_products_on_page', $f_count_products_on_page, $list_count_products_on_page, ['id' => 'id_f_count_products_on_page_footer', 'class' => 'form-control form-control-sm d-inline-block w-auto']) .
                 '</div>';
             ?>
