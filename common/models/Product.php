@@ -252,7 +252,7 @@ class Product extends \yii\db\ActiveRecord
             'and',
             //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
-            $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
+            $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple, $filters->f_asin_type ?: Filters::TYPE_ASIN),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
             $q->getSqlTille($source_table_name, $filters->f_title),
             $q->getSqlStatus($filters->f_status),
@@ -302,8 +302,6 @@ class Product extends \yii\db\ActiveRecord
             $q->offset($offset);
         }
 
-
-
         $list = $q->distinct()->all();
         //$list = self::filterProducts($list, $filters);
 
@@ -340,7 +338,7 @@ class Product extends \yii\db\ActiveRecord
         $query->where([
             'and',
             //$query->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
-            $query->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
+            $query->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple, $filters->f_asin_type ?: Filters::TYPE_ASIN),
             $query->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
             $query->getSqlTille($source_table_name, $filters->f_title),
             $query->getSqlStatus($filters->f_status),
@@ -591,7 +589,7 @@ class Product extends \yii\db\ActiveRecord
             'and',
             //$q->getSqlNoCompareItems($filters->f_no_compare, $filters->f_source),
             $q->getSqlIsMissingHiddenItems($filters->f_source, $filters->f_comparison_status),
-            $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple),
+            $q->getSqlAsin($source_table_name, $filters->f_asin, $filters->f_asin_multiple, $filters->f_asin_type ?: Filters::TYPE_ASIN),
             $q->getSqlCategoriesRoot($source_table_name, $filters->f_categories_root),
             $q->getSqlTille($source_table_name, $filters->f_title),
             $q->getSqlStatus($filters->f_status),

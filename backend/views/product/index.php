@@ -7,6 +7,7 @@ use backend\controllers\StatsController;
 use common\models\Comparison;
 use common\models\HiddenItems;
 use yii\helpers\Html;
+use common\models\Filters;
 
 /*
  * @var string $f_source
@@ -14,6 +15,7 @@ use yii\helpers\Html;
  * @var string $f_count_products_on_page
  * $var int    $f_number_page_current
  * @var string $f_asin
+ * @var string $f_asin_type
  * @var string $f_title
  * @val string $f_status
  * @var string $f_username
@@ -170,8 +172,21 @@ $this->params['breadtail'] = '<div class="d-flex align-items-center">' .
             </div>
 
             <div class="form-row">
+                <div class="form-group _col-sm-2">
+                    <?= Html::dropDownList(
+                        "f_asin_type",
+                        $f_asin_type,
+                        Filters::$ASIN_TYPE,
+                        [
+                            'class' => 'form-control',
+                            'id' => 'id_f_asin_type',
+                            'style' => 'max-width: 100px;',
+                        ]
+                    )
+                    ?>
+                </div>
                 <div class="form-group _col-sm-2" style="width: 128px">
-                    <input value="<?= $f_asin ?>" type="text" class="form-control" placeholder="ASIN" id="id_f_asin" name="f_asin">
+                    <input value="<?= $f_asin ?>" type="text" class="form-control" placeholder="<?= Filters::$ASIN_TYPE[$f_asin_type ?: Filters::TYPE_ASIN] ?>" id="id_f_asin" name="f_asin">
                 </div>
 
 

@@ -146,6 +146,7 @@ class ProductController extends Controller
             'f_number_page_current' => $filters->f_number_page_current,
             'f_asin' => $filters->f_asin,
             'f_asin_multiple' => $filters->f_asin_multiple,
+            'f_asin_type' => $filters->f_asin_type,
             'f_title' => $filters->f_title,
             'f_status' => $filters->f_status,
             'f_username' => $filters->f_username,

@@ -85,7 +85,7 @@ function main() {
 
     let active_filtr_status = $( '#id_f_comparison_status' ).val();
 
-
+    Filters.attachEvents();
     /**
      * Обработка события изменения статуса правого товара
      */
@@ -444,7 +444,7 @@ function main() {
      * Инициазизация событий на изменение фильтров
      */
     addActionChangeFilter( 'id_f_asin', 'f_asin' );
-    addActionChangeFilter( 'id_f_asin_multiple', 'f_asin_multiple' );
+    addActionChangeFilter( 'id_f_asin_type', 'f_asin_type' );
     addActionChangeFilter( 'id_f_categories_root', 'f_categories_root' );
     addActionChangeFilter( 'id_f_title', 'f_title' );
     addActionChangeFilter( 'id_f_status', 'f_status' );
@@ -537,6 +537,11 @@ function main() {
      */
     function addActionChangeFilter( id_filter, name_filter ) {
         let filter = $( '#' + id_filter );
+        if (filter.attr('data-init') === 'true') {
+            return;
+        }
+
+        filter.attr('data-init', 'true');
         filter.on( 'change', function ( e ) {
             e.stopPropagation();
             let value;
@@ -777,6 +782,9 @@ function main() {
             callback: ( res ) => {
                 $this.attr( 'data-value', res.value );
                 $this.data('value', res.value);
+                if (currentProfile !== '{{all}}' && !(new RegExp(currentProfile)).test(res.profile.name)) {
+                    $this.closest(CLASS_BLOCK_PRODUCT_ROW).hide();
+                }
             },
         } )
     } );
@@ -788,8 +796,7 @@ function main() {
             value: $this.find('option:selected').text(),
             callback: ( res ) => {
                 $this.closest('.product-list-item__data').find('.product-list-item__profile').text(res.profile.name);
-
-                if (currentProfile !== '{{all}}' && currentProfile !== res.profile.name) {
+                if (currentProfile !== '{{all}}' && !(new RegExp(currentProfile)).test(res.profile.name)) {
                     $this.closest(CLASS_BLOCK_PRODUCT_ROW).hide();
                 }
             },

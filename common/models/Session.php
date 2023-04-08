@@ -27,6 +27,7 @@ class Session extends \yii\web\Session{
                 'f_id'                      => $this->get('f_id'),
                 'f_asin'                    => $this->get('f_asin'),
                 'f_asin_multiple'           => $this->get('f_asin_multiple'),
+                'f_asin_type'               => $this->get('f_asin_type'),
                 'f_categories_root'         => $this->get('f_categories_root'),
                 'f_title'                   => $this->get('f_title'),
                 'f_status'                  => $this->get('f_status'),

@@ -300,6 +300,12 @@ $(document).ready(function () {
      */
     function addActionChangeFilter(id_filter, name_filter) {
         let filter = $('#' + id_filter);
+
+        if (filter.attr('data-init') === 'true') {
+            return;
+        }
+
+        filter.attr('data-init', 'true');
         filter.on('change', function (e) {
             e.stopPropagation();
             send_product_right_data(); // Отослать данные на сервер

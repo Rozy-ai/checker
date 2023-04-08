@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Source;
+
 /**
  * @var Source $source
  * @var string $f_asin_multiple 
@@ -12,7 +13,7 @@ use common\models\Source;
 
 use yii\helpers\Html;
 
-$filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
+$filtersOpened = !empty($f_asin_multiple) || !empty($f_asin_type) || (int)$f_new || (int)$f_favor
     || !empty(array_filter($additional_filter_values, fn ($v) => isset($v)));
 ?>
 
@@ -103,8 +104,16 @@ $filtersOpened = !empty($f_asin_multiple) || (int)$f_new || (int)$f_favor
                                 </div>
                             </div>
                         <?php } ?>
-                        <div class="col col-12 col-md-6">
-                            <?= Html::textarea('f_asin_multiple', $f_asin_multiple ?: "", ['class' => 'form-control', 'placeholder' => 'ASIN (multiple)', 'id' => 'id_f_asin_multiple']); ?>
+                        <div class="col col-12 col-md-6 d-flex">
+                            <?= Html::textarea(
+                                'f_asin_multiple',
+                                $f_asin_multiple ?: "",
+                                [
+                                    'class' => 'form-control',
+                                    'placeholder' => 'ASIN (multiple)',
+                                    'id' => 'id_f_asin_multiple'
+                                ]
+                            ) ?>
                         </div>
                     </div>
                 </div>

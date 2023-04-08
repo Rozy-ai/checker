@@ -153,7 +153,7 @@ class FiltersQuery extends \yii\db\ActiveQuery
      * @param string|null $f_asin
      * @return array
      */
-    public function getSqlAsin(string $source_table_name, $f_asin, $f_asin_multiple): array
+    public function getSqlAsin(string $source_table_name, $f_asin, $f_asin_multiple, $f_asin_type = Filters::TYPE_ASIN): array
     {
         $f_asin_multiple = array_filter(preg_split("/\s+|\n+|(\s*,\s*)/", $f_asin_multiple), function ($v) {
             return !empty($v);
@@ -165,9 +165,22 @@ class FiltersQuery extends \yii\db\ActiveQuery
         }
 
         $asinCondition = ['or'];
+        $field = $source_table_name . '.ASIN';
+        $compareValue = "$f_asin%";
+
+        switch ($f_asin_type) {
+            case Filters::TYPE_EAN:
+                $field = $source_table_name . '.info';
+                $compareValue = '%"Product Codes: EAN": "' . $f_asin . '%';
+                break;
+            case Filters::TYPE_UPC:
+                $field = $source_table_name . '.info';
+                $compareValue = '%"Product Codes: UPC": "' . $f_asin . '%';
+                break;    
+        }
 
         if ($f_asin) {
-            $asinCondition[] = ['like', $source_table_name . '.ASIN', "$f_asin%", false];
+            $asinCondition[] = ['like', $field, $compareValue, false];
         }
 
         if (!empty($f_asin_multiple)) {

@@ -263,7 +263,7 @@ use common\models\Comparison;
                         <div class="mb-3">
                             <?= Html::dropDownList(
                                 'product-profile',
-                                $f_profile,
+                                array_search($item->profile, $profiles),
                                 $profiles,
                                 [
                                     'data-source-id' => $source_id,

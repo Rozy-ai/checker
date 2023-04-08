@@ -26,6 +26,15 @@ namespace common\models;
  */
 class Filters
 {
+    public const TYPE_ASIN = 'asin';
+    public const TYPE_UPC = 'upc';
+    public const TYPE_EAN = 'ean';
+    public static $ASIN_TYPE = [
+        self::TYPE_ASIN => 'ASIN',
+        self::TYPE_UPC => 'UPC',
+        self::TYPE_EAN => 'EAN',
+    ];
+
     /** @var string f_items__profile */
     public $f_profile;
 
@@ -46,6 +55,8 @@ class Filters
 
     /** @var string  product => asin товара из поля формы для ввода asin*/
     public $f_asin;
+    /** @var string */
+    public $f_asin_type;
 
     /** @var string  product => список asin товаров из поля формы для ввода asin (multiple)*/
     public $f_asin_multiple;
@@ -159,6 +170,7 @@ class Filters
         $this->f_id = null;
         $this->f_asin = null;
         $this->f_asin_multiple = null;
+        $this->f_asin_type = null;
         $this->f_title = null;
         $this->t_status = null;
         $this->f_comparison_status = null;
