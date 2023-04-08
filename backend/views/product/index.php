@@ -86,6 +86,7 @@ $this->params['breadtail'] = '<div class="d-flex align-items-center">' .
 ?>
 
 <script>
+    window.currentProfile = '<?= $f_profile ?>';
     document.body.classList.add('loaded_hiding');
     window.onload = function() {
         document.getElementById("show_all").click();
@@ -331,6 +332,7 @@ $this->params['breadtail'] = '<div class="d-flex align-items-center">' .
             'f_hide_mode' => $f_hide_mode,
             'source' => $source,
             'favorites' => $favorites,
+            'profiles' => $profiles,
         ]);
         ?>
     </div><!-- table-responsive -->

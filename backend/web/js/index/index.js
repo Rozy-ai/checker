@@ -19,6 +19,7 @@ import {
     CLASS_BLOCK_BUTTON_DELETE,
     CLASS_BLOCK_BUTTON_CLOSE,
     CLASS_BLOCK_PRODUCT,
+    CLASS_BLOCK_PRODUCT_ROW,
     CLASS_BLOCK_PRODUCT_MIN,
     STATUS_BLOCK_DEFAULT,
     STATUS_BLOCK_DELETE_ALL,
@@ -64,13 +65,18 @@ import {
     STATUS_CONFIRM_DEL_LEFT_PRODUCT
 } from './classes/IcXpProductStatus.js';
 
+import {
+    CLASS_ELEMENT_PROFILE,
+    CLASS_ELEMENT_PROFILE_LIST,
+    ProductProfile
+} from './classes/ProductProfile.js';
+
 const CLASS_BUTTON_MISSMATCH_ALL = '.product-list__item-mismatch-all'; // Левый крестик
 const CLASS_BUTTON_RESET_FILTERS = '#id_button_reset_filters';
 const CLASS_BUTTON_ADDITIONAL_FILTERS = '#additional_filter_link';
 const CLASS_BLOCK_BUTTON_DELETE_ALL = '.js-del-all-visible-items';
 const CLASS_CHECKBOX_EXPORT_FILTERED = '#id_export_filtered';
 const CLASS_BUTTON_EDIT_PROFILE = '.product-list-item__edit-profile';
-const CLASS_ELEMENT_PROFILE = '.product-list-item__profile';
 const CLASS_BUTTON_PRODUCT_FAVOR = '.products-list__favor';
 
 function main() {
@@ -181,7 +187,7 @@ function main() {
 
         Ajax.send( "/product/reset-filters", { listDataForServer: listDataForServer }, ( response ) => {
             switch ( response.status ) {
-                case 'ok':    
+                case 'ok':
                     //let html = response.html_index_table;
                     //var container = $( "#id_table_container" );
                     //container.html( html );
@@ -384,8 +390,8 @@ function main() {
      */
     $body.on( 'click', '.js-update-compare-all-visible-items', function ( e ) {
         e.stopPropagation();
-        let q = confirm('Уверены?');
-        if (!q) {
+        let q = confirm( 'Уверены?' );
+        if ( !q ) {
             return false;
         } else {
             sendListDatasAsync().then( function ( is_confirm ) {
@@ -394,12 +400,12 @@ function main() {
                 }
                 listDataForServer.reset();
                 location.reload();
-            }); 
+            } );
             $( '#preloader' ).show();
         }
-        console.log('update');
+        console.log( 'update' );
     } );
-    
+
     /**
      * Кнопка удалить. Нужно удалить только товары со статусом mismatch
      */
@@ -451,9 +457,9 @@ function main() {
     addActionChangeFilter( 'id_f_profile', 'f_profile' );
     addActionChangeFilter( 'id_f_new', 'f_new' );
     addActionChangeFilter( 'id_f_favor', 'f_favor' );
-    $('.additional-filters__right-products, .additional-filters__left-products').find('input, select, textarea').each((i, el) => {
-        addActionChangeFilter($(el).attr('id'), $(el).attr('name'));
-    });
+    $( '.additional-filters__right-products, .additional-filters__left-products' ).find( 'input, select, textarea' ).each( ( i, el ) => {
+        addActionChangeFilter( $( el ).attr( 'id' ), $( el ).attr( 'name' ) );
+    } );
 
     $( CLASS_ITEM_STAT ).on( 'click', ( e ) => {
         const $this = $( e.target ).closest( CLASS_ITEM_STAT );
@@ -745,7 +751,7 @@ function main() {
             $profile = $btn.siblings( '.product-list-item__profile' );
         $profile.attr( 'contenteditable', $profile.attr( 'contenteditable' ) !== 'true' );
 
-        if ($profile.attr( 'contenteditable' ) === 'true') {
+        if ( $profile.attr( 'contenteditable' ) === 'true' ) {
             $profile.focus();
         }
     } );
@@ -759,43 +765,55 @@ function main() {
 
     $( 'body' ).on( 'blur', CLASS_ELEMENT_PROFILE, ( e ) => {
         const $this = $( e.target );
-        $this.attr('contenteditable', 'false');
+        $this.attr( 'contenteditable', 'false' );
 
-        if ($this.text().trim() === $this.data('value')) {
+        if ( $this.text().trim() === $this.data( 'value' ) ) {
             return;
         }
 
+        const profile = new ProductProfile( $this.data( 'pid' ), $this.data( 'source-id' ) );
+        profile.change( {
+            value: $this.text().trim(),
+            callback: ( res ) => {
+                $this.attr( 'data-value', res.value );
+                $this.data('value', res.value);
+            },
+        } )
+    } );
+
+    $( 'body' ).on( 'change', CLASS_ELEMENT_PROFILE_LIST, ( e ) => {
+        const $this = $( e.target ),
+            profile = new ProductProfile( $this.data( 'pid' ), $this.data( 'source-id' ) );
+        profile.change( {
+            value: $this.find('option:selected').text(),
+            callback: ( res ) => {
+                $this.closest('.product-list-item__data').find('.product-list-item__profile').text(res.profile.name);
+
+                if (currentProfile !== '{{all}}' && currentProfile !== res.profile.name) {
+                    $this.closest(CLASS_BLOCK_PRODUCT_ROW).hide();
+                }
+            },
+        } )
+    } );
+
+    $( ' body' ).on( 'click', CLASS_BUTTON_PRODUCT_FAVOR, ( e ) => {
+        const $this = $( e.target ),
+            $parent = $this.closest( '.products-list__img-wrapper' );
+
         Ajax.send(
-            "/product/change-profile",
+            "/product/toggle-product-favor",
             {
-                pid: $this.data( 'pid' ),
-                value: $this.text().trim(),
-                source_id: $this.data('source-id'),
+                product_id: $parent.data( 'id_product' ),
+                source_id: $parent.data( 'id_source' ),
             },
             ( res ) => {
-                $this.attr('data-value', res.value);
+                if ( res.favored ) {
+                    $this.removeClass( 'bi-star' ).addClass( 'bi-star-fill favored' );
+                } else {
+                    $this.removeClass( 'bi-star-fill favored' ).addClass( 'bi-star' );
+                }
             }
         );
     } );
-
-    $(' body').on('click', CLASS_BUTTON_PRODUCT_FAVOR, (e) => {
-        const $this = $(e.target),
-            $parent = $this.closest('.products-list__img-wrapper');
-
-            Ajax.send(
-                "/product/toggle-product-favor",
-                {
-                    product_id: $parent.data('id_product'),
-                    source_id: $parent.data('id_source'),
-                },
-                ( res ) => {
-                    if (res.favored) {
-                        $this.removeClass('bi-star').addClass('bi-star-fill favored');
-                    } else {
-                        $this.removeClass('bi-star-fill favored').addClass('bi-star');
-                    }
-                }
-            );    
-    });
 }
 document.addEventListener( "DOMContentLoaded", main );

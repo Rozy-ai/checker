@@ -293,15 +293,21 @@ trait TraitListFilters {
 
         $list_out = [];
         //$q2_load = $q2->all();
-        $q2_load_cnt = $q2->count();
+        //$q2_load_cnt = $q2->count();
         foreach ($profiles_uniq as $p_name) {
             $q2_tmp = clone $q2;
             $q2_tmp->andWhere(['like', $this->source_table_name . '.`profile`', $p_name]);
-            $list_out[$p_name] = $p_name . ' (' . $q2_tmp->count() . ')';
+            $count = $q2_tmp->count();
+            if ($count) {
+                $list_out[$p_name] = $p_name . ' (' . $count . ')';
+            }
         }
 
         // !!!! что считать если один товар содержит 3 значения то товар же один ... дак выводить цифру 1 или 3
-        $a['{{all}}'] = 'Все (' . $q2_load_cnt . ')';
-        return array_merge($a, $list_out);
+
+        if (\Yii::$app->user->identity->isAdmin()) {
+            $list_out = array_merge(['{{all}}' => 'Все'], $list_out);    
+        }
+        return $list_out;
     }
 }
